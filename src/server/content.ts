@@ -1,9 +1,5 @@
 import 'server-only';
-import {milestones} from '../../prisma/seed-data/milestones';
-import {posts} from '../../prisma/seed-data/posts';
-import {projects} from '../../prisma/seed-data/projects';
-import {stack} from '../../prisma/seed-data/stack';
-import {timeline} from '../../prisma/seed-data/timeline';
+import {cacheLife, cacheTag} from 'next/cache';
 import {
   type Milestone,
   milestoneSchema,
@@ -12,31 +8,137 @@ import {
   type ProjectGroup,
   postSchema,
   projectSchema,
+  type SiteSettings,
   type StackItem,
+  siteSettingsSchema,
   stackItemSchema,
   type TimelineEntry,
   timelineEntrySchema,
 } from './content-schema';
+import {db} from './db';
 
-/* The only way components read content. Phase 4 swaps these bodies for Prisma queries; the signatures stay. */
+/*
+ * The only way components read content. Every getter is cached until its tag is revalidated: the home page is
+ * prerendered from these at build time, and the Phase 5 admin calls revalidateTag/updateTag with CACHE_TAGS after a
+ * save. Rows are mapped to the shapes in content-schema.ts and parsed there, so components never see Prisma types.
+ */
 
-// Components take their types from here too, so nothing outside src/server depends on src/content
-export type {Milestone, Post, Project, ProjectGroup, ProjectSpan, ProjectTheme, StackItem, TimelineDot, TimelineEntry} from './content-schema';
+// Components take their types from here too, so nothing outside src/server depends on Prisma or the seed data
+export type {
+  Milestone,
+  Post,
+  Project,
+  ProjectGroup,
+  ProjectSpan,
+  ProjectTheme,
+  SiteSettings,
+  StackItem,
+  TimelineDot,
+  TimelineEntry,
+} from './content-schema';
 
-const byOrder = <T extends {order: number}>(rows: T[]) => [...rows].sort((a, b) => a.order - b.order);
+export const CACHE_TAGS = {
+  projects: 'projects',
+  posts: 'posts',
+  milestones: 'milestones',
+  timeline: 'timeline',
+  stack: 'stack',
+  settings: 'settings',
+} as const;
 
-export const getStack = async (): Promise<StackItem[]> => byOrder(stackItemSchema.array().parse(stack));
+const lower = <T extends string>(value: T) => value.toLowerCase() as Lowercase<T>;
 
-/** Featured projects in display order; `group: 'all'` (the default) returns both groups. */
-export const getProjects = async ({group = 'all'}: {group?: ProjectGroup | 'all'} = {}): Promise<Project[]> =>
-  byOrder(projectSchema.array().parse(projects)).filter((p) => p.featured && (group === 'all' || p.group === group));
+export const getStack = async (): Promise<StackItem[]> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.stack);
+  cacheLife('max');
+  const rows = await db.stackItem.findMany({select: {name: true, order: true}, orderBy: {order: 'asc'}});
+  return stackItemSchema.array().parse(rows);
+};
 
-export const getMilestones = async (): Promise<Milestone[]> => byOrder(milestoneSchema.array().parse(milestones));
+/** Published, featured projects in display order; `group: 'all'` (the default) returns both groups. */
+export const getProjects = async ({group = 'all'}: {group?: ProjectGroup | 'all'} = {}): Promise<Project[]> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.projects);
+  cacheLife('max');
+  const rows = await db.project.findMany({
+    where: {status: 'PUBLISHED', featured: true, ...(group === 'all' ? {} : {group: group === 'client' ? 'CLIENT' : 'PERSONAL'})},
+    orderBy: {order: 'asc'},
+  });
+  return projectSchema.array().parse(
+    rows.map((row) => ({
+      slug: row.slug,
+      title: row.title,
+      summary: row.summary,
+      kindLabel: row.kindLabel,
+      group: lower(row.group),
+      glyph: row.glyph,
+      theme: lower(row.theme),
+      span: row.span,
+      tags: row.tags,
+      featured: row.featured,
+      order: row.order,
+    })),
+  );
+};
 
-export const getTimeline = async (): Promise<TimelineEntry[]> => byOrder(timelineEntrySchema.array().parse(timeline));
+export const getMilestones = async (): Promise<Milestone[]> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.milestones);
+  cacheLife('max');
+  const rows = await db.milestone.findMany({
+    select: {kind: true, value: true, title: true, description: true, order: true},
+    orderBy: {order: 'asc'},
+  });
+  return milestoneSchema.array().parse(rows);
+};
 
-/** Newest first. ISO dates sort correctly as strings. */
+export const getTimeline = async (): Promise<TimelineEntry[]> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.timeline);
+  cacheLife('max');
+  const rows = await db.timelineEntry.findMany({orderBy: {order: 'asc'}});
+  return timelineEntrySchema.array().parse(
+    rows.map((row) => ({
+      when: row.when,
+      role: row.role,
+      org: row.org,
+      description: row.description,
+      dot: lower(row.dot),
+      isCurrent: row.isCurrent,
+      order: row.order,
+    })),
+  );
+};
+
+/** Published posts, newest first. */
 export const getPosts = async ({limit}: {limit?: number} = {}): Promise<Post[]> => {
-  const sorted = [...postSchema.array().parse(posts)].sort((a, b) => b.date.localeCompare(a.date));
-  return limit === undefined ? sorted : sorted.slice(0, limit);
+  'use cache';
+  cacheTag(CACHE_TAGS.posts);
+  cacheLife('max');
+  const rows = await db.post.findMany({
+    where: {status: 'PUBLISHED', publishedAt: {not: null}},
+    orderBy: [{publishedAt: 'desc'}, {title: 'asc'}],
+    take: limit,
+  });
+  return postSchema.array().parse(
+    rows.map((row) => ({
+      slug: row.slug,
+      title: row.title,
+      tag: row.tag,
+      // The home page shows month and year; the date part of the UTC timestamp is enough
+      date: row.publishedAt?.toISOString().slice(0, 10),
+      readMinutes: row.readMinutes,
+      excerpt: row.excerpt,
+    })),
+  );
+};
+
+/** The single settings row. Not used by a component yet: the contact section and footer pick it up in Phase 6. */
+export const getSiteSettings = async (): Promise<SiteSettings> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.settings);
+  cacheLife('max');
+  const row = await db.siteSettings.findUniqueOrThrow({where: {id: 'site'}});
+  return siteSettingsSchema.parse({contactEmail: row.contactEmail, openToProjects: row.openToProjects, cvUrl: row.cvUrl, socials: row.socials});
 };
