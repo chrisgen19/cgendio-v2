@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react';
+import {Hero} from '@/components/sections/hero';
 import {SiteFooter} from '@/components/site/site-footer';
-import {SiteHeader} from '@/components/site/site-header';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {Mark} from '@/components/ui-site/mark';
 import {SectionHeading} from '@/components/ui-site/section-heading';
@@ -30,15 +30,8 @@ export default function Home() {
   return (
     <>
       <h1 className="sr-only">Cgdiomampo.dev — web design and development studio by Christian</h1>
-      <SiteHeader overlay />
       <main>
-        <section
-          id="top"
-          aria-label="Brand film placeholder"
-          className="dot-grid grid h-[min(100svh,980px)] place-items-center border-b border-line max-md:h-svh"
-        >
-          <p className="m-0 font-mono text-[13px] text-muted">[Hero film arrives in Phase 2]</p>
-        </section>
+        <Hero />
         <PlaceholderSection id="about" eyebrow="About" />
         <PlaceholderSection
           id="work"

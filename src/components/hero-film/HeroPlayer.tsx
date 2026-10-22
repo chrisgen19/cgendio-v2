@@ -17,6 +17,8 @@ type HeroPlayerProps = {
   /** Rendered over the top of the film (your site header). */
   header?: React.ReactNode;
   className?: string;
+  /** Called once, when the Player first plays, renders a new frame or seeks (the static first frame can go). */
+  onFirstFrame?: () => void;
 };
 
 const FILMS: Record<Variant, {component: React.FC<HeroFilmProps>; timeline: Timeline}> = {
@@ -38,9 +40,20 @@ const FILMS: Record<Variant, {component: React.FC<HeroFilmProps>; timeline: Time
  * - Pauses while scrolled away; respects prefers-reduced-motion by opening
  *   on the final card.
  */
-export function HeroPlayer({worksHref = '#work', header, className}: HeroPlayerProps) {
+export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame}: HeroPlayerProps) {
   const playerRef = useRef<PlayerRef>(null);
   const boxRef = useRef<HTMLDivElement>(null);
+  /** The play/pause/replay button: Skip removes itself, so focus moves here instead of falling back to <body>. */
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  const onFirstFrameRef = useRef(onFirstFrame);
+  onFirstFrameRef.current = onFirstFrame;
+  const firstFrameSent = useRef(false);
+  const notifyFirstFrame = useCallback(() => {
+    if (firstFrameSent.current) return;
+    firstFrameSent.current = true;
+    onFirstFrameRef.current?.();
+  }, []);
 
   const [size, setSize] = useState<Size | null>(null);
   const [frame, setFrame] = useState(0);
@@ -88,12 +101,18 @@ export function HeroPlayer({worksHref = '#work', header, className}: HeroPlayerP
 
     setFrame(player.getCurrentFrame());
     setEnded(false);
+    // autoPlay starts in the Player's own mount effect, before this listener exists, so read the state instead
+    setPlaying(player.isPlaying());
 
     const onFrame = (e: {detail: {frame: number}}) => {
+      notifyFirstFrame();
       setFrame(e.detail.frame);
       if (e.detail.frame < lastFrame) setEnded(false);
     };
-    const onPlay = () => setPlaying(true);
+    const onPlay = () => {
+      notifyFirstFrame();
+      setPlaying(true);
+    };
     const onPause = () => setPlaying(false);
     const onEnded = () => {
       setPlaying(false);
@@ -108,6 +127,7 @@ export function HeroPlayer({worksHref = '#work', header, className}: HeroPlayerP
     if (reducedMotion) {
       player.seekTo(lastFrame);
       setEnded(true);
+      notifyFirstFrame();
     }
 
     return () => {
@@ -116,7 +136,7 @@ export function HeroPlayer({worksHref = '#work', header, className}: HeroPlayerP
       player.removeEventListener('pause', onPause);
       player.removeEventListener('ended', onEnded);
     };
-  }, [variant, reducedMotion, lastFrame]);
+  }, [variant, reducedMotion, lastFrame, notifyFirstFrame]);
 
   /* -- pause while the hero is off screen ------------------------------ */
   useEffect(() => {
@@ -184,8 +204,12 @@ export function HeroPlayer({worksHref = '#work', header, className}: HeroPlayerP
     ended,
     playing,
     onJump: jumpTo,
-    onSkip: (e) => jumpTo(timeline.brandStart, e),
+    onSkip: (e) => {
+      jumpTo(timeline.brandStart, e);
+      toggleRef.current?.focus();
+    },
     onToggle: toggle,
+    toggleRef,
   };
 
   return (
@@ -194,7 +218,8 @@ export function HeroPlayer({worksHref = '#work', header, className}: HeroPlayerP
       className={className}
       style={{
         position: 'relative',
-        height: variant === 'mobile' ? '100svh' : 'min(100svh, 980px)',
+        // The page's hero wrapper owns the height (100svh on phones, min(100svh, 980px) on desktop) so its static first frame lines up
+        height: '100%',
         minHeight: variant === 'mobile' ? 600 : 640,
         overflow: 'hidden',
         background: theme.white,
@@ -262,6 +287,7 @@ type HudProps = {
   onJump: (startFrame: number, e: React.SyntheticEvent) => void;
   onSkip: (e: React.SyntheticEvent) => void;
   onToggle: (e: React.SyntheticEvent) => void;
+  toggleRef: React.RefObject<HTMLButtonElement | null>;
 };
 
 const iconBtn = 'inline-grid size-11 place-items-center rounded-full border border-line bg-white/90 text-ink backdrop-blur hover:border-ink';
@@ -292,7 +318,7 @@ const SkipIcon = () => (
 );
 
 /** Desktop: chapter chips + timecode + skip + play state, thin progress bar. */
-function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing, onJump, onSkip, onToggle}: HudProps) {
+function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing, onJump, onSkip, onToggle, toggleRef}: HudProps) {
   const progress = Math.min(1, frame / (durationInFrames - 1));
   return (
     <>
@@ -335,7 +361,7 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
               Skip intro <SkipIcon />
             </button>
           ) : null}
-          <button type="button" onClick={onToggle} aria-label={playLabel(ended, playing)} className={iconBtn}>
+          <button ref={toggleRef} type="button" onClick={onToggle} aria-label={playLabel(ended, playing)} className={iconBtn}>
             <PlayStateIcon ended={ended} playing={playing} />
           </button>
         </div>
@@ -353,7 +379,7 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
  * play state. The brand scene reserves room at the bottom so the HUD never
  * covers its buttons.
  */
-function MobileHud({chapters, current, frame, atBrand, ended, playing, onJump, onSkip, onToggle}: HudProps) {
+function MobileHud({chapters, current, frame, atBrand, ended, playing, onJump, onSkip, onToggle, toggleRef}: HudProps) {
   const label = atBrand ? 'Cgdiomampo.dev' : current ? `${current.number} · ${current.label}` : 'Intro';
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 px-4 pb-3">
@@ -371,7 +397,7 @@ function MobileHud({chapters, current, frame, atBrand, ended, playing, onJump, o
               Skip <SkipIcon />
             </button>
           ) : null}
-          <button type="button" onClick={onToggle} aria-label={playLabel(ended, playing)} className={iconBtn}>
+          <button ref={toggleRef} type="button" onClick={onToggle} aria-label={playLabel(ended, playing)} className={iconBtn}>
             <PlayStateIcon ended={ended} playing={playing} />
           </button>
         </div>
