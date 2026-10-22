@@ -3,7 +3,7 @@ import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {Mark} from '@/components/ui-site/mark';
 import {Section} from '@/components/ui-site/section';
 import {SectionHeading} from '@/components/ui-site/section-heading';
-import type {TimelineDot} from '@/content/schema';
+import type {TimelineDot} from '@/server/content';
 import {getTimeline} from '@/server/content';
 
 const DOTS: Record<TimelineDot, string> = {

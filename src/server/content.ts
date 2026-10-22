@@ -20,6 +20,9 @@ import {timeline} from '@/content/timeline';
 
 /* The only way components read content. Phase 4 swaps these bodies for Prisma queries; the signatures stay. */
 
+// Components take their types from here too, so nothing outside src/server depends on src/content
+export type {Milestone, Post, Project, ProjectGroup, ProjectSpan, ProjectTheme, StackItem, TimelineDot, TimelineEntry} from '@/content/schema';
+
 const byOrder = <T extends {order: number}>(rows: T[]) => [...rows].sort((a, b) => a.order - b.order);
 
 export const getStack = async (): Promise<StackItem[]> => byOrder(stackItemSchema.array().parse(stack));

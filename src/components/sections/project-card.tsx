@@ -1,6 +1,6 @@
 import {Tag} from '@/components/ui-site/tag';
-import type {Project, ProjectSpan, ProjectTheme} from '@/content/schema';
 import {cn} from '@/lib/cn';
+import type {Project, ProjectSpan, ProjectTheme} from '@/server/content';
 
 // Full class names so Tailwind can see them
 const SPANS: Record<ProjectSpan, string> = {

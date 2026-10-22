@@ -1,4 +1,4 @@
-import type {ProjectGroup} from '@/content/schema';
+import type {ProjectGroup} from '@/server/content';
 
 export type WorkFilter = ProjectGroup | 'all';
 
