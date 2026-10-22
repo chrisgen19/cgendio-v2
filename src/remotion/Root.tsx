@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import {Composition} from 'remotion';
 import {HeroFilm} from '../components/hero-film/HeroFilm';
 import {HeroFilmMobile} from '../components/hero-film/HeroFilmMobile';

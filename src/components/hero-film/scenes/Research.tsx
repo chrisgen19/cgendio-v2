@@ -1,6 +1,6 @@
-import React from 'react';
+import type React from 'react';
 import {MarkedTitle, ProcessScene} from '../layout';
-import {Abs, Appear, Check, GrowX, GrowY, MonoLabel, Pop, Reveal, cardStyle} from '../primitives';
+import {Abs, Appear, Check, cardStyle, GrowX, GrowY, MonoLabel, Pop, Reveal} from '../primitives';
 import {fonts, theme} from '../theme';
 
 const personas = [
@@ -15,14 +15,25 @@ export const Research: React.FC = () => (
   <ProcessScene
     n="01"
     label="Research"
-    title={<MarkedTitle before="Listen " marked="first." after={<><br />Build second.</>} />}
+    title={
+      <MarkedTitle
+        before="Listen "
+        marked="first."
+        after={
+          <>
+            <br />
+            Build second.
+          </>
+        }
+      />
+    }
     lede="Goals, audiences, competitors and analytics get mapped before a single pixel — so every screen has a reason to exist."
     tags={['Personas', 'Sitemap', 'Content plan']}
   >
     {/* search query being typed */}
     <Appear delay={12} style={{position: 'absolute', left: 40, top: 8, width: 740}}>
       <div style={{...cardStyle, height: 96, borderRadius: 999, display: 'flex', alignItems: 'center', gap: 22, padding: '0 30px'}}>
-        <svg viewBox="0 0 24 24" width={32} height={32} fill="none" stroke={theme.ink} strokeWidth={2.2} strokeLinecap="round">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width={32} height={32} fill="none" stroke={theme.ink} strokeWidth={2.2} strokeLinecap="round">
           <circle cx="11" cy="11" r="7" />
           <path d="m20 20-3.5-3.5" />
         </svg>
@@ -52,7 +63,9 @@ export const Research: React.FC = () => (
     <Appear delay={46} style={{position: 'absolute', left: 30, top: 464, width: 570, height: 320}}>
       <div style={{...cardStyle, height: '100%', padding: 26, display: 'flex', flexDirection: 'column', gap: 20}}>
         <div style={{display: 'flex', justifyContent: 'space-between'}}>
-          <MonoLabel size={17} color={theme.ink}>Audience insights</MonoLabel>
+          <MonoLabel size={17} color={theme.ink}>
+            Audience insights
+          </MonoLabel>
           <MonoLabel size={17}>last 90 days</MonoLabel>
         </div>
         <div style={{flex: 1, display: 'flex', alignItems: 'flex-end', gap: 16}}>
@@ -70,7 +83,9 @@ export const Research: React.FC = () => (
     {/* competitor audit */}
     <Appear delay={52} style={{position: 'absolute', left: 630, top: 464, width: 340, height: 320}}>
       <div style={{...cardStyle, height: '100%', padding: 26, display: 'flex', flexDirection: 'column', gap: 26}}>
-        <MonoLabel size={17} color={theme.ink}>Competitor audit</MonoLabel>
+        <MonoLabel size={17} color={theme.ink}>
+          Competitor audit
+        </MonoLabel>
         {[0, 1, 2].map((i) => (
           <div key={i} style={{display: 'flex', alignItems: 'center', gap: 14}}>
             <GrowX delay={60 + i * 5} style={{flex: 1, height: 16, borderRadius: 10, background: theme.wire}} />

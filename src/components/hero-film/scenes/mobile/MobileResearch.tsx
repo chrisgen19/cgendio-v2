@@ -1,6 +1,6 @@
-import React from 'react';
+import type React from 'react';
 import {MarkedTitle} from '../../layout';
-import {Abs, Appear, GrowY, MonoLabel, Pop, Reveal, cardStyle} from '../../primitives';
+import {Abs, Appear, cardStyle, GrowY, MonoLabel, Pop, Reveal} from '../../primitives';
 import {fonts, theme} from '../../theme';
 import {MobileScene} from './MobileScene';
 
@@ -18,13 +18,25 @@ export const MobileResearch: React.FC = () => (
     n="01"
     label="Research"
     titleLines={2}
-    title={<MarkedTitle before="Listen " marked="first." after={<><br />Build second.</>} markDelay={30} />}
+    title={
+      <MarkedTitle
+        before="Listen "
+        marked="first."
+        after={
+          <>
+            <br />
+            Build second.
+          </>
+        }
+        markDelay={30}
+      />
+    }
     lede="Goals, users and competitors — mapped before a single pixel."
   >
     {/* search query */}
     <Appear delay={10} style={{position: 'absolute', left: 0, top: 0, width: 350}}>
       <div style={{...cardStyle, height: 52, borderRadius: 999, display: 'flex', alignItems: 'center', gap: 12, padding: '0 18px'}}>
-        <svg viewBox="0 0 24 24" width={20} height={20} fill="none" stroke={theme.ink} strokeWidth={2.4} strokeLinecap="round">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width={20} height={20} fill="none" stroke={theme.ink} strokeWidth={2.4} strokeLinecap="round">
           <circle cx="11" cy="11" r="7" />
           <path d="m20 20-3.5-3.5" />
         </svg>
@@ -55,7 +67,9 @@ export const MobileResearch: React.FC = () => (
     <Appear delay={40} style={{position: 'absolute', left: 0, top: 286, width: 350, height: 114}}>
       <div style={{...cardStyle, borderRadius: 18, height: '100%', padding: 14, display: 'flex', flexDirection: 'column', gap: 10}}>
         <div style={{display: 'flex', justifyContent: 'space-between'}}>
-          <MonoLabel size={12} color={theme.ink}>Audience insights</MonoLabel>
+          <MonoLabel size={12} color={theme.ink}>
+            Audience insights
+          </MonoLabel>
           <MonoLabel size={12}>90 days</MonoLabel>
         </div>
         <div style={{flex: 1, display: 'flex', alignItems: 'flex-end', gap: 8}}>

@@ -1,7 +1,7 @@
-import React from 'react';
+import type React from 'react';
 import {interpolate, random, useCurrentFrame} from 'remotion';
 import {MarkedTitle, ProcessScene} from '../layout';
-import {Appear, Mark, MonoLabel, Reveal, SlideIn, WindowDots, cardStyle} from '../primitives';
+import {Appear, cardStyle, Mark, MonoLabel, Reveal, SlideIn, WindowDots} from '../primitives';
 import {fonts, theme} from '../theme';
 
 const CONFETTI = Array.from({length: 18}, (_, i) => ({
@@ -104,8 +104,10 @@ export const Live: React.FC = () => (
       <div style={{...cardStyle, height: '100%', overflow: 'hidden'}}>
         <div style={{height: 78, borderBottom: `1px solid ${theme.line}`, display: 'flex', alignItems: 'center', gap: 20, padding: '0 22px'}}>
           <WindowDots />
-          <div style={{flex: 1, height: 44, borderRadius: 99, background: '#F1F2F5', display: 'flex', alignItems: 'center', gap: 10, padding: '0 18px'}}>
-            <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke={theme.ink} strokeWidth={2.4}>
+          <div
+            style={{flex: 1, height: 44, borderRadius: 99, background: '#F1F2F5', display: 'flex', alignItems: 'center', gap: 10, padding: '0 18px'}}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" width={18} height={18} fill="none" stroke={theme.ink} strokeWidth={2.4}>
               <rect x="5" y="11" width="14" height="10" rx="2" />
               <path d="M8 11V8a4 4 0 0 1 8 0v3" />
             </svg>
@@ -130,8 +132,12 @@ export const Live: React.FC = () => (
             </div>
           </Appear>
           <Appear delay={36} style={{display: 'flex', gap: 14}}>
-            <span style={{padding: '14px 24px', borderRadius: 99, background: theme.ink, color: '#fff', fontSize: 17, fontWeight: 600}}>See my works</span>
-            <span style={{padding: '14px 24px', borderRadius: 99, border: `1px solid ${theme.line}`, fontSize: 17, fontWeight: 600}}>Let&apos;s talk</span>
+            <span style={{padding: '14px 24px', borderRadius: 99, background: theme.ink, color: '#fff', fontSize: 17, fontWeight: 600}}>
+              See my works
+            </span>
+            <span style={{padding: '14px 24px', borderRadius: 99, border: `1px solid ${theme.line}`, fontSize: 17, fontWeight: 600}}>
+              Let&apos;s talk
+            </span>
           </Appear>
           <Appear delay={42} style={{display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 14}}>
             <span style={{height: 150, borderRadius: 16, background: theme.tint}} />
@@ -161,7 +167,7 @@ export const Live: React.FC = () => (
       icon={iconBox(
         theme.accent,
         '#fff',
-        <svg viewBox="0 0 24 24" width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
           <rect x="3" y="5" width="18" height="14" rx="2" />
           <path d="m3 7 9 6 9-6" />
         </svg>,
@@ -177,7 +183,7 @@ export const Live: React.FC = () => (
       icon={iconBox(
         theme.lime,
         theme.ink,
-        <svg viewBox="0 0 24 24" width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round">
           <path d="M3 12h4l3-8 4 16 3-8h4" />
         </svg>,
       )}

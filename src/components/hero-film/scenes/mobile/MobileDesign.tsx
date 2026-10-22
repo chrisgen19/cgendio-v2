@@ -1,7 +1,7 @@
-import React from 'react';
+import type React from 'react';
 import {Easing, interpolate, useCurrentFrame} from 'remotion';
 import {MarkedTitle} from '../../layout';
-import {Appear, GrowX, Mark, MonoLabel, Pop, cardStyle, useProgress} from '../../primitives';
+import {Appear, cardStyle, GrowX, Mark, MonoLabel, Pop, useProgress} from '../../primitives';
 import {fonts, theme} from '../../theme';
 import {MobileScene} from './MobileScene';
 
@@ -24,10 +24,21 @@ const Cursor: React.FC = () => {
   const opacity = interpolate(frame, [14, 20], [0, 1], opts);
   return (
     <div style={{position: 'absolute', left: 0, top: 0, transform: `translate(${x}px, ${y}px)`, opacity, zIndex: 10}}>
-      <svg viewBox="0 0 24 24" width={26} height={26}>
+      <svg aria-hidden="true" viewBox="0 0 24 24" width={26} height={26}>
         <path d="M3 2l7.5 19 2.4-7.6L20.5 11z" fill={theme.accent} stroke="#fff" strokeWidth={1.5} strokeLinejoin="round" />
       </svg>
-      <span style={{display: 'inline-block', marginLeft: 16, padding: '5px 10px', borderRadius: 99, background: theme.accent, color: '#fff', fontSize: 12, fontWeight: 600}}>
+      <span
+        style={{
+          display: 'inline-block',
+          marginLeft: 16,
+          padding: '5px 10px',
+          borderRadius: 99,
+          background: theme.accent,
+          color: '#fff',
+          fontSize: 12,
+          fontWeight: 600,
+        }}
+      >
         Christian
       </span>
     </div>
@@ -108,7 +119,17 @@ export const MobileDesign: React.FC = () => {
           ))}
         </div>
         <Pop delay={62} style={{alignSelf: 'flex-start'}}>
-          <span style={{fontFamily: fonts.mono, fontSize: 11, padding: '7px 10px', borderRadius: 99, background: theme.tint, color: theme.accent, whiteSpace: 'nowrap'}}>
+          <span
+            style={{
+              fontFamily: fonts.mono,
+              fontSize: 11,
+              padding: '7px 10px',
+              borderRadius: 99,
+              background: theme.tint,
+              color: theme.accent,
+              whiteSpace: 'nowrap',
+            }}
+          >
             ◆ Button
           </span>
         </Pop>

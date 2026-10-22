@@ -1,7 +1,7 @@
-import React from 'react';
+import type React from 'react';
 import {interpolate, random, useCurrentFrame} from 'remotion';
 import {MarkedTitle} from '../../layout';
-import {Appear, Mark, MonoLabel, Reveal, cardStyle, useSpringIn} from '../../primitives';
+import {Appear, cardStyle, Mark, MonoLabel, Reveal, useSpringIn} from '../../primitives';
 import {fonts, theme} from '../../theme';
 import {MobileScene} from './MobileScene';
 
@@ -91,7 +91,9 @@ const LiveDot: React.FC = () => {
   const ring = frame < 20 || frame > 20 + 30 * 3 ? 0 : leg / 30;
   return (
     <span style={{position: 'relative', width: 10, height: 10, display: 'inline-block'}}>
-      <span style={{position: 'absolute', inset: -ring * 10, borderRadius: '50%', border: `2px solid ${theme.accent}`, opacity: ring > 0 ? 1 - ring : 0}} />
+      <span
+        style={{position: 'absolute', inset: -ring * 10, borderRadius: '50%', border: `2px solid ${theme.accent}`, opacity: ring > 0 ? 1 - ring : 0}}
+      />
       <span style={{position: 'absolute', inset: 0, borderRadius: '50%', background: theme.accent}} />
     </span>
   );
@@ -111,8 +113,10 @@ export const MobileLive: React.FC = () => (
     <Appear delay={8} style={{position: 'absolute', left: 40, top: 128, width: 270, height: 272}}>
       <div style={{...cardStyle, height: '100%', borderRadius: 26, overflow: 'hidden'}}>
         <div style={{height: 46, borderBottom: `1px solid ${theme.line}`, display: 'flex', alignItems: 'center', gap: 8, padding: '0 12px'}}>
-          <div style={{flex: 1, height: 28, borderRadius: 99, background: '#F1F2F5', display: 'flex', alignItems: 'center', gap: 6, padding: '0 10px'}}>
-            <svg viewBox="0 0 24 24" width={12} height={12} fill="none" stroke={theme.ink} strokeWidth={2.6}>
+          <div
+            style={{flex: 1, height: 28, borderRadius: 99, background: '#F1F2F5', display: 'flex', alignItems: 'center', gap: 6, padding: '0 10px'}}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" width={12} height={12} fill="none" stroke={theme.ink} strokeWidth={2.6}>
               <rect x="5" y="11" width="14" height="10" rx="2" />
               <path d="M8 11V8a4 4 0 0 1 8 0v3" />
             </svg>
@@ -133,8 +137,12 @@ export const MobileLive: React.FC = () => (
             that <Mark delay={36}>work.</Mark>
           </div>
           <div style={{display: 'flex', gap: 8}}>
-            <span style={{padding: '9px 14px', borderRadius: 99, background: theme.ink, color: '#fff', fontSize: 12, fontWeight: 600}}>See my works</span>
-            <span style={{padding: '9px 14px', borderRadius: 99, border: `1px solid ${theme.line}`, fontSize: 12, fontWeight: 600}}>Let&apos;s talk</span>
+            <span style={{padding: '9px 14px', borderRadius: 99, background: theme.ink, color: '#fff', fontSize: 12, fontWeight: 600}}>
+              See my works
+            </span>
+            <span style={{padding: '9px 14px', borderRadius: 99, border: `1px solid ${theme.line}`, fontSize: 12, fontWeight: 600}}>
+              Let&apos;s talk
+            </span>
           </div>
           <div style={{display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 8}}>
             <span style={{height: 50, borderRadius: 12, background: theme.tint}} />
@@ -161,7 +169,7 @@ export const MobileLive: React.FC = () => (
       icon={iconBox(
         theme.accent,
         '#fff',
-        <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
           <rect x="3" y="5" width="18" height="14" rx="2" />
           <path d="m3 7 9 6 9-6" />
         </svg>,

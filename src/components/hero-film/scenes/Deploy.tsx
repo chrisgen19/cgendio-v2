@@ -1,7 +1,7 @@
-import React from 'react';
+import type React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {MarkedTitle, ProcessScene} from '../layout';
-import {Appear, MonoLabel, Pop, Reveal, WindowDots, cardStyle, useProgress} from '../primitives';
+import {Appear, cardStyle, MonoLabel, Pop, Reveal, useProgress, WindowDots} from '../primitives';
 import {fonts, theme} from '../theme';
 
 const c = theme.code;
@@ -53,7 +53,7 @@ const Node: React.FC<{x: number; y: number; delay: number; dark?: boolean}> = ({
 };
 
 export const Deploy: React.FC = () => {
-  const bar = useProgress(30, 96, (t) => 1 - Math.pow(1 - t, 2));
+  const bar = useProgress(30, 96, (t) => 1 - (1 - t) ** 2);
   return (
     <ProcessScene
       n="05"
@@ -106,7 +106,7 @@ export const Deploy: React.FC = () => {
 
       {/* globe */}
       <Pop delay={26} style={{position: 'absolute', left: 664, top: 40, width: 330, height: 330}}>
-        <svg viewBox="0 0 100 100" width={330} height={330}>
+        <svg aria-hidden="true" viewBox="0 0 100 100" width={330} height={330}>
           <circle cx="50" cy="50" r="46" fill="#fff" stroke="#CBD0DA" strokeWidth={0.6} />
           <ellipse cx="50" cy="50" rx="20" ry="46" fill="none" stroke="#DADDE4" strokeWidth={0.6} />
           <ellipse cx="50" cy="50" rx="36" ry="46" fill="none" stroke={theme.outline} strokeWidth={0.6} />
@@ -128,9 +128,13 @@ export const Deploy: React.FC = () => {
           <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10}}>
             <span style={{fontFamily: fonts.mono, fontSize: 15, padding: '10px 14px', borderRadius: 99, background: theme.wireSoft}}>Preview</span>
             <span style={{fontSize: 20}}>→</span>
-            <span style={{fontFamily: fonts.mono, fontSize: 15, padding: '10px 14px', borderRadius: 99, background: theme.ink, color: '#fff'}}>Production</span>
+            <span style={{fontFamily: fonts.mono, fontSize: 15, padding: '10px 14px', borderRadius: 99, background: theme.ink, color: '#fff'}}>
+              Production
+            </span>
           </div>
-          <span style={{fontSize: 17, lineHeight: 1.4, color: theme.muted}}>Every change gets its own preview URL to review before it goes live.</span>
+          <span style={{fontSize: 17, lineHeight: 1.4, color: theme.muted}}>
+            Every change gets its own preview URL to review before it goes live.
+          </span>
         </div>
       </Appear>
     </ProcessScene>

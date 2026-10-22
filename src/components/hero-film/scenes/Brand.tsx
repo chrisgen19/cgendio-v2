@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import {AbsoluteFill} from 'remotion';
 import {Headline, SceneShell, StepLabel, useLayout} from '../layout';
 import {Appear, Check, Mark} from '../primitives';
@@ -40,13 +40,13 @@ const btnBase: React.CSSProperties = {
 const compact: React.CSSProperties = {minHeight: 46, padding: '0 16px', fontSize: 14, gap: 8};
 
 const Arrow = () => (
-  <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
+  <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true">
     <path d="M5 12h14M13 6l6 6-6 6" />
   </svg>
 );
 
 const ReplayIcon = () => (
-  <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
+  <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true">
     <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
     <path d="M3 3v5h5" />
   </svg>
@@ -79,11 +79,12 @@ export const Brand: React.FC<BrandProps> = ({worksHref = '#work', onReplay}) => 
             </Headline>
           </Appear>
           {short ? null : (
-          <Appear delay={25}>
-            <p style={{margin: 0, maxWidth: 640, fontSize: L.lede, lineHeight: 1.55, color: theme.muted}}>
-              One team from first question to live URL. WordPress, WooCommerce, Next.js and React — built for the people who&apos;ll actually use them.
-            </p>
-          </Appear>
+            <Appear delay={25}>
+              <p style={{margin: 0, maxWidth: 640, fontSize: L.lede, lineHeight: 1.55, color: theme.muted}}>
+                One team from first question to live URL. WordPress, WooCommerce, Next.js and React — built for the people who&apos;ll actually use
+                them.
+              </p>
+            </Appear>
           )}
 
           <div style={{display: 'grid', gridTemplateColumns: L.portrait ? '1fr' : 'repeat(3, minmax(0, 1fr))', gap: L.portrait ? 8 : 14}}>
@@ -102,7 +103,9 @@ export const Brand: React.FC<BrandProps> = ({worksHref = '#work', onReplay}) => 
                   }}
                 >
                   {L.portrait ? null : <span style={{fontFamily: fonts.mono, fontSize: 12, color: theme.accent}}>{s.n}</span>}
-                  <span style={{fontFamily: fonts.display, fontSize: short ? 17 : L.portrait ? 19 : 22, fontWeight: 700, letterSpacing: '-0.02em'}}>{s.title}</span>
+                  <span style={{fontFamily: fonts.display, fontSize: short ? 17 : L.portrait ? 19 : 22, fontWeight: 700, letterSpacing: '-0.02em'}}>
+                    {s.title}
+                  </span>
                   {L.portrait ? null : <span style={{fontSize: 14, lineHeight: 1.5, color: theme.muted}}>{s.desc}</span>}
                 </div>
               </Appear>
@@ -110,14 +113,14 @@ export const Brand: React.FC<BrandProps> = ({worksHref = '#work', onReplay}) => 
           </div>
 
           {short ? null : (
-          <Appear delay={44} style={{display: 'flex', flexWrap: 'wrap', gap: L.portrait ? '8px 16px' : '10px 26px'}}>
-            {benefits.map((b) => (
-              <span key={b} style={{display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: L.portrait ? 13 : 15, fontWeight: 500}}>
-                <Check size={20} dark />
-                {b}
-              </span>
-            ))}
-          </Appear>
+            <Appear delay={44} style={{display: 'flex', flexWrap: 'wrap', gap: L.portrait ? '8px 16px' : '10px 26px'}}>
+              {benefits.map((b) => (
+                <span key={b} style={{display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: L.portrait ? 13 : 15, fontWeight: 500}}>
+                  <Check size={20} dark />
+                  {b}
+                </span>
+              ))}
+            </Appear>
           )}
 
           <Appear delay={52} style={{display: 'flex', flexWrap: 'wrap', gap: L.portrait ? 8 : 12}}>

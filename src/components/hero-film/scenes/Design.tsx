@@ -1,7 +1,7 @@
-import React from 'react';
+import type React from 'react';
 import {Easing, interpolate, useCurrentFrame} from 'remotion';
 import {MarkedTitle, ProcessScene} from '../layout';
-import {Appear, GrowX, Mark, MonoLabel, Pop, WindowDots, cardStyle, useProgress} from '../primitives';
+import {Appear, cardStyle, GrowX, Mark, MonoLabel, Pop, useProgress, WindowDots} from '../primitives';
 import {fonts, theme} from '../theme';
 
 /** Positions inside the 600 × 640 artboard. */
@@ -24,7 +24,7 @@ const Cursor: React.FC = () => {
   const opacity = interpolate(frame, [18, 26], [0, 1], opts);
   return (
     <div style={{position: 'absolute', left: 0, top: 0, transform: `translate(${x}px, ${y}px)`, opacity, zIndex: 10}}>
-      <svg viewBox="0 0 24 24" width={36} height={36}>
+      <svg aria-hidden="true" viewBox="0 0 24 24" width={36} height={36}>
         <path d="M3 2l7.5 19 2.4-7.6L20.5 11z" fill={theme.accent} stroke="#fff" strokeWidth={1.5} strokeLinejoin="round" />
       </svg>
       <span
@@ -97,9 +97,7 @@ export const Design: React.FC = () => {
             {blocks.map((b, i) => (
               <div key={i} style={{position: 'absolute', left: b.x, top: b.y, width: b.w, height: b.h}}>
                 <GrowX delay={20 + i * 4} style={{position: 'absolute', inset: 0, borderRadius: b.r, background: theme.wire}} />
-                {b.color ? (
-                  <div style={{position: 'absolute', inset: 0, borderRadius: b.r, background: b.color, opacity: colour}} />
-                ) : null}
+                {b.color ? <div style={{position: 'absolute', inset: 0, borderRadius: b.r, background: b.color, opacity: colour}} /> : null}
               </div>
             ))}
             {/* real headline replaces the two grey text bars */}
@@ -148,11 +146,17 @@ export const Design: React.FC = () => {
             </Appear>
             <div style={{display: 'flex', flexDirection: 'column', gap: 10}}>
               {[30, 50, 75, 100].map((w, i) => (
-                <GrowX key={w} delay={56 + i * 3} style={{height: 12, width: `${w}%`, borderRadius: 10, background: theme.accent, opacity: 1 - i * 0.2}} />
+                <GrowX
+                  key={w}
+                  delay={56 + i * 3}
+                  style={{height: 12, width: `${w}%`, borderRadius: 10, background: theme.accent, opacity: 1 - i * 0.2}}
+                />
               ))}
             </div>
             <Pop delay={76} style={{alignSelf: 'flex-start'}}>
-              <span style={{fontFamily: fonts.mono, fontSize: 15, padding: '10px 16px', borderRadius: 99, background: theme.tint, color: theme.accent}}>
+              <span
+                style={{fontFamily: fonts.mono, fontSize: 15, padding: '10px 16px', borderRadius: 99, background: theme.tint, color: theme.accent}}
+              >
                 ◆ Button / Primary
               </span>
             </Pop>

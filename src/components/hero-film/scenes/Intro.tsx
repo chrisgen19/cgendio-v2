@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
 import {Headline, SceneShell, useLayout} from '../layout';
 import {Appear, Mark, MonoLabel, Pop} from '../primitives';

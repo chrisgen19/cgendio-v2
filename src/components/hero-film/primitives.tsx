@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import {Easing, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {fonts, theme} from './theme';
 
@@ -40,18 +40,14 @@ type BoxProps = {
 /** Fade + rise. */
 export const Appear: React.FC<BoxProps & {y?: number}> = ({delay = 0, y = 28, style, children}) => {
   const p = useSpringIn(delay);
-  return (
-    <div style={{...style, opacity: p, transform: `translateY(${(1 - p) * y}px)`}}>{children}</div>
-  );
+  return <div style={{...style, opacity: p, transform: `translateY(${(1 - p) * y}px)`}}>{children}</div>;
 };
 
 /** Springy scale-in. */
 export const Pop: React.FC<BoxProps> = ({delay = 0, style, children}) => {
   const p = useSpringIn(delay, BOUNCY);
   const scale = interpolate(p, [0, 1], [0.55, 1]);
-  return (
-    <div style={{...style, opacity: Math.min(1, p * 2), transform: `scale(${scale})`}}>{children}</div>
-  );
+  return <div style={{...style, opacity: Math.min(1, p * 2), transform: `scale(${scale})`}}>{children}</div>;
 };
 
 /** Slide in from the right with a slight tilt (toasts, cards). */
@@ -71,13 +67,7 @@ export const SlideIn: React.FC<BoxProps & {distance?: number}> = ({delay = 0, di
 };
 
 /** Typewriter-style left-to-right reveal, quantised into steps. */
-export const Reveal: React.FC<BoxProps & {duration?: number; steps?: number}> = ({
-  delay = 0,
-  duration = 20,
-  steps = 26,
-  style,
-  children,
-}) => {
+export const Reveal: React.FC<BoxProps & {duration?: number; steps?: number}> = ({delay = 0, duration = 20, steps = 26, style, children}) => {
   const p = useProgress(delay, delay + duration);
   const q = Math.floor(p * steps) / steps;
   return <div style={{...style, clipPath: `inset(0 ${100 - q * 100}% 0 0)`}}>{children}</div>;
@@ -103,9 +93,7 @@ export const Abs: React.FC<{
   h?: number;
   style?: React.CSSProperties;
   children?: React.ReactNode;
-}> = ({x, y, w, h, style, children}) => (
-  <div style={{position: 'absolute', left: x, top: y, width: w, height: h, ...style}}>{children}</div>
-);
+}> = ({x, y, w, h, style, children}) => <div style={{position: 'absolute', left: x, top: y, width: w, height: h, ...style}}>{children}</div>;
 
 /* ------------------------------------------------------------------ */
 /* Visual atoms                                                        */
@@ -144,10 +132,7 @@ export const cardStyle: React.CSSProperties = {
 export const WindowDots: React.FC<{dark?: boolean; size?: number}> = ({dark, size = 13}) => (
   <div style={{display: 'flex', gap: size * 0.7}}>
     {[0, 1, 2].map((i) => (
-      <span
-        key={i}
-        style={{width: size, height: size, borderRadius: '50%', background: dark ? theme.code.dots : '#D5D8DF'}}
-      />
+      <span key={i} style={{width: size, height: size, borderRadius: '50%', background: dark ? theme.code.dots : '#D5D8DF'}} />
     ))}
   </div>
 );
@@ -165,17 +150,23 @@ export const Check: React.FC<{size?: number; dark?: boolean}> = ({size = 28, dar
       placeItems: 'center',
     }}
   >
-    <svg viewBox="0 0 24 24" width={size * 0.55} height={size * 0.55} fill="none" stroke="currentColor" strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width={size * 0.55}
+      height={size * 0.55}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={3.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M5 12.5l4.5 4.5L19 7.5" />
     </svg>
   </span>
 );
 
-export const Tag: React.FC<{children: React.ReactNode; size?: number; inverted?: boolean}> = ({
-  children,
-  size = 13,
-  inverted,
-}) => (
+export const Tag: React.FC<{children: React.ReactNode; size?: number; inverted?: boolean}> = ({children, size = 13, inverted}) => (
   <span
     style={{
       fontFamily: fonts.mono,
@@ -199,6 +190,4 @@ export const MonoLabel: React.FC<{children: React.ReactNode; size?: number; colo
   size = 16,
   color = theme.muted,
   style,
-}) => (
-  <span style={{fontFamily: fonts.mono, fontSize: size, color, letterSpacing: '0.04em', ...style}}>{children}</span>
-);
+}) => <span style={{fontFamily: fonts.mono, fontSize: size, color, letterSpacing: '0.04em', ...style}}>{children}</span>;

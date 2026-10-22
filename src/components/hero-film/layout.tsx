@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
 import {Appear, EASE_INOUT, Mark, Tag} from './primitives';
 import {fonts, theme} from './theme';
@@ -148,11 +148,7 @@ export const StepLabel: React.FC<{n: string; label: string; size: number}> = ({n
   </span>
 );
 
-export const Headline: React.FC<{size: number; children: React.ReactNode; style?: React.CSSProperties}> = ({
-  size,
-  children,
-  style,
-}) => (
+export const Headline: React.FC<{size: number; children: React.ReactNode; style?: React.CSSProperties}> = ({size, children, style}) => (
   <div
     style={{
       fontFamily: fonts.display,

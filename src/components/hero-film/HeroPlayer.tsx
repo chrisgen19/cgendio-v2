@@ -1,11 +1,12 @@
 'use client';
 
 import {Player, type PlayerRef} from '@remotion/player';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import type React from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {HeroFilm, type HeroFilmProps} from './HeroFilm';
 import {HeroFilmMobile} from './HeroFilmMobile';
 import {theme} from './theme';
-import {DESKTOP_TIMELINE, FPS, MOBILE_TIMELINE, formatTimecode, isPortrait, type Chapter, type Timeline} from './timeline';
+import {type Chapter, DESKTOP_TIMELINE, FPS, formatTimecode, isPortrait, MOBILE_TIMELINE, type Timeline} from './timeline';
 
 type Size = {width: number; height: number};
 type Variant = 'desktop' | 'mobile';
@@ -80,6 +81,7 @@ export function HeroPlayer({worksHref = '#work', header, className}: HeroPlayerP
   }, []);
 
   /* -- player events (re-subscribe whenever the Player remounts) ------- */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: variant is the Player's key, so a new cut means a new playerRef to subscribe to
   useEffect(() => {
     const player = playerRef.current;
     if (!player) return;
@@ -200,8 +202,8 @@ export function HeroPlayer({worksHref = '#work', header, className}: HeroPlayerP
       }}
     >
       <p className="sr-only">
-        A short animated film of our process in six steps — research, design, Figma to web development, QA, deploying to
-        Vercel and going live — ending with what Cgdiomampo.dev offers, a link to the work and a replay button.
+        A short animated film of our process in six steps — research, design, Figma to web development, QA, deploying to Vercel and going live —
+        ending with what Cgdiomampo.dev offers, a link to the work and a replay button.
       </p>
 
       <div ref={boxRef} style={{position: 'absolute', inset: 0}}>
@@ -267,17 +269,17 @@ const iconBtn =
 
 const PlayStateIcon: React.FC<{ended: boolean; playing: boolean}> = ({ended, playing}) =>
   ended ? (
-    <svg viewBox="0 0 24 24" width={16} height={16} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
+    <svg viewBox="0 0 24 24" width={16} height={16} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true">
       <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
       <path d="M3 3v5h5" />
     </svg>
   ) : playing ? (
-    <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor" aria-hidden>
+    <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor" aria-hidden="true">
       <rect x="6" y="5" width="4" height="14" rx="1" />
       <rect x="14" y="5" width="4" height="14" rx="1" />
     </svg>
   ) : (
-    <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor" aria-hidden>
+    <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor" aria-hidden="true">
       <path d="M7 4.5v15l13-7.5z" />
     </svg>
   );
@@ -285,7 +287,7 @@ const PlayStateIcon: React.FC<{ended: boolean; playing: boolean}> = ({ended, pla
 const playLabel = (ended: boolean, playing: boolean) => (ended ? 'Replay film' : playing ? 'Pause film' : 'Play film');
 
 const SkipIcon = () => (
-  <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden>
+  <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true">
     <path d="M5 5l8 7-8 7M17 5v14" />
   </svg>
 );

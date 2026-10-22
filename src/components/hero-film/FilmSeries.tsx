@@ -1,5 +1,5 @@
 import {linearTiming, TransitionSeries} from '@remotion/transitions';
-import React from 'react';
+import type React from 'react';
 import {AbsoluteFill} from 'remotion';
 import {film} from './presentations';
 import {EASE_INOUT} from './primitives';

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import {FilmSeries} from './FilmSeries';
 import type {HeroFilmProps} from './HeroFilm';
 import {Brand} from './scenes/Brand';

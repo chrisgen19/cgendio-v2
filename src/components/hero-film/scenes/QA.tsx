@@ -1,7 +1,7 @@
-import React from 'react';
+import type React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {MarkedTitle, ProcessScene} from '../layout';
-import {Appear, Check, MonoLabel, Pop, WindowDots, cardStyle, useProgress} from '../primitives';
+import {Appear, Check, cardStyle, MonoLabel, Pop, useProgress, WindowDots} from '../primitives';
 import {theme} from '../theme';
 
 /** A horizontal scan line sweeping the device twice. */
@@ -43,11 +43,11 @@ export const MiniPage: React.FC<{scale?: number}> = ({scale = 1}) => (
 );
 
 const Ring: React.FC<{delay: number; label: string}> = ({delay, label}) => {
-  const p = useProgress(delay, delay + 40, (t) => 1 - Math.pow(1 - t, 3));
+  const p = useProgress(delay, delay + 40, (t) => 1 - (1 - t) ** 3);
   return (
     <div style={{display: 'flex', alignItems: 'center', gap: 14}}>
       <span style={{position: 'relative', width: 62, height: 62, flex: 'none'}}>
-        <svg viewBox="0 0 40 40" width={62} height={62} style={{transform: 'rotate(-90deg)'}}>
+        <svg aria-hidden="true" viewBox="0 0 40 40" width={62} height={62} style={{transform: 'rotate(-90deg)'}}>
           <circle cx="20" cy="20" r="16" fill="none" stroke={theme.wire} strokeWidth={4} />
           <circle
             cx="20"
@@ -63,7 +63,17 @@ const Ring: React.FC<{delay: number; label: string}> = ({delay, label}) => {
           />
         </svg>
         <Pop delay={delay + 40} style={{position: 'absolute', inset: 0, display: 'grid', placeItems: 'center'}}>
-          <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke={theme.accent} strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width={22}
+            height={22}
+            fill="none"
+            stroke={theme.accent}
+            strokeWidth={3.2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M5 12.5l4.5 4.5L19 7.5" />
           </svg>
         </Pop>
@@ -73,13 +83,7 @@ const Ring: React.FC<{delay: number; label: string}> = ({delay, label}) => {
   );
 };
 
-const checks = [
-  'Responsive at every breakpoint',
-  'Accessibility (WCAG 2.2 AA)',
-  'Core Web Vitals',
-  'Cross-browser',
-  'Forms & integrations',
-];
+const checks = ['Responsive at every breakpoint', 'Accessibility (WCAG 2.2 AA)', 'Core Web Vitals', 'Cross-browser', 'Forms & integrations'];
 
 export const QA: React.FC = () => (
   <ProcessScene

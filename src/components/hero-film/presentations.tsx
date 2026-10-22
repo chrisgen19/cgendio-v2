@@ -1,5 +1,6 @@
 import type {TransitionPresentation, TransitionPresentationComponentProps} from '@remotion/transitions';
-import React, {useMemo} from 'react';
+import type React from 'react';
+import {useMemo} from 'react';
 import {AbsoluteFill, interpolate} from 'remotion';
 import type {TransitionKind} from './timeline';
 

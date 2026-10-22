@@ -1,18 +1,34 @@
-import React from 'react';
+import type React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {MarkedTitle} from '../../layout';
-import {Appear, MonoLabel, Pop, Reveal, WindowDots, cardStyle} from '../../primitives';
+import {Appear, cardStyle, MonoLabel, Pop, Reveal, WindowDots} from '../../primitives';
 import {fonts, theme} from '../../theme';
 import {MobileScene} from './MobileScene';
 
 const c = theme.code;
 
 const LINES: Array<Array<[string, string]>> = [
-  [['export function', c.kw], [' Button() {', c.text]],
-  [['  return', c.kw], [' (', c.text]],
-  [['    <', c.text], ['a', c.tag], [' className=', c.text], ['"btn"', c.str], ['>', c.text]],
+  [
+    ['export function', c.kw],
+    [' Button() {', c.text],
+  ],
+  [
+    ['  return', c.kw],
+    [' (', c.text],
+  ],
+  [
+    ['    <', c.text],
+    ['a', c.tag],
+    [' className=', c.text],
+    ['"btn"', c.str],
+    ['>', c.text],
+  ],
   [['      Start a project →', c.text]],
-  [['    </', c.text], ['a', c.tag], ['>', c.text]],
+  [
+    ['    </', c.text],
+    ['a', c.tag],
+    ['>', c.text],
+  ],
   [['  )', c.text]],
   [['}', c.text]],
 ];
@@ -31,7 +47,16 @@ const TokenDrop: React.FC = () => {
         return (
           <span
             key={i}
-            style={{position: 'absolute', left: 3, top: y, width: 14, height: 14, borderRadius: '50%', background: i % 2 ? theme.lime : theme.accent, opacity}}
+            style={{
+              position: 'absolute',
+              left: 3,
+              top: y,
+              width: 14,
+              height: 14,
+              borderRadius: '50%',
+              background: i % 2 ? theme.lime : theme.accent,
+              opacity,
+            }}
           />
         );
       })}
@@ -51,7 +76,18 @@ export const MobileFigmaToWeb: React.FC = () => (
     <Appear delay={10} style={{position: 'absolute', left: 0, top: 0, width: 350, height: 120}}>
       <div style={{...cardStyle, borderRadius: 18, height: '100%', padding: 14, display: 'flex', gap: 14}}>
         <div style={{flex: 1, borderRadius: 12, background: '#F3F4F7', display: 'grid', placeItems: 'center'}}>
-          <span style={{position: 'relative', display: 'inline-flex', padding: '10px 16px', borderRadius: 99, background: theme.accent, color: '#fff', fontSize: 14, fontWeight: 600}}>
+          <span
+            style={{
+              position: 'relative',
+              display: 'inline-flex',
+              padding: '10px 16px',
+              borderRadius: 99,
+              background: theme.accent,
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
             Start a project →
             <Pop delay={26} style={{position: 'absolute', inset: -7}}>
               <span style={{position: 'absolute', inset: 0, border: `1.5px dashed ${theme.accent}`, borderRadius: 99}} />
@@ -71,10 +107,23 @@ export const MobileFigmaToWeb: React.FC = () => (
 
     {/* editor */}
     <Appear delay={18} style={{position: 'absolute', left: 0, top: 176, width: 350, height: 224}}>
-      <div style={{height: '100%', background: c.bg, borderRadius: 18, padding: 14, display: 'flex', flexDirection: 'column', gap: 10, boxShadow: theme.shadowDeep}}>
+      <div
+        style={{
+          height: '100%',
+          background: c.bg,
+          borderRadius: 18,
+          padding: 14,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+          boxShadow: theme.shadowDeep,
+        }}
+      >
         <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
           <WindowDots dark size={9} />
-          <span style={{fontFamily: fonts.mono, fontSize: 11, color: '#fff', padding: '5px 9px', background: c.chrome, borderRadius: 6}}>Button.tsx</span>
+          <span style={{fontFamily: fonts.mono, fontSize: 11, color: '#fff', padding: '5px 9px', background: c.chrome, borderRadius: 6}}>
+            Button.tsx
+          </span>
         </div>
         <div style={{fontFamily: fonts.mono, fontSize: 13.5, lineHeight: 1.6, whiteSpace: 'pre', color: c.text}}>
           {LINES.map((tokens, i) => (

@@ -1,6 +1,6 @@
-import React from 'react';
+import type React from 'react';
 import {MarkedTitle} from '../../layout';
-import {Appear, MonoLabel, Pop, Reveal, WindowDots, cardStyle, useProgress} from '../../primitives';
+import {Appear, cardStyle, MonoLabel, Pop, Reveal, useProgress, WindowDots} from '../../primitives';
 import {fonts, theme} from '../../theme';
 import {MobileScene} from './MobileScene';
 
@@ -40,7 +40,7 @@ const Node: React.FC<{x: number; y: number; delay: number; dark?: boolean}> = ({
 };
 
 export const MobileDeploy: React.FC = () => {
-  const bar = useProgress(20, 70, (t) => 1 - Math.pow(1 - t, 2));
+  const bar = useProgress(20, 70, (t) => 1 - (1 - t) ** 2);
   return (
     <MobileScene
       n="05"
@@ -51,7 +51,18 @@ export const MobileDeploy: React.FC = () => {
     >
       {/* terminal */}
       <Appear delay={10} style={{position: 'absolute', left: 0, top: 0, width: 350, height: 250}}>
-        <div style={{height: '100%', background: c.bg, borderRadius: 18, padding: 16, display: 'flex', flexDirection: 'column', gap: 12, boxShadow: theme.shadowDeep}}>
+        <div
+          style={{
+            height: '100%',
+            background: c.bg,
+            borderRadius: 18,
+            padding: 16,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+            boxShadow: theme.shadowDeep,
+          }}
+        >
           <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
             <WindowDots dark size={9} />
             <span style={{fontFamily: fonts.mono, fontSize: 11, color: c.dim}}>~/cgdiomampo.dev</span>
@@ -78,7 +89,7 @@ export const MobileDeploy: React.FC = () => {
 
       {/* globe */}
       <Pop delay={30} style={{position: 'absolute', left: 0, top: 268, width: 132, height: 132}}>
-        <svg viewBox="0 0 100 100" width={132} height={132}>
+        <svg aria-hidden="true" viewBox="0 0 100 100" width={132} height={132}>
           <circle cx="50" cy="50" r="46" fill="#fff" stroke="#CBD0DA" strokeWidth={1} />
           <ellipse cx="50" cy="50" rx="20" ry="46" fill="none" stroke="#DADDE4" strokeWidth={1} />
           <ellipse cx="50" cy="50" rx="36" ry="46" fill="none" stroke={theme.outline} strokeWidth={1} />
@@ -97,7 +108,9 @@ export const MobileDeploy: React.FC = () => {
           <div style={{display: 'flex', alignItems: 'center', gap: 6}}>
             <span style={{fontFamily: fonts.mono, fontSize: 11, padding: '7px 9px', borderRadius: 99, background: theme.wireSoft}}>Preview</span>
             <span style={{fontSize: 14}}>→</span>
-            <span style={{fontFamily: fonts.mono, fontSize: 11, padding: '7px 9px', borderRadius: 99, background: theme.ink, color: '#fff'}}>Live</span>
+            <span style={{fontFamily: fonts.mono, fontSize: 11, padding: '7px 9px', borderRadius: 99, background: theme.ink, color: '#fff'}}>
+              Live
+            </span>
           </div>
           <span style={{fontSize: 13, lineHeight: 1.35, color: theme.muted}}>Reviewed on its own URL first.</span>
         </div>

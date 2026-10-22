@@ -1,20 +1,41 @@
-import React from 'react';
+import type React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {MarkedTitle, ProcessScene} from '../layout';
-import {Appear, MonoLabel, Pop, Reveal, SlideIn, Tag, WindowDots, cardStyle} from '../primitives';
+import {Appear, cardStyle, MonoLabel, Pop, Reveal, SlideIn, Tag, WindowDots} from '../primitives';
 import {fonts, theme} from '../theme';
 
 const c = theme.code;
 
 /** Each line is an array of [text, colour] tokens. */
 const LINES: Array<Array<[string, string]>> = [
-  [['export function', c.kw], [' Button() {', c.text]],
-  [['  return', c.kw], [' (', c.text]],
-  [['    <', c.text], ['a', c.tag], [' href=', c.text], ['"/contact"', c.str]],
-  [['      className=', c.text], ['"rounded-full', c.str]],
-  [['        bg-accent px-6 py-3"', c.str], ['>', c.text]],
+  [
+    ['export function', c.kw],
+    [' Button() {', c.text],
+  ],
+  [
+    ['  return', c.kw],
+    [' (', c.text],
+  ],
+  [
+    ['    <', c.text],
+    ['a', c.tag],
+    [' href=', c.text],
+    ['"/contact"', c.str],
+  ],
+  [
+    ['      className=', c.text],
+    ['"rounded-full', c.str],
+  ],
+  [
+    ['        bg-accent px-6 py-3"', c.str],
+    ['>', c.text],
+  ],
   [['      Start a project →', c.text]],
-  [['    </', c.text], ['a', c.tag], ['>', c.text]],
+  [
+    ['    </', c.text],
+    ['a', c.tag],
+    ['>', c.text],
+  ],
   [['  )', c.text]],
   [['}', c.text]],
 ];
@@ -114,13 +135,15 @@ export const FigmaToWeb: React.FC = () => (
       >
         <div style={{display: 'flex', alignItems: 'center', gap: 16}}>
           <WindowDots dark />
-          <span style={{fontFamily: fonts.mono, fontSize: 15, color: '#fff', padding: '8px 14px', background: c.chrome, borderRadius: 8}}>Button.tsx</span>
+          <span style={{fontFamily: fonts.mono, fontSize: 15, color: '#fff', padding: '8px 14px', background: c.chrome, borderRadius: 8}}>
+            Button.tsx
+          </span>
           <span style={{fontFamily: fonts.mono, fontSize: 15, color: c.dim}}>page.tsx</span>
         </div>
         <div style={{fontFamily: fonts.mono, fontSize: 18.5, lineHeight: 1.75, whiteSpace: 'pre', color: c.text}}>
           {LINES.map((tokens, i) => (
             <Reveal key={i} delay={30 + i * 7} duration={9} steps={18}>
-              <span style={{color: c.dim}}>{String(i + 1).padStart(2, ' ')}  </span>
+              <span style={{color: c.dim}}>{String(i + 1).padStart(2, ' ')} </span>
               {tokens.map(([text, color], j) => (
                 <span key={j} style={{color}}>
                   {text}

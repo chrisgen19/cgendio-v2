@@ -1,6 +1,6 @@
-import React from 'react';
+import type React from 'react';
 import {MarkedTitle} from '../../layout';
-import {Appear, Check, MonoLabel, Pop, cardStyle, useProgress} from '../../primitives';
+import {Appear, Check, cardStyle, MonoLabel, Pop, useProgress} from '../../primitives';
 import {theme} from '../../theme';
 import {MiniPage, Scan} from '../QA';
 import {MobileScene} from './MobileScene';
@@ -8,11 +8,11 @@ import {MobileScene} from './MobileScene';
 const checks = ['Every breakpoint', 'WCAG 2.2 AA', 'Core Web Vitals', 'Cross-browser', 'Forms & CRM'];
 
 const Ring: React.FC<{delay: number; label: string}> = ({delay, label}) => {
-  const p = useProgress(delay, delay + 30, (t) => 1 - Math.pow(1 - t, 3));
+  const p = useProgress(delay, delay + 30, (t) => 1 - (1 - t) ** 3);
   return (
     <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flex: 1}}>
       <span style={{position: 'relative', width: 46, height: 46}}>
-        <svg viewBox="0 0 40 40" width={46} height={46} style={{transform: 'rotate(-90deg)'}}>
+        <svg aria-hidden="true" viewBox="0 0 40 40" width={46} height={46} style={{transform: 'rotate(-90deg)'}}>
           <circle cx="20" cy="20" r="16" fill="none" stroke={theme.wire} strokeWidth={4} />
           <circle
             cx="20"
@@ -28,7 +28,17 @@ const Ring: React.FC<{delay: number; label: string}> = ({delay, label}) => {
           />
         </svg>
         <Pop delay={delay + 30} style={{position: 'absolute', inset: 0, display: 'grid', placeItems: 'center'}}>
-          <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke={theme.accent} strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width={18}
+            height={18}
+            fill="none"
+            stroke={theme.accent}
+            strokeWidth={3.2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M5 12.5l4.5 4.5L19 7.5" />
           </svg>
         </Pop>
