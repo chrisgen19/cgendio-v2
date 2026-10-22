@@ -125,7 +125,7 @@ src/components/sections/ one server component per home page section
 src/components/ui-site/  the site's own primitives (Mark, Eyebrow, SectionHeading, Button, Tag, Container)
 src/components/ui/       shadcn/ui, admin only
 src/components/hero-film/ the Remotion hero (copied from docs/design/remotion-src)
-src/content/             typed mock data until the database exists (Phase 3)
+prisma/seed-data/        the Phase 3 content, inserted by prisma/seed.mts
 src/lib/                 shared helpers
 src/server/              data access and server actions
 prisma/                  schema, migrations, seed

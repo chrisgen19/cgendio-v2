@@ -1,4 +1,4 @@
-import type {Project} from './schema';
+import type {Project} from '../../src/server/content-schema';
 
 export const projects: Project[] = [
   {

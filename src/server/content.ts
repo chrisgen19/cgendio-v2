@@ -1,7 +1,9 @@
 import 'server-only';
-import {milestones} from '@/content/milestones';
-import {posts} from '@/content/posts';
-import {projects} from '@/content/projects';
+import {milestones} from '../../prisma/seed-data/milestones';
+import {posts} from '../../prisma/seed-data/posts';
+import {projects} from '../../prisma/seed-data/projects';
+import {stack} from '../../prisma/seed-data/stack';
+import {timeline} from '../../prisma/seed-data/timeline';
 import {
   type Milestone,
   milestoneSchema,
@@ -14,14 +16,12 @@ import {
   stackItemSchema,
   type TimelineEntry,
   timelineEntrySchema,
-} from '@/content/schema';
-import {stack} from '@/content/stack';
-import {timeline} from '@/content/timeline';
+} from './content-schema';
 
 /* The only way components read content. Phase 4 swaps these bodies for Prisma queries; the signatures stay. */
 
 // Components take their types from here too, so nothing outside src/server depends on src/content
-export type {Milestone, Post, Project, ProjectGroup, ProjectSpan, ProjectTheme, StackItem, TimelineDot, TimelineEntry} from '@/content/schema';
+export type {Milestone, Post, Project, ProjectGroup, ProjectSpan, ProjectTheme, StackItem, TimelineDot, TimelineEntry} from './content-schema';
 
 const byOrder = <T extends {order: number}>(rows: T[]) => [...rows].sort((a, b) => a.order - b.order);
 

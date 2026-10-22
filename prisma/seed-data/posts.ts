@@ -1,4 +1,4 @@
-import type {Post} from './schema';
+import type {Post} from '../../src/server/content-schema';
 
 // The canvas only gives month and year: dates use the 1st of the month and the home page shows "Oct 2026".
 export const posts: Post[] = [

@@ -1,4 +1,4 @@
-import type {Milestone} from './schema';
+import type {Milestone} from '../../src/server/content-schema';
 
 export const milestones: Milestone[] = [
   {
