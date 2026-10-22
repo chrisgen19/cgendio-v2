@@ -15,12 +15,17 @@
     "format": "biome check --write ."
   },
   "dependencies": {
+    "@remotion/google-fonts": "4.0.537",
+    "@remotion/player": "4.0.537",
+    "@remotion/transitions": "4.0.537",
     "next": "16.4.2",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "remotion": "4.0.537"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",
+    "@remotion/cli": "4.0.537",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^24.19.2",
     "@types/react": "^19",
