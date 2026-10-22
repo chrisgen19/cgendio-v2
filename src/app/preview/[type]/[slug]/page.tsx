@@ -1,9 +1,11 @@
 import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
+import {connection} from 'next/server';
 import {Suspense} from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import {getPreviewContent, type PreviewType, verifyPreview} from '@/server/preview';
+import {isPreviewType, verifyPreview} from '@/lib/preview-signature';
+import {getPreviewContent} from '@/server/preview';
 
 export const metadata: Metadata = {title: 'Draft preview', robots: {index: false, follow: false}};
 
@@ -20,13 +22,15 @@ export default function PreviewPage({params, searchParams}: PageProps<'/preview/
 }
 
 async function Preview({params, searchParams}: Pick<PageProps<'/preview/[type]/[slug]'>, 'params' | 'searchParams'>) {
+  // Request time only: the link's expiry is checked against the current time
+  await connection();
   const [{type, slug}, {expires, signature}] = await Promise.all([params, searchParams]);
-  if (type !== 'post' && type !== 'project') notFound();
-  const previewType: PreviewType = type;
+  // proxy.ts already answers 404 for bad links; this is the same check again, as the page shouldn't rely on it
+  if (!isPreviewType(type)) notFound();
   const decodedSlug = decodeURIComponent(slug);
-  if (!verifyPreview(previewType, decodedSlug, expires, signature)) notFound();
+  if (!verifyPreview(type, decodedSlug, expires, signature)) notFound();
 
-  const content = await getPreviewContent(previewType, decodedSlug);
+  const content = await getPreviewContent(type, decodedSlug);
   if (!content) notFound();
 
   return (

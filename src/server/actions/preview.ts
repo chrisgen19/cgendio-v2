@@ -1,9 +1,9 @@
 'use server';
 
 import {z} from 'zod';
+import {createPreviewPath} from '@/lib/preview-signature';
 import {requireAdmin} from '../admin-session';
 import {db} from '../db';
-import {createPreviewPath} from '../preview';
 
 const input = z.object({type: z.enum(['post', 'project']), id: z.string().min(1)});
 
