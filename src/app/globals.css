@@ -33,6 +33,8 @@
   --color-wire: #e6e8ee;
   --color-wire-soft: #eef0f4;
   --color-outline-num: #e4e7ed;
+  --color-dot-placeholder: #c9cdd6;
+  --color-ink-soft: #23252b;
   --color-code-chrome: #1c1e25;
   --color-code-dots: #3a3d46;
   --color-code-text: #e8e9ee;
@@ -63,6 +65,8 @@
     background-color: var(--color-ground);
     color: var(--color-ink);
     font-family: var(--font-body);
+    /* The canvas never sets a line-height, so its text uses the browser's normal; Tailwind's preflight sets 1.5 */
+    line-height: normal;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -84,6 +88,20 @@
     html {
       scroll-behavior: smooth;
     }
+  }
+}
+
+/* Scroll reveal (ScrollReveal adds .reveal-ready). Never hides anything without JS or with reduced motion. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .reveal-ready [data-reveal] {
+    transition:
+      opacity 0.6s ease-out,
+      translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .reveal-ready [data-reveal]:not([data-revealed]) {
+    opacity: 0;
+    translate: 0 16px;
   }
 }
 
