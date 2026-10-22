@@ -431,7 +431,7 @@ Prompt C updates this table when a phase finishes. **Status** is one of `Not sta
 | 0 — Kickoff | CLAUDE.md agreed | [#1](https://github.com/chrisgen19/cgendio-v2/issues/1) | Done | [#15](https://github.com/chrisgen19/cgendio-v2/pull/15) |
 | 1 — Foundations | Tokens, fonts, header, footer, anchors | [#2](https://github.com/chrisgen19/cgendio-v2/issues/2) | Done | [#17](https://github.com/chrisgen19/cgendio-v2/pull/17) |
 | 2 — Remotion hero | Both cuts play once, HUD, reduced motion, fast LCP | [#3](https://github.com/chrisgen19/cgendio-v2/issues/3) | Done | [#19](https://github.com/chrisgen19/cgendio-v2/pull/19) |
-| 3 — Home sections | All sections from the canvas, typed mock data | [#4](https://github.com/chrisgen19/cgendio-v2/issues/4) | In progress | |
+| 3 — Home sections | All sections from the canvas, typed mock data | [#4](https://github.com/chrisgen19/cgendio-v2/issues/4) | In review | |
 | 4 — Content layer | Prisma + Postgres, seeded, cached, static home | [#5](https://github.com/chrisgen19/cgendio-v2/issues/5) | Not started | |
 | 5 — Admin | Better Auth, CRUD, uploads, instant revalidation | [#6](https://github.com/chrisgen19/cgendio-v2/issues/6) | Not started | |
 | 6 — Blog & contact | Posts, case studies, contact form, CV, RSS | [#7](https://github.com/chrisgen19/cgendio-v2/issues/7) | Not started | |
