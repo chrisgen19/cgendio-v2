@@ -57,7 +57,7 @@ export function ProjectCard({project}: ProjectCardProps) {
       <div className="flex flex-col gap-3 px-1">
         <div className="flex flex-wrap gap-1.5">
           {project.tags.map((tag) => (
-            <Tag key={tag} className="px-2.5 py-[7px] text-[11px]">
+            <Tag key={tag} size="sm">
               {tag}
             </Tag>
           ))}

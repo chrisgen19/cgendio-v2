@@ -1,7 +1,7 @@
 import type {AnchorHTMLAttributes, ButtonHTMLAttributes} from 'react';
 import {cn} from '@/lib/cn';
 
-type Variant = 'primary' | 'secondary';
+type Variant = 'primary' | 'secondary' | 'outline';
 type Size = 'md' | 'sm';
 
 type BaseProps = {
@@ -18,6 +18,8 @@ const BASE =
 const VARIANTS: Record<Variant, string> = {
   primary: 'bg-ink text-white hover:bg-accent hover:text-white',
   secondary: 'border-line bg-white text-ink hover:border-ink hover:text-ink',
+  // Secondary with an ink border, for coloured panels (the lime contact CTA)
+  outline: 'border-ink bg-white text-ink hover:text-ink',
 };
 
 const SIZES: Record<Size, string> = {

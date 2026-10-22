@@ -1,7 +1,13 @@
 import {SiteFooter} from '@/components/site/site-footer';
 import {SiteHeader} from '@/components/site/site-header';
 import type {WorkFilter} from '@/lib/work-filter';
+import {About} from './about';
+import {BlogTeaser} from './blog-teaser';
+import {ContactCta} from './contact-cta';
 import {Hero} from './hero';
+import {Milestones} from './milestones';
+import {StackStrip} from './stack-strip';
+import {Timeline} from './timeline';
 import {Work} from './work';
 
 type HomePageProps = {
@@ -17,7 +23,13 @@ export function HomePage({filter}: HomePageProps) {
       <SiteHeader overlay />
       <main>
         <Hero />
+        <StackStrip />
+        <About />
         <Work filter={filter} />
+        <Milestones />
+        <Timeline />
+        <BlogTeaser />
+        <ContactCta />
       </main>
       <SiteFooter />
     </>
