@@ -1,1 +1,94 @@
 @import "tailwindcss";
+
+/* The design canvas and the Remotion reference are specs, not app code */
+@source not "../../docs";
+
+/* Animate only when JS can reveal it and the user hasn't asked for less motion */
+@custom-variant motion-js (@media (scripting: enabled) and (prefers-reduced-motion: no-preference));
+
+/* `inline` because these tokens reference variables set by next/font */
+@theme inline {
+  --font-display: var(--font-bricolage), system-ui, sans-serif;
+  --font-body: var(--font-geist), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+@theme {
+  --breakpoint-md: 860px;
+  --breakpoint-lg: 1080px;
+
+  --color-ink: #0d0e12;
+  --color-muted: #565b67;
+  --color-line: #e3e5ea;
+  --color-ground: #f5f6f8;
+  --color-white: #ffffff;
+  --color-lime: #d7ff3d;
+  --color-accent: #3b2bff;
+  --color-tint: color-mix(in srgb, #3b2bff 10%, #fff);
+
+  --color-accent-hover: #2417c9;
+  --color-status: #16a34a;
+  --color-thumb: #e9ebf0;
+  --color-dot: #e1e4ea;
+  --color-wire: #e6e8ee;
+  --color-wire-soft: #eef0f4;
+  --color-outline-num: #e4e7ed;
+  --color-code-chrome: #1c1e25;
+  --color-code-dots: #3a3d46;
+  --color-code-text: #e8e9ee;
+  --color-code-keyword: #b9b2ff;
+  --color-code-string: #d7ff3d;
+  --color-code-tag: #7fd4ff;
+  --color-code-dim: #7c818e;
+
+  --radius-pill: 999px;
+  --radius-card: 22px;
+  --radius-panel: 28px;
+  --radius-cta: 40px;
+  --radius-photo: 32px;
+  --radius-milestone: 24px;
+  --radius-logo: 11px;
+
+  --shadow-card: 0 1px 0 rgba(13, 14, 18, 0.04), 0 18px 40px -18px rgba(13, 14, 18, 0.22);
+  --shadow-deep: 0 30px 60px -24px rgba(13, 14, 18, 0.5);
+  --shadow-menu: 0 24px 48px -20px rgba(13, 14, 18, 0.3);
+
+  --container-site: 1320px;
+
+  --ease-mark: cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+
+  a:hover {
+    color: var(--color-accent-hover);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+@utility dot-grid {
+  background-color: var(--color-white);
+  background-image: radial-gradient(circle, var(--color-dot) 1px, transparent 1.3px);
+  background-size: 26px 26px;
+}
