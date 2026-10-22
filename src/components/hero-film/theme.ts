@@ -1,20 +1,35 @@
-import {loadFont as loadBricolage} from '@remotion/google-fonts/BricolageGrotesque';
+import {loadVariableFont as loadBricolage} from '@remotion/google-fonts/BricolageGrotesque';
 import {loadFont as loadGeist} from '@remotion/google-fonts/Geist';
 import {loadFont as loadGeistMono} from '@remotion/google-fonts/GeistMono';
+import {getRemotionEnvironment} from 'remotion';
 
 /**
- * Fonts are loaded through Remotion so the film looks identical in the
- * in-page <Player> and in an MP4 rendered with `npx remotion render`.
- * Remotion delays each frame until the fonts are ready.
+ * In the website's <Player> the film uses the page's next/font files through
+ * their CSS variables, so nothing is downloaded twice and the static first
+ * frame hands over to the film without a font change.
+ *
+ * Studio and `remotion render` have no Next.js page around them, so there the
+ * fonts load through Remotion, which delays each frame until they're ready.
+ * Bricolage loads as the variable font so optical sizing matches the site.
  */
-const display = loadBricolage('normal', {weights: ['600', '700', '800'], subsets: ['latin']});
-const body = loadGeist('normal', {weights: ['400', '500', '600', '700'], subsets: ['latin']});
-const mono = loadGeistMono('normal', {weights: ['400', '500'], subsets: ['latin']});
+const loadFamilies = () => {
+  const {isStudio, isRendering} = getRemotionEnvironment();
+  if (!isStudio && !isRendering) {
+    return {display: 'var(--font-bricolage)', body: 'var(--font-geist)', mono: 'var(--font-geist-mono)'};
+  }
+  return {
+    display: loadBricolage('normal', {subsets: ['latin']}).fontFamily,
+    body: loadGeist('normal', {weights: ['400', '500', '600', '700'], subsets: ['latin']}).fontFamily,
+    mono: loadGeistMono('normal', {weights: ['400', '500'], subsets: ['latin']}).fontFamily,
+  };
+};
+
+const families = loadFamilies();
 
 export const fonts = {
-  display: `${display.fontFamily}, system-ui, sans-serif`,
-  body: `${body.fontFamily}, system-ui, sans-serif`,
-  mono: `${mono.fontFamily}, ui-monospace, monospace`,
+  display: `${families.display}, system-ui, sans-serif`,
+  body: `${families.body}, system-ui, sans-serif`,
+  mono: `${families.mono}, ui-monospace, monospace`,
 } as const;
 
 export const theme = {
