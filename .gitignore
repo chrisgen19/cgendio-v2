@@ -1,0 +1,10 @@
+# Windows download metadata (WSL)
+*:Zone.Identifier
+
+# OS
+.DS_Store
+
+# Dependencies and env (Phase 1 extends this)
+node_modules/
+.env*
+!.env.example
