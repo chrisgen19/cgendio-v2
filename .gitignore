@@ -8,3 +8,16 @@
 node_modules/
 .env*
 !.env.example
+
+# Next.js
+/.next/
+/out/
+/build
+/coverage
+next-env.d.ts
+*.tsbuildinfo
+*.pem
+.pnpm-debug.log*
+
+# Playwright MCP output
+.playwright-mcp/

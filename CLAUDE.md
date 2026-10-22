@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # cgdiomampo.dev: project rules
 
 Portfolio and dev blog for Christian Diomampo, branded as a "we" web studio. Audience: job-offer agencies, recruiters and dev clients.
