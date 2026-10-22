@@ -1,9 +1,9 @@
 import {Eyebrow} from '@/components/ui-site/eyebrow';
-import {Mark} from '@/components/ui-site/mark';
+import {MarkedText} from '@/components/ui-site/marked-text';
 import {Section} from '@/components/ui-site/section';
 import {SectionHeading} from '@/components/ui-site/section-heading';
 import type {WorkFilter} from '@/lib/work-filter';
-import {getProjects} from '@/server/content';
+import {getPageCopy, getProjects} from '@/server/content';
 import {ProjectCard} from './project-card';
 import {WorkCount, WorkFilterProvider, WorkFilters, WorkGrid} from './work-browser';
 
@@ -14,7 +14,7 @@ type WorkProps = {
 
 export async function Work({filter}: WorkProps) {
   // Every card is rendered so JavaScript can switch filters in place; the active filter hides the rest
-  const projects = await getProjects();
+  const [projects, copy] = await Promise.all([getProjects(), getPageCopy()]);
   const counts = {
     all: projects.length,
     client: projects.filter((p) => p.group === 'client').length,
@@ -28,10 +28,10 @@ export async function Work({filter}: WorkProps) {
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div data-reveal className="flex flex-col gap-[18px]">
               <Eyebrow>
-                Selected work · <WorkCount />
+                {copy['work.eyebrow']} · <WorkCount />
               </Eyebrow>
               <SectionHeading>
-                Things we&apos;ve <Mark>shipped.</Mark>
+                <MarkedText text={copy['work.heading']} />
               </SectionHeading>
             </div>
             <WorkFilters />

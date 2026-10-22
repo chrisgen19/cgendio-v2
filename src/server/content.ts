@@ -3,9 +3,12 @@ import {cacheLife, cacheTag} from 'next/cache';
 import {
   type Milestone,
   milestoneSchema,
+  PAGE_COPY_KEYS,
+  type PageCopy,
   type Post,
   type Project,
   type ProjectGroup,
+  pageCopySchema,
   postSchema,
   projectSchema,
   type SiteSettings,
@@ -26,6 +29,8 @@ import {db} from './db';
 // Components take their types from here too, so nothing outside src/server depends on Prisma or the seed data
 export type {
   Milestone,
+  PageCopy,
+  PageCopyKey,
   Post,
   Project,
   ProjectGroup,
@@ -44,6 +49,7 @@ export const CACHE_TAGS = {
   timeline: 'timeline',
   stack: 'stack',
   settings: 'settings',
+  copy: 'copy',
 } as const;
 
 const lower = <T extends string>(value: T) => value.toLowerCase() as Lowercase<T>;
@@ -141,4 +147,13 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
   cacheLife('max');
   const row = await db.siteSettings.findUniqueOrThrow({where: {id: 'site'}});
   return siteSettingsSchema.parse({contactEmail: row.contactEmail, openToProjects: row.openToProjects, cvUrl: row.cvUrl, socials: row.socials});
+};
+
+/** Every editable piece of home page copy, keyed by PAGE_COPY_KEYS. A missing key fails the parse (and the build). */
+export const getPageCopy = async (): Promise<PageCopy> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.copy);
+  cacheLife('max');
+  const rows = await db.pageCopy.findMany({where: {key: {in: [...PAGE_COPY_KEYS]}}, select: {key: true, value: true}});
+  return pageCopySchema.parse(Object.fromEntries(rows.map((row) => [row.key, row.value])));
 };

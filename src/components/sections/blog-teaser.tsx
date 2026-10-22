@@ -1,28 +1,26 @@
 import {Button} from '@/components/ui-site/button';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
-import {Mark} from '@/components/ui-site/mark';
+import {MarkedText} from '@/components/ui-site/marked-text';
 import {Section} from '@/components/ui-site/section';
 import {SectionHeading} from '@/components/ui-site/section-heading';
-import {getPosts} from '@/server/content';
+import {getPageCopy, getPosts} from '@/server/content';
 
 // "Oct 2026": the canvas shows month and year only
 const MONTH_YEAR = new Intl.DateTimeFormat('en', {month: 'short', year: 'numeric', timeZone: 'UTC'});
 
 export async function BlogTeaser() {
-  const posts = await getPosts({limit: 4});
+  const [posts, copy] = await Promise.all([getPosts({limit: 4}), getPageCopy()]);
   return (
     <Section id="blog" innerClassName="grid grid-cols-[minmax(0,4fr)_minmax(0,8fr)] items-start gap-16 max-md:grid-cols-1 max-md:gap-8">
       <div data-reveal className="flex flex-col gap-[18px]">
-        <Eyebrow>Dev notes &amp; tech news</Eyebrow>
+        <Eyebrow>{copy['blog.eyebrow']}</Eyebrow>
         <SectionHeading>
-          From the <Mark>blog.</Mark>
+          <MarkedText text={copy['blog.heading']} />
         </SectionHeading>
-        <p className="m-0 max-w-[360px] text-base leading-[1.55] text-muted">
-          Field notes on migrations, Next.js, WordPress and AI-assisted development.
-        </p>
+        <p className="m-0 max-w-[360px] text-base leading-[1.55] text-muted">{copy['blog.lede']}</p>
         {/* Posts arrive in Phase 6; until then these links stay on #blog, as in the canvas */}
         <Button href="#blog" size="sm" className="mt-2 self-start">
-          All articles
+          {copy['blog.allLabel']}
         </Button>
       </div>
       <ul className="m-0 flex list-none flex-col border-b border-line p-0">

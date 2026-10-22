@@ -211,3 +211,14 @@ model Verification {
   @@index([identifier])
   @@map("verifications")
 }
+
+/// Editable home page copy: eyebrows, headings, ledes, the About statement and facts, CTA labels. Keys are fixed in
+/// src/server/content-schema.ts (PAGE_COPY_KEYS); `[[...]]` marks the highlighted words in a heading.
+model PageCopy {
+  key       String   @id
+  value     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("page_copy")
+}

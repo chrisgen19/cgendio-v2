@@ -1,10 +1,10 @@
 import {Button} from '@/components/ui-site/button';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
-import {Mark} from '@/components/ui-site/mark';
+import {MarkedText} from '@/components/ui-site/marked-text';
 import {Section} from '@/components/ui-site/section';
 import {SectionHeading} from '@/components/ui-site/section-heading';
 import type {TimelineDot} from '@/server/content';
-import {getTimeline} from '@/server/content';
+import {getPageCopy, getSiteSettings, getTimeline} from '@/server/content';
 
 const DOTS: Record<TimelineDot, string> = {
   lime: 'bg-lime',
@@ -14,7 +14,7 @@ const DOTS: Record<TimelineDot, string> = {
 };
 
 export async function Timeline() {
-  const entries = await getTimeline();
+  const [entries, copy, settings] = await Promise.all([getTimeline(), getPageCopy(), getSiteSettings()]);
   return (
     <Section
       id="timeline"
@@ -22,14 +22,14 @@ export async function Timeline() {
       innerClassName="grid grid-cols-[minmax(0,4fr)_minmax(0,8fr)] items-start gap-16 max-md:grid-cols-1 max-md:gap-8"
     >
       <div data-reveal className="flex flex-col gap-[18px]">
-        <Eyebrow>Work timeline</Eyebrow>
+        <Eyebrow>{copy['timeline.eyebrow']}</Eyebrow>
         <SectionHeading>
-          The road <Mark>here.</Mark>
+          <MarkedText text={copy['timeline.heading']} />
         </SectionHeading>
-        <p className="m-0 max-w-[360px] text-base leading-[1.55] text-muted">Roles, promotions and the projects in between.</p>
-        {/* The CV file is still an open placeholder; until then this goes to the contact section, as in the canvas */}
-        <Button href="#contact" variant="secondary" size="sm" className="mt-2 self-start">
-          Download CV
+        <p className="m-0 max-w-[360px] text-base leading-[1.55] text-muted">{copy['timeline.lede']}</p>
+        {/* Links to the uploaded CV once there is one; until then to the contact section, as in the canvas */}
+        <Button href={settings.cvUrl ?? '#contact'} variant="secondary" size="sm" className="mt-2 self-start">
+          {copy['timeline.cvLabel']}
         </Button>
       </div>
       <ol className="m-0 flex list-none flex-col p-0">

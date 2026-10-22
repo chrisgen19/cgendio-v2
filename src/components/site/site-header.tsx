@@ -2,6 +2,7 @@ import {Button} from '@/components/ui-site/button';
 import {Container} from '@/components/ui-site/container';
 import {Logo} from '@/components/ui-site/logo';
 import {cn} from '@/lib/cn';
+import {getSiteSettings} from '@/server/content';
 import {MobileMenu} from './mobile-menu';
 import {NAV_LINKS} from './nav-links';
 
@@ -10,7 +11,8 @@ type SiteHeaderProps = {
   overlay?: boolean;
 };
 
-export function SiteHeader({overlay = false}: SiteHeaderProps) {
+export async function SiteHeader({overlay = false}: SiteHeaderProps) {
+  const settings = await getSiteSettings();
   return (
     <header className={cn('inset-x-0 top-0 z-30', overlay ? 'absolute' : 'relative')}>
       <Container>
@@ -29,10 +31,13 @@ export function SiteHeader({overlay = false}: SiteHeaderProps) {
             ))}
           </ul>
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-2 font-mono text-xs leading-none font-medium text-muted max-md:hidden">
-              <i className="block size-2 rounded-full bg-status shadow-[0_0_0_4px_rgba(22,163,74,0.15)]" />
-              Open to projects
-            </span>
+            {/* Switched off in the admin's settings: hidden rather than inventing a "closed" message */}
+            {settings.openToProjects ? (
+              <span className="inline-flex items-center gap-2 font-mono text-xs leading-none font-medium text-muted max-md:hidden">
+                <i className="block size-2 rounded-full bg-status shadow-[0_0_0_4px_rgba(22,163,74,0.15)]" />
+                Open to projects
+              </span>
+            ) : null}
             <Button href="#contact" size="sm">
               Let&apos;s talk
             </Button>
