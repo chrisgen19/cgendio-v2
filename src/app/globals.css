@@ -91,6 +91,20 @@
   }
 }
 
+/* Scroll reveal (ScrollReveal adds .reveal-ready). Never hides anything without JS or with reduced motion. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .reveal-ready [data-reveal] {
+    transition:
+      opacity 0.6s ease-out,
+      translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .reveal-ready [data-reveal]:not([data-revealed]) {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+
 @utility dot-grid {
   background-color: var(--color-white);
   background-image: radial-gradient(circle, var(--color-dot) 1px, transparent 1.3px);

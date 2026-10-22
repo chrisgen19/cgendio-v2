@@ -1,5 +1,6 @@
 import {SiteFooter} from '@/components/site/site-footer';
 import {SiteHeader} from '@/components/site/site-header';
+import {ScrollReveal} from '@/components/ui-site/scroll-reveal';
 import type {WorkFilter} from '@/lib/work-filter';
 import {About} from './about';
 import {BlogTeaser} from './blog-teaser';
@@ -32,6 +33,7 @@ export function HomePage({filter}: HomePageProps) {
         <ContactCta />
       </main>
       <SiteFooter />
+      <ScrollReveal />
     </>
   );
 }
