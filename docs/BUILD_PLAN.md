@@ -428,7 +428,7 @@ Prompt C updates this table when a phase finishes. **Status** is one of `Not sta
 
 | Phase | Outcome | Issue | Status | PR |
 | --- | --- | --- | --- | --- |
-| 0 — Kickoff | CLAUDE.md agreed | [#1](https://github.com/chrisgen19/cgendio-v2/issues/1) | Not started | |
+| 0 — Kickoff | CLAUDE.md agreed | [#1](https://github.com/chrisgen19/cgendio-v2/issues/1) | In progress | |
 | 1 — Foundations | Tokens, fonts, header, footer, anchors | [#2](https://github.com/chrisgen19/cgendio-v2/issues/2) | Not started | |
 | 2 — Remotion hero | Both cuts play once, HUD, reduced motion, fast LCP | [#3](https://github.com/chrisgen19/cgendio-v2/issues/3) | Not started | |
 | 3 — Home sections | All sections from the canvas, typed mock data | [#4](https://github.com/chrisgen19/cgendio-v2/issues/4) | Not started | |

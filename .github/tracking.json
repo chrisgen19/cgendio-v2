@@ -7,9 +7,9 @@
     "0": {
       "issue": 1,
       "title": "Kickoff: project rules",
-      "branch": null,
+      "branch": "feature/phase-0-project-rules",
       "pr": null,
-      "status": "Not started"
+      "status": "In progress"
     },
     "1": {
       "issue": 2,
