@@ -5,7 +5,7 @@ import {Appear, Check, Mark} from '../primitives';
 import {fonts, theme} from '../theme';
 
 export type BrandProps = {
-  /** Where "See my works" goes. */
+  /** Where "See our work" goes. */
   worksHref?: string;
   /** Wired by the page player; absent when rendering an MP4. */
   onReplay?: () => void;
@@ -125,7 +125,7 @@ export const Brand: React.FC<BrandProps> = ({worksHref = '#work', onReplay}) => 
 
           <Appear delay={52} style={{display: 'flex', flexWrap: 'wrap', gap: L.portrait ? 8 : 12}}>
             <a href={worksHref} style={{...btnBase, ...(L.portrait ? compact : null), background: theme.ink, color: '#fff'}}>
-              See my works <Arrow />
+              See our work <Arrow />
             </a>
             <button
               type="button"

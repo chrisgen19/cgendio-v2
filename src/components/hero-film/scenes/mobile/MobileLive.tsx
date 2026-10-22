@@ -138,7 +138,7 @@ export const MobileLive: React.FC = () => (
           </div>
           <div style={{display: 'flex', gap: 8}}>
             <span style={{padding: '9px 14px', borderRadius: 99, background: theme.ink, color: '#fff', fontSize: 12, fontWeight: 600}}>
-              See my works
+              See our work
             </span>
             <span style={{padding: '9px 14px', borderRadius: 99, border: `1px solid ${theme.line}`, fontSize: 12, fontWeight: 600}}>
               Let&apos;s talk

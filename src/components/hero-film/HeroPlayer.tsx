@@ -12,7 +12,7 @@ type Size = {width: number; height: number};
 type Variant = 'desktop' | 'mobile';
 
 type HeroPlayerProps = {
-  /** Anchor or route for the "See my works" button. */
+  /** Anchor or route for the "See our work" button. */
   worksHref?: string;
   /** Rendered over the top of the film (your site header). */
   header?: React.ReactNode;
@@ -264,8 +264,7 @@ type HudProps = {
   onToggle: (e: React.SyntheticEvent) => void;
 };
 
-const iconBtn =
-  'inline-grid size-11 place-items-center rounded-full border border-[#E3E5EA] bg-white/90 text-[#0D0E12] backdrop-blur hover:border-[#0D0E12] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3B2BFF]';
+const iconBtn = 'inline-grid size-11 place-items-center rounded-full border border-line bg-white/90 text-ink backdrop-blur hover:border-ink';
 
 const PlayStateIcon: React.FC<{ended: boolean; playing: boolean}> = ({ended, playing}) =>
   ended ? (
@@ -297,7 +296,7 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
   const progress = Math.min(1, frame / (durationInFrames - 1));
   return (
     <>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-10 pb-6 xl:px-14">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-site items-center justify-between gap-4 px-10 pb-6 xl:px-14">
         <div role="group" aria-label="Film chapters" className="pointer-events-auto flex flex-wrap gap-1.5">
           {chapters.map((c) => {
             const active = frame >= c.startFrame && frame < c.endFrame;
@@ -311,10 +310,10 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
                 className={[
                   'inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-[13px] font-medium backdrop-blur transition-colors',
                   active
-                    ? 'border-[#0D0E12] bg-[#0D0E12] text-white'
+                    ? 'border-ink bg-ink text-white'
                     : done
-                      ? 'border-[#E3E5EA] bg-white/90 text-[#0D0E12] hover:border-[#0D0E12]'
-                      : 'border-[#E3E5EA] bg-white/90 text-[#565B67] hover:border-[#0D0E12] hover:text-[#0D0E12]',
+                      ? 'border-line bg-white/90 text-ink hover:border-ink'
+                      : 'border-line bg-white/90 text-muted hover:border-ink hover:text-ink',
                 ].join(' ')}
               >
                 <span className="font-mono text-[11px] opacity-70">{c.number}</span>
@@ -324,14 +323,14 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
           })}
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
-          <span className="px-2 font-mono text-xs tabular-nums text-[#565B67]">
+          <span className="px-2 font-mono text-xs tabular-nums text-muted">
             {formatTimecode(frame)} / {formatTimecode(durationInFrames)}
           </span>
           {!atBrand ? (
             <button
               type="button"
               onClick={onSkip}
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-[#E3E5EA] bg-white/90 px-4 text-[13px] font-medium text-[#0D0E12] backdrop-blur hover:border-[#0D0E12]"
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-white/90 px-4 text-[13px] font-medium text-ink backdrop-blur hover:border-ink"
             >
               Skip intro <SkipIcon />
             </button>
@@ -341,8 +340,8 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
           </button>
         </div>
       </div>
-      <div aria-hidden className="absolute inset-x-0 bottom-0 z-20 h-[3px] bg-[#E3E5EA]">
-        <div className="h-full origin-left bg-[#3B2BFF]" style={{transform: `scaleX(${progress})`}} />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 z-20 h-[3px] bg-line">
+        <div className="h-full origin-left bg-accent" style={{transform: `scaleX(${progress})`}} />
       </div>
     </>
   );
@@ -359,7 +358,7 @@ function MobileHud({chapters, current, frame, atBrand, ended, playing, onJump, o
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 px-4 pb-3">
       <div className="flex items-center justify-between gap-3">
-        <span aria-live="polite" className="font-mono text-[12px] uppercase tracking-[0.08em] text-[#565B67]">
+        <span aria-live="polite" className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted">
           {label}
         </span>
         <div className="pointer-events-auto flex items-center gap-2">
@@ -367,7 +366,7 @@ function MobileHud({chapters, current, frame, atBrand, ended, playing, onJump, o
             <button
               type="button"
               onClick={onSkip}
-              className="inline-flex h-11 items-center gap-1.5 rounded-full border border-[#E3E5EA] bg-white/90 px-3.5 text-[13px] font-medium text-[#0D0E12] backdrop-blur"
+              className="inline-flex h-11 items-center gap-1.5 rounded-full border border-line bg-white/90 px-3.5 text-[13px] font-medium text-ink backdrop-blur"
             >
               Skip <SkipIcon />
             </button>
@@ -391,10 +390,10 @@ function MobileHud({chapters, current, frame, atBrand, ended, playing, onJump, o
               aria-current={active ? 'step' : undefined}
               className="group flex h-8 flex-1 items-center"
             >
-              <span className="relative block h-1 w-full overflow-hidden rounded-full bg-[#E3E5EA]">
+              <span className="relative block h-1 w-full overflow-hidden rounded-full bg-line">
                 <span
-                  className="absolute inset-0 origin-left rounded-full"
-                  style={{transform: `scaleX(${fill})`, background: active ? '#3B2BFF' : '#0D0E12'}}
+                  className={`absolute inset-0 origin-left rounded-full ${active ? 'bg-accent' : 'bg-ink'}`}
+                  style={{transform: `scaleX(${fill})`}}
                 />
               </span>
             </button>

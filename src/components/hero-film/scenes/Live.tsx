@@ -133,7 +133,7 @@ export const Live: React.FC = () => (
           </Appear>
           <Appear delay={36} style={{display: 'flex', gap: 14}}>
             <span style={{padding: '14px 24px', borderRadius: 99, background: theme.ink, color: '#fff', fontSize: 17, fontWeight: 600}}>
-              See my works
+              See our work
             </span>
             <span style={{padding: '14px 24px', borderRadius: 99, border: `1px solid ${theme.line}`, fontSize: 17, fontWeight: 600}}>
               Let&apos;s talk
