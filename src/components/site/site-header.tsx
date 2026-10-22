@@ -12,7 +12,7 @@ type SiteHeaderProps = {
 
 export function SiteHeader({overlay = false}: SiteHeaderProps) {
   return (
-    <header className={cn('inset-x-0 top-0 z-20', overlay ? 'absolute' : 'relative')}>
+    <header className={cn('inset-x-0 top-0 z-30', overlay ? 'absolute' : 'relative')}>
       <Container>
         <nav aria-label="Main" className="flex items-center justify-between gap-4 py-[22px] max-md:py-4">
           <Logo />
