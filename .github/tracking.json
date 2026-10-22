@@ -16,14 +16,14 @@
       "title": "Scaffold and design foundations",
       "branch": "feature/phase-1-scaffold-foundations",
       "pr": 17,
-      "status": "In review"
+      "status": "Done"
     },
     "2": {
       "issue": 3,
       "title": "Remotion hero film",
-      "branch": null,
+      "branch": "feature/phase-2-remotion-hero-film",
       "pr": null,
-      "status": "Not started"
+      "status": "In progress"
     },
     "3": {
       "issue": 4,
