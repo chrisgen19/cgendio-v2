@@ -113,7 +113,7 @@ Verify: pnpm typecheck, lint and build pass. Run the dev server and describe wha
 <!-- phase:2 -->
 ## Phase 2 — Remotion hero film
 
-**Goal:** the hero film fills the screen above the fold: the ~30s landscape cut on desktop and the ~26s phone-native cut on phones. It plays once, ends on the brand card with See my works and Replay, and the page still loads fast.
+**Goal:** the hero film fills the screen above the fold: the ~30s landscape cut on desktop and the ~26s phone-native cut on phones. It plays once, ends on the brand card with See our work and Replay, and the page still loads fast.
 
 **Prompt:**
 
@@ -123,14 +123,14 @@ Phase 2 of docs/BUILD_PLAN.md — integrate the Remotion hero. Follow CLAUDE.md.
 Source: docs/design/remotion-src (read its README fully first). It was type-checked against Remotion 4.0.537 under strict TS and render-tested at 1440x820, 390x844 and 360x640.
 
 1. Install remotion, @remotion/player, @remotion/transitions, @remotion/google-fonts at exactly 4.0.537 (the version the source was tested against; no ^). Add @remotion/cli as a dev dependency at the same version. Get everything working on 4.0.537 first; upgrading to a newer 4.x is a separate commit, only if I agree.
-2. Copy src/components/hero-film/ into the app unchanged first, plus src/remotion/ (Studio entry). Get it compiling before changing anything. Add scripts: "remotion:studio": "remotion studio src/remotion/index.ts", "remotion:poster" that renders a still of the last frame of HeroFilm to public/hero-poster.png, and "remotion:render" that renders HeroFilm to docs/design/hero-film.mp4 and HeroFilmMobile to docs/design/hero-film-mobile.mp4. Run remotion:render once so I have the motion references to compare against.
-3. Wire it into src/app/page.tsx: <HeroPlayer worksHref="#work" header={<SiteHeader overlay />} />. Replace the HUD's hard-coded hex classes with the Tailwind tokens from Phase 1.
+2. Copy src/components/hero-film/ into the app unchanged first, plus src/remotion/ (Studio entry). Get it compiling before changing anything. Add scripts: "remotion:studio": "remotion studio src/remotion/index.ts", "remotion:poster" that renders a still of the last frame of HeroFilm to public/hero-poster.png, and "remotion:render" that renders HeroFilm to docs/design/hero-film.mp4 and HeroFilmMobile to docs/design/hero-film-mobile.mp4. Run remotion:render once, after the copy change in step 3, so I have the motion references to compare against.
+3. Wire it into src/app/page.tsx: <HeroPlayer worksHref="#work" header={<SiteHeader overlay />} />. Replace the HUD's hard-coded hex classes with the Tailwind tokens from Phase 1. Change the CTA text "See my works" to "See our work" in both cuts (Brand, Live and MobileLive scenes, plus the worksHref doc comment), per the copy rules in CLAUDE.md.
 4. Performance — the Player is client-only and heavy:
    - Server-render a static first frame underneath (the intro headline "Great websites don't happen by accident." as real HTML in the same type styles) so the hero has content and an LCP element before JS loads; fade it out once the Player reports its first frame.
    - Load HeroPlayer with next/dynamic (ssr: false) behind that static frame.
    - Confirm the Remotion code is not in the JS for other routes.
 5. Two cuts: HeroPlayer shows HeroFilm (desktop) or HeroFilmMobile (phone-native scenes, story-style segment HUD) based on isPortrait() in timeline.ts — under 860px wide or any tall window. Test both, plus rotating a tablet (it swaps cuts and restarts).
-6. Behaviour to keep and verify: plays once (loop false, moveToBeginningWhenEnded false); chapter chips jump; Skip intro; pause/play becomes Replay at the end; pauses when scrolled out of view; prefers-reduced-motion opens on the final brand card paused; See my works scrolls to #work; Replay restarts.
+6. Behaviour to keep and verify: plays once (loop false, moveToBeginningWhenEnded false); chapter chips jump; Skip intro; pause/play becomes Replay at the end; pauses when scrolled out of view; prefers-reduced-motion opens on the final brand card paused; See our work scrolls to #work; Replay restarts.
 7. Fonts: the film loads its fonts through @remotion/google-fonts (needed for MP4 exports). Check that this doesn't cause a visible font swap against the next/font versions; if it does, propose the cleanest fix and ask me before changing theme.ts.
 
 Verify: typecheck, lint, build. Report the First Load JS for / before and after, and test the hero at 1440x820, 1280x720, 390x844 and 360x640 in the dev server.
@@ -360,7 +360,7 @@ Phase 8 of docs/BUILD_PLAN.md — tests and CI. Follow CLAUDE.md.
 
 1. Unit tests with Vitest for: Zod schemas, slug generation, readMinutes calculation, the content data-access functions (Prisma mocked or a test database), the timeline helpers in src/components/hero-film/timeline.ts (makeTimeline chapter start frames and total duration for DESKTOP_TIMELINE and MOBILE_TIMELINE, and isPortrait()).
 2. Playwright end-to-end, desktop 1440x900 and mobile 390x844 projects, against a production build with a seeded test database:
-   - Home: hero renders, HUD Skip jumps to the brand card, See my works scrolls to #work, the film does not loop (wait for the end, assert the brand card stays); the mobile project shows the mobile cut and its segment HUD
+   - Home: hero renders, HUD Skip jumps to the brand card, See our work scrolls to #work, the film does not loop (wait for the end, assert the brand card stays); the mobile project shows the mobile cut and its segment HUD
    - Reduced motion (emulated): hero opens on the brand card, paused
    - Work filter: Client / Personal change the cards and the URL; works with JavaScript disabled
    - Blog: list → post → next post; RSS returns valid XML
@@ -428,7 +428,7 @@ Prompt C updates this table when a phase finishes. **Status** is one of `Not sta
 
 | Phase | Outcome | Issue | Status | PR |
 | --- | --- | --- | --- | --- |
-| 0 — Kickoff | CLAUDE.md agreed | [#1](https://github.com/chrisgen19/cgendio-v2/issues/1) | Not started | |
+| 0 — Kickoff | CLAUDE.md agreed | [#1](https://github.com/chrisgen19/cgendio-v2/issues/1) | In review | [#15](https://github.com/chrisgen19/cgendio-v2/pull/15) |
 | 1 — Foundations | Tokens, fonts, header, footer, anchors | [#2](https://github.com/chrisgen19/cgendio-v2/issues/2) | Not started | |
 | 2 — Remotion hero | Both cuts play once, HUD, reduced motion, fast LCP | [#3](https://github.com/chrisgen19/cgendio-v2/issues/3) | Not started | |
 | 3 — Home sections | All sections from the canvas, typed mock data | [#4](https://github.com/chrisgen19/cgendio-v2/issues/4) | Not started | |
