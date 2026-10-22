@@ -7,6 +7,7 @@ import type {ActionResult} from '@/server/admin/action-helpers';
 import {SubmitButton, SwitchField, TextAreaField, TextField} from './form-fields';
 import {MarkdownField} from './markdown-field';
 import {TitleSlugFields} from './title-slug-fields';
+import {UploadField} from './upload-field';
 import {useActionToast} from './use-action-toast';
 
 export type PostFormValues = {
@@ -52,7 +53,7 @@ export function PostForm({post}: {post: PostFormValues | null}) {
               defaultValue={post?.publishedAt?.slice(0, 10) ?? ''}
               errors={errors}
             />
-            <TextField name="coverImageUrl" label="Cover image URL" type="url" defaultValue={post?.coverImageUrl ?? ''} errors={errors} />
+            <UploadField name="coverImageUrl" label="Cover image" kind="image" defaultValue={post?.coverImageUrl} />
           </div>
           <SwitchField
             name="status"

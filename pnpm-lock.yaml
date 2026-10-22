@@ -23,6 +23,9 @@ importers:
       '@remotion/transitions':
         specifier: 4.0.537
         version: 4.0.537(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      aws4fetch:
+        specifier: 1.0.20
+        version: 1.0.20
       better-auth:
         specifier: 1.7.12
         version: 1.7.12(@prisma/client@7.10.1(prisma@7.10.1(@types/node@24.19.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3))(mysql2@3.24.4(@types/node@24.19.2))(next@16.4.2(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@24.19.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.23.1)(prisma@7.10.1(@types/node@24.19.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -2399,6 +2402,9 @@ packages:
   aws-ssl-profiles@1.1.2:
     resolution: {integrity: sha512-NZKeq9AfyQvEeNlN0zSYAaWrmBffJh3IELMZfRpJVWgrpEbtEpnjvzqBPf+mxoI287JohRDoa+/nsfqqiZmF6g==}
     engines: {node: '>= 6.0.0'}
+
+  aws4fetch@1.0.20:
+    resolution: {integrity: sha512-/djoAN709iY65ETD6LKCtyyEI04XIBP5xVvfmNxsEP0uJB5tyaGBztSryRr4HqMStr9R06PisQE7m9zDTXKu6g==}
 
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
@@ -7115,6 +7121,8 @@ snapshots:
   atomically@1.7.0: {}
 
   aws-ssl-profiles@1.1.2: {}
+
+  aws4fetch@1.0.20: {}
 
   bail@2.0.2: {}
 

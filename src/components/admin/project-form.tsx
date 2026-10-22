@@ -7,6 +7,7 @@ import type {ActionResult} from '@/server/admin/action-helpers';
 import {SelectField, SubmitButton, SwitchField, TextAreaField, TextField} from './form-fields';
 import {MarkdownField} from './markdown-field';
 import {TitleSlugFields} from './title-slug-fields';
+import {UploadField} from './upload-field';
 import {useActionToast} from './use-action-toast';
 
 export type ProjectFormValues = {
@@ -83,7 +84,7 @@ export function ProjectForm({project}: {project: ProjectFormValues | null}) {
       <Card>
         <CardContent className="flex flex-col gap-4">
           <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-            <TextField name="coverImageUrl" label="Cover image URL" type="url" defaultValue={project?.coverImageUrl ?? ''} errors={errors} />
+            <UploadField name="coverImageUrl" label="Cover image" kind="image" defaultValue={project?.coverImageUrl} />
             <TextField name="liveUrl" label="Live site" type="url" defaultValue={project?.liveUrl ?? ''} errors={errors} />
             <TextField name="repoUrl" label="Repository" type="url" defaultValue={project?.repoUrl ?? ''} errors={errors} />
           </div>
