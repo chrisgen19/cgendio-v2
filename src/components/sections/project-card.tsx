@@ -34,7 +34,7 @@ export function ProjectCard({project}: ProjectCardProps) {
         )}
       >
         <div className="relative z-1 flex items-start justify-between">
-          <span className="font-mono text-xs tracking-[0.08em]">{project.kindLabel}</span>
+          <span className="font-mono text-[12px] tracking-[0.08em]">{project.kindLabel}</span>
           <span className="inline-grid size-11 place-items-center rounded-full border-[1.5px] border-current">
             <svg
               viewBox="0 0 24 24"

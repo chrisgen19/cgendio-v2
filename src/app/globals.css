@@ -65,6 +65,8 @@
     background-color: var(--color-ground);
     color: var(--color-ink);
     font-family: var(--font-body);
+    /* The canvas never sets a line-height, so its text uses the browser's normal; Tailwind's preflight sets 1.5 */
+    line-height: normal;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
