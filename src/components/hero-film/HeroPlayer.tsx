@@ -158,22 +158,28 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
   }, [reducedMotion, lastFrame]);
 
   /* -- controls --------------------------------------------------------- */
-  const replay = useCallback((e?: React.SyntheticEvent) => {
+  /**
+   * Seek, then make sure the film plays. If it was already playing, seekTo() resumes it by itself; calling play()
+   * as well leaves the Player's "resume after seek" flag set, and that flag restarts the film from 0 when it ends.
+   */
+  const seekAndPlay = useCallback((startFrame: number, e?: React.SyntheticEvent) => {
     const player = playerRef.current;
     if (!player) return;
     userPaused.current = false;
-    setEnded(false);
-    player.seekTo(0);
-    player.play(e);
+    const wasPlaying = player.isPlaying();
+    player.seekTo(startFrame);
+    if (!wasPlaying) player.play(e);
   }, []);
 
-  const jumpTo = useCallback((startFrame: number, e?: React.SyntheticEvent) => {
-    const player = playerRef.current;
-    if (!player) return;
-    userPaused.current = false;
-    player.seekTo(startFrame);
-    player.play(e);
-  }, []);
+  const replay = useCallback(
+    (e?: React.SyntheticEvent) => {
+      setEnded(false);
+      seekAndPlay(0, e);
+    },
+    [seekAndPlay],
+  );
+
+  const jumpTo = seekAndPlay;
 
   const toggle = useCallback(
     (e: React.SyntheticEvent) => {
