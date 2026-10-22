@@ -176,3 +176,70 @@
     color: inherit;
   }
 }
+
+/* Markdown preview in the admin editor. The public post typography arrives with the post pages in Phase 6. */
+.admin-theme .prose-admin {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+.admin-theme .prose-admin > * + * {
+  margin-top: 0.75em;
+}
+.admin-theme .prose-admin :is(h1, h2, h3, h4) {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 1.25em;
+}
+.admin-theme .prose-admin h1 {
+  font-size: 1.75em;
+}
+.admin-theme .prose-admin h2 {
+  font-size: 1.4em;
+}
+.admin-theme .prose-admin h3 {
+  font-size: 1.15em;
+}
+.admin-theme .prose-admin :is(ul, ol) {
+  padding-left: 1.25em;
+}
+.admin-theme .prose-admin ul {
+  list-style: disc;
+}
+.admin-theme .prose-admin ol {
+  list-style: decimal;
+}
+.admin-theme .prose-admin a {
+  color: var(--ring);
+  text-decoration: underline;
+}
+.admin-theme .prose-admin code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.3em;
+}
+.admin-theme .prose-admin pre {
+  background: var(--color-ink);
+  color: var(--color-code-text);
+  border-radius: 8px;
+  padding: 0.75em 1em;
+  overflow-x: auto;
+}
+.admin-theme .prose-admin pre code {
+  background: none;
+  padding: 0;
+}
+.admin-theme .prose-admin blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1em;
+  color: var(--muted-foreground);
+}
+.admin-theme .prose-admin table {
+  border-collapse: collapse;
+}
+.admin-theme .prose-admin :is(th, td) {
+  border: 1px solid var(--border);
+  padding: 0.25em 0.5em;
+}
