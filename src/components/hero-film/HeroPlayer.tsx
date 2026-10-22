@@ -139,6 +139,9 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
   }, [variant, reducedMotion, lastFrame, notifyFirstFrame]);
 
   /* -- pause while the hero is off screen ------------------------------ */
+  // The Player only mounts once the box is measured, so the first callback can arrive before it exists (a deep link
+  // to #work, or a restored scroll position). Re-observing on each cut gives the new Player its own first check.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: variant is the Player's key, so re-run when a new Player mounts
   useEffect(() => {
     const el = boxRef.current;
     if (!el) return;
@@ -155,7 +158,7 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [reducedMotion, lastFrame]);
+  }, [variant, reducedMotion, lastFrame]);
 
   /* -- controls --------------------------------------------------------- */
   /**

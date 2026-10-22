@@ -1,6 +1,7 @@
 import type {ReactNode} from 'react';
 import {Hero} from '@/components/sections/hero';
 import {SiteFooter} from '@/components/site/site-footer';
+import {SiteHeader} from '@/components/site/site-header';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {Mark} from '@/components/ui-site/mark';
 import {SectionHeading} from '@/components/ui-site/section-heading';
@@ -30,6 +31,7 @@ export default function Home() {
   return (
     <>
       <h1 className="sr-only">Cgdiomampo.dev — web design and development studio by Christian</h1>
+      <SiteHeader overlay />
       <main>
         <Hero />
         <PlaceholderSection id="about" eyebrow="About" />
