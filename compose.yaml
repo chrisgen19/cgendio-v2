@@ -1,0 +1,22 @@
+# Local development database only. Production runs Postgres in Coolify on the Hostinger VPS.
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: cgendio-v2-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cgendio
+      POSTGRES_PASSWORD: cgendio
+      POSTGRES_DB: cgendio
+    ports:
+      - "127.0.0.1:5437:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cgendio -d cgendio"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db-data:
