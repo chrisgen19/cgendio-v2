@@ -80,7 +80,7 @@ Set up GitHub tracking for docs/BUILD_PLAN.md. Follow docs/prompts/GITHUB_TRACKI
    - needs-decision (#C2410C) "Waiting on a choice from Christian"
    - blocked (#B91C1C) "Can't proceed"
 
-3. Milestone "v1 launch" (description: "cgdiomampo.dev live on Vercel") via
+3. Milestone "v1 launch" (description: "cgdiomampo.dev live on Coolify") via
    `gh api repos/{owner}/{repo}/milestones` — reuse it if one with that title exists (check `gh api repos/{owner}/{repo}/milestones?state=all`).
 
 4. Phase issues, in order 0..9. Before creating each, look for an existing one: tracking.json first, then
@@ -97,7 +97,7 @@ Set up GitHub tracking for docs/BUILD_PLAN.md. Follow docs/prompts/GITHUB_TRACKI
    <goal>
 
    ## Before you start
-   <decisions as a checklist, e.g. "- [ ] Decide: database host (Vercel Marketplace Neon/Prisma Postgres or Coolify VPS)" — omit this section if none>
+   <decisions as a checklist, e.g. "- [ ] Decide: database host (Postgres in Coolify on the Hostinger VPS, or Neon)" — omit this section if none>
 
    ## Claude Code prompt
    ```text

@@ -2,7 +2,7 @@
 
 Owner: Christian · Last updated: 2026-10-22
 
-Ten phases take the approved home page design and the Remotion hero film to a live, editable site on Vercel. Each phase is one Claude Code session, one branch, one PR and one GitHub issue.
+Ten phases take the approved home page design and the Remotion hero film to a live, editable site on Coolify, self-hosted on a Hostinger VPS. Each phase is one Claude Code session, one branch, one PR and one GitHub issue.
 
 > **For Claude Code:** this file is the source of truth. Every phase starts with a `<!-- phase:N -->` marker and has the same sections: **Goal**, optional **Before you start** decisions, **Prompt**, and **Done when** as a checklist. `docs/prompts/GITHUB_TRACKING.md` reads those sections to create and update the GitHub issues. Keep the markers and section names unchanged.
 
@@ -196,8 +196,8 @@ Verify: typecheck, lint, build; compare each section to the canvas at 1440px and
 
 **Before you start:** choose the database host.
 
-- **Neon or Prisma Postgres from the Vercel Marketplace:** no networking work, connection pooling built in, free tier.
-- **Your Coolify VPS Postgres:** you own it, but it must be reachable from Vercel over SSL, with a pooler such as PgBouncer.
+- **Postgres in Coolify on the same Hostinger VPS (recommended):** the app reaches it over Coolify's internal Docker network, so there's no public port and no pooler needed for one long-running server. You own the backups (Phase 9 sets them up).
+- **Neon (managed):** backups and per-PR database branches built in, but every query leaves the VPS, which adds latency.
 
 The prompt asks Claude Code to confirm the choice with you.
 
@@ -206,7 +206,7 @@ The prompt asks Claude Code to confirm the choice with you.
 ```text
 Phase 4 of docs/BUILD_PLAN.md — move content into PostgreSQL with Prisma. Follow CLAUDE.md.
 
-Before coding, ask me which Postgres host we're using (Vercel Marketplace Neon/Prisma Postgres, or my Coolify VPS) and set up .env / .env.example accordingly. Use the latest stable Prisma and read its current docs for client generation, config file and driver adapters — don't rely on older Prisma patterns.
+Before coding, ask me which Postgres host we're using in production (Postgres in Coolify on my Hostinger VPS, or Neon) and set up .env / .env.example accordingly. Local development uses Postgres in Docker (compose.yaml) either way. Use the latest stable Prisma and read its current docs for client generation, config file and driver adapters — don't rely on older Prisma patterns.
 
 1. Schema (prisma/schema.prisma), mirroring src/content/schema.ts:
    - Project: id, slug (unique), title, summary, kindLabel, group (enum CLIENT | PERSONAL), glyph, theme (enum INK | LIME | TINT | GRAY), span (int), tags (string[]), featured, order, status (DRAFT | PUBLISHED), coverImageUrl?, caseStudy (markdown text, optional), liveUrl?, repoUrl?, timestamps
@@ -215,7 +215,7 @@ Before coding, ask me which Postgres host we're using (Vercel Marketplace Neon/P
    - SiteSettings (single row): contactEmail, openToProjects (bool), cvUrl?, socials (json)
    Leave the Better Auth tables for Phase 5.
 2. Migrations + prisma/seed.ts that imports the Phase 3 files from src/content and upserts them (idempotent; re-running changes nothing).
-3. Swap the bodies of src/server/content.ts to Prisma queries (published only, ordered) with Zod parsing at the boundary. Components must not change. Use a single Prisma client module that is safe in dev hot-reload and on serverless.
+3. Swap the bodies of src/server/content.ts to Prisma queries (published only, ordered) with Zod parsing at the boundary. Components must not change. Use a single Prisma client module that is safe in dev hot-reload and in a long-running Node server (the production container).
 4. Caching: use this Next.js version's recommended data-cache API with one cache tag per collection (projects, posts, milestones, timeline, stack, settings) so Phase 5 can revalidate precisely. The home page should be static/ISR, not dynamic per request.
 5. Once the DB is the source of truth, move src/content/*.ts to prisma/seed-data/ so nothing in src imports them.
 
@@ -239,8 +239,8 @@ Verify: migrate, seed twice (second run is a no-op), typecheck, lint, build. Con
 
 **Before you start:** choose image storage.
 
-- **Cloudflare R2:** S3-compatible, with cheap egress.
-- **Vercel Blob:** the simplest option on Vercel.
+- **Cloudflare R2 (recommended):** S3-compatible, free egress, and off the VPS, so images survive a VPS failure and are served from Cloudflare's network. The same bucket can hold the Phase 9 database backups.
+- **MinIO in Coolify:** self-hosted S3 on the same VPS, but it uses the VPS's disk and bandwidth and needs its own backups.
 
 **Prompt:**
 
@@ -256,7 +256,7 @@ Phase 5 of docs/BUILD_PLAN.md — admin with Better Auth. Follow CLAUDE.md.
    - CRUD tables + forms for Project, Post, Milestone, TimelineEntry, StackItem; drag-to-reorder where there's an order field; Draft/Published toggle
    - Markdown editor with live preview for Post.body and Project.caseStudy
    - SiteSettings form (contact email, open-to-projects toggle shown in the header status dot, CV upload)
-   - Image upload: ask me R2 or Vercel Blob, then upload directly from the browser with a server-issued signed URL; store the public URL
+   - Image upload: ask me R2 or MinIO in Coolify (both S3-compatible, so use one S3 client), then upload directly from the browser with a server-issued signed URL; store the public URL
 3. Mutations as server actions: Zod-validate input, check the session, write with Prisma, then revalidate only the affected cache tags and paths from Phase 4. Slugs auto-generate from titles and stay editable; reject duplicates with a friendly error.
 4. Draft preview: a signed preview route so I can see a draft post or case study before publishing.
 5. Admin pages are noindex and excluded from the sitemap.
@@ -266,7 +266,7 @@ Verify: typecheck, lint, build. Walk through: sign in, edit a project title, pub
 
 **Done when:**
 
-- [ ] Image storage chosen (R2 or Vercel Blob) and wired up
+- [ ] Image storage chosen (R2 or MinIO in Coolify) and wired up
 - [ ] Any text on the home page can be changed from `/admin` and appears live within seconds, without a redeploy
 - [ ] Draft preview works for posts and case studies
 - [ ] A GitHub account that isn't on the allowlist is refused; every server action checks the session
@@ -384,34 +384,40 @@ Verify: everything green locally and in CI. List anything you couldn't test and 
 ---
 
 <!-- phase:9 -->
-## Phase 9 — Deploy to Vercel and go live
+## Phase 9 — Deploy to Coolify and go live
 
-**Goal:** cgdiomampo.dev is live on Vercel, with a preview deployment for every PR, migrations that run safely and monitoring turned on.
+**Goal:** cgdiomampo.dev is live on Coolify on the Hostinger VPS, with a preview deployment for every PR, migrations that run safely, off-VPS backups and monitoring turned on.
 
-**Before you start:** some steps are yours, not Claude Code's. You connect the GitHub repo in the Vercel dashboard, add the domain at your registrar and paste in the secrets. The prompt has Claude Code prepare everything and give you a checklist for those steps.
+**Before you start:** some steps are yours, not Claude Code's. You connect the GitHub repo to Coolify (GitHub App), point the domain's DNS at the VPS and paste in the secrets. The prompt has Claude Code prepare everything and give you a checklist for those steps. Have the VPS plan's CPU and RAM ready: they decide where the Docker image gets built.
 
 **Prompt:**
 
 ```text
-Phase 9 of docs/BUILD_PLAN.md — production deploy on Vercel. Follow CLAUDE.md.
+Phase 9 of docs/BUILD_PLAN.md: production deploy on Coolify, self-hosted on my Hostinger VPS. Follow CLAUDE.md. For anything Coolify-specific (build packs, preview deployments, pre/post-deployment commands, health checks, backups), read the current Coolify docs instead of relying on memory.
 
-1. Audit env vars: list every variable the app reads, mark which are needed in Production / Preview / Development, and make sure .env.example documents each one (DATABASE_URL and any direct/unpooled URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL, GITHUB_CLIENT_ID/SECRET, ADMIN_EMAILS, RESEND_API_KEY, storage keys, NEXT_PUBLIC_SITE_URL). Validate them at startup with Zod so a missing secret fails the build, not a page.
-2. Migrations: production runs `prisma migrate deploy` (never migrate dev) as part of the Vercel build or a separate CI step — recommend one and explain why. Preview deployments use a separate branch/database so PRs never touch production data.
-3. Better Auth + GitHub OAuth callback URLs for production and previews.
-4. Headers in next.config: a Content Security Policy that still allows the Remotion player, Google Fonts used by @remotion/google-fonts, the image host and Resend; plus HSTS, Referrer-Policy, Permissions-Policy. Test the CSP in a preview before production.
-5. Add Vercel Analytics and Speed Insights; add error monitoring if I want it (ask).
-6. Write docs/DEPLOY.md: my manual checklist (import repo in Vercel, set env vars per environment, add cgdiomampo.dev + www redirect, DNS records to add, OAuth app settings, first seed against production), and a rollback procedure.
-7. After I confirm the first production deploy, run a smoke test against the live URL: home (both hero cuts), hero plays once, a post, a case study, contact submit, admin sign-in.
+1. Container: set output: 'standalone' in next.config and write a multi-stage Dockerfile (Node 24, pnpm, prisma generate at build, non-root user, only the standalone output in the final image) plus .dockerignore. Add a /api/health route for the Coolify health check. Build and run the image locally and confirm the site works from it.
+2. Build location: Coolify can build on the VPS, or GitHub Actions can build the image and push it to GHCR for Coolify to pull. Ask me for the VPS CPU/RAM, then recommend one (a Next.js + Remotion build can run out of memory on a small VPS and slow the live site while it builds).
+3. Env vars: list every variable the app reads, mark which are needed in Production / Preview / Development, and make sure .env.example documents each one (DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL, GITHUB_CLIENT_ID/SECRET, ADMIN_EMAILS, RESEND_API_KEY, storage keys, NEXT_PUBLIC_SITE_URL). Validate them with Zod: NEXT_PUBLIC_* at build time (they're inlined, so they must be Coolify build variables) and server secrets when the server starts (the image build shouldn't need them), so a missing secret fails the deploy, not a page.
+4. Migrations: production runs `prisma migrate deploy` (never migrate dev) before the new container takes traffic: as a Coolify pre-deployment command, in the container's start script, or as a CI step. Recommend one and explain why. Preview deployments use a separate database so PRs never touch production data.
+5. Previews: enable Coolify preview deployments for PRs (GitHub App, plus a wildcard DNS record such as *.preview.cgdiomampo.dev). Previews get their own env vars, point at the preview database and are noindex.
+6. Better Auth + GitHub OAuth callback URLs for production and previews. A GitHub OAuth app has one callback URL, so propose how admin sign-in works on previews (for example a second OAuth app, or admin disabled on previews).
+7. Headers in next.config: a Content Security Policy that still allows the Remotion player, Google Fonts used by @remotion/google-fonts, the image host, Resend and the analytics script; plus HSTS, Referrer-Policy, Permissions-Policy. Test the CSP on a preview before production.
+8. Caching: self-hosted Next.js keeps its data cache and ISR output on the container's disk. Confirm the Phase 5 revalidation works in the production container, and note in DEPLOY.md that a second replica would need a shared cache handler (we run one).
+9. Backups and monitoring: scheduled Coolify backups of the production Postgres to off-VPS S3 storage (the R2 bucket if we chose R2), with one restore tested into a scratch database. Analytics: ask me (Umami or Plausible self-hosted on Coolify, or none). Error monitoring: ask me (Sentry or none). Coolify notifications for failed deploys and failing health checks.
+10. Write docs/DEPLOY.md: my manual checklist (Coolify project + GitHub App, env vars per environment, cgdiomampo.dev + www redirect, DNS records at the registrar pointing at the VPS IP including the preview wildcard, Hostinger VPS firewall with only 22/80/443 open and Postgres not public, OAuth app settings, first seed against production), and a rollback procedure (redeploy the previous image in Coolify, and what to do when a migration has to be undone).
+11. After I confirm the first production deploy, run a smoke test against the live URL: home (both hero cuts), hero plays once, a post, a case study, contact submit, admin sign-in, /api/health.
 
-Verify: a preview deployment from a PR passes CI and the smoke test before we promote to production.
+Verify: a preview deployment from a PR passes CI and the smoke test before we deploy to production.
 ```
 
 **Done when:**
 
+- [ ] The Docker image builds and serves the site locally
 - [ ] `docs/DEPLOY.md` exists with your manual checklist and a rollback procedure
-- [ ] `https://cgdiomampo.dev` serves the site over HTTPS, and `www` redirects to it
+- [ ] `https://cgdiomampo.dev` serves the site over HTTPS from Coolify, and `www` redirects to it
 - [ ] Preview deployments build per PR against their own data
-- [ ] Every PR runs `prisma migrate deploy` safely, and production data is never touched by previews
+- [ ] Every deploy runs `prisma migrate deploy` safely, and production data is never touched by previews
+- [ ] Production Postgres backs up off the VPS on a schedule, and a restore has been tested
 - [ ] The smoke test passes on production
 
 ---
