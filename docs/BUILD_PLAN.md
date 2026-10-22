@@ -432,8 +432,8 @@ Prompt C updates this table when a phase finishes. **Status** is one of `Not sta
 | 1 — Foundations | Tokens, fonts, header, footer, anchors | [#2](https://github.com/chrisgen19/cgendio-v2/issues/2) | Done | [#17](https://github.com/chrisgen19/cgendio-v2/pull/17) |
 | 2 — Remotion hero | Both cuts play once, HUD, reduced motion, fast LCP | [#3](https://github.com/chrisgen19/cgendio-v2/issues/3) | Done | [#19](https://github.com/chrisgen19/cgendio-v2/pull/19) |
 | 3 — Home sections | All sections from the canvas, typed mock data | [#4](https://github.com/chrisgen19/cgendio-v2/issues/4) | Done | [#20](https://github.com/chrisgen19/cgendio-v2/pull/20) |
-| 4 — Content layer | Prisma + Postgres, seeded, cached, static home | [#5](https://github.com/chrisgen19/cgendio-v2/issues/5) | In review | [#21](https://github.com/chrisgen19/cgendio-v2/pull/21) |
-| 5 — Admin | Better Auth, CRUD, uploads, instant revalidation | [#6](https://github.com/chrisgen19/cgendio-v2/issues/6) | Not started | |
+| 4 — Content layer | Prisma + Postgres, seeded, cached, static home | [#5](https://github.com/chrisgen19/cgendio-v2/issues/5) | Done | [#21](https://github.com/chrisgen19/cgendio-v2/pull/21) |
+| 5 — Admin | Better Auth, CRUD, uploads, instant revalidation | [#6](https://github.com/chrisgen19/cgendio-v2/issues/6) | In progress | |
 | 6 — Blog & contact | Posts, case studies, contact form, CV, RSS | [#7](https://github.com/chrisgen19/cgendio-v2/issues/7) | Not started | |
 | 7 — Polish | SEO, Lighthouse 90+, axe clean, dark mode | [#8](https://github.com/chrisgen19/cgendio-v2/issues/8) | Not started | |
 | 8 — Tests | Vitest + Playwright in CI, all green | [#9](https://github.com/chrisgen19/cgendio-v2/issues/9) | Not started | |
