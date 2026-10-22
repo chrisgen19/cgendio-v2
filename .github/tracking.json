@@ -9,14 +9,14 @@
       "title": "Kickoff: project rules",
       "branch": "feature/phase-0-project-rules",
       "pr": 15,
-      "status": "In review"
+      "status": "Done"
     },
     "1": {
       "issue": 2,
       "title": "Scaffold and design foundations",
-      "branch": null,
+      "branch": "feature/phase-1-scaffold-foundations",
       "pr": null,
-      "status": "Not started"
+      "status": "In progress"
     },
     "2": {
       "issue": 3,
