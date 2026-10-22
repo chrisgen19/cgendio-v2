@@ -23,14 +23,14 @@
       "title": "Remotion hero film",
       "branch": "feature/phase-2-remotion-hero-film",
       "pr": 19,
-      "status": "In review"
+      "status": "Done"
     },
     "3": {
       "issue": 4,
       "title": "Home page sections with typed mock content",
-      "branch": null,
+      "branch": "feature/phase-3-home-sections",
       "pr": null,
-      "status": "Not started"
+      "status": "In progress"
     },
     "4": {
       "issue": 5,
