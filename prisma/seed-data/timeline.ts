@@ -1,4 +1,4 @@
-import type {TimelineEntry} from './schema';
+import type {TimelineEntry} from '../../src/server/content-schema';
 
 export const timeline: TimelineEntry[] = [
   {

@@ -1,4 +1,4 @@
-import type {StackItem} from './schema';
+import type {StackItem} from '../../src/server/content-schema';
 
 const NAMES = [
   'Next.js',

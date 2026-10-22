@@ -30,14 +30,14 @@
       "title": "Home page sections with typed mock content",
       "branch": "feature/phase-3-home-sections",
       "pr": 20,
-      "status": "In review"
+      "status": "Done"
     },
     "4": {
       "issue": 5,
       "title": "Content layer: Prisma + PostgreSQL",
-      "branch": null,
-      "pr": null,
-      "status": "Not started"
+      "branch": "feature/phase-4-content-layer",
+      "pr": 21,
+      "status": "In review"
     },
     "5": {
       "issue": 6,

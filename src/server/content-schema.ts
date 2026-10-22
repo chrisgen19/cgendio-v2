@@ -1,6 +1,6 @@
 import {z} from 'zod';
 
-/* Shaped like the Phase 4 Prisma rows, so src/server/content.ts can swap mock data for queries without touching components. */
+/* The shapes components receive. src/server/content.ts maps Prisma rows to these and parses them at the boundary. */
 
 export const stackItemSchema = z.object({
   name: z.string().min(1),
@@ -54,6 +54,14 @@ export const postSchema = z.object({
   excerpt: z.string().min(1),
 });
 
+export const siteSettingsSchema = z.object({
+  contactEmail: z.string().min(1),
+  openToProjects: z.boolean(),
+  cvUrl: z.url().nullable(),
+  /** Profile URLs by network, null until known */
+  socials: z.record(z.string(), z.url().nullable()),
+});
+
 export type StackItem = z.infer<typeof stackItemSchema>;
 export type ProjectGroup = z.infer<typeof projectGroupSchema>;
 export type ProjectTheme = z.infer<typeof projectThemeSchema>;
@@ -63,3 +71,4 @@ export type Milestone = z.infer<typeof milestoneSchema>;
 export type TimelineDot = z.infer<typeof timelineDotSchema>;
 export type TimelineEntry = z.infer<typeof timelineEntrySchema>;
 export type Post = z.infer<typeof postSchema>;
+export type SiteSettings = z.infer<typeof siteSettingsSchema>;

@@ -1,0 +1,149 @@
+// Content for cgdiomampo.dev. Mirrors the Phase 3 shapes in src/server/content-schema.ts; src/server/content.ts
+// maps these rows to them, so components never see Prisma types. Tables and columns are snake_case.
+// Better Auth's tables arrive in Phase 5.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  // .ts import paths let Node 24 run the seed (prisma/seed.ts) without a TypeScript loader
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+
+  @@map("content_status")
+}
+
+enum ProjectGroup {
+  CLIENT
+  PERSONAL
+
+  @@map("project_group")
+}
+
+enum ProjectTheme {
+  INK
+  LIME
+  TINT
+  GRAY
+
+  @@map("project_theme")
+}
+
+enum TimelineDot {
+  LIME
+  ACCENT
+  INK
+  PLACEHOLDER
+
+  @@map("timeline_dot")
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  title         String
+  summary       String
+  kindLabel     String        @map("kind_label")
+  group         ProjectGroup
+  glyph         String
+  theme         ProjectTheme
+  /// Columns out of 12 in the Work grid: 4, 5, 6 or 7
+  span          Int
+  tags          String[]
+  featured      Boolean       @default(false)
+  order         Int
+  status        ContentStatus @default(DRAFT)
+  coverImageUrl String?       @map("cover_image_url")
+  /// Markdown
+  caseStudy     String?       @map("case_study")
+  liveUrl       String?       @map("live_url")
+  repoUrl       String?       @map("repo_url")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@index([status, featured, order])
+  @@map("projects")
+}
+
+model Post {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  title         String
+  excerpt       String
+  tag           String
+  /// Markdown
+  body          String
+  /// Computed from the body when it's saved (Phase 5)
+  readMinutes   Int           @map("read_minutes")
+  status        ContentStatus @default(DRAFT)
+  publishedAt   DateTime?     @map("published_at")
+  coverImageUrl String?       @map("cover_image_url")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@index([status, publishedAt])
+  @@map("posts")
+}
+
+model Milestone {
+  id          String   @id @default(cuid())
+  /// Stable handle so the seed can skip rows that already exist
+  key         String   @unique
+  kind        String
+  value       String
+  title       String
+  description String
+  order       Int
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("milestones")
+}
+
+model TimelineEntry {
+  id          String      @id @default(cuid())
+  /// Stable handle so the seed can skip rows that already exist
+  key         String      @unique
+  when        String
+  role        String
+  org         String
+  description String
+  dot         TimelineDot
+  isCurrent   Boolean     @default(false) @map("is_current")
+  order       Int
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("timeline_entries")
+}
+
+model StackItem {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  order     Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("stack_items")
+}
+
+/// A single row (id "site")
+model SiteSettings {
+  id             String   @id @default("site")
+  contactEmail   String   @map("contact_email")
+  openToProjects Boolean  @default(true) @map("open_to_projects")
+  cvUrl          String?  @map("cv_url")
+  /// {github, linkedin, ...}: profile URLs, null until known
+  socials        Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
