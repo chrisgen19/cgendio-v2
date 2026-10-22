@@ -1,0 +1,78 @@
+{
+  "repo": "chrisgen19/cgendio-v2",
+  "milestone": "v1 launch",
+  "epic": 11,
+  "project": null,
+  "phases": {
+    "0": {
+      "issue": 1,
+      "title": "Kickoff: project rules",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
+    },
+    "1": {
+      "issue": 2,
+      "title": "Scaffold and design foundations",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
+    },
+    "2": {
+      "issue": 3,
+      "title": "Remotion hero film",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
+    },
+    "3": {
+      "issue": 4,
+      "title": "Home page sections with typed mock content",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
+    },
+    "4": {
+      "issue": 5,
+      "title": "Content layer: Prisma + PostgreSQL",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
+    },
+    "5": {
+      "issue": 6,
+      "title": "Admin to edit content",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
+    },
+    "6": {
+      "issue": 7,
+      "title": "Blog, case studies and contact",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
+    },
+    "7": {
+      "issue": 8,
+      "title": "SEO, performance, accessibility, dark mode",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
+    },
+    "8": {
+      "issue": 9,
+      "title": "Tests and QA",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
+    },
+    "9": {
+      "issue": 10,
+      "title": "Deploy to Vercel and go live",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
+    }
+  }
+}
