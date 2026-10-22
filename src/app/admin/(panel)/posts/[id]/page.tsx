@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 import {PageHeader} from '@/components/admin/page-header';
 import {PostForm} from '@/components/admin/post-form';
+import {PreviewButton} from '@/components/admin/preview-button';
 import {getPostForEdit} from '@/server/admin/data';
 
 export const metadata: Metadata = {title: 'Edit post'};
@@ -21,7 +22,11 @@ export default async function PostEditPage({params}: PageProps<'/admin/posts/[id
   if (!post) notFound();
   return (
     <>
-      <PageHeader title={post.title} description={`Last saved ${new Date(post.updatedAt ?? '').toLocaleString('en-AU')}`} />
+      <PageHeader
+        title={post.title}
+        description={`Last saved ${new Date(post.updatedAt ?? '').toLocaleString('en-AU')}`}
+        actions={<PreviewButton type="post" id={post.id} />}
+      />
       <PostForm post={post} />
     </>
   );

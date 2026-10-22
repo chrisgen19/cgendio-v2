@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 import {PageHeader} from '@/components/admin/page-header';
+import {PreviewButton} from '@/components/admin/preview-button';
 import {ProjectForm} from '@/components/admin/project-form';
 import {getProjectForEdit} from '@/server/admin/data';
 
@@ -21,7 +22,11 @@ export default async function ProjectEditPage({params}: PageProps<'/admin/projec
   if (!project) notFound();
   return (
     <>
-      <PageHeader title={project.title} description={`Last saved ${new Date(project.updatedAt ?? '').toLocaleString('en-AU')}`} />
+      <PageHeader
+        title={project.title}
+        description={`Last saved ${new Date(project.updatedAt ?? '').toLocaleString('en-AU')}`}
+        actions={<PreviewButton type="project" id={project.id} />}
+      />
       <ProjectForm project={project} />
     </>
   );
