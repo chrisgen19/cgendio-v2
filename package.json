@@ -12,7 +12,10 @@
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "biome check .",
-    "format": "biome check --write ."
+    "format": "biome check --write .",
+    "remotion:studio": "remotion studio src/remotion/index.ts",
+    "remotion:poster": "remotion still src/remotion/index.ts HeroFilm public/hero-poster.png --frame=904",
+    "remotion:render": "remotion render src/remotion/index.ts HeroFilm docs/design/hero-film.mp4 && remotion render src/remotion/index.ts HeroFilmMobile docs/design/hero-film-mobile.mp4"
   },
   "dependencies": {
     "@remotion/google-fonts": "4.0.537",
