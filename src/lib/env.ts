@@ -43,10 +43,22 @@ const mailEnvSchema = z.object({
   MAIL_FROM: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(3).default('Cgdiomampo.dev <onboarding@resend.dev>')),
 });
 
+/** The public origin, for absolute URLs (the RSS feed now, canonical URLs and OG images in Phase 7). No trailing slash. */
+const siteEnvSchema = z.object({
+  NEXT_PUBLIC_SITE_URL: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z
+      .url()
+      .default('http://localhost:3000')
+      .transform((url) => url.replace(/\/+$/, '')),
+  ),
+});
+
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 export type AuthEnv = z.infer<typeof authEnvSchema>;
 export type R2Env = z.infer<typeof r2EnvSchema>;
 export type MailEnv = z.infer<typeof mailEnvSchema>;
+export type SiteEnv = z.infer<typeof siteEnvSchema>;
 
 const lazy = <T>(parse: () => T) => {
   let cached: T | undefined;
@@ -60,3 +72,4 @@ export const serverEnv = lazy((): ServerEnv => serverEnvSchema.parse(process.env
 export const authEnv = lazy((): AuthEnv => authEnvSchema.parse(process.env));
 export const r2Env = lazy((): R2Env => r2EnvSchema.parse(process.env));
 export const mailEnv = lazy((): MailEnv => mailEnvSchema.parse(process.env));
+export const siteEnv = lazy((): SiteEnv => siteEnvSchema.parse(process.env));
