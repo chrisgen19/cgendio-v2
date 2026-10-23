@@ -124,8 +124,14 @@ const COMPONENTS: Components = {
   th: ({node: _node, ...props}) => <th className="border-b border-line px-3 py-2 text-left font-semibold" {...props} />,
   td: ({node: _node, ...props}) => <td className="border-b border-line px-3 py-2 align-top" {...props} />,
   img: ({node: _node, alt, src}) => (
-    // biome-ignore lint/performance/noImgElement: images in Markdown come from R2 or other hosts; next/image (remotePatterns) arrives in Phase 7
-    <img src={typeof src === 'string' ? src : undefined} alt={alt ?? ''} loading="lazy" className="my-8 h-auto max-w-full rounded-card" />
+    // biome-ignore lint/performance/noImgElement: Markdown images have no known size and can come from any host, so next/image can't size or optimise them
+    <img
+      src={typeof src === 'string' ? src : undefined}
+      alt={alt ?? ''}
+      loading="lazy"
+      decoding="async"
+      className="my-8 h-auto max-w-full rounded-card"
+    />
   ),
 };
 

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type {ReactNode} from 'react';
 import {renderMarkdown} from '@/components/prose/markdown';
+import {CoverImage} from '@/components/ui-site/cover-image';
 import {PROJECT_RINGS, PROJECT_THEMES} from '@/components/ui-site/project-theme';
 import {Section} from '@/components/ui-site/section';
 import {Tag} from '@/components/ui-site/tag';
@@ -99,16 +100,7 @@ export async function CaseStudyArticle({project}: {project: ProjectDetail}) {
             </div>
           ) : null}
         </dl>
-        {project.coverImageUrl ? (
-          // biome-ignore lint/performance/noImgElement: covers come from R2; next/image (remotePatterns for the bucket) arrives in Phase 7
-          <img
-            src={project.coverImageUrl}
-            alt=""
-            width={1600}
-            height={900}
-            className="aspect-[16/9] h-auto w-full rounded-panel border border-line object-cover"
-          />
-        ) : null}
+        {project.coverImageUrl ? <CoverImage src={project.coverImageUrl} /> : null}
         {markdown ? markdown.content : <p className="m-0 max-w-[68ch] text-lg leading-[1.7] text-muted">[Case study write-up]</p>}
       </Section>
     </article>
