@@ -1,0 +1,94 @@
+name: CI
+
+# Every PR: typecheck, lint, unit tests, a production build and the Playwright e2e suite against a seeded Postgres.
+# The test environment (database URL, auth secret, mock Resend) comes from e2e/support/test-env.ts: test-only values.
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      update_snapshots:
+        description: Regenerate the Linux visual baselines and upload them as an artifact (commit them by hand)
+        type: boolean
+        default: false
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Typecheck, lint, unit, build and e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: cgendio
+          POSTGRES_DB: cgendio
+          # Throwaway container reachable only from this job: no password, so none is committed
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5437:5432
+        options: >-
+          --health-cmd "pg_isready -U cgendio -d cgendio"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Prepare the e2e database
+        run: pnpm test:e2e:prepare
+
+      - name: Build
+        run: pnpm test:e2e:build
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E tests
+        run: pnpm exec playwright test ${{ inputs.update_snapshots && '--update-snapshots=all' || '' }}
+
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
+      # A missing baseline is written by the run (and fails it), so a failed run also carries any new Linux baselines
+      - name: Upload the Linux visual baselines
+        if: failure() || inputs.update_snapshots
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-snapshots
+          path: e2e/**/__screenshots__/**/*-linux.png
+          if-no-files-found: ignore
+          retention-days: 7

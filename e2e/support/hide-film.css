@@ -1,0 +1,4 @@
+/* Applied while taking the hero screenshot: hides the Remotion film so only the header and HUD over it are compared. */
+section[aria-label^="Brand film"] > div[data-theme="light"] {
+  visibility: hidden;
+}

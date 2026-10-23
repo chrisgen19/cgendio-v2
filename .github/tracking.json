@@ -58,14 +58,14 @@
       "title": "SEO, performance, accessibility, dark mode",
       "branch": "feature/phase-7-seo-perf-a11y",
       "pr": 29,
-      "status": "In review"
+      "status": "Done"
     },
     "8": {
       "issue": 9,
       "title": "Tests and QA",
-      "branch": null,
-      "pr": null,
-      "status": "Not started"
+      "branch": "feature/phase-8-tests-qa",
+      "pr": 31,
+      "status": "In review"
     },
     "9": {
       "issue": 10,
