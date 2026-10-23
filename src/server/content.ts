@@ -1,7 +1,7 @@
 import 'server-only';
 import {cacheLife, cacheTag} from 'next/cache';
 import type {Post as PostRow, Project as ProjectRow} from '@/generated/prisma/client';
-import {slugify} from '@/lib/slugify';
+import {tagSlug} from '@/lib/tag-slug';
 import {
   type ContentLink,
   contentLinkSchema,
@@ -183,14 +183,24 @@ export const getPost = async (slug: string): Promise<PostDetail | null> => {
 
 export const BLOG_PAGE_SIZE = 10;
 
-/** Tags in use by published posts, most used first, with the slug used in /blog?tag=. */
+/**
+ * Tags in use by published posts, most used first, with the slug used in /blog?tag=. Labels that share a slug ("C#" and
+ * "C++") are one filter: it shows the most used label and counts every post that matches, as getBlogIndex does.
+ */
 export const getPostTags = async (): Promise<PostTag[]> => {
   'use cache';
   cacheTag(CACHE_TAGS.posts);
   cacheLife('max');
-  const counts = new Map<string, number>();
-  for (const post of await getPosts()) counts.set(post.tag, (counts.get(post.tag) ?? 0) + 1);
-  const tags = [...counts].map(([label, count]) => ({label, slug: slugify(label), count}));
+  const groups = new Map<string, Map<string, number>>();
+  for (const post of await getPosts()) {
+    const labels = groups.get(tagSlug(post.tag)) ?? new Map<string, number>();
+    labels.set(post.tag, (labels.get(post.tag) ?? 0) + 1);
+    groups.set(tagSlug(post.tag), labels);
+  }
+  const tags = [...groups].map(([slug, labels]) => {
+    const [label] = [...labels].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+    return {label, slug, count: [...labels.values()].reduce((sum, n) => sum + n, 0)};
+  });
   return postTagSchema.array().parse(tags.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)));
 };
 
@@ -198,12 +208,12 @@ export const getPostTags = async (): Promise<PostTag[]> => {
  * One page of the blog index, optionally for one tag. Callers pass a known tag slug and a page within range (the
  * blog page checks both first), which keeps the number of cache entries small.
  */
-export const getBlogIndex = async ({tagSlug, page}: {tagSlug: string | null; page: number}) => {
+export const getBlogIndex = async ({tag, page}: {tag: string | null; page: number}) => {
   'use cache';
   cacheTag(CACHE_TAGS.posts);
   cacheLife('max');
   const all = await getPosts();
-  const matching = tagSlug ? all.filter((post) => slugify(post.tag) === tagSlug) : all;
+  const matching = tag ? all.filter((post) => tagSlug(post.tag) === tag) : all;
   const pageCount = Math.max(1, Math.ceil(matching.length / BLOG_PAGE_SIZE));
   return {posts: matching.slice((page - 1) * BLOG_PAGE_SIZE, page * BLOG_PAGE_SIZE), page, pageCount, total: matching.length};
 };

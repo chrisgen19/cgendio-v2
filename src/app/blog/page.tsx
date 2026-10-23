@@ -68,7 +68,7 @@ async function BlogList({searchParams}: Pick<PageProps<'/blog'>, 'searchParams'>
     );
   }
 
-  const index = await getBlogIndex({tagSlug: tag?.slug ?? null, page});
+  const index = await getBlogIndex({tag: tag?.slug ?? null, page});
   return (
     <div className="flex flex-col gap-8">
       <TagFilter tags={tags} active={tag?.slug ?? null} />

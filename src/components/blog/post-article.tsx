@@ -3,7 +3,7 @@ import {renderMarkdown} from '@/components/prose/markdown';
 import {Section} from '@/components/ui-site/section';
 import {blogHref} from '@/lib/blog-url';
 import {formatMonthYear} from '@/lib/format-date';
-import {slugify} from '@/lib/slugify';
+import {tagSlug} from '@/lib/tag-slug';
 import {getPageCopy, type PostDetail} from '@/server/content';
 import {TableOfContents} from './table-of-contents';
 
@@ -33,7 +33,7 @@ export async function PostArticle({post}: {post: PostDetail}) {
           {copy['blog.allLabel']}
         </Link>
         <p className="m-0 flex flex-wrap items-center gap-x-2 font-mono text-[13px] text-muted">
-          <Link href={blogHref({tag: slugify(post.tag)})} className="inline-flex min-h-11 items-center tracking-[0.06em] text-accent no-underline">
+          <Link href={blogHref({tag: tagSlug(post.tag)})} className="inline-flex min-h-11 items-center tracking-[0.06em] text-accent no-underline">
             {post.tag}
           </Link>
           <span aria-hidden="true">·</span>
