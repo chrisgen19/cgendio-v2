@@ -22,7 +22,9 @@ export function SignInCard({error}: SignInCardProps) {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Cgdiomampo.dev admin</CardTitle>
+        <CardTitle>
+          <h1>Cgdiomampo.dev admin</h1>
+        </CardTitle>
         <CardDescription>Sign in with the GitHub account on the admin allowlist.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
