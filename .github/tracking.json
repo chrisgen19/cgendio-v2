@@ -43,8 +43,8 @@
       "issue": 6,
       "title": "Admin to edit content",
       "branch": "feature/phase-5-admin",
-      "pr": null,
-      "status": "In progress"
+      "pr": 23,
+      "status": "In review"
     },
     "6": {
       "issue": 7,
