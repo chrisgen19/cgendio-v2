@@ -2,6 +2,7 @@
 
 import {updateTag} from 'next/cache';
 import {z} from 'zod';
+import type {Prisma} from '@/generated/prisma/client';
 import type {ActionResult} from '../admin/action-helpers';
 import {type Collection, collectionSchema} from '../admin/form-schemas';
 import {requireAdmin} from '../admin-session';
@@ -39,6 +40,9 @@ export async function deleteItem(collection: Collection, id: string): Promise<Ac
   return {ok: true, message: 'Deleted.'};
 }
 
+/** Thrown inside the reorder transaction to roll it back when one of the ids no longer exists. */
+class StaleListError extends Error {}
+
 const reorderInput = z.object({collection: collectionSchema.exclude(['posts']), ids: z.array(z.string().min(1)).min(1).max(200)});
 
 /** Saves a new display order: `ids` in their new order, first = 1. Posts are ordered by date, so they're excluded. */
@@ -48,12 +52,24 @@ export async function reorderItems(collection: Exclude<Collection, 'posts'>, ids
   if (!input.success) return {ok: false, error: 'Invalid request.'};
 
   const setOrder = {
-    projects: (id: string, order: number) => db.project.update({where: {id}, data: {order}}),
-    milestones: (id: string, order: number) => db.milestone.update({where: {id}, data: {order}}),
-    timeline: (id: string, order: number) => db.timelineEntry.update({where: {id}, data: {order}}),
-    stack: (id: string, order: number) => db.stackItem.update({where: {id}, data: {order}}),
+    projects: (tx: Prisma.TransactionClient, id: string, order: number) => tx.project.updateMany({where: {id}, data: {order}}),
+    milestones: (tx: Prisma.TransactionClient, id: string, order: number) => tx.milestone.updateMany({where: {id}, data: {order}}),
+    timeline: (tx: Prisma.TransactionClient, id: string, order: number) => tx.timelineEntry.updateMany({where: {id}, data: {order}}),
+    stack: (tx: Prisma.TransactionClient, id: string, order: number) => tx.stackItem.updateMany({where: {id}, data: {order}}),
   }[input.data.collection];
-  await db.$transaction(input.data.ids.map((id, i) => setOrder(id, i + 1)));
+  // All or nothing: if an item was deleted elsewhere (say, in another tab), roll the whole order back and say so, rather
+  // than saving half of it or throwing P2025, which inside the list's async transition would show the error page
+  try {
+    await db.$transaction(async (tx) => {
+      for (const [i, id] of input.data.ids.entries()) {
+        const {count} = await setOrder(tx, id, i + 1);
+        if (count === 0) throw new StaleListError();
+      }
+    });
+  } catch (error) {
+    if (error instanceof StaleListError) return {ok: false, error: 'An item in this list no longer exists. Reload to see the current list.'};
+    throw error;
+  }
   updateTag(TAG[input.data.collection]);
   return {ok: true, message: 'Order saved.'};
 }
