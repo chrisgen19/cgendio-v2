@@ -23,24 +23,18 @@ export async function deleteItem(collection: Collection, id: string): Promise<Ac
   const input = deleteInput.safeParse({collection, id});
   if (!input.success) return {ok: false, error: 'Invalid request.'};
 
+  // deleteMany reports a count instead of throwing P2025 when the item was already deleted (say, in another tab), which
+  // inside the list's async transition would otherwise replace the admin page with the error page
   const where = {id: input.data.id};
-  switch (input.data.collection) {
-    case 'projects':
-      await db.project.delete({where});
-      break;
-    case 'posts':
-      await db.post.delete({where});
-      break;
-    case 'milestones':
-      await db.milestone.delete({where});
-      break;
-    case 'timeline':
-      await db.timelineEntry.delete({where});
-      break;
-    case 'stack':
-      await db.stackItem.delete({where});
-      break;
-  }
+  const remove = {
+    projects: () => db.project.deleteMany({where}),
+    posts: () => db.post.deleteMany({where}),
+    milestones: () => db.milestone.deleteMany({where}),
+    timeline: () => db.timelineEntry.deleteMany({where}),
+    stack: () => db.stackItem.deleteMany({where}),
+  }[input.data.collection];
+  const {count} = await remove();
+  if (count === 0) return {ok: false, error: 'That item no longer exists.'};
   updateTag(TAG[input.data.collection]);
   return {ok: true, message: 'Deleted.'};
 }
