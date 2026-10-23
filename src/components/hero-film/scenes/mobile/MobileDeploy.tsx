@@ -80,7 +80,7 @@ export const MobileDeploy: React.FC = () => {
               <span>production</span>
               <span>{bar >= 1 ? 'ready' : 'building'}</span>
             </div>
-            <div style={{height: 7, borderRadius: 7, background: '#23262E', overflow: 'hidden'}}>
+            <div style={{height: 7, borderRadius: 7, background: c.track, overflow: 'hidden'}}>
               <div style={{height: '100%', width: `${bar * 100}%`, background: theme.lime, borderRadius: 7}} />
             </div>
           </div>
@@ -90,10 +90,10 @@ export const MobileDeploy: React.FC = () => {
       {/* globe */}
       <Pop delay={30} style={{position: 'absolute', left: 0, top: 268, width: 132, height: 132}}>
         <svg aria-hidden="true" viewBox="0 0 100 100" width={132} height={132}>
-          <circle cx="50" cy="50" r="46" fill="#fff" stroke="#CBD0DA" strokeWidth={1} />
-          <ellipse cx="50" cy="50" rx="20" ry="46" fill="none" stroke="#DADDE4" strokeWidth={1} />
-          <ellipse cx="50" cy="50" rx="36" ry="46" fill="none" stroke={theme.outline} strokeWidth={1} />
-          <path d="M6 36h88M6 64h88M4 50h92" stroke={theme.outline} strokeWidth={1} />
+          <circle cx="50" cy="50" r="46" style={{fill: theme.surface, stroke: theme.globe}} strokeWidth={1} />
+          <ellipse cx="50" cy="50" rx="20" ry="46" fill="none" style={{stroke: theme.globeSoft}} strokeWidth={1} />
+          <ellipse cx="50" cy="50" rx="36" ry="46" fill="none" style={{stroke: theme.outline}} strokeWidth={1} />
+          <path d="M6 36h88M6 64h88M4 50h92" style={{stroke: theme.outline}} strokeWidth={1} />
         </svg>
         <Node x={40} y={40} delay={44} />
         <Node x={84} y={32} delay={49} />
@@ -108,7 +108,7 @@ export const MobileDeploy: React.FC = () => {
           <div style={{display: 'flex', alignItems: 'center', gap: 6}}>
             <span style={{fontFamily: fonts.mono, fontSize: 11, padding: '7px 9px', borderRadius: 99, background: theme.wireSoft}}>Preview</span>
             <span style={{fontSize: 14}}>→</span>
-            <span style={{fontFamily: fonts.mono, fontSize: 11, padding: '7px 9px', borderRadius: 99, background: theme.ink, color: '#fff'}}>
+            <span style={{fontFamily: fonts.mono, fontSize: 11, padding: '7px 9px', borderRadius: 99, background: theme.ink, color: theme.onInk}}>
               Live
             </span>
           </div>

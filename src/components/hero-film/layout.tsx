@@ -56,7 +56,7 @@ const Sweep: React.FC = () => {
         width: '16%',
         background: theme.lime,
         transform: 'skewX(-18deg)',
-        mixBlendMode: 'multiply',
+        mixBlendMode: theme.sweepBlend as React.CSSProperties['mixBlendMode'],
         zIndex: 20,
       }}
     />
@@ -90,7 +90,7 @@ const BgNumber: React.FC<{text: string; size?: number}> = ({text, size}) => {
   );
 };
 
-/** White stage with a dot grid, a giant outlined number and the lime sweep. */
+/** The dot-grid stage (white, or near-black in dark mode), a giant outlined number and the lime sweep. */
 export const SceneShell: React.FC<{
   number?: string;
   numberSize?: number;
@@ -99,7 +99,7 @@ export const SceneShell: React.FC<{
 }> = ({number, numberSize, sweep = true, children}) => (
   <AbsoluteFill
     style={{
-      backgroundColor: theme.white,
+      backgroundColor: theme.stage,
       backgroundImage: `radial-gradient(circle, ${theme.dot} 1px, transparent 1.3px)`,
       backgroundSize: '26px 26px',
       overflow: 'hidden',
@@ -138,7 +138,7 @@ export const StepLabel: React.FC<{n: string; label: string; size: number}> = ({n
         padding: '0 9px',
         borderRadius: 999,
         background: theme.ink,
-        color: theme.white,
+        color: theme.onInk,
         fontWeight: 500,
       }}
     >

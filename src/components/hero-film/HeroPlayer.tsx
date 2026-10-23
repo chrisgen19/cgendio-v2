@@ -231,7 +231,7 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
         height: '100%',
         minHeight: variant === 'mobile' ? 600 : 640,
         overflow: 'hidden',
-        background: theme.white,
+        background: theme.stage,
         borderBottom: `1px solid ${theme.line}`,
       }}
     >
@@ -240,8 +240,8 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
         ending with what Cgdiomampo.dev offers, a link to the work and a replay button.
       </p>
 
-      {/* The film is always light (it renders theme.ts colours); the HUD below sits outside this and follows the site theme */}
-      <div ref={boxRef} data-theme="light" style={{position: 'absolute', inset: 0}}>
+      {/* theme.ts colours follow the site theme through CSS variables; data-film-box lets the visual tests hide the film */}
+      <div ref={boxRef} data-film-box style={{position: 'absolute', inset: 0}}>
         {size && variant ? (
           <Player
             key={variant}
@@ -360,8 +360,7 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
           })}
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
-          {/* Bare text on the always-light film, so it keeps the light colours */}
-          <span data-theme="light" className="px-2 font-mono text-xs tabular-nums text-muted">
+          <span className="px-2 font-mono text-xs tabular-nums text-muted">
             {formatTimecode(frame)} / {formatTimecode(durationInFrames)}
           </span>
           {!atBrand ? (
@@ -396,7 +395,7 @@ function MobileHud({chapters, current, frame, atBrand, ended, playing, onJump, o
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 px-4 pb-3">
       <div className="flex items-center justify-between gap-3">
-        <span aria-live="polite" data-theme="light" className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted">
+        <span aria-live="polite" className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted">
           {label}
         </span>
         <div className="pointer-events-auto flex items-center gap-2">

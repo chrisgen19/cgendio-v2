@@ -10,7 +10,7 @@ import type {SceneId, Timeline} from './timeline';
 export const FilmSeries: React.FC<{timeline: Timeline; render: (id: SceneId) => React.ReactNode}> = ({timeline, render}) => {
   const timing = linearTiming({durationInFrames: timeline.transitionFrames, easing: EASE_INOUT});
   return (
-    <AbsoluteFill style={{backgroundColor: theme.white}}>
+    <AbsoluteFill style={{backgroundColor: theme.stage}}>
       <TransitionSeries>
         {timeline.scenes.flatMap((scene) => {
           const nodes: React.ReactNode[] = [];

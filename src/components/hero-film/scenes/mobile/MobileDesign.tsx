@@ -25,7 +25,7 @@ const Cursor: React.FC = () => {
   return (
     <div style={{position: 'absolute', left: 0, top: 0, transform: `translate(${x}px, ${y}px)`, opacity, zIndex: 10}}>
       <svg aria-hidden="true" viewBox="0 0 24 24" width={26} height={26}>
-        <path d="M3 2l7.5 19 2.4-7.6L20.5 11z" fill={theme.accent} stroke="#fff" strokeWidth={1.5} strokeLinejoin="round" />
+        <path d="M3 2l7.5 19 2.4-7.6L20.5 11z" style={{fill: theme.accent}} stroke="#fff" strokeWidth={1.5} strokeLinejoin="round" />
       </svg>
       <span
         style={{
@@ -77,7 +77,7 @@ export const MobileDesign: React.FC = () => {
               top: 70,
               width: 190,
               height: 64,
-              background: '#fff',
+              background: theme.surface,
               opacity: colour,
               fontFamily: fonts.display,
               fontWeight: 700,
@@ -99,7 +99,7 @@ export const MobileDesign: React.FC = () => {
           <MonoLabel size={11}>STYLES</MonoLabel>
         </Appear>
         <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 34px)', gap: 10}}>
-          {[theme.accent, theme.lime, theme.ink, '#fff'].map((c, i) => (
+          {[theme.accent, theme.lime, theme.brandInk, theme.white].map((c, i) => (
             <Pop key={c} delay={28 + i * 3}>
               <span style={{display: 'block', width: 34, height: 34, borderRadius: '50%', background: c, border: `1px solid ${theme.line}`}} />
             </Pop>

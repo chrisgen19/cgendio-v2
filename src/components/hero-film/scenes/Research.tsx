@@ -33,7 +33,16 @@ export const Research: React.FC = () => (
     {/* search query being typed */}
     <Appear delay={12} style={{position: 'absolute', left: 40, top: 8, width: 740}}>
       <div style={{...cardStyle, height: 96, borderRadius: 999, display: 'flex', alignItems: 'center', gap: 22, padding: '0 30px'}}>
-        <svg aria-hidden="true" viewBox="0 0 24 24" width={32} height={32} fill="none" stroke={theme.ink} strokeWidth={2.2} strokeLinecap="round">
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          width={32}
+          height={32}
+          fill="none"
+          style={{stroke: theme.ink}}
+          strokeWidth={2.2}
+          strokeLinecap="round"
+        >
           <circle cx="11" cy="11" r="7" />
           <path d="m20 20-3.5-3.5" />
         </svg>
@@ -73,7 +82,7 @@ export const Research: React.FC = () => (
             <GrowY
               key={i}
               delay={54 + i * 3}
-              style={{flex: 1, height: `${h}%`, borderRadius: 8, background: i === bars.length - 1 ? theme.accent : '#DCDFE6'}}
+              style={{flex: 1, height: `${h}%`, borderRadius: 8, background: i === bars.length - 1 ? theme.accent : theme.bar}}
             />
           ))}
         </div>

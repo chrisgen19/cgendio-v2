@@ -105,9 +105,18 @@ export const Live: React.FC = () => (
         <div style={{height: 78, borderBottom: `1px solid ${theme.line}`, display: 'flex', alignItems: 'center', gap: 20, padding: '0 22px'}}>
           <WindowDots />
           <div
-            style={{flex: 1, height: 44, borderRadius: 99, background: '#F1F2F5', display: 'flex', alignItems: 'center', gap: 10, padding: '0 18px'}}
+            style={{
+              flex: 1,
+              height: 44,
+              borderRadius: 99,
+              background: theme.field,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '0 18px',
+            }}
           >
-            <svg aria-hidden="true" viewBox="0 0 24 24" width={18} height={18} fill="none" stroke={theme.ink} strokeWidth={2.4}>
+            <svg aria-hidden="true" viewBox="0 0 24 24" width={18} height={18} fill="none" style={{stroke: theme.ink}} strokeWidth={2.4}>
               <rect x="5" y="11" width="14" height="10" rx="2" />
               <path d="M8 11V8a4 4 0 0 1 8 0v3" />
             </svg>
@@ -132,7 +141,7 @@ export const Live: React.FC = () => (
             </div>
           </Appear>
           <Appear delay={36} style={{display: 'flex', gap: 14}}>
-            <span style={{padding: '14px 24px', borderRadius: 99, background: theme.ink, color: '#fff', fontSize: 17, fontWeight: 600}}>
+            <span style={{padding: '14px 24px', borderRadius: 99, background: theme.ink, color: theme.onInk, fontSize: 17, fontWeight: 600}}>
               See our work
             </span>
             <span style={{padding: '14px 24px', borderRadius: 99, border: `1px solid ${theme.line}`, fontSize: 17, fontWeight: 600}}>
@@ -155,7 +164,7 @@ export const Live: React.FC = () => (
       delay={42}
       title="Deployment ready"
       sub="production · just now"
-      icon={iconBox(theme.ink, theme.lime, <span style={{fontSize: 22}}>✓</span>)}
+      icon={iconBox(theme.badge, theme.badgeInk, <span style={{fontSize: 22}}>✓</span>)}
     />
     <Toast
       x={640}
@@ -182,7 +191,7 @@ export const Live: React.FC = () => (
       sub="all regions healthy"
       icon={iconBox(
         theme.lime,
-        theme.ink,
+        theme.onLime,
         <svg aria-hidden="true" viewBox="0 0 24 24" width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round">
           <path d="M3 12h4l3-8 4 16 3-8h4" />
         </svg>,

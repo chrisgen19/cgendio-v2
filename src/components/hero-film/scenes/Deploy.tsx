@@ -93,7 +93,7 @@ export const Deploy: React.FC = () => {
               <span>production</span>
               <span>{bar >= 1 ? 'ready' : 'building'}</span>
             </div>
-            <div style={{height: 10, borderRadius: 10, background: '#23262E', overflow: 'hidden'}}>
+            <div style={{height: 10, borderRadius: 10, background: c.track, overflow: 'hidden'}}>
               <div style={{height: '100%', width: `${bar * 100}%`, background: theme.lime, borderRadius: 10}} />
             </div>
           </div>
@@ -107,10 +107,10 @@ export const Deploy: React.FC = () => {
       {/* globe */}
       <Pop delay={26} style={{position: 'absolute', left: 664, top: 40, width: 330, height: 330}}>
         <svg aria-hidden="true" viewBox="0 0 100 100" width={330} height={330}>
-          <circle cx="50" cy="50" r="46" fill="#fff" stroke="#CBD0DA" strokeWidth={0.6} />
-          <ellipse cx="50" cy="50" rx="20" ry="46" fill="none" stroke="#DADDE4" strokeWidth={0.6} />
-          <ellipse cx="50" cy="50" rx="36" ry="46" fill="none" stroke={theme.outline} strokeWidth={0.6} />
-          <path d="M6 36h88M6 64h88M4 50h92" stroke={theme.outline} strokeWidth={0.6} />
+          <circle cx="50" cy="50" r="46" style={{fill: theme.surface, stroke: theme.globe}} strokeWidth={0.6} />
+          <ellipse cx="50" cy="50" rx="20" ry="46" fill="none" style={{stroke: theme.globeSoft}} strokeWidth={0.6} />
+          <ellipse cx="50" cy="50" rx="36" ry="46" fill="none" style={{stroke: theme.outline}} strokeWidth={0.6} />
+          <path d="M6 36h88M6 64h88M4 50h92" style={{stroke: theme.outline}} strokeWidth={0.6} />
         </svg>
         <Node x={100} y={100} delay={48} />
         <Node x={205} y={80} delay={54} />
@@ -128,7 +128,7 @@ export const Deploy: React.FC = () => {
           <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10}}>
             <span style={{fontFamily: fonts.mono, fontSize: 15, padding: '10px 14px', borderRadius: 99, background: theme.wireSoft}}>Preview</span>
             <span style={{fontSize: 20}}>→</span>
-            <span style={{fontFamily: fonts.mono, fontSize: 15, padding: '10px 14px', borderRadius: 99, background: theme.ink, color: '#fff'}}>
+            <span style={{fontFamily: fonts.mono, fontSize: 15, padding: '10px 14px', borderRadius: 99, background: theme.ink, color: theme.onInk}}>
               Production
             </span>
           </div>

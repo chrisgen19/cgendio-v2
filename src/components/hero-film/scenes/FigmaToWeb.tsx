@@ -83,7 +83,7 @@ export const FigmaToWeb: React.FC = () => (
     <SlideIn delay={14} distance={-260} style={{position: 'absolute', left: 0, top: 64, width: 380, height: 528}}>
       <div style={{...cardStyle, height: '100%', padding: 24, display: 'flex', flexDirection: 'column', gap: 20}}>
         <MonoLabel size={15}>FRAME · Button/Primary</MonoLabel>
-        <div style={{flex: 1, borderRadius: 14, background: '#F3F4F7', display: 'grid', placeItems: 'center'}}>
+        <div style={{flex: 1, borderRadius: 14, background: theme.preview, display: 'grid', placeItems: 'center'}}>
           <span
             style={{
               position: 'relative',
