@@ -267,7 +267,7 @@ Verify: typecheck, lint, build. Walk through: sign in, edit a project title, pub
 **Done when:**
 
 - [ ] Image storage chosen (R2 or MinIO in Coolify) and wired up
-- [ ] Any text on the home page can be changed from `/admin` and appears live within seconds, without a redeploy
+- [ ] Any section copy on the home page can be changed from `/admin` and appears live within seconds, without a redeploy
 - [ ] Draft preview works for posts and case studies
 - [ ] A GitHub account that isn't on the allowlist is refused; every server action checks the session
 - [ ] `/admin` is noindex and not in the sitemap
