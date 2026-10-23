@@ -74,6 +74,13 @@
       "pr": 31,
       "status": "Done"
     },
+    "8.1": {
+      "issue": 35,
+      "title": "Real content before launch",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
+    },
     "9": {
       "issue": 10,
       "title": "Deploy to Coolify and go live",
