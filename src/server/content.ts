@@ -1,15 +1,25 @@
 import 'server-only';
 import {cacheLife, cacheTag} from 'next/cache';
+import type {Post as PostRow, Project as ProjectRow} from '@/generated/prisma/client';
+import {tagSlug} from '@/lib/tag-slug';
 import {
+  type ContentLink,
+  contentLinkSchema,
   type Milestone,
   milestoneSchema,
   PAGE_COPY_KEYS,
   type PageCopy,
   type Post,
+  type PostDetail,
+  type PostTag,
   type Project,
+  type ProjectDetail,
   type ProjectGroup,
   pageCopySchema,
+  postDetailSchema,
   postSchema,
+  postTagSchema,
+  projectDetailSchema,
   projectSchema,
   type SiteSettings,
   type StackItem,
@@ -28,11 +38,15 @@ import {db} from './db';
 
 // Components take their types from here too, so nothing outside src/server depends on Prisma or the seed data
 export type {
+  ContentLink,
   Milestone,
   PageCopy,
   PageCopyKey,
   Post,
+  PostDetail,
+  PostTag,
   Project,
+  ProjectDetail,
   ProjectGroup,
   ProjectSpan,
   ProjectTheme,
@@ -54,6 +68,48 @@ export const CACHE_TAGS = {
 
 const lower = <T extends string>(value: T) => value.toLowerCase() as Lowercase<T>;
 
+/** Card fields of a project row (the Work grid and the case study page share them). */
+const projectFields = (row: ProjectRow) => ({
+  slug: row.slug,
+  title: row.title,
+  summary: row.summary,
+  kindLabel: row.kindLabel,
+  group: lower(row.group),
+  glyph: row.glyph,
+  theme: lower(row.theme),
+  span: row.span,
+  tags: row.tags,
+  featured: row.featured,
+  order: row.order,
+});
+
+/** List fields of a post row. Drafts have no publishedAt, so the preview passes their last save instead. */
+const postFields = (row: PostRow, date: Date | null = row.publishedAt) => ({
+  slug: row.slug,
+  title: row.title,
+  tag: row.tag,
+  // Pages show the day or month and year; the date part of the UTC timestamp is enough
+  date: date?.toISOString().slice(0, 10),
+  readMinutes: row.readMinutes,
+  excerpt: row.excerpt,
+});
+
+/** A project row as its case study page shape; used by getProject and the draft preview. */
+export const toProjectDetail = (row: ProjectRow): ProjectDetail =>
+  projectDetailSchema.parse({
+    ...projectFields(row),
+    caseStudy: row.caseStudy,
+    coverImageUrl: row.coverImageUrl,
+    liveUrl: row.liveUrl,
+    repoUrl: row.repoUrl,
+    client: row.client,
+    role: row.role,
+  });
+
+/** A post row as its article page shape; used by getPost and the draft preview. */
+export const toPostDetail = (row: PostRow, date: Date | null = row.publishedAt): PostDetail =>
+  postDetailSchema.parse({...postFields(row, date), body: row.body, coverImageUrl: row.coverImageUrl});
+
 export const getStack = async (): Promise<StackItem[]> => {
   'use cache';
   cacheTag(CACHE_TAGS.stack);
@@ -71,21 +127,7 @@ export const getProjects = async ({group = 'all'}: {group?: ProjectGroup | 'all'
     where: {status: 'PUBLISHED', featured: true, ...(group === 'all' ? {} : {group: group === 'client' ? 'CLIENT' : 'PERSONAL'})},
     orderBy: {order: 'asc'},
   });
-  return projectSchema.array().parse(
-    rows.map((row) => ({
-      slug: row.slug,
-      title: row.title,
-      summary: row.summary,
-      kindLabel: row.kindLabel,
-      group: lower(row.group),
-      glyph: row.glyph,
-      theme: lower(row.theme),
-      span: row.span,
-      tags: row.tags,
-      featured: row.featured,
-      order: row.order,
-    })),
-  );
+  return projectSchema.array().parse(rows.map((row) => projectFields(row)));
 };
 
 export const getMilestones = async (): Promise<Milestone[]> => {
@@ -127,20 +169,104 @@ export const getPosts = async ({limit}: {limit?: number} = {}): Promise<Post[]> 
     orderBy: [{publishedAt: 'desc'}, {title: 'asc'}],
     take: limit,
   });
-  return postSchema.array().parse(
-    rows.map((row) => ({
-      slug: row.slug,
-      title: row.title,
-      tag: row.tag,
-      // The home page shows month and year; the date part of the UTC timestamp is enough
-      date: row.publishedAt?.toISOString().slice(0, 10),
-      readMinutes: row.readMinutes,
-      excerpt: row.excerpt,
-    })),
-  );
+  return postSchema.array().parse(rows.map((row) => postFields(row)));
 };
 
-/** The single settings row. Not used by a component yet: the contact section and footer pick it up in Phase 6. */
+/** One published post with its body, or null for drafts and unknown slugs (the page then 404s). */
+export const getPost = async (slug: string): Promise<PostDetail | null> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.posts);
+  cacheLife('max');
+  const row = await db.post.findFirst({where: {slug, status: 'PUBLISHED', publishedAt: {not: null}}});
+  return row ? toPostDetail(row) : null;
+};
+
+export const BLOG_PAGE_SIZE = 10;
+
+/**
+ * Tags in use by published posts, most used first, with the slug used in /blog?tag=. Labels that share a slug ("C#" and
+ * "C++") are one filter: it shows the most used label and counts every post that matches, as getBlogIndex does.
+ */
+export const getPostTags = async (): Promise<PostTag[]> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.posts);
+  cacheLife('max');
+  const groups = new Map<string, Map<string, number>>();
+  for (const post of await getPosts()) {
+    const labels = groups.get(tagSlug(post.tag)) ?? new Map<string, number>();
+    labels.set(post.tag, (labels.get(post.tag) ?? 0) + 1);
+    groups.set(tagSlug(post.tag), labels);
+  }
+  const tags = [...groups].map(([slug, labels]) => {
+    const [label] = [...labels].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+    return {label, slug, count: [...labels.values()].reduce((sum, n) => sum + n, 0)};
+  });
+  return postTagSchema.array().parse(tags.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)));
+};
+
+/**
+ * One page of the blog index, optionally for one tag. Callers pass a known tag slug and a page within range (the
+ * blog page checks both first), which keeps the number of cache entries small.
+ */
+export const getBlogIndex = async ({tag, page}: {tag: string | null; page: number}) => {
+  'use cache';
+  cacheTag(CACHE_TAGS.posts);
+  cacheLife('max');
+  const all = await getPosts();
+  const matching = tag ? all.filter((post) => tagSlug(post.tag) === tag) : all;
+  const pageCount = Math.max(1, Math.ceil(matching.length / BLOG_PAGE_SIZE));
+  return {posts: matching.slice((page - 1) * BLOG_PAGE_SIZE, page * BLOG_PAGE_SIZE), page, pageCount, total: matching.length};
+};
+
+/** The published neighbours of a post: `previous` is the older one, `next` the newer one. */
+export const getAdjacentPosts = async (slug: string): Promise<{previous: ContentLink | null; next: ContentLink | null}> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.posts);
+  cacheLife('max');
+  const posts = await getPosts();
+  const index = posts.findIndex((post) => post.slug === slug);
+  const link = (post: Post | undefined) => (post ? contentLinkSchema.parse({slug: post.slug, title: post.title}) : null);
+  return index === -1 ? {previous: null, next: null} : {previous: link(posts[index + 1]), next: link(posts[index - 1])};
+};
+
+/** Slugs of every published post, for generateStaticParams. */
+export const getPostSlugs = async (): Promise<string[]> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.posts);
+  cacheLife('max');
+  return (await getPosts()).map((post) => post.slug);
+};
+
+/** One published project with its case study (featured or not), or null for drafts and unknown slugs. */
+export const getProject = async (slug: string): Promise<ProjectDetail | null> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.projects);
+  cacheLife('max');
+  const row = await db.project.findFirst({where: {slug, status: 'PUBLISHED'}});
+  return row ? toProjectDetail(row) : null;
+};
+
+/** Published projects in display order, as links: case study slugs and the "Next project" order. */
+const getPublishedProjectLinks = async (): Promise<ContentLink[]> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.projects);
+  cacheLife('max');
+  const rows = await db.project.findMany({where: {status: 'PUBLISHED'}, orderBy: {order: 'asc'}, select: {slug: true, title: true}});
+  return contentLinkSchema.array().parse(rows);
+};
+
+/** Slugs of every published project, for generateStaticParams. */
+export const getProjectSlugs = async (): Promise<string[]> => (await getPublishedProjectLinks()).map((project) => project.slug);
+
+/** The project after this one in display order, wrapping round to the first; null when it's the only one. */
+export const getNextProject = async (slug: string): Promise<ContentLink | null> => {
+  const projects = await getPublishedProjectLinks();
+  const index = projects.findIndex((project) => project.slug === slug);
+  const next = projects[(index + 1) % projects.length];
+  return next && next.slug !== slug ? next : null;
+};
+
+/** The single settings row: the header status, contact details, CV link and social profiles. */
 export const getSiteSettings = async (): Promise<SiteSettings> => {
   'use cache';
   cacheTag(CACHE_TAGS.settings);

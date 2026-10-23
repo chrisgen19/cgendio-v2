@@ -3,7 +3,7 @@ import {body, display, mono} from './fonts';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Cgdiomampo.dev',
+  title: {default: 'Cgdiomampo.dev', template: '%s · Cgdiomampo.dev'},
   description: 'We take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.',
 };
 

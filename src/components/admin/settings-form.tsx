@@ -9,7 +9,7 @@ import {useActionToast} from './use-action-toast';
 import {useAdminForm} from './use-admin-form';
 
 type SettingsFormProps = {
-  settings: {contactEmail: string; openToProjects: boolean; cvUrl: string | null};
+  settings: {contactEmail: string; openToProjects: boolean; cvUrl: string | null; linkedinUrl: string | null};
 };
 
 export function SettingsForm({settings}: SettingsFormProps) {
@@ -35,6 +35,14 @@ export function SettingsForm({settings}: SettingsFormProps) {
               label="Open to projects"
               hint="Shows the green status dot in the header"
               defaultChecked={settings.openToProjects}
+            />
+            <TextField
+              name="linkedinUrl"
+              label="LinkedIn profile"
+              type="url"
+              hint="The footer's LinkedIn link; hidden while this is empty."
+              defaultValue={settings.linkedinUrl ?? ''}
+              errors={errors}
             />
             <UploadField
               name="cvUrl"

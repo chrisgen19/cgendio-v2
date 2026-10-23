@@ -2,6 +2,7 @@
 
 import {updateTag} from 'next/cache';
 import {z} from 'zod';
+import type {Prisma} from '@/generated/prisma/client';
 import type {ActionResult} from '../admin/action-helpers';
 import {type Collection, collectionSchema} from '../admin/form-schemas';
 import {requireAdmin} from '../admin-session';
@@ -23,27 +24,24 @@ export async function deleteItem(collection: Collection, id: string): Promise<Ac
   const input = deleteInput.safeParse({collection, id});
   if (!input.success) return {ok: false, error: 'Invalid request.'};
 
+  // deleteMany reports a count instead of throwing P2025 when the item was already deleted (say, in another tab), which
+  // inside the list's async transition would otherwise replace the admin page with the error page
   const where = {id: input.data.id};
-  switch (input.data.collection) {
-    case 'projects':
-      await db.project.delete({where});
-      break;
-    case 'posts':
-      await db.post.delete({where});
-      break;
-    case 'milestones':
-      await db.milestone.delete({where});
-      break;
-    case 'timeline':
-      await db.timelineEntry.delete({where});
-      break;
-    case 'stack':
-      await db.stackItem.delete({where});
-      break;
-  }
+  const remove = {
+    projects: () => db.project.deleteMany({where}),
+    posts: () => db.post.deleteMany({where}),
+    milestones: () => db.milestone.deleteMany({where}),
+    timeline: () => db.timelineEntry.deleteMany({where}),
+    stack: () => db.stackItem.deleteMany({where}),
+  }[input.data.collection];
+  const {count} = await remove();
+  if (count === 0) return {ok: false, error: 'That item no longer exists.'};
   updateTag(TAG[input.data.collection]);
   return {ok: true, message: 'Deleted.'};
 }
+
+/** Thrown inside the reorder transaction to roll it back when one of the ids no longer exists. */
+class StaleListError extends Error {}
 
 const reorderInput = z.object({collection: collectionSchema.exclude(['posts']), ids: z.array(z.string().min(1)).min(1).max(200)});
 
@@ -54,12 +52,24 @@ export async function reorderItems(collection: Exclude<Collection, 'posts'>, ids
   if (!input.success) return {ok: false, error: 'Invalid request.'};
 
   const setOrder = {
-    projects: (id: string, order: number) => db.project.update({where: {id}, data: {order}}),
-    milestones: (id: string, order: number) => db.milestone.update({where: {id}, data: {order}}),
-    timeline: (id: string, order: number) => db.timelineEntry.update({where: {id}, data: {order}}),
-    stack: (id: string, order: number) => db.stackItem.update({where: {id}, data: {order}}),
+    projects: (tx: Prisma.TransactionClient, id: string, order: number) => tx.project.updateMany({where: {id}, data: {order}}),
+    milestones: (tx: Prisma.TransactionClient, id: string, order: number) => tx.milestone.updateMany({where: {id}, data: {order}}),
+    timeline: (tx: Prisma.TransactionClient, id: string, order: number) => tx.timelineEntry.updateMany({where: {id}, data: {order}}),
+    stack: (tx: Prisma.TransactionClient, id: string, order: number) => tx.stackItem.updateMany({where: {id}, data: {order}}),
   }[input.data.collection];
-  await db.$transaction(input.data.ids.map((id, i) => setOrder(id, i + 1)));
+  // All or nothing: if an item was deleted elsewhere (say, in another tab), roll the whole order back and say so, rather
+  // than saving half of it or throwing P2025, which inside the list's async transition would show the error page
+  try {
+    await db.$transaction(async (tx) => {
+      for (const [i, id] of input.data.ids.entries()) {
+        const {count} = await setOrder(tx, id, i + 1);
+        if (count === 0) throw new StaleListError();
+      }
+    });
+  } catch (error) {
+    if (error instanceof StaleListError) return {ok: false, error: 'An item in this list no longer exists. Reload to see the current list.'};
+    throw error;
+  }
   updateTag(TAG[input.data.collection]);
   return {ok: true, message: 'Order saved.'};
 }

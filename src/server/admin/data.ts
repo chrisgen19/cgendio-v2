@@ -53,7 +53,17 @@ export const listStack = async () => {
 
 export const getSettingsForEdit = async () => {
   await requireAdmin();
-  return db.siteSettings.findUniqueOrThrow({where: {id: 'site'}, select: {contactEmail: true, openToProjects: true, cvUrl: true}});
+  const row = await db.siteSettings.findUniqueOrThrow({
+    where: {id: 'site'},
+    select: {contactEmail: true, openToProjects: true, cvUrl: true, socials: true},
+  });
+  const linkedin = (row.socials as Record<string, unknown>).linkedin;
+  return {
+    contactEmail: row.contactEmail,
+    openToProjects: row.openToProjects,
+    cvUrl: row.cvUrl,
+    linkedinUrl: typeof linkedin === 'string' ? linkedin : null,
+  };
 };
 
 export const getPageCopyForEdit = async () => {
@@ -66,12 +76,13 @@ export const getPageCopyForEdit = async () => {
 export const getDashboard = async () => {
   await requireAdmin();
   const recent = {take: 10, orderBy: {updatedAt: 'desc' as const}};
-  const [projects, posts, milestones, timeline, stack, p, po, m, t, s] = await Promise.all([
+  const [projects, posts, milestones, timeline, stack, unread, p, po, m, t, s] = await Promise.all([
     db.project.count(),
     db.post.count(),
     db.milestone.count(),
     db.timelineEntry.count(),
     db.stackItem.count(),
+    db.contactMessage.count({where: {readAt: null}}),
     db.project.findMany({...recent, select: {id: true, title: true, updatedAt: true}}),
     db.post.findMany({...recent, select: {id: true, title: true, updatedAt: true}}),
     db.milestone.findMany({...recent, select: {id: true, title: true, updatedAt: true}}),
@@ -88,7 +99,7 @@ export const getDashboard = async () => {
     .sort((a, b) => b.at.getTime() - a.at.getTime())
     .slice(0, 10)
     .map((edit) => ({...edit, at: edit.at.toISOString()}));
-  return {counts: {projects, posts, milestones, timeline, stack}, edits};
+  return {counts: {projects, posts, milestones, timeline, stack, unread}, edits};
 };
 
 export const getMilestoneForEdit = async (id: string) => {
@@ -108,3 +119,22 @@ export const getStackItemForEdit = async (id: string) => {
   await requireAdmin();
   return db.stackItem.findUnique({where: {id}, select: {id: true, name: true}});
 };
+
+/** Contact form messages for the inbox, newest first. */
+export const listContactMessages = async () => {
+  await requireAdmin();
+  const rows = await db.contactMessage.findMany({orderBy: {createdAt: 'desc'}});
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    company: row.company,
+    projectType: row.projectType,
+    message: row.message,
+    readAt: iso(row.readAt),
+    emailedAt: iso(row.emailedAt),
+    createdAt: iso(row.createdAt) as string,
+  }));
+};
+
+export type ContactMessageRow = Awaited<ReturnType<typeof listContactMessages>>[number];

@@ -7,13 +7,16 @@ import {requireAdmin} from '../admin-session';
 import {CACHE_TAGS} from '../content';
 import {db} from '../db';
 
-/** Contact email, the "Open to projects" status and the CV link. */
+/** Contact email, the "Open to projects" status, the CV link and the LinkedIn profile (kept in socials). */
 export async function saveSettings(_previous: ActionResult | null, formData: FormData): Promise<ActionResult> {
   await requireAdmin();
   const input = settingsFormSchema.safeParse(Object.fromEntries(formData));
   if (!input.success) return fieldErrorsFrom(input.error);
 
-  await db.siteSettings.update({where: {id: 'site'}, data: input.data});
+  const {linkedinUrl, ...fields} = input.data;
+  const current = await db.siteSettings.findUniqueOrThrow({where: {id: 'site'}, select: {socials: true}});
+  const socials = {...(current.socials as Record<string, string | null>), linkedin: linkedinUrl};
+  await db.siteSettings.update({where: {id: 'site'}, data: {...fields, socials}});
   updateTag(CACHE_TAGS.settings);
   return {ok: true, message: 'Settings saved.'};
 }

@@ -1,6 +1,8 @@
+import Link from 'next/link';
+import {PROJECT_RINGS, PROJECT_THEMES} from '@/components/ui-site/project-theme';
 import {Tag} from '@/components/ui-site/tag';
 import {cn} from '@/lib/cn';
-import type {Project, ProjectSpan, ProjectTheme} from '@/server/content';
+import type {Project, ProjectSpan} from '@/server/content';
 
 // Full class names so Tailwind can see them
 const SPANS: Record<ProjectSpan, string> = {
@@ -8,13 +10,6 @@ const SPANS: Record<ProjectSpan, string> = {
   5: 'col-span-5',
   6: 'col-span-6',
   7: 'col-span-7',
-};
-
-const THEMES: Record<ProjectTheme, string> = {
-  ink: 'bg-ink text-white',
-  tint: 'bg-tint text-accent',
-  lime: 'bg-lime text-ink',
-  gray: 'bg-thumb text-ink',
 };
 
 type ProjectCardProps = {
@@ -27,10 +22,8 @@ export function ProjectCard({project}: ProjectCardProps) {
       <div
         className={cn(
           'relative flex h-80 flex-col justify-between overflow-hidden rounded-panel p-6 transition-transform duration-450 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:-translate-y-1 group-hover:-rotate-[0.4deg] motion-reduce:transition-none max-md:h-60',
-          // The two outline circles in the top-right corner
-          "before:absolute before:-top-20 before:-right-15 before:size-65 before:rounded-full before:border-[1.5px] before:border-current before:opacity-14 before:content-['']",
-          "after:absolute after:-top-40 after:-right-35 after:size-105 after:rounded-full after:border-[1.5px] after:border-current after:opacity-14 after:content-['']",
-          THEMES[project.theme],
+          PROJECT_RINGS,
+          PROJECT_THEMES[project.theme],
         )}
       >
         <div className="relative z-1 flex items-start justify-between">
@@ -64,9 +57,8 @@ export function ProjectCard({project}: ProjectCardProps) {
         </div>
         <h3 className="m-0 font-display text-[28px] leading-[1.1] font-bold tracking-[-0.03em]">{project.title}</h3>
         <p className="m-0 max-w-[560px] text-base leading-[1.55] text-muted">{project.summary}</p>
-        {/* Case studies arrive in Phase 6; until then this stays on #work, as in the canvas */}
-        <a
-          href="#work"
+        <Link
+          href={`/work/${project.slug}`}
           className="relative inline-flex items-center gap-2 self-start border-b-[1.5px] border-ink pb-[3px] text-[15px] font-semibold text-ink no-underline after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:border-accent hover:text-accent"
         >
           View case study<span className="sr-only">: {project.title}</span>
@@ -82,7 +74,7 @@ export function ProjectCard({project}: ProjectCardProps) {
           >
             <path d="M5 12h14M13 6l6 6-6 6" />
           </svg>
-        </a>
+        </Link>
       </div>
     </article>
   );

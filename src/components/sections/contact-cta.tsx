@@ -3,6 +3,7 @@ import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {MarkedText} from '@/components/ui-site/marked-text';
 import {Section} from '@/components/ui-site/section';
 import {SectionHeading} from '@/components/ui-site/section-heading';
+import {isEmail} from '@/lib/email';
 import {getPageCopy, getSiteSettings} from '@/server/content';
 
 export async function ContactCta() {
@@ -17,9 +18,8 @@ export async function ContactCta() {
         <MarkedText text={copy['contact.heading']} />
       </SectionHeading>
       <p className="m-0 max-w-[560px] text-lg leading-[1.55] text-ink-soft">{copy['contact.lede']}</p>
-      {/* The contact form arrives in Phase 6, so "Start a project" stays on #contact; the CV links to the uploaded file once there is one */}
       <div className="flex flex-wrap gap-3">
-        <Button href="#contact">
+        <Button href="/contact">
           {copy['contact.primaryLabel']}
           <svg
             viewBox="0 0 24 24"
@@ -34,12 +34,23 @@ export async function ContactCta() {
             <path d="M5 12h14M13 6l6 6-6 6" />
           </svg>
         </Button>
-        <Button href={settings.cvUrl ?? '#contact'} variant="outline">
-          {copy['contact.cvLabel']}
-        </Button>
+        {/* Only once a CV is uploaded in admin Settings */}
+        {settings.cvUrl ? (
+          <Button href={settings.cvUrl} variant="outline">
+            {copy['contact.cvLabel']}
+          </Button>
+        ) : null}
       </div>
       <span className="font-mono text-[13px] text-ink-soft">
-        {settings.contactEmail} · {copy['contact.location']}
+        {/* A mailto link once the address is real; the [YOUR EMAIL] placeholder stays plain text */}
+        {isEmail(settings.contactEmail) ? (
+          <a href={`mailto:${settings.contactEmail}`} className="text-ink-soft underline underline-offset-2 hover:text-ink">
+            {settings.contactEmail}
+          </a>
+        ) : (
+          settings.contactEmail
+        )}{' '}
+        · {copy['contact.location']}
       </span>
     </Section>
   );

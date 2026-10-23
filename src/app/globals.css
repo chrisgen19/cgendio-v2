@@ -44,6 +44,8 @@
   --color-code-string: #d7ff3d;
   --color-code-tag: #7fd4ff;
   --color-code-dim: #7c818e;
+  /* Form errors (the canvas has no form; same red as the admin's destructive colour) */
+  --color-danger: #b91c1c;
 
   --radius-pill: 999px;
   --radius-card: 22px;
@@ -52,6 +54,8 @@
   --radius-photo: 32px;
   --radius-milestone: 24px;
   --radius-logo: 11px;
+  /* Contact form fields (the canvas has no form design) */
+  --radius-field: 14px;
 
   --shadow-card: 0 1px 0 rgba(13, 14, 18, 0.04), 0 18px 40px -18px rgba(13, 14, 18, 0.22);
   --shadow-deep: 0 30px 60px -24px rgba(13, 14, 18, 0.5);
@@ -105,6 +109,24 @@
     opacity: 0;
     translate: 0 16px;
   }
+}
+
+/* Code blocks in posts and case studies: Shiki's css-variables theme (src/lib/code-theme.ts) mapped to the code tokens */
+:root {
+  --shiki-foreground: var(--color-code-text);
+  --shiki-background: var(--color-ink);
+  --shiki-token-keyword: var(--color-code-keyword);
+  --shiki-token-constant: var(--color-code-keyword);
+  --shiki-token-parameter: var(--color-code-text);
+  --shiki-token-string: var(--color-code-string);
+  --shiki-token-string-expression: var(--color-code-string);
+  --shiki-token-function: var(--color-code-tag);
+  --shiki-token-link: var(--color-code-tag);
+  --shiki-token-comment: var(--color-code-dim);
+  --shiki-token-punctuation: var(--color-code-dim);
+  --shiki-token-inserted: var(--color-code-string);
+  --shiki-token-deleted: var(--color-code-dim);
+  --shiki-token-changed: var(--color-code-keyword);
 }
 
 @utility dot-grid {

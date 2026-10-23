@@ -54,6 +54,28 @@ export const postSchema = z.object({
   excerpt: z.string().min(1),
 });
 
+/** A post page: the list fields plus the Markdown body and cover. */
+export const postDetailSchema = postSchema.extend({
+  body: z.string(),
+  coverImageUrl: z.url().nullable(),
+});
+
+/** A previous/next link between posts or projects. */
+export const contentLinkSchema = z.object({slug: z.string().min(1), title: z.string().min(1)});
+
+/** A blog tag as filter: the label as written, its URL slug (?tag=) and how many published posts use it. */
+export const postTagSchema = z.object({label: z.string().min(1), slug: z.string().min(1), count: z.int().positive()});
+
+/** A case study page: the card fields plus the Markdown case study, cover, links and the facts row. */
+export const projectDetailSchema = projectSchema.extend({
+  caseStudy: z.string().nullable(),
+  coverImageUrl: z.url().nullable(),
+  liveUrl: z.url().nullable(),
+  repoUrl: z.url().nullable(),
+  client: z.string().nullable(),
+  role: z.string().nullable(),
+});
+
 export const siteSettingsSchema = z.object({
   contactEmail: z.string().min(1),
   openToProjects: z.boolean(),
@@ -110,6 +132,10 @@ export type Milestone = z.infer<typeof milestoneSchema>;
 export type TimelineDot = z.infer<typeof timelineDotSchema>;
 export type TimelineEntry = z.infer<typeof timelineEntrySchema>;
 export type Post = z.infer<typeof postSchema>;
+export type PostDetail = z.infer<typeof postDetailSchema>;
+export type ContentLink = z.infer<typeof contentLinkSchema>;
+export type PostTag = z.infer<typeof postTagSchema>;
+export type ProjectDetail = z.infer<typeof projectDetailSchema>;
 export type SiteSettings = z.infer<typeof siteSettingsSchema>;
 export type PageCopyKey = z.infer<typeof pageCopyKeySchema>;
 export type PageCopy = z.infer<typeof pageCopySchema>;

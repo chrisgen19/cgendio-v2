@@ -27,10 +27,12 @@ export async function Timeline() {
           <MarkedText text={copy['timeline.heading']} />
         </SectionHeading>
         <p className="m-0 max-w-[360px] text-base leading-[1.55] text-muted">{copy['timeline.lede']}</p>
-        {/* Links to the uploaded CV once there is one; until then to the contact section, as in the canvas */}
-        <Button href={settings.cvUrl ?? '#contact'} variant="secondary" size="sm" className="mt-2 self-start">
-          {copy['timeline.cvLabel']}
-        </Button>
+        {/* Only once a CV is uploaded in admin Settings */}
+        {settings.cvUrl ? (
+          <Button href={settings.cvUrl} variant="secondary" size="sm" className="mt-2 self-start">
+            {copy['timeline.cvLabel']}
+          </Button>
+        ) : null}
       </div>
       <ol className="m-0 flex list-none flex-col p-0">
         {entries.map((entry) => (

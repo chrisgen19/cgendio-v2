@@ -27,6 +27,8 @@ export type ProjectFormValues = {
   caseStudy: string | null;
   liveUrl: string | null;
   repoUrl: string | null;
+  client: string | null;
+  role: string | null;
 };
 
 const GROUPS = [
@@ -93,6 +95,20 @@ export function ProjectForm({project}: {project: ProjectFormValues | null}) {
               <UploadField name="coverImageUrl" label="Cover image" kind="image" defaultValue={project?.coverImageUrl} />
               <TextField name="liveUrl" label="Live site" type="url" defaultValue={project?.liveUrl ?? ''} errors={errors} />
               <TextField name="repoUrl" label="Repository" type="url" defaultValue={project?.repoUrl ?? ''} errors={errors} />
+              <TextField
+                name="client"
+                label="Client"
+                hint="Shown in the case study facts row; leave empty for [Client]"
+                defaultValue={project?.client ?? ''}
+                errors={errors}
+              />
+              <TextField
+                name="role"
+                label="Role"
+                hint="Your role on the project; leave empty for [Role]"
+                defaultValue={project?.role ?? ''}
+                errors={errors}
+              />
             </div>
             <MarkdownField name="caseStudy" label="Case study" defaultValue={project?.caseStudy} errors={errors} />
           </CardContent>
