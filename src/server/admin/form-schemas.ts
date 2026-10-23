@@ -50,6 +50,8 @@ export const projectFormSchema = z.object({
   caseStudy: optionalText,
   liveUrl: optionalUrl,
   repoUrl: optionalUrl,
+  client: optionalText.pipe(z.string().max(120).nullable()),
+  role: optionalText.pipe(z.string().max(120).nullable()),
 });
 
 export const postFormSchema = z.object({
