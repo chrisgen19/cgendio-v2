@@ -13,6 +13,11 @@
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "biome check .",
     "format": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e:prepare": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON e2e/support/prepare.mts",
+    "test:e2e": "pnpm test:e2e:prepare && playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "remotion:studio": "remotion studio src/remotion/index.ts",
     "remotion:poster": "remotion still src/remotion/index.ts HeroFilm src/app/opengraph-image.png --frame=904 --width=1200 --height=630",
     "remotion:render": "remotion render src/remotion/index.ts HeroFilm docs/design/hero-film.mp4 && remotion render src/remotion/index.ts HeroFilmMobile docs/design/hero-film-mobile.mp4",
@@ -55,7 +60,9 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@biomejs/biome": "2.4.2",
+    "@playwright/test": "1.64.1",
     "@remotion/cli": "4.0.537",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^24.19.2",
@@ -66,6 +73,7 @@
     "shadcn": "4.22.1",
     "tailwindcss": "^4",
     "tw-animate-css": "1.4.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "5.0.5"
   }
 }
