@@ -2,10 +2,11 @@
 
 import {type KeyboardEvent, useEffect, useId, useRef, useState} from 'react';
 import {MOBILE_NAV_LINKS} from './nav-links';
+import {ThemeSegmented} from './theme-toggle';
 
 /**
  * Menu button and disclosure panel for phones (under 860px). While open, focus moves to the first link,
- * Tab cycles between the button and the links, and Esc, an outside click or a link closes it.
+ * Tab cycles between the button, the links and the theme choice, and Esc, an outside click or a link closes it.
  */
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
@@ -41,8 +42,9 @@ export function MobileMenu() {
       return;
     }
     if (event.key !== 'Tab') return;
-    const links = panelRef.current?.querySelectorAll('a');
-    const last = links?.[links.length - 1];
+    // The radio group is one tab stop: the checked radio
+    const stops = panelRef.current?.querySelectorAll<HTMLElement>('a[href], input[type="radio"]:checked');
+    const last = stops?.[stops.length - 1];
     if (!event.shiftKey && document.activeElement === last) {
       event.preventDefault();
       toggleRef.current?.focus();
@@ -84,6 +86,9 @@ export function MobileMenu() {
             {link.label}
           </a>
         ))}
+        <div className="mt-1.5 border-t border-line px-1 pt-2.5">
+          <ThemeSegmented className="w-full justify-between" />
+        </div>
       </div>
     </div>
   );

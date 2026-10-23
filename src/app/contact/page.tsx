@@ -7,12 +7,14 @@ import {MarkedText} from '@/components/ui-site/marked-text';
 import {Section} from '@/components/ui-site/section';
 import {SectionHeading} from '@/components/ui-site/section-heading';
 import {isEmail} from '@/lib/email';
+import {pageMetadata} from '@/lib/metadata';
 import {getPageCopy, getSiteSettings} from '@/server/content';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Contact',
   description: "Agencies, recruiters and founders: tell us what you're building and we'll come back with next steps.",
-};
+  path: '/contact',
+});
 
 /** The contact form, with the same heading and copy as the home page's contact panel. */
 export default async function ContactPage() {

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import {renderMarkdown} from '@/components/prose/markdown';
+import {CoverImage} from '@/components/ui-site/cover-image';
 import {Section} from '@/components/ui-site/section';
 import {blogHref} from '@/lib/blog-url';
 import {formatMonthYear} from '@/lib/format-date';
@@ -43,16 +44,7 @@ export async function PostArticle({post}: {post: PostDetail}) {
         </p>
         <h1 className="m-0 max-w-[20ch] font-display text-[clamp(40px,5vw,64px)] leading-[1.02] font-bold tracking-[-0.04em]">{post.title}</h1>
         <p className="m-0 max-w-[640px] text-lg leading-[1.55] text-muted max-md:text-base">{post.excerpt}</p>
-        {post.coverImageUrl ? (
-          // biome-ignore lint/performance/noImgElement: covers come from R2; next/image (remotePatterns for the bucket) arrives in Phase 7
-          <img
-            src={post.coverImageUrl}
-            alt=""
-            width={1600}
-            height={900}
-            className="mt-4 aspect-[16/9] h-auto w-full rounded-panel border border-line object-cover"
-          />
-        ) : null}
+        {post.coverImageUrl ? <CoverImage src={post.coverImageUrl} className="mt-4" aboveTheFold /> : null}
       </Section>
       <Section tone="white">
         <div className={hasToc ? 'grid grid-cols-[minmax(0,68ch)_240px] justify-between gap-16 max-lg:grid-cols-1 max-lg:gap-10' : undefined}>

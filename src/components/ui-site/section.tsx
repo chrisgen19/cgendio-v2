@@ -17,14 +17,18 @@ type SectionProps = {
   padding?: keyof typeof PADDING;
   className?: string;
   innerClassName?: string;
+  /** Keep the inner panel light in dark mode (the lime contact panel). */
+  innerTheme?: 'light';
   children: ReactNode;
 };
 
 /** A home page section: the canvas `.sec` padding plus the 1320px `.wrap`. */
-export function Section({id, tone = 'ground', padding = 'default', className, innerClassName, children}: SectionProps) {
+export function Section({id, tone = 'ground', padding = 'default', className, innerClassName, innerTheme, children}: SectionProps) {
   return (
     <section id={id} className={cn('px-14 max-md:px-5', PADDING[padding], tone === 'white' && 'border-y border-line bg-white', className)}>
-      <div className={cn('mx-auto max-w-site', innerClassName)}>{children}</div>
+      <div data-theme={innerTheme} className={cn('mx-auto max-w-site', innerClassName)}>
+        {children}
+      </div>
     </section>
   );
 }

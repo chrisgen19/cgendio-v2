@@ -11,7 +11,8 @@ export default function AdminRootLayout({children}: LayoutProps<'/admin'>) {
   return (
     <div className="admin-theme min-h-svh font-body">
       {children}
-      <Toaster position="bottom-right" />
+      {/* The admin is light only, whatever the public site's theme */}
+      <Toaster position="bottom-right" theme="light" />
     </div>
   );
 }

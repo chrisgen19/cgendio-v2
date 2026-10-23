@@ -20,6 +20,7 @@ export function ProjectCard({project}: ProjectCardProps) {
   return (
     <article data-reveal data-group={project.group} className={cn('group flex flex-col gap-5 max-md:col-span-12', SPANS[project.span])}>
       <div
+        data-theme="light"
         className={cn(
           'relative flex h-80 flex-col justify-between overflow-hidden rounded-panel p-6 transition-transform duration-450 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:-translate-y-1 group-hover:-rotate-[0.4deg] motion-reduce:transition-none max-md:h-60',
           PROJECT_RINGS,

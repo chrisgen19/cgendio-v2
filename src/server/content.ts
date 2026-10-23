@@ -21,8 +21,10 @@ import {
   postTagSchema,
   projectDetailSchema,
   projectSchema,
+  type SitemapEntry,
   type SiteSettings,
   type StackItem,
+  sitemapEntrySchema,
   siteSettingsSchema,
   stackItemSchema,
   type TimelineEntry,
@@ -50,6 +52,7 @@ export type {
   ProjectGroup,
   ProjectSpan,
   ProjectTheme,
+  SitemapEntry,
   SiteSettings,
   StackItem,
   TimelineDot,
@@ -264,6 +267,21 @@ export const getNextProject = async (slug: string): Promise<ContentLink | null> 
   const index = projects.findIndex((project) => project.slug === slug);
   const next = projects[(index + 1) % projects.length];
   return next && next.slug !== slug ? next : null;
+};
+
+/** Published posts and projects with their last save, for sitemap.ts. Drafts never appear. */
+export const getSitemapEntries = async (): Promise<{posts: SitemapEntry[]; projects: SitemapEntry[]}> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.posts, CACHE_TAGS.projects);
+  cacheLife('max');
+  const select = {slug: true, updatedAt: true} as const;
+  const [posts, projects] = await Promise.all([
+    db.post.findMany({where: {status: 'PUBLISHED', publishedAt: {not: null}}, orderBy: {publishedAt: 'desc'}, select}),
+    db.project.findMany({where: {status: 'PUBLISHED'}, orderBy: {order: 'asc'}, select}),
+  ]);
+  const toEntries = (rows: {slug: string; updatedAt: Date}[]) =>
+    sitemapEntrySchema.array().parse(rows.map((row) => ({slug: row.slug, lastModified: row.updatedAt.toISOString()})));
+  return {posts: toEntries(posts), projects: toEntries(projects)};
 };
 
 /** The single settings row: the header status, contact details, CV link and social profiles. */

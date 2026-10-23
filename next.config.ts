@@ -1,8 +1,11 @@
 import type {NextConfig} from 'next';
 
+// Covers uploaded to R2 go through the image optimizer. Read at build time, so R2_PUBLIC_URL must be a build variable too.
+const r2PublicUrl = process.env.R2_PUBLIC_URL?.replace(/\/+$/, '');
+
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
+  images: {remotePatterns: r2PublicUrl ? [new URL(`${r2PublicUrl}/**`)] : []},
   partialPrefetching: true,
   // `/?filter=client|personal` is served from a prerendered variant of the home page, so the Work filter works without
   // JavaScript while `/` stays static. beforeFiles, because `/` is itself a page and afterFiles would never match it.

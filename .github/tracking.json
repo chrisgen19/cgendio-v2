@@ -51,14 +51,14 @@
       "title": "Blog, case studies and contact",
       "branch": "feature/phase-6-blog-case-studies-contact",
       "pr": 27,
-      "status": "In review"
+      "status": "Done"
     },
     "7": {
       "issue": 8,
       "title": "SEO, performance, accessibility, dark mode",
-      "branch": null,
-      "pr": null,
-      "status": "Not started"
+      "branch": "feature/phase-7-seo-perf-a11y",
+      "pr": 29,
+      "status": "In review"
     },
     "8": {
       "issue": 9,

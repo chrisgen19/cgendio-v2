@@ -240,7 +240,8 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
         ending with what Cgdiomampo.dev offers, a link to the work and a replay button.
       </p>
 
-      <div ref={boxRef} style={{position: 'absolute', inset: 0}}>
+      {/* The film is always light (it renders theme.ts colours); the HUD below sits outside this and follows the site theme */}
+      <div ref={boxRef} data-theme="light" style={{position: 'absolute', inset: 0}}>
         {size && variant ? (
           <Player
             key={variant}
@@ -351,14 +352,16 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
                       : 'border-line bg-white/90 text-muted hover:border-ink hover:text-ink',
                 ].join(' ')}
               >
-                <span className="font-mono text-[11px] opacity-70">{c.number}</span>
+                {/* Dimmed only on ink and done chips: on upcoming chips the label is already muted, and 70% of muted fails 4.5:1 */}
+                <span className={active || done ? 'font-mono text-[11px] opacity-70' : 'font-mono text-[11px]'}>{c.number}</span>
                 {c.label}
               </button>
             );
           })}
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
-          <span className="px-2 font-mono text-xs tabular-nums text-muted">
+          {/* Bare text on the always-light film, so it keeps the light colours */}
+          <span data-theme="light" className="px-2 font-mono text-xs tabular-nums text-muted">
             {formatTimecode(frame)} / {formatTimecode(durationInFrames)}
           </span>
           {!atBrand ? (
@@ -393,7 +396,7 @@ function MobileHud({chapters, current, frame, atBrand, ended, playing, onJump, o
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 px-4 pb-3">
       <div className="flex items-center justify-between gap-3">
-        <span aria-live="polite" className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted">
+        <span aria-live="polite" data-theme="light" className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted">
           {label}
         </span>
         <div className="pointer-events-auto flex items-center gap-2">

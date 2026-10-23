@@ -1,5 +1,6 @@
 import {SiteFooter} from '@/components/site/site-footer';
 import {SiteHeader} from '@/components/site/site-header';
+import {SkipLink} from '@/components/site/skip-link';
 import {ScrollReveal} from '@/components/ui-site/scroll-reveal';
 import type {WorkFilter} from '@/lib/work-filter';
 import {About} from './about';
@@ -20,9 +21,11 @@ type HomePageProps = {
 export function HomePage({filter}: HomePageProps) {
   return (
     <>
-      <h1 className="sr-only">Cgdiomampo.dev — web design and development studio by Christian</h1>
+      <SkipLink />
       <SiteHeader overlay />
-      <main>
+      <main id="main" tabIndex={-1} className="focus-visible:outline-none">
+        {/* Inside <main> so every piece of content sits in a landmark */}
+        <h1 className="sr-only">Cgdiomampo.dev — web design and development studio by Christian</h1>
         <Hero />
         <StackStrip />
         <About />
