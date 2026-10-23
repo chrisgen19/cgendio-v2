@@ -61,6 +61,7 @@ export async function CaseStudyArticle({project}: {project: ProjectDetail}) {
           All work
         </Link>
         <div
+          data-theme="light"
           className={cn(
             'relative flex min-h-90 flex-col justify-between gap-10 overflow-hidden rounded-panel p-[clamp(24px,4vw,48px)] max-md:min-h-70',
             PROJECT_RINGS,

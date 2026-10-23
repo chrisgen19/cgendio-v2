@@ -46,6 +46,8 @@
   --color-code-dim: #7c818e;
   /* Form errors (the canvas has no form; same red as the admin's destructive colour) */
   --color-danger: #b91c1c;
+  /* The highlighter bar under a heading's key word (lime; toned down in dark mode so light text stays readable) */
+  --color-highlight: #d7ff3d;
 
   --radius-pill: 999px;
   --radius-card: 22px;
@@ -66,7 +68,74 @@
   --ease-mark: cubic-bezier(0.7, 0, 0.2, 1);
 }
 
+/*
+ * Dark mode. The inline script in the root layout sets data-theme on <html> from the `theme` cookie before the first
+ * paint (light when there's no cookie). Only the tokens change: components keep using the same utilities.
+ * Admin pages always stay light (they have their own shadcn theme).
+ */
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"]:not(:has(.admin-theme)) {
+  color-scheme: dark;
+  --color-ground: #0d0e12;
+  --color-white: #15171d;
+  --color-ink: #f1f2f5;
+  --color-muted: #9a9fab;
+  --color-line: #2a2d36;
+  --color-accent: #8e85ff;
+  --color-accent-hover: #ada6ff;
+  --color-tint: color-mix(in srgb, #8e85ff 16%, #15171d);
+  --color-thumb: #1e2128;
+  --color-dot: #24272f;
+  --color-wire: #22252c;
+  --color-wire-soft: #1b1d23;
+  --color-outline-num: #262930;
+  --color-dot-placeholder: #3a3e48;
+  --color-ink-soft: #c9ccd4;
+  --color-danger: #f87171;
+  --color-highlight: color-mix(in srgb, #d7ff3d 32%, transparent);
+  --shadow-card: 0 1px 0 rgba(0, 0, 0, 0.3), 0 18px 40px -18px rgba(0, 0, 0, 0.7);
+  --shadow-deep: 0 30px 60px -24px rgba(0, 0, 0, 0.8);
+  --shadow-menu: 0 24px 48px -20px rgba(0, 0, 0, 0.75);
+}
+
+/*
+ * A light island inside a dark page: the hero (the film is always light), the lime contact panel, the logo square,
+ * project thumbs, lime badges and code windows. Restates the light values from @theme above (keep them in sync). The
+ * text colour reset is in @layer base below, so utilities like text-white still win over it.
+ */
+:root[data-theme="dark"] [data-theme="light"] {
+  color-scheme: light;
+  --color-ground: #f5f6f8;
+  --color-white: #ffffff;
+  --color-ink: #0d0e12;
+  --color-muted: #565b67;
+  --color-line: #e3e5ea;
+  --color-accent: #3b2bff;
+  --color-accent-hover: #2417c9;
+  --color-tint: color-mix(in srgb, #3b2bff 10%, #fff);
+  --color-thumb: #e9ebf0;
+  --color-dot: #e1e4ea;
+  --color-wire: #e6e8ee;
+  --color-wire-soft: #eef0f4;
+  --color-outline-num: #e4e7ed;
+  --color-dot-placeholder: #c9cdd6;
+  --color-ink-soft: #23252b;
+  --color-danger: #b91c1c;
+  --color-highlight: #d7ff3d;
+  --shadow-card: 0 1px 0 rgba(13, 14, 18, 0.04), 0 18px 40px -18px rgba(13, 14, 18, 0.22);
+  --shadow-deep: 0 30px 60px -24px rgba(13, 14, 18, 0.5);
+  --shadow-menu: 0 24px 48px -20px rgba(13, 14, 18, 0.3);
+}
+
 @layer base {
+  /* An island's inherited text colour was resolved against the dark tokens; resolve it again inside */
+  :root[data-theme="dark"] [data-theme="light"] {
+    color: var(--color-ink);
+  }
+
   body {
     background-color: var(--color-ground);
     color: var(--color-ink);
@@ -111,8 +180,13 @@
   }
 }
 
-/* Code blocks in posts and case studies: Shiki's css-variables theme (src/lib/code-theme.ts) mapped to the code tokens */
-:root {
+/*
+ * Code blocks in posts and case studies: Shiki's css-variables theme (src/lib/code-theme.ts) mapped to the code tokens.
+ * Also declared on light islands: a var() inside a custom property resolves where it's declared, so the code window
+ * (a light island) needs its own copy to get the dark ink background in dark mode.
+ */
+:root,
+[data-theme="light"] {
   --shiki-foreground: var(--color-code-text);
   --shiki-background: var(--color-ink);
   --shiki-token-keyword: var(--color-code-keyword);

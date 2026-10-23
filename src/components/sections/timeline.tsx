@@ -46,7 +46,11 @@ export async function Timeline() {
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2.5">
                 <h3 className="m-0 font-display text-[26px] font-bold tracking-[-0.03em]">{entry.role}</h3>
-                {entry.isCurrent ? <span className="rounded-pill bg-lime px-[9px] py-1.5 font-mono text-[11px]">NOW</span> : null}
+                {entry.isCurrent ? (
+                  <span data-theme="light" className="rounded-pill bg-lime px-[9px] py-1.5 font-mono text-[11px]">
+                    NOW
+                  </span>
+                ) : null}
               </div>
               <span className="text-[15px] font-semibold text-accent">{entry.org}</span>
               <p className="m-0 max-w-[620px] text-base leading-[1.6] text-muted">{entry.description}</p>

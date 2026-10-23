@@ -69,7 +69,8 @@ function AnchoredHeading({level, id, className, children}: HeadingProps) {
 function CodeWindow({node, children, className, style, tabIndex}: ComponentProps<'pre'> & {node?: {properties?: Record<string, unknown>}}) {
   const language = node?.properties?.dataLanguage;
   return (
-    <figure className="my-8 overflow-hidden rounded-card bg-ink shadow-deep">
+    // A light island, so bg-ink stays the dark code background in dark mode
+    <figure data-theme="light" className="my-8 overflow-hidden rounded-card bg-ink shadow-deep">
       <div className="flex items-center gap-2 px-4 pt-3.5 pb-2.5" aria-hidden="true">
         <i className="block size-[9px] rounded-full bg-code-dots" />
         <i className="block size-[9px] rounded-full bg-code-dots" />

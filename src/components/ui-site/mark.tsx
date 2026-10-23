@@ -37,7 +37,7 @@ export function Mark({children, className}: MarkProps) {
       {children}
       <span
         aria-hidden="true"
-        className="absolute -right-[0.06em] bottom-[0.07em] -left-[0.06em] -z-10 h-[0.36em] origin-left bg-lime motion-js:scale-x-0 motion-js:transition-transform motion-js:duration-700 motion-js:ease-mark motion-js:group-data-revealed:scale-x-100"
+        className="absolute -right-[0.06em] bottom-[0.07em] -left-[0.06em] -z-10 h-[0.36em] origin-left bg-highlight motion-js:scale-x-0 motion-js:transition-transform motion-js:duration-700 motion-js:ease-mark motion-js:group-data-revealed:scale-x-100"
       />
     </span>
   );

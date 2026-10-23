@@ -5,6 +5,7 @@ import {cn} from '@/lib/cn';
 import {getSiteSettings} from '@/server/content';
 import {MobileMenu} from './mobile-menu';
 import {NAV_LINKS} from './nav-links';
+import {ThemeCycleButton} from './theme-toggle';
 
 type SiteHeaderProps = {
   /** Sit transparently on top of the hero instead of taking space in the flow. */
@@ -14,7 +15,8 @@ type SiteHeaderProps = {
 export async function SiteHeader({overlay = false}: SiteHeaderProps) {
   const settings = await getSiteSettings();
   return (
-    <header className={cn('inset-x-0 top-0 z-30', overlay ? 'absolute' : 'relative')}>
+    // Over the hero the header stays light in both themes, because it sits on the always-light film
+    <header data-theme={overlay ? 'light' : undefined} className={cn('inset-x-0 top-0 z-30', overlay ? 'absolute' : 'relative')}>
       <Container>
         <nav aria-label="Main" className="flex items-center justify-between gap-4 py-[22px] max-md:py-4">
           <Logo />
@@ -38,6 +40,7 @@ export async function SiteHeader({overlay = false}: SiteHeaderProps) {
                 Open to projects
               </span>
             ) : null}
+            <ThemeCycleButton className="max-md:hidden" />
             <Button href="/contact" size="sm" className="whitespace-nowrap">
               Let&apos;s talk
             </Button>

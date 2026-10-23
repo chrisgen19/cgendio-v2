@@ -1,6 +1,7 @@
 import type {Metadata, Viewport} from 'next';
 import {siteEnv} from '@/lib/env';
 import {SITE_DESCRIPTION, SITE_NAME} from '@/lib/metadata';
+import {THEME_SCRIPT} from '@/lib/theme';
 import {body, display, mono} from './fonts';
 import './globals.css';
 
@@ -15,12 +16,21 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#F5F6F8',
+  themeColor: [
+    {media: '(prefers-color-scheme: light)', color: '#F5F6F8'},
+    {media: '(prefers-color-scheme: dark)', color: '#0D0E12'},
+  ],
 };
 
 export default function RootLayout({children}: LayoutProps<'/'>) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    // The head script changes data-theme before React hydrates, hence suppressHydrationWarning (it covers <html> only)
+    <html lang="en" data-theme="light" suppressHydrationWarning className={`${display.variable} ${body.variable} ${mono.variable}`}>
+      <head>
+        {/* Reads the theme cookie and sets data-theme before the first paint, so static pages never flash (src/lib/theme.ts) */}
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: a fixed script from src/lib/theme.ts, no user input */}
+        <script dangerouslySetInnerHTML={{__html: THEME_SCRIPT}} />
+      </head>
       <body>{children}</body>
     </html>
   );

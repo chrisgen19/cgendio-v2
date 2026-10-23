@@ -10,7 +10,12 @@ export async function ContactCta() {
   const [copy, settings] = await Promise.all([getPageCopy(), getSiteSettings()]);
 
   return (
-    <Section id="contact" padding="cta" innerClassName="relative flex flex-col gap-7 overflow-hidden rounded-cta bg-lime p-[clamp(36px,6vw,80px)]">
+    <Section
+      id="contact"
+      padding="cta"
+      innerTheme="light"
+      innerClassName="relative flex flex-col gap-7 overflow-hidden rounded-cta bg-lime p-[clamp(36px,6vw,80px)]"
+    >
       <div aria-hidden="true" className="absolute -top-30 -right-30 size-105 rounded-full border-2 border-ink opacity-12" />
       <div aria-hidden="true" className="absolute -top-10 -right-10 size-65 rounded-full border-2 border-ink opacity-12" />
       <Eyebrow tone="ink">{copy['contact.eyebrow']}</Eyebrow>

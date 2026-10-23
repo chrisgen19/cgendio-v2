@@ -22,6 +22,7 @@ export async function About() {
           </span>
           <span
             aria-hidden="true"
+            data-theme="light"
             className="grid size-10 place-items-center rounded-xl bg-lime font-display text-[15px] leading-none font-extrabold"
           >
             cg
