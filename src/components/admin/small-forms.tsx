@@ -1,22 +1,21 @@
 'use client';
 
-import {useActionState} from 'react';
 import {Card, CardContent} from '@/components/ui/card';
 import {saveMilestone, saveStackItem, saveTimelineEntry} from '@/server/actions/small-collections';
-import type {ActionResult} from '@/server/admin/action-helpers';
 import {SelectField, SubmitButton, SwitchField, TextAreaField, TextField} from './form-fields';
 import {useActionToast} from './use-action-toast';
+import {useAdminForm} from './use-admin-form';
 
 /* Forms for the three simple ordered collections. */
 
 type Milestone = {id: string; kind: string; value: string; title: string; description: string};
 
 export function MilestoneForm({milestone}: {milestone: Milestone | null}) {
-  const [result, action] = useActionState<ActionResult | null, FormData>(saveMilestone, null);
+  const {result, pending, onSubmit} = useAdminForm(saveMilestone);
   useActionToast(result);
   const errors = result && !result.ok ? result.fieldErrors : undefined;
   return (
-    <form action={action} className="max-w-2xl">
+    <form onSubmit={onSubmit} className="max-w-2xl">
       <Card>
         <CardContent className="flex flex-col gap-4">
           <input type="hidden" name="id" value={milestone?.id ?? ''} />
@@ -27,7 +26,7 @@ export function MilestoneForm({milestone}: {milestone: Milestone | null}) {
           <TextField name="title" label="Title" defaultValue={milestone?.title} errors={errors} required />
           <TextAreaField name="description" label="Description" rows={3} defaultValue={milestone?.description} errors={errors} required />
           <div>
-            <SubmitButton>{milestone ? 'Save milestone' : 'Add milestone'}</SubmitButton>
+            <SubmitButton pending={pending}>{milestone ? 'Save milestone' : 'Add milestone'}</SubmitButton>
           </div>
         </CardContent>
       </Card>
@@ -45,11 +44,11 @@ const DOTS = [
 ] as const;
 
 export function TimelineForm({entry}: {entry: TimelineEntry | null}) {
-  const [result, action] = useActionState<ActionResult | null, FormData>(saveTimelineEntry, null);
+  const {result, pending, onSubmit} = useAdminForm(saveTimelineEntry);
   useActionToast(result);
   const errors = result && !result.ok ? result.fieldErrors : undefined;
   return (
-    <form action={action} className="max-w-2xl">
+    <form onSubmit={onSubmit} className="max-w-2xl">
       <Card>
         <CardContent className="flex flex-col gap-4">
           <input type="hidden" name="id" value={entry?.id ?? ''} />
@@ -64,7 +63,7 @@ export function TimelineForm({entry}: {entry: TimelineEntry | null}) {
           <TextAreaField name="description" label="Description" rows={3} defaultValue={entry?.description} errors={errors} required />
           <SwitchField name="isCurrent" label="Current role" hint="Shows the lime NOW badge" defaultChecked={entry?.isCurrent} />
           <div>
-            <SubmitButton>{entry ? 'Save entry' : 'Add entry'}</SubmitButton>
+            <SubmitButton pending={pending}>{entry ? 'Save entry' : 'Add entry'}</SubmitButton>
           </div>
         </CardContent>
       </Card>
@@ -73,17 +72,17 @@ export function TimelineForm({entry}: {entry: TimelineEntry | null}) {
 }
 
 export function StackForm({item}: {item: {id: string; name: string} | null}) {
-  const [result, action] = useActionState<ActionResult | null, FormData>(saveStackItem, null);
+  const {result, pending, onSubmit} = useAdminForm(saveStackItem);
   useActionToast(result);
   const errors = result && !result.ok ? result.fieldErrors : undefined;
   return (
-    <form action={action} className="max-w-md">
+    <form onSubmit={onSubmit} className="max-w-md">
       <Card>
         <CardContent className="flex flex-col gap-4">
           <input type="hidden" name="id" value={item?.id ?? ''} />
           <TextField name="name" label="Name" hint="e.g. Next.js" defaultValue={item?.name} errors={errors} required />
           <div>
-            <SubmitButton>{item ? 'Save' : 'Add to stack'}</SubmitButton>
+            <SubmitButton pending={pending}>{item ? 'Save' : 'Add to stack'}</SubmitButton>
           </div>
         </CardContent>
       </Card>

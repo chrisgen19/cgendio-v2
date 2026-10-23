@@ -1,26 +1,25 @@
 'use client';
 
-import {useActionState} from 'react';
 import {Card, CardContent} from '@/components/ui/card';
 import {saveSettings} from '@/server/actions/site';
-import type {ActionResult} from '@/server/admin/action-helpers';
 import {SubmitButton, SwitchField, TextField} from './form-fields';
 import {UploadField} from './upload-field';
 import {UploadStatusProvider} from './upload-status';
 import {useActionToast} from './use-action-toast';
+import {useAdminForm} from './use-admin-form';
 
 type SettingsFormProps = {
   settings: {contactEmail: string; openToProjects: boolean; cvUrl: string | null};
 };
 
 export function SettingsForm({settings}: SettingsFormProps) {
-  const [result, action] = useActionState<ActionResult | null, FormData>(saveSettings, null);
+  const {result, pending, onSubmit} = useAdminForm(saveSettings);
   useActionToast(result);
   const errors = result && !result.ok ? result.fieldErrors : undefined;
 
   return (
     <UploadStatusProvider>
-      <form action={action} className="max-w-2xl">
+      <form onSubmit={onSubmit} className="max-w-2xl">
         <Card>
           <CardContent className="flex flex-col gap-5">
             <TextField
@@ -45,7 +44,7 @@ export function SettingsForm({settings}: SettingsFormProps) {
               hint="PDF, up to 10 MB. The Download CV buttons link to it; without one they go to the contact section."
             />
             <div>
-              <SubmitButton>Save settings</SubmitButton>
+              <SubmitButton pending={pending}>Save settings</SubmitButton>
             </div>
           </CardContent>
         </Card>

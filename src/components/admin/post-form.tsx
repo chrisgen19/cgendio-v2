@@ -1,15 +1,14 @@
 'use client';
 
-import {useActionState} from 'react';
 import {Card, CardContent} from '@/components/ui/card';
 import {savePost} from '@/server/actions/posts';
-import type {ActionResult} from '@/server/admin/action-helpers';
 import {SubmitButton, SwitchField, TextAreaField, TextField} from './form-fields';
 import {MarkdownField} from './markdown-field';
 import {TitleSlugFields} from './title-slug-fields';
 import {UploadField} from './upload-field';
 import {UploadStatusProvider} from './upload-status';
 import {useActionToast} from './use-action-toast';
+import {useAdminForm} from './use-admin-form';
 
 export type PostFormValues = {
   id: string;
@@ -25,13 +24,13 @@ export type PostFormValues = {
 };
 
 export function PostForm({post}: {post: PostFormValues | null}) {
-  const [result, action] = useActionState<ActionResult | null, FormData>(savePost, null);
+  const {result, pending, onSubmit} = useAdminForm(savePost);
   useActionToast(result);
   const errors = result && !result.ok ? result.fieldErrors : undefined;
 
   return (
     <UploadStatusProvider>
-      <form action={action} className="flex max-w-5xl flex-col gap-6">
+      <form onSubmit={onSubmit} className="flex max-w-5xl flex-col gap-6">
         <input type="hidden" name="id" value={post?.id ?? ''} />
         <Card>
           <CardContent className="flex flex-col gap-4">
@@ -71,7 +70,7 @@ export function PostForm({post}: {post: PostFormValues | null}) {
           </CardContent>
         </Card>
         <div>
-          <SubmitButton>{post ? 'Save post' : 'Create post'}</SubmitButton>
+          <SubmitButton pending={pending}>{post ? 'Save post' : 'Create post'}</SubmitButton>
         </div>
       </form>
     </UploadStatusProvider>

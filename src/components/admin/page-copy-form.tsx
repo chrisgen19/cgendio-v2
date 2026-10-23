@@ -1,11 +1,10 @@
 'use client';
 
-import {useActionState} from 'react';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {savePageCopy} from '@/server/actions/site';
-import type {ActionResult} from '@/server/admin/action-helpers';
 import {SubmitButton, TextAreaField, TextField} from './form-fields';
 import {useActionToast} from './use-action-toast';
+import {useAdminForm} from './use-admin-form';
 
 type Field = {key: string; label: string; long?: boolean};
 
@@ -75,12 +74,12 @@ const SECTIONS: ReadonlyArray<{title: string; fields: Field[]}> = [
 ];
 
 export function PageCopyForm({copy}: {copy: Record<string, string>}) {
-  const [result, action] = useActionState<ActionResult | null, FormData>(savePageCopy, null);
+  const {result, pending, onSubmit} = useAdminForm(savePageCopy);
   useActionToast(result);
   const errors = result && !result.ok ? result.fieldErrors : undefined;
 
   return (
-    <form action={action} className="flex max-w-3xl flex-col gap-6">
+    <form onSubmit={onSubmit} className="flex max-w-3xl flex-col gap-6">
       {SECTIONS.map((section) => (
         <Card key={section.title}>
           <CardHeader>
@@ -108,7 +107,7 @@ export function PageCopyForm({copy}: {copy: Record<string, string>}) {
         </Card>
       ))}
       <div className="sticky bottom-4">
-        <SubmitButton>Save page copy</SubmitButton>
+        <SubmitButton pending={pending}>Save page copy</SubmitButton>
       </div>
     </form>
   );

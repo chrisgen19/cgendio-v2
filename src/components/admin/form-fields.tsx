@@ -20,7 +20,7 @@ type FieldShellProps = {
 
 /**
  * Label, control, hint and the field's server error, with the error wired to aria-describedby.
- * Only used inside the admin's client forms (SubmitButton relies on useFormStatus).
+ * Only used inside the admin's client forms (SubmitButton uses React hooks).
  */
 export function FieldShell({name, label, hint, errors, children}: FieldShellProps) {
   const id = `field-${name}`;
@@ -113,8 +113,15 @@ export function SwitchField({name, label, hint, defaultChecked}: SwitchFieldProp
   );
 }
 
-export function SubmitButton({children}: {children: ReactNode}) {
-  const {pending} = useFormStatus();
+type SubmitButtonProps = {
+  children: ReactNode;
+  /** From useAdminForm; falls back to useFormStatus, which only sees <form action> submissions */
+  pending?: boolean;
+};
+
+export function SubmitButton({children, pending: pendingProp}: SubmitButtonProps) {
+  const status = useFormStatus();
+  const pending = pendingProp ?? status.pending;
   // Also disabled while an UploadField is uploading, so a save can't race the upload (see upload-status.tsx)
   const {uploading} = useUploadStatus();
   return (

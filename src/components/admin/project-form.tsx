@@ -1,15 +1,14 @@
 'use client';
 
-import {useActionState} from 'react';
 import {Card, CardContent} from '@/components/ui/card';
 import {saveProject} from '@/server/actions/projects';
-import type {ActionResult} from '@/server/admin/action-helpers';
 import {SelectField, SubmitButton, SwitchField, TextAreaField, TextField} from './form-fields';
 import {MarkdownField} from './markdown-field';
 import {TitleSlugFields} from './title-slug-fields';
 import {UploadField} from './upload-field';
 import {UploadStatusProvider} from './upload-status';
 import {useActionToast} from './use-action-toast';
+import {useAdminForm} from './use-admin-form';
 
 export type ProjectFormValues = {
   id: string;
@@ -48,13 +47,13 @@ const SPANS = [
 ] as const;
 
 export function ProjectForm({project}: {project: ProjectFormValues | null}) {
-  const [result, action] = useActionState<ActionResult | null, FormData>(saveProject, null);
+  const {result, pending, onSubmit} = useAdminForm(saveProject);
   useActionToast(result);
   const errors = result && !result.ok ? result.fieldErrors : undefined;
 
   return (
     <UploadStatusProvider>
-      <form action={action} className="flex max-w-5xl flex-col gap-6">
+      <form onSubmit={onSubmit} className="flex max-w-5xl flex-col gap-6">
         <input type="hidden" name="id" value={project?.id ?? ''} />
         <Card>
           <CardContent className="flex flex-col gap-4">
@@ -99,7 +98,7 @@ export function ProjectForm({project}: {project: ProjectFormValues | null}) {
           </CardContent>
         </Card>
         <div>
-          <SubmitButton>{project ? 'Save project' : 'Create project'}</SubmitButton>
+          <SubmitButton pending={pending}>{project ? 'Save project' : 'Create project'}</SubmitButton>
         </div>
       </form>
     </UploadStatusProvider>
