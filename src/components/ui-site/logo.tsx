@@ -1,6 +1,8 @@
+import Link from 'next/link';
+
 export function Logo() {
   return (
-    <a
+    <Link
       href="/"
       className="relative inline-flex items-center gap-2.5 text-base font-semibold tracking-[-0.01em] text-ink no-underline after:absolute after:-inset-y-1 after:inset-x-0 after:content-[''] hover:text-ink"
     >
@@ -8,6 +10,6 @@ export function Logo() {
         cg
       </b>
       cgdiomampo.dev
-    </a>
+    </Link>
   );
 }

@@ -97,7 +97,7 @@ export function InboxList({messages}: {messages: ContactMessageRow[]}) {
             </div>
             <p className="m-0 text-sm leading-relaxed whitespace-pre-wrap">{message.message}</p>
             {message.emailedAt === null ? (
-              <p className="m-0 text-xs text-muted-foreground">Not emailed: no Resend key or contact email set.</p>
+              <p className="m-0 text-xs text-muted-foreground">Not emailed: check the Resend key and contact email in Settings, or the server log.</p>
             ) : null}
           </li>
         );
