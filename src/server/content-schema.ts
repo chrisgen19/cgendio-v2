@@ -63,6 +63,9 @@ export const postDetailSchema = postSchema.extend({
 /** A previous/next link between posts or projects. */
 export const contentLinkSchema = z.object({slug: z.string().min(1), title: z.string().min(1)});
 
+/** A published post or project in the sitemap: its slug and when it was last saved. */
+export const sitemapEntrySchema = z.object({slug: z.string().min(1), lastModified: z.iso.datetime()});
+
 /** A blog tag as filter: the label as written, its URL slug (?tag=) and how many published posts use it. */
 export const postTagSchema = z.object({label: z.string().min(1), slug: z.string().min(1), count: z.int().positive()});
 
@@ -135,6 +138,7 @@ export type Post = z.infer<typeof postSchema>;
 export type PostDetail = z.infer<typeof postDetailSchema>;
 export type ContentLink = z.infer<typeof contentLinkSchema>;
 export type PostTag = z.infer<typeof postTagSchema>;
+export type SitemapEntry = z.infer<typeof sitemapEntrySchema>;
 export type ProjectDetail = z.infer<typeof projectDetailSchema>;
 export type SiteSettings = z.infer<typeof siteSettingsSchema>;
 export type PageCopyKey = z.infer<typeof pageCopyKeySchema>;

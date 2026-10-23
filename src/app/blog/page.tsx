@@ -9,12 +9,15 @@ import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {MarkedText} from '@/components/ui-site/marked-text';
 import {Section} from '@/components/ui-site/section';
 import {SectionHeading} from '@/components/ui-site/section-heading';
+import {pageMetadata} from '@/lib/metadata';
 import {BLOG_PAGE_SIZE, getBlogIndex, getPageCopy, getPostTags} from '@/server/content';
 
-export const metadata: Metadata = {
+// Every tag and page variant points at /blog as its canonical URL (reading searchParams here would make it dynamic)
+export const metadata: Metadata = pageMetadata({
   title: 'Blog',
   description: 'Field notes on migrations, Next.js, WordPress and AI-assisted development.',
-};
+  path: '/blog',
+});
 
 /**
  * The blog index. The header is static; the list reads ?tag= and ?page= inside Suspense, so only that part waits for

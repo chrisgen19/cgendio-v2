@@ -1,10 +1,17 @@
 import type {Metadata, Viewport} from 'next';
+import {siteEnv} from '@/lib/env';
+import {SITE_DESCRIPTION, SITE_NAME} from '@/lib/metadata';
 import {body, display, mono} from './fonts';
 import './globals.css';
 
+/** Defaults for routes without their own metadata (pageMetadata() in src/lib/metadata.ts sets the rest per route). */
 export const metadata: Metadata = {
-  title: {default: 'Cgdiomampo.dev', template: '%s · Cgdiomampo.dev'},
-  description: 'We take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.',
+  metadataBase: new URL(siteEnv().NEXT_PUBLIC_SITE_URL),
+  title: {default: SITE_NAME, template: `%s · ${SITE_NAME}`},
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: {siteName: SITE_NAME, locale: 'en', type: 'website'},
+  twitter: {card: 'summary_large_image'},
 };
 
 export const viewport: Viewport = {
