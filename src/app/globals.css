@@ -107,6 +107,24 @@
   }
 }
 
+/* Code blocks in posts and case studies: Shiki's css-variables theme (src/lib/code-theme.ts) mapped to the code tokens */
+:root {
+  --shiki-foreground: var(--color-code-text);
+  --shiki-background: var(--color-ink);
+  --shiki-token-keyword: var(--color-code-keyword);
+  --shiki-token-constant: var(--color-code-keyword);
+  --shiki-token-parameter: var(--color-code-text);
+  --shiki-token-string: var(--color-code-string);
+  --shiki-token-string-expression: var(--color-code-string);
+  --shiki-token-function: var(--color-code-tag);
+  --shiki-token-link: var(--color-code-tag);
+  --shiki-token-comment: var(--color-code-dim);
+  --shiki-token-punctuation: var(--color-code-dim);
+  --shiki-token-inserted: var(--color-code-string);
+  --shiki-token-deleted: var(--color-code-dim);
+  --shiki-token-changed: var(--color-code-keyword);
+}
+
 @utility dot-grid {
   background-color: var(--color-white);
   background-image: radial-gradient(circle, var(--color-dot) 1px, transparent 1.3px);
