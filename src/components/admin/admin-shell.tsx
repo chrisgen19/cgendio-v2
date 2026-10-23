@@ -10,6 +10,7 @@ import {cn} from '@/lib/utils';
 
 const NAV = [
   {href: '/admin', label: 'Dashboard'},
+  {href: '/admin/inbox', label: 'Inbox'},
   {href: '/admin/projects', label: 'Projects'},
   {href: '/admin/posts', label: 'Posts'},
   {href: '/admin/milestones', label: 'Milestones'},
