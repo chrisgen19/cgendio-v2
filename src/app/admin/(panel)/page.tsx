@@ -39,7 +39,7 @@ export default async function AdminDashboard() {
       ) : (
         <ol className="flex flex-col divide-y rounded-lg border">
           {edits.map((edit) => (
-            <li key={`${edit.kind}-${edit.href}-${edit.at}`} className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm">
+            <li key={`${edit.kind}-${edit.id}`} className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm">
               <Link href={edit.href} className="font-medium hover:underline">
                 {edit.label}
               </Link>

@@ -79,11 +79,11 @@ export const getDashboard = async () => {
     db.stackItem.findMany({...recent, select: {id: true, name: true, updatedAt: true}}),
   ]);
   const edits = [
-    ...p.map((r) => ({label: r.title, kind: 'Project', href: `/admin/projects/${r.id}`, at: r.updatedAt})),
-    ...po.map((r) => ({label: r.title, kind: 'Post', href: `/admin/posts/${r.id}`, at: r.updatedAt})),
-    ...m.map((r) => ({label: r.title, kind: 'Milestone', href: '/admin/milestones', at: r.updatedAt})),
-    ...t.map((r) => ({label: r.role, kind: 'Timeline', href: '/admin/timeline', at: r.updatedAt})),
-    ...s.map((r) => ({label: r.name, kind: 'Stack', href: '/admin/stack', at: r.updatedAt})),
+    ...p.map((r) => ({id: r.id, label: r.title, kind: 'Project', href: `/admin/projects/${r.id}`, at: r.updatedAt})),
+    ...po.map((r) => ({id: r.id, label: r.title, kind: 'Post', href: `/admin/posts/${r.id}`, at: r.updatedAt})),
+    ...m.map((r) => ({id: r.id, label: r.title, kind: 'Milestone', href: '/admin/milestones', at: r.updatedAt})),
+    ...t.map((r) => ({id: r.id, label: r.role, kind: 'Timeline', href: '/admin/timeline', at: r.updatedAt})),
+    ...s.map((r) => ({id: r.id, label: r.name, kind: 'Stack', href: '/admin/stack', at: r.updatedAt})),
   ]
     .sort((a, b) => b.at.getTime() - a.at.getTime())
     .slice(0, 10)
