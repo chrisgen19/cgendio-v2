@@ -1,5 +1,6 @@
 import {expect, type Page, test} from '@playwright/test';
 import {fillContactForm, uniqueToken, useOwnIp} from '../support/contact';
+import {queryTestDb} from '../support/test-db';
 
 /*
  * Signed in as the e2e admin through the storage state from e2e/support/prepare.mts (Better Auth's test-utils plugin,
@@ -32,11 +33,15 @@ test('a project title edited in the admin shows on the home page', async ({page}
   const edited = `CV Tailor ${uniqueToken()}`;
   const workTitles = () => page.locator('#work').getByRole('heading', {level: 3});
 
+  // A failed earlier attempt (CI retries once, on the same database) can leave its edited title behind, so start from
+  // the seeded title, found by the slug that never changes. The save below revalidates the home page.
+  await queryTestDb('UPDATE projects SET title = $1 WHERE slug = $2', [original, 'cv-tailor']);
+
   await renameProject(page, original, edited);
   await page.goto('/');
   await expect(workTitles().filter({hasText: edited})).toBeVisible();
 
-  // Put it back (and prove the update works both ways); the next prepare resets the database anyway
+  // Put it back, proving the update works both ways (if this attempt fails first, the next one resets it above)
   await renameProject(page, edited, original);
   await page.goto('/');
   await expect(workTitles().filter({hasText: original})).toHaveText(original);
