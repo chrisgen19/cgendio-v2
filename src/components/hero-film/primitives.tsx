@@ -145,7 +145,7 @@ export const Check: React.FC<{size?: number; dark?: boolean}> = ({size = 28, dar
       flex: 'none',
       borderRadius: '50%',
       background: dark ? theme.badge : theme.accent,
-      color: dark ? theme.badgeInk : theme.white,
+      color: dark ? theme.badgeInk : theme.onAccent,
       display: 'grid',
       placeItems: 'center',
     }}

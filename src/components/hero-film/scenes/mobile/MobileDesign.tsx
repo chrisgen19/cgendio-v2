@@ -34,7 +34,7 @@ const Cursor: React.FC = () => {
           padding: '5px 10px',
           borderRadius: 99,
           background: theme.accent,
-          color: '#fff',
+          color: theme.onAccent,
           fontSize: 12,
           fontWeight: 600,
         }}

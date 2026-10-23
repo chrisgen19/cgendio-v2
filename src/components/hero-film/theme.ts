@@ -59,6 +59,8 @@ export const theme = {
   field: themed('field', '#F1F2F5'),
   /** Text on ink-filled shapes. */
   onInk: themed('on-ink', '#FFFFFF'),
+  /** Text and icons on accent fills: white on #3B2BFF, ink on the lighter dark-mode accent (white there is only 3:1). */
+  onAccent: themed('on-accent', '#FFFFFF'),
   /** Check badges and icon squares: ink with a lime tick in light mode, lime with an ink tick in dark mode. */
   badge: themed('badge', '#0D0E12'),
   badgeInk: themed('badge-ink', '#D7FF3D'),

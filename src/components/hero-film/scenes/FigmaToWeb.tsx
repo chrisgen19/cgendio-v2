@@ -91,7 +91,7 @@ export const FigmaToWeb: React.FC = () => (
               padding: '16px 26px',
               borderRadius: 99,
               background: theme.accent,
-              color: '#fff',
+              color: theme.onAccent,
               fontSize: 20,
               fontWeight: 600,
             }}

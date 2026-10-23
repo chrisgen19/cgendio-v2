@@ -83,7 +83,7 @@ export const MobileFigmaToWeb: React.FC = () => (
               padding: '10px 16px',
               borderRadius: 99,
               background: theme.accent,
-              color: '#fff',
+              color: theme.onAccent,
               fontSize: 14,
               fontWeight: 600,
             }}
