@@ -29,8 +29,9 @@ jobs:
         image: postgres:18-alpine
         env:
           POSTGRES_USER: cgendio
-          POSTGRES_PASSWORD: cgendio
           POSTGRES_DB: cgendio
+          # Throwaway container reachable only from this job: no password, so none is committed
+          POSTGRES_HOST_AUTH_METHOD: trust
         ports:
           - 5437:5432
         options: >-
