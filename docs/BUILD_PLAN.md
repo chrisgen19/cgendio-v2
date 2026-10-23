@@ -357,7 +357,7 @@ Verify: typecheck, lint, build; share the Lighthouse scores and axe results befo
 
 - Dark accent stays `#8E85FF`: the mockup's `#7466FF` fails 4.5:1 on cards and tint chips.
 - Light stays the default for a first visit (no cookie).
-- The toggle becomes the mockup's single sun/moon button in the header (light ↔ dark). The System option and the mobile menu and footer controls go.
+- The toggle becomes the mockup's single sun/moon button (light ↔ dark): in the header from 860px up, and as a row in the mobile menu on phones, where the header has no room. The System option and the footer control go.
 
 **Prompt:**
 
