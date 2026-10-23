@@ -3,7 +3,7 @@ import {z} from 'zod';
 /*
  * Server environment, validated on first use rather than at import, so modules that merely import this file don't
  * fail. Split by concern: `next build` needs only the database (it prerenders from it), so a build doesn't require
- * the auth or R2 secrets. Phase 9 extends this with mail and analytics.
+ * the auth or R2 secrets. Phase 9 adds analytics.
  */
 
 const serverEnvSchema = z.object({
@@ -37,9 +37,16 @@ const r2EnvSchema = z.object({
   R2_PUBLIC_URL: z.url().transform((url) => url.replace(/\/+$/, '')),
 });
 
+/** Contact form email. Without a key the message is still stored, and only the notification is skipped. */
+const mailEnvSchema = z.object({
+  RESEND_API_KEY: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
+  MAIL_FROM: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(3).default('Cgdiomampo.dev <onboarding@resend.dev>')),
+});
+
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 export type AuthEnv = z.infer<typeof authEnvSchema>;
 export type R2Env = z.infer<typeof r2EnvSchema>;
+export type MailEnv = z.infer<typeof mailEnvSchema>;
 
 const lazy = <T>(parse: () => T) => {
   let cached: T | undefined;
@@ -52,3 +59,4 @@ const lazy = <T>(parse: () => T) => {
 export const serverEnv = lazy((): ServerEnv => serverEnvSchema.parse(process.env));
 export const authEnv = lazy((): AuthEnv => authEnvSchema.parse(process.env));
 export const r2Env = lazy((): R2Env => r2EnvSchema.parse(process.env));
+export const mailEnv = lazy((): MailEnv => mailEnvSchema.parse(process.env));

@@ -225,3 +225,33 @@ model PageCopy {
 
   @@map("page_copy")
 }
+
+enum ContactProjectType {
+  WORDPRESS
+  NEXTJS
+  MIGRATION
+  JOB
+
+  @@map("contact_project_type")
+}
+
+/// A message from the /contact form. The admin inbox lists them; the visitor's IP is only kept as an HMAC hash for
+/// the rate limit, never in the clear.
+model ContactMessage {
+  id          String             @id @default(cuid())
+  name        String
+  email       String
+  company     String?
+  projectType ContactProjectType @map("project_type")
+  message     String
+  ipHash      String             @map("ip_hash")
+  /// null until the admin opens or marks it read
+  readAt      DateTime?          @map("read_at")
+  /// null when the notification email wasn't sent (no Resend key or contact email yet, or the send failed)
+  emailedAt   DateTime?          @map("emailed_at")
+  createdAt   DateTime           @default(now()) @map("created_at")
+
+  @@index([ipHash, createdAt])
+  @@index([createdAt])
+  @@map("contact_messages")
+}

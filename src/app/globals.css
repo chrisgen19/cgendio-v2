@@ -44,6 +44,8 @@
   --color-code-string: #d7ff3d;
   --color-code-tag: #7fd4ff;
   --color-code-dim: #7c818e;
+  /* Form errors (the canvas has no form; same red as the admin's destructive colour) */
+  --color-danger: #b91c1c;
 
   --radius-pill: 999px;
   --radius-card: 22px;
@@ -52,6 +54,8 @@
   --radius-photo: 32px;
   --radius-milestone: 24px;
   --radius-logo: 11px;
+  /* Contact form fields (the canvas has no form design) */
+  --radius-field: 14px;
 
   --shadow-card: 0 1px 0 rgba(13, 14, 18, 0.04), 0 18px 40px -18px rgba(13, 14, 18, 0.22);
   --shadow-deep: 0 30px 60px -24px rgba(13, 14, 18, 0.5);
