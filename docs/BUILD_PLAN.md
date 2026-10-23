@@ -435,7 +435,7 @@ Prompt C updates this table when a phase finishes. **Status** is one of `Not sta
 | 4 — Content layer | Prisma + Postgres, seeded, cached, static home | [#5](https://github.com/chrisgen19/cgendio-v2/issues/5) | Done | [#21](https://github.com/chrisgen19/cgendio-v2/pull/21) |
 | 5 — Admin | Better Auth, CRUD, uploads, instant revalidation | [#6](https://github.com/chrisgen19/cgendio-v2/issues/6) | Done | [#23](https://github.com/chrisgen19/cgendio-v2/pull/23) |
 | 6 — Blog & contact | Posts, case studies, contact form, CV, RSS | [#7](https://github.com/chrisgen19/cgendio-v2/issues/7) | Done | [#27](https://github.com/chrisgen19/cgendio-v2/pull/27) |
-| 7 — Polish | SEO, Lighthouse 90+, axe clean, dark mode | [#8](https://github.com/chrisgen19/cgendio-v2/issues/8) | In progress | |
+| 7 — Polish | SEO, Lighthouse 90+, axe clean, dark mode | [#8](https://github.com/chrisgen19/cgendio-v2/issues/8) | In review | |
 | 8 — Tests | Vitest + Playwright in CI, all green | [#9](https://github.com/chrisgen19/cgendio-v2/issues/9) | Not started | |
 | 9 — Launch | Live on cgdiomampo.dev, previews per PR | [#10](https://github.com/chrisgen19/cgendio-v2/issues/10) | Not started | |
 
