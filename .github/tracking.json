@@ -44,14 +44,14 @@
       "title": "Admin to edit content",
       "branch": "feature/phase-5-admin",
       "pr": 23,
-      "status": "In review"
+      "status": "Done"
     },
     "6": {
       "issue": 7,
       "title": "Blog, case studies and contact",
-      "branch": null,
+      "branch": "feature/phase-6-blog-case-studies-contact",
       "pr": null,
-      "status": "Not started"
+      "status": "In progress"
     },
     "7": {
       "issue": 8,
