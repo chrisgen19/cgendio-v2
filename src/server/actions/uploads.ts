@@ -22,7 +22,7 @@ export async function getUploadTarget(input: {kind: 'image' | 'cv'; contentType:
 
   const {kind, contentType, size} = parsed.data;
   const rules = UPLOAD_KINDS[kind];
-  if (!(contentType in rules.types)) {
+  if (!Object.hasOwn(rules.types, contentType)) {
     return {ok: false, error: kind === 'cv' ? 'The CV has to be a PDF.' : 'Use a JPEG, PNG, WebP or AVIF image.'};
   }
   if (size > rules.maxBytes) return {ok: false, error: `That file is over the ${megabytes(rules.maxBytes)} limit.`};
