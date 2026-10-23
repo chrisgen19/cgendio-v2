@@ -43,7 +43,7 @@ const clientIpHash = async () => {
 
 /**
  * The public contact form. A filled honeypot gets a fake success and stores nothing; otherwise the message is
- * validated, rate limited per IP (three per ten minutes), stored, and emailed after the response is sent.
+ * validated, rate limited per IP (three per ten minutes, checked atomically), stored, and emailed after the response is sent.
  */
 export async function submitContact(_previous: ContactResult | null, formData: FormData): Promise<ContactResult> {
   if (String(formData.get('website') ?? '') !== '') return {ok: true};
@@ -60,10 +60,15 @@ export async function submitContact(_previous: ContactResult | null, formData: F
   try {
     const ipHash = await clientIpHash();
     const since = new Date(Date.now() - RATE_LIMIT.minutes * 60_000);
-    const recent = await db.contactMessage.count({where: {ipHash, createdAt: {gte: since}}});
-    if (recent >= RATE_LIMIT.messages) return {ok: false, error: 'Too many messages from this connection. Try again in a few minutes.'};
-
-    const message = await db.contactMessage.create({data: {...input.data, ipHash}, select: {id: true}});
+    // Count and insert in one transaction behind a per-IP advisory lock (released at commit), so parallel requests from
+    // the same IP queue up instead of all passing the count before any of them inserts
+    const message = await db.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT 1 FROM pg_advisory_xact_lock(hashtextextended(${ipHash}, 0))`;
+      const recent = await tx.contactMessage.count({where: {ipHash, createdAt: {gte: since}}});
+      if (recent >= RATE_LIMIT.messages) return null;
+      return tx.contactMessage.create({data: {...input.data, ipHash}, select: {id: true}});
+    });
+    if (!message) return {ok: false, error: 'Too many messages from this connection. Try again in a few minutes.'};
     after(() => notifyContactMessage(message.id));
   } catch {
     return {ok: false, error: 'Something went wrong. Please try again.'};
