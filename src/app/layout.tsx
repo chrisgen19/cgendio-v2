@@ -1,7 +1,7 @@
 import type {Metadata, Viewport} from 'next';
 import {siteEnv} from '@/lib/env';
 import {SITE_DESCRIPTION, SITE_NAME} from '@/lib/metadata';
-import {THEME_SCRIPT} from '@/lib/theme';
+import {THEME_COLORS, THEME_SCRIPT} from '@/lib/theme';
 import {body, display, mono} from './fonts';
 import './globals.css';
 
@@ -15,11 +15,9 @@ export const metadata: Metadata = {
   twitter: {card: 'summary_large_image'},
 };
 
+// The no-JS fallback (light is the default theme). THEME_SCRIPT adds a theme-color for the chosen theme in front of it.
 export const viewport: Viewport = {
-  themeColor: [
-    {media: '(prefers-color-scheme: light)', color: '#F5F6F8'},
-    {media: '(prefers-color-scheme: dark)', color: '#0D0E12'},
-  ],
+  themeColor: THEME_COLORS.light,
 };
 
 export default function RootLayout({children}: LayoutProps<'/'>) {
