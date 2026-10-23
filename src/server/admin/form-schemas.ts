@@ -14,7 +14,11 @@ const text = (label: string, max = 500) =>
 const checkbox = z.preprocess((value) => value === 'on' || value === 'true', z.boolean());
 
 /** Empty optional fields become null instead of "" */
-const optionalUrl = z.preprocess((value) => (value === '' || value === undefined ? null : value), z.url({error: 'Enter a full URL'}).nullable());
+/** An http(s) address on a real domain, or empty. Bare z.url() also accepts mailto:, ftp: and javascript: URLs. */
+const optionalUrl = z.preprocess(
+  (value) => (value === '' || value === undefined ? null : value),
+  z.url({protocol: /^https?$/, hostname: z.regexes.domain, error: 'Enter a full URL'}).nullable(),
+);
 const optionalText = z.preprocess((value) => (typeof value === 'string' && value.trim() === '' ? null : value), z.string().trim().nullable());
 
 const slug = z
