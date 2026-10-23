@@ -1,6 +1,6 @@
 // Content for cgdiomampo.dev. Mirrors the Phase 3 shapes in src/server/content-schema.ts; src/server/content.ts
 // maps these rows to them, so components never see Prisma types. Tables and columns are snake_case.
-// Better Auth's tables arrive in Phase 5.
+// Better Auth's tables are at the end.
 
 generator client {
   provider            = "prisma-client"
@@ -146,4 +146,79 @@ model SiteSettings {
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   @@map("site_settings")
+}
+
+// Better Auth 1.7 tables (generated with `pnpm dlx auth@1.7.12 generate`, then mapped to snake_case; the adapter
+// only sees the Prisma model and field names). Only emails in ADMIN_EMAILS ever get a user row.
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false) @map("email_verified")
+  image         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime @map("expires_at")
+  token     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id")
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([identifier])
+  @@map("verifications")
+}
+
+/// Editable home page copy: eyebrows, headings, ledes, the About statement and facts, CTA labels. Keys are fixed in
+/// src/server/content-schema.ts (PAGE_COPY_KEYS); `[[...]]` marks the highlighted words in a heading.
+model PageCopy {
+  key       String   @id
+  value     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("page_copy")
 }

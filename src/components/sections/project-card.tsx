@@ -67,7 +67,7 @@ export function ProjectCard({project}: ProjectCardProps) {
         {/* Case studies arrive in Phase 6; until then this stays on #work, as in the canvas */}
         <a
           href="#work"
-          className="inline-flex items-center gap-2 self-start border-b-[1.5px] border-ink pb-[3px] text-[15px] font-semibold text-ink no-underline hover:border-accent hover:text-accent"
+          className="relative inline-flex items-center gap-2 self-start border-b-[1.5px] border-ink pb-[3px] text-[15px] font-semibold text-ink no-underline after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:border-accent hover:text-accent"
         >
           View case study<span className="sr-only">: {project.title}</span>
           <svg

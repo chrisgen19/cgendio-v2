@@ -7,6 +7,7 @@
 import {PrismaPg} from '@prisma/adapter-pg';
 import {type Prisma, PrismaClient} from '../src/generated/prisma/client.ts';
 import {milestones} from './seed-data/milestones.ts';
+import {pageCopy} from './seed-data/page-copy.ts';
 import {posts} from './seed-data/posts.ts';
 import {projects} from './seed-data/projects.ts';
 import {stack} from './seed-data/stack.ts';
@@ -86,9 +87,10 @@ const seed = async () => {
       data: [{id: 'site', contactEmail: '[YOUR EMAIL]', openToProjects: true, socials: {github: 'https://github.com/chrisgen19', linkedin: null}}],
       skipDuplicates: true,
     }),
+    db.pageCopy.createMany({data: Object.entries(pageCopy).map(([key, value]) => ({key, value})), skipDuplicates: true}),
   ]);
 
-  const names = ['stack items', 'projects', 'milestones', 'timeline entries', 'posts', 'site settings'];
+  const names = ['stack items', 'projects', 'milestones', 'timeline entries', 'posts', 'site settings', 'page copy'];
   for (const [i, result] of results.entries()) console.info(`${names[i]}: ${result.count} inserted`);
 };
 

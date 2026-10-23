@@ -37,14 +37,14 @@
       "title": "Content layer: Prisma + PostgreSQL",
       "branch": "feature/phase-4-content-layer",
       "pr": 21,
-      "status": "In review"
+      "status": "Done"
     },
     "5": {
       "issue": 6,
       "title": "Admin to edit content",
-      "branch": null,
-      "pr": null,
-      "status": "Not started"
+      "branch": "feature/phase-5-admin",
+      "pr": 23,
+      "status": "In review"
     },
     "6": {
       "issue": 7,

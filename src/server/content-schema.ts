@@ -62,6 +62,45 @@ export const siteSettingsSchema = z.object({
   socials: z.record(z.string(), z.url().nullable()),
 });
 
+/** Every editable piece of home page copy, grouped by section (the admin form follows this order). */
+export const PAGE_COPY_KEYS = [
+  'stack.eyebrow',
+  'about.eyebrow',
+  'about.statement',
+  'about.name',
+  'about.role',
+  'about.fact1.title',
+  'about.fact1.body',
+  'about.fact2.title',
+  'about.fact2.body',
+  'about.fact3.title',
+  'about.fact3.body',
+  'work.eyebrow',
+  'work.heading',
+  'milestones.eyebrow',
+  'milestones.heading',
+  'milestones.lede',
+  'timeline.eyebrow',
+  'timeline.heading',
+  'timeline.lede',
+  'timeline.cvLabel',
+  'blog.eyebrow',
+  'blog.heading',
+  'blog.lede',
+  'blog.allLabel',
+  'contact.eyebrow',
+  'contact.heading',
+  'contact.lede',
+  'contact.primaryLabel',
+  'contact.cvLabel',
+  'contact.location',
+] as const;
+
+export const pageCopyKeySchema = z.enum(PAGE_COPY_KEYS);
+
+/** All keys are required: a missing row fails loudly instead of rendering an empty heading. */
+export const pageCopySchema = z.record(pageCopyKeySchema, z.string().min(1));
+
 export type StackItem = z.infer<typeof stackItemSchema>;
 export type ProjectGroup = z.infer<typeof projectGroupSchema>;
 export type ProjectTheme = z.infer<typeof projectThemeSchema>;
@@ -72,3 +111,5 @@ export type TimelineDot = z.infer<typeof timelineDotSchema>;
 export type TimelineEntry = z.infer<typeof timelineEntrySchema>;
 export type Post = z.infer<typeof postSchema>;
 export type SiteSettings = z.infer<typeof siteSettingsSchema>;
+export type PageCopyKey = z.infer<typeof pageCopyKeySchema>;
+export type PageCopy = z.infer<typeof pageCopySchema>;

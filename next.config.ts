@@ -17,6 +17,12 @@ const nextConfig: NextConfig = {
     afterFiles: [],
     fallback: [],
   }),
+  // Admin, sign-in and draft previews never go in search results (also set as robots metadata on those pages)
+  headers: async () => [
+    {source: '/admin/:path*', headers: [{key: 'X-Robots-Tag', value: 'noindex, nofollow'}]},
+    {source: '/admin', headers: [{key: 'X-Robots-Tag', value: 'noindex, nofollow'}]},
+    {source: '/preview/:path*', headers: [{key: 'X-Robots-Tag', value: 'noindex, nofollow'}]},
+  ],
   turbopack: {
     rules: {
       '*.css': {
