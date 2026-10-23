@@ -57,7 +57,7 @@
       "issue": 8,
       "title": "SEO, performance, accessibility, dark mode",
       "branch": "feature/phase-7-seo-perf-a11y",
-      "pr": null,
+      "pr": 29,
       "status": "In review"
     },
     "8": {
