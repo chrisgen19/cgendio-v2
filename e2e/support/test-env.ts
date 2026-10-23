@@ -1,7 +1,7 @@
 /*
- * The environment of the e2e server: the Playwright config, the prepare script and .github/workflows/ci.yml all use
- * these values (the workflow repeats them, keep it in sync). Variables set here win over .env, so a local run never
- * uses real secrets, the real database or the real Resend API.
+ * The environment of the e2e build and server: the Playwright config, the prepare script and `pnpm test:e2e:build`
+ * (used by CI) all read these values. Variables set here win over .env, so a local run never uses real secrets, the
+ * real database or the real Resend API. CI's Postgres service listens on the same port as compose.yaml's.
  */
 
 export const E2E_PORT = 3100;

@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e:prepare": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON e2e/support/prepare.mts",
+    "test:e2e:build": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON e2e/support/with-test-env.mts next build",
     "test:e2e": "pnpm test:e2e:prepare && playwright test",
     "test:e2e:ui": "playwright test --ui",
     "remotion:studio": "remotion studio src/remotion/index.ts",
