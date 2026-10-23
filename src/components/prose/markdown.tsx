@@ -1,8 +1,9 @@
 import 'server-only';
 import rehypeShiki, {type RehypeShikiOptions} from '@shikijs/rehype';
+import {cacheLife} from 'next/cache';
 import type {ComponentProps, ReactNode} from 'react';
 import {type Components, MarkdownAsync} from 'react-markdown';
-import rehypeSanitize from 'rehype-sanitize';
+import rehypeSanitize, {defaultSchema} from 'rehype-sanitize';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import {CODE_THEME} from '@/lib/code-theme';
@@ -23,6 +24,12 @@ const SHIKI_OPTIONS: RehypeShikiOptions = {
     },
   ],
 };
+
+/**
+ * GitHub's sanitize schema without its own id prefix: remark-rehype already prefixes footnote ids and their links with
+ * "user-content-", and raw HTML (the only other source of ids) is removed, so a second prefix would only break footnotes.
+ */
+const SANITIZE_SCHEMA = {...defaultSchema, clobberPrefix: ''};
 
 type HeadingProps = ComponentProps<'h2'> & {level: 2 | 3};
 
@@ -126,13 +133,18 @@ const COMPONENTS: Components = {
  * Renders post or case study Markdown from the database on the server. Raw HTML is removed (rehype-sanitize) before
  * anything else runs; headings get ids (rehype-slug) and the h2s are returned for the table of contents; code blocks
  * are highlighted by Shiki last, on trusted output.
+ *
+ * Cached by the Markdown text: Shiki's tokenizer reads the clock (a time limit per line), which Cache Components only
+ * allows inside a cache scope, and the same body never needs highlighting twice.
  */
 export const renderMarkdown = async (markdown: string): Promise<{content: ReactNode; toc: TocItem[]}> => {
+  'use cache';
+  cacheLife('max');
   const toc: TocItem[] = [];
   const content = await MarkdownAsync({
     children: markdown,
     remarkPlugins: [remarkGfm],
-    rehypePlugins: [rehypeSanitize, rehypeDemoteH1, rehypeSlug, [rehypeCollectToc, {sink: toc}], [rehypeShiki, SHIKI_OPTIONS]],
+    rehypePlugins: [[rehypeSanitize, SANITIZE_SCHEMA], rehypeDemoteH1, rehypeSlug, [rehypeCollectToc, {sink: toc}], [rehypeShiki, SHIKI_OPTIONS]],
     components: COMPONENTS,
   });
   return {content: <div className="max-w-[68ch] text-lg leading-[1.7] text-ink max-md:text-[17px]">{content}</div>, toc};
