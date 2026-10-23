@@ -82,10 +82,12 @@ jobs:
             test-results/
           retention-days: 14
 
+      # A missing baseline is written by the run (and fails it), so a failed run also carries any new Linux baselines
       - name: Upload the Linux visual baselines
-        if: inputs.update_snapshots
+        if: failure() || inputs.update_snapshots
         uses: actions/upload-artifact@v7
         with:
           name: linux-snapshots
           path: e2e/**/__screenshots__/**/*-linux.png
+          if-no-files-found: ignore
           retention-days: 7

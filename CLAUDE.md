@@ -107,7 +107,7 @@ Map them in `@theme inline`. A next/font variable must never share its name with
 Before calling any task done:
 
 - `pnpm typecheck`, `pnpm lint`, `pnpm test` (Vitest) and `pnpm build` pass.
-- `pnpm test:e2e` passes (needs `pnpm db:up`). It resets the `cgendio_test` database, builds against it and runs Playwright at 1440px and 390px. After an intended visual change, refresh the baselines with `pnpm test:e2e --update-snapshots`, check the new images, and regenerate the Linux ones by running the CI workflow with `update_snapshots`.
+- `pnpm test:e2e` passes (needs `pnpm db:up`). It resets the `cgendio_test` database, builds against it and runs Playwright at 1440px and 390px. After an intended visual change, refresh the baselines with `pnpm test:e2e --update-snapshots`, check the new images, and get the Linux ones from CI's `linux-snapshots` artifact (run the workflow with `update_snapshots`, or take them from a run that failed on a missing baseline).
 - UI changes are checked at **1440px** and **390px**; say so if they weren't.
 
 ## Git and tracking
