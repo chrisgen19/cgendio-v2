@@ -6,6 +6,7 @@ import {toast} from 'sonner';
 import {Button} from '@/components/ui/button';
 import {Label} from '@/components/ui/label';
 import {getUploadTarget} from '@/server/actions/uploads';
+import {useUploadStatus} from './upload-status';
 
 type UploadFieldProps = {
   /** Form field that receives the public URL */
@@ -25,9 +26,11 @@ export function UploadField({name, label, kind, defaultValue, hint}: UploadField
   const input = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(defaultValue ?? '');
   const [busy, setBusy] = useState(false);
+  const {trackUpload} = useUploadStatus();
 
   const upload = async (file: File) => {
     setBusy(true);
+    trackUpload(1);
     try {
       const target = await getUploadTarget({kind, contentType: file.type, size: file.size});
       if (!target.ok) {
@@ -45,6 +48,7 @@ export function UploadField({name, label, kind, defaultValue, hint}: UploadField
       toast.error('Upload failed. Check your connection and the bucket settings.');
     } finally {
       setBusy(false);
+      trackUpload(-1);
       if (input.current) input.current.value = '';
     }
   };

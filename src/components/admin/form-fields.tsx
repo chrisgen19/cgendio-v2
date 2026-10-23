@@ -6,6 +6,7 @@ import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Switch} from '@/components/ui/switch';
 import {Textarea} from '@/components/ui/textarea';
+import {useUploadStatus} from './upload-status';
 
 type FieldErrors = Record<string, string[]> | undefined;
 
@@ -114,9 +115,11 @@ export function SwitchField({name, label, hint, defaultChecked}: SwitchFieldProp
 
 export function SubmitButton({children}: {children: ReactNode}) {
   const {pending} = useFormStatus();
+  // Also disabled while an UploadField is uploading, so a save can't race the upload (see upload-status.tsx)
+  const {uploading} = useUploadStatus();
   return (
-    <Button type="submit" size="lg" disabled={pending}>
-      {pending ? 'Saving…' : children}
+    <Button type="submit" size="lg" disabled={pending || uploading}>
+      {pending ? 'Saving…' : uploading ? 'Uploading…' : children}
     </Button>
   );
 }
