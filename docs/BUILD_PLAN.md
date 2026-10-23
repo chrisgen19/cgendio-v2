@@ -470,7 +470,7 @@ Prompt C updates this table when a phase finishes. **Status** is one of `Not sta
 | 5 — Admin | Better Auth, CRUD, uploads, instant revalidation | [#6](https://github.com/chrisgen19/cgendio-v2/issues/6) | Done | [#23](https://github.com/chrisgen19/cgendio-v2/pull/23) |
 | 6 — Blog & contact | Posts, case studies, contact form, CV, RSS | [#7](https://github.com/chrisgen19/cgendio-v2/issues/7) | Done | [#27](https://github.com/chrisgen19/cgendio-v2/pull/27) |
 | 7 — Polish | SEO, Lighthouse 90+, axe clean, dark mode | [#8](https://github.com/chrisgen19/cgendio-v2/issues/8) | Done | [#29](https://github.com/chrisgen19/cgendio-v2/pull/29) |
-| 7.1: Dark refresh | Dark mockup applied, themed hero film, sun/moon toggle | [#32](https://github.com/chrisgen19/cgendio-v2/issues/32) | In review | [#33](https://github.com/chrisgen19/cgendio-v2/pull/33) |
+| 7.1: Dark refresh | Dark mockup applied, themed hero film, sun/moon toggle | [#32](https://github.com/chrisgen19/cgendio-v2/issues/32) | Done | [#33](https://github.com/chrisgen19/cgendio-v2/pull/33) |
 | 8 — Tests | Vitest + Playwright in CI, all green | [#9](https://github.com/chrisgen19/cgendio-v2/issues/9) | Done | [#31](https://github.com/chrisgen19/cgendio-v2/pull/31) |
 | 9 — Launch | Live on cgdiomampo.dev, previews per PR | [#10](https://github.com/chrisgen19/cgendio-v2/issues/10) | Not started | |
 
