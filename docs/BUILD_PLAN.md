@@ -348,6 +348,40 @@ Verify: typecheck, lint, build; share the Lighthouse scores and axe results befo
 
 ---
 
+<!-- phase:7.1 -->
+## Phase 7.1: Dark mode refresh with a themed hero film
+
+**Goal:** dark mode follows the updated mockup in `docs/design/dark-version/Main.dc.html`: the hero film, its header and HUD, the logo, project thumbs and the highlighter all get dark values, and light mode stays exactly as it is.
+
+**Decisions (agreed with Christian):**
+
+- Dark accent stays `#8E85FF`: the mockup's `#7466FF` fails 4.5:1 on cards and tint chips.
+- Light stays the default for a first visit (no cookie).
+- The toggle becomes the mockup's single sun/moon button in the header (light ↔ dark). The System option and the mobile menu and footer controls go.
+
+**Prompt:**
+
+```text
+Phase 7.1 of docs/BUILD_PLAN.md: dark mode refresh. Follow CLAUDE.md.
+
+- Read docs/design/dark-version/Main.dc.html as a spec (diff it against design-reference.dc.html: the changes are the new --surface/--solid/--badge/--mark/--film/--hud/--code tokens and their dark values). Never copy its runtime.
+- Map the mockup's dark tokens onto the @theme tokens in globals.css, keeping the decisions above. Light values must not change.
+- Theme the Remotion hero film through CSS variables in theme.ts, with the light values as fallbacks so Studio and renders stay light. The static first frame, overlay header and HUD follow the theme too.
+- Remove the light islands the mockup drops (film, overlay header, logo square, project thumbs, code windows); keep the lime contact panel and lime badges light.
+- Replace the three-way toggle with the sun/moon button; the cookie stores light or dark.
+
+Verify: typecheck, lint, test, build, test:e2e (light baselines unchanged); check both themes at 1440px and 390px; recheck contrast in dark.
+```
+
+**Done when:**
+
+- [ ] Dark mode matches the dark-version mockup, hero film included, at 1440px and 390px
+- [ ] Light mode is unchanged (visual baselines pass without updates)
+- [ ] axe reports zero violations in both themes
+- [ ] The sun/moon toggle switches themes with no flash on reload
+
+---
+
 <!-- phase:8 -->
 ## Phase 8 — Tests and QA
 
@@ -436,7 +470,8 @@ Prompt C updates this table when a phase finishes. **Status** is one of `Not sta
 | 5 — Admin | Better Auth, CRUD, uploads, instant revalidation | [#6](https://github.com/chrisgen19/cgendio-v2/issues/6) | Done | [#23](https://github.com/chrisgen19/cgendio-v2/pull/23) |
 | 6 — Blog & contact | Posts, case studies, contact form, CV, RSS | [#7](https://github.com/chrisgen19/cgendio-v2/issues/7) | Done | [#27](https://github.com/chrisgen19/cgendio-v2/pull/27) |
 | 7 — Polish | SEO, Lighthouse 90+, axe clean, dark mode | [#8](https://github.com/chrisgen19/cgendio-v2/issues/8) | Done | [#29](https://github.com/chrisgen19/cgendio-v2/pull/29) |
-| 8 — Tests | Vitest + Playwright in CI, all green | [#9](https://github.com/chrisgen19/cgendio-v2/issues/9) | In review | [#31](https://github.com/chrisgen19/cgendio-v2/pull/31) |
+| 7.1: Dark refresh | Dark mockup applied, themed hero film, sun/moon toggle | [#32](https://github.com/chrisgen19/cgendio-v2/issues/32) | In progress | |
+| 8 — Tests | Vitest + Playwright in CI, all green | [#9](https://github.com/chrisgen19/cgendio-v2/issues/9) | Done | [#31](https://github.com/chrisgen19/cgendio-v2/pull/31) |
 | 9 — Launch | Live on cgdiomampo.dev, previews per PR | [#10](https://github.com/chrisgen19/cgendio-v2/issues/10) | Not started | |
 
 **Open items to fill before launch:**
