@@ -88,6 +88,7 @@ export const settingsFormSchema = z.object({
   contactEmail: text('Contact email', 200),
   openToProjects: checkbox,
   cvUrl: optionalUrl,
+  linkedinUrl: optionalUrl,
 });
 
 export const pageCopyFormSchema = z.object(

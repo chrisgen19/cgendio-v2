@@ -53,7 +53,17 @@ export const listStack = async () => {
 
 export const getSettingsForEdit = async () => {
   await requireAdmin();
-  return db.siteSettings.findUniqueOrThrow({where: {id: 'site'}, select: {contactEmail: true, openToProjects: true, cvUrl: true}});
+  const row = await db.siteSettings.findUniqueOrThrow({
+    where: {id: 'site'},
+    select: {contactEmail: true, openToProjects: true, cvUrl: true, socials: true},
+  });
+  const linkedin = (row.socials as Record<string, unknown>).linkedin;
+  return {
+    contactEmail: row.contactEmail,
+    openToProjects: row.openToProjects,
+    cvUrl: row.cvUrl,
+    linkedinUrl: typeof linkedin === 'string' ? linkedin : null,
+  };
 };
 
 export const getPageCopyForEdit = async () => {

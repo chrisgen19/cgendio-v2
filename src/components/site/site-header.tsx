@@ -38,7 +38,7 @@ export async function SiteHeader({overlay = false}: SiteHeaderProps) {
                 Open to projects
               </span>
             ) : null}
-            <Button href="#contact" size="sm">
+            <Button href="/contact" size="sm" className="whitespace-nowrap">
               Let&apos;s talk
             </Button>
             <MobileMenu />
