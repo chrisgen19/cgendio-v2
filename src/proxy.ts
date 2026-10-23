@@ -8,13 +8,22 @@ import {isPreviewType, verifyPreview} from '@/lib/preview-signature';
  *   valid session for an allowlisted email) is requireAdmin() in the admin layout and in every server action.
  * - /preview: a 404 for any link whose signature is wrong or expired. The page checks again before showing anything.
  */
+/** The decoded path segment, or null for malformed percent-encoding (decodeURIComponent throws a URIError). */
+const decodeSegment = (segment: string) => {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return null;
+  }
+};
+
 export function proxy(request: NextRequest) {
   const {pathname, searchParams} = request.nextUrl;
 
   if (pathname.startsWith('/preview/')) {
-    const [, , type, slug] = pathname.split('/');
-    const valid =
-      isPreviewType(type) && slug && verifyPreview(type, decodeURIComponent(slug), searchParams.get('expires'), searchParams.get('signature'));
+    const [, , type, rawSlug] = pathname.split('/');
+    const slug = rawSlug ? decodeSegment(rawSlug) : null;
+    const valid = isPreviewType(type) && slug && verifyPreview(type, slug, searchParams.get('expires'), searchParams.get('signature'));
     return valid ? NextResponse.next() : new NextResponse('Not found', {status: 404, headers: {'X-Robots-Tag': 'noindex, nofollow'}});
   }
 
