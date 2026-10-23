@@ -9,7 +9,7 @@ type MarkProps = {
 };
 
 /**
- * The lime highlighter under a key word. The bar is drawn by default; only when JS runs and motion is
+ * The lime highlighter under a key word (in dark mode a translucent bar under lime text). The bar is drawn by default; only when JS runs and motion is
  * allowed (the `motion-js` variant) does it start collapsed and sweep in the first time it scrolls into view.
  */
 export function Mark({children, className}: MarkProps) {
@@ -33,7 +33,7 @@ export function Mark({children, className}: MarkProps) {
   }, []);
 
   return (
-    <span ref={ref} data-revealed={revealed || undefined} className={cn('group relative z-0 inline-block', className)}>
+    <span ref={ref} data-revealed={revealed || undefined} className={cn('group relative z-0 inline-block text-highlight-ink', className)}>
       {children}
       <span
         aria-hidden="true"

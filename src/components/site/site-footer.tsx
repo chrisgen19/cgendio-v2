@@ -1,6 +1,5 @@
 import {Logo} from '@/components/ui-site/logo';
 import {getSiteSettings} from '@/server/content';
-import {ThemeSegmented} from './theme-toggle';
 
 /** Profiles from admin Settings (socials); each link is hidden until its URL is set. */
 const PROFILES = [
@@ -28,7 +27,6 @@ export async function SiteFooter() {
             </li>
           ))}
         </ul>
-        <ThemeSegmented />
         <span className="font-mono text-xs text-muted">© 2026 Cgdiomampo.dev · Built with Next.js · Deployed on Coolify</span>
       </div>
     </footer>

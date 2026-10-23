@@ -11,7 +11,7 @@ type PostNavProps = {
 };
 
 const CARD =
-  'flex min-h-11 flex-col gap-2 rounded-card border border-line bg-white p-6 text-ink no-underline shadow-card transition-colors duration-200 hover:border-ink hover:text-ink';
+  'flex min-h-11 flex-col gap-2 rounded-card border border-line bg-white p-6 text-ink no-underline shadow-(--shadow-card) transition-colors duration-200 hover:border-ink hover:text-ink';
 
 /** Previous and next article links under a post. */
 export function PostNav({previous, next}: PostNavProps) {

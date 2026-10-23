@@ -62,7 +62,7 @@ export function ContactForm() {
 
   if (result?.ok) {
     return (
-      <output className="flex flex-col gap-3 rounded-card border border-line bg-white p-8 shadow-card max-md:p-6">
+      <output className="flex flex-col gap-3 rounded-card border border-line bg-white p-8 shadow-(--shadow-card) max-md:p-6">
         <h2 ref={doneRef} tabIndex={-1} className="m-0 font-display text-[32px] leading-[1.1] font-bold tracking-[-0.03em]">
           Thanks, we&apos;ve got your message.
         </h2>
@@ -83,7 +83,7 @@ export function ContactForm() {
       ref={formRef}
       onSubmit={onSubmit}
       noValidate
-      className="relative flex flex-col gap-5 rounded-card border border-line bg-white p-8 shadow-card max-md:p-6"
+      className="relative flex flex-col gap-5 rounded-card border border-line bg-white p-8 shadow-(--shadow-card) max-md:p-6"
     >
       {result && !result.ok && result.error ? (
         <p role="alert" className="m-0 rounded-field border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">

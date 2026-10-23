@@ -10,7 +10,7 @@ export function Hero() {
   return (
     <div
       id="top"
-      className="@container relative h-[min(100svh,980px)] min-h-[640px] bg-white max-md:h-svh max-md:min-h-[600px] portrait:h-svh portrait:min-h-[600px]"
+      className="@container relative h-[min(100svh,980px)] min-h-[640px] bg-film max-md:h-svh max-md:min-h-[600px] portrait:h-svh portrait:min-h-[600px]"
     >
       <HeroStage worksHref="#work">
         <HeroStaticFrame />

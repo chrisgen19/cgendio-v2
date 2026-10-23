@@ -31,12 +31,23 @@
   --color-accent-hover: #2417c9;
   --color-status: #16a34a;
   --color-thumb: #e9ebf0;
+  /* The ink project thumb (darker than the dark page in dark mode) */
+  --color-thumb-ink: #0d0e12;
   --color-dot: #e1e4ea;
   --color-wire: #e6e8ee;
   --color-wire-soft: #eef0f4;
   --color-outline-num: #e4e7ed;
   --color-dot-placeholder: #c9cdd6;
   --color-ink-soft: #23252b;
+  /* The hero stage behind the dot grid */
+  --color-film: #ffffff;
+  /* The logo square: ink with a lime "cg", swapped to lime with ink in dark mode */
+  --color-badge: #0d0e12;
+  --color-badge-ink: #d7ff3d;
+  /* Fixed in both themes: text on the ink thumb and code windows, and text on lime */
+  --color-on-dark: #ffffff;
+  --color-on-lime: #0d0e12;
+  --color-code-bg: #0d0e12;
   --color-code-chrome: #1c1e25;
   --color-code-dots: #3a3d46;
   --color-code-text: #e8e9ee;
@@ -46,8 +57,9 @@
   --color-code-dim: #7c818e;
   /* Form errors (the canvas has no form; same red as the admin's destructive colour) */
   --color-danger: #b91c1c;
-  /* The highlighter bar under a heading's key word (lime; toned down in dark mode so light text stays readable) */
+  /* The highlighter bar under a heading's key word, and the marked word's colour (lime text on a translucent bar in dark mode) */
   --color-highlight: #d7ff3d;
+  --color-highlight-ink: currentColor;
 
   --radius-pill: 999px;
   --radius-card: 22px;
@@ -59,9 +71,15 @@
   /* Contact form fields (the canvas has no form design) */
   --radius-field: 14px;
 
+  /*
+   * Use these as shadow-(--shadow-card), not shadow-card: Tailwind copies a theme shadow's value into its utility, so
+   * the dark mode overrides below would never reach shadow-card.
+   */
   --shadow-card: 0 1px 0 rgba(13, 14, 18, 0.04), 0 18px 40px -18px rgba(13, 14, 18, 0.22);
   --shadow-deep: 0 30px 60px -24px rgba(13, 14, 18, 0.5);
   --shadow-menu: 0 24px 48px -20px rgba(13, 14, 18, 0.3);
+  /* The ink project thumb's edge: none on the light page, a line-coloured ring on the dark one */
+  --shadow-thumb: 0 0 #0000;
 
   --container-site: 1320px;
 
@@ -69,8 +87,9 @@
 }
 
 /*
- * Dark mode. The inline script in the root layout sets data-theme on <html> from the `theme` cookie before the first
- * paint (light when there's no cookie). Only the tokens change: components keep using the same utilities.
+ * Dark mode, from docs/design/dark-version/Main.dc.html. The inline script in the root layout sets data-theme on <html>
+ * from the `theme` cookie before the first paint (light when there's no cookie). Only the tokens change: components
+ * keep using the same utilities. The accent stays #8e85ff (the mockup's #7466ff fails 4.5:1 on cards and tint chips).
  * Admin pages always stay light (they have their own shadcn theme).
  */
 :root {
@@ -79,32 +98,71 @@
 
 :root[data-theme="dark"]:not(:has(.admin-theme)) {
   color-scheme: dark;
-  --color-ground: #0d0e12;
+  --color-ground: #0b0c10;
   --color-white: #15171d;
-  --color-ink: #f1f2f5;
-  --color-muted: #9a9fab;
-  --color-line: #2a2d36;
+  --color-ink: #f2f3f5;
+  --color-muted: #a0a6b2;
+  --color-line: #2a2e37;
   --color-accent: #8e85ff;
-  --color-accent-hover: #ada6ff;
-  --color-tint: color-mix(in srgb, #8e85ff 16%, #15171d);
-  --color-thumb: #1e2128;
-  --color-dot: #24272f;
-  --color-wire: #22252c;
-  --color-wire-soft: #1b1d23;
-  --color-outline-num: #262930;
-  --color-dot-placeholder: #3a3e48;
+  --color-accent-hover: #a69dff;
+  --color-tint: color-mix(in srgb, #8e85ff 18%, #15171d);
+  --color-thumb: #1f222a;
+  --color-thumb-ink: #050608;
+  --color-dot: #1c1f26;
+  --color-wire: #2c303a;
+  --color-wire-soft: #23262e;
+  --color-outline-num: #1f222a;
+  --color-dot-placeholder: #3a3f4b;
   --color-ink-soft: #c9ccd4;
+  --color-film: #0b0c10;
+  --color-badge: #d7ff3d;
+  --color-badge-ink: #0d0e12;
+  --color-code-bg: #0f1116;
+  --color-code-chrome: #1a1d24;
   --color-danger: #f87171;
-  --color-highlight: color-mix(in srgb, #d7ff3d 32%, transparent);
-  --shadow-card: 0 1px 0 rgba(0, 0, 0, 0.3), 0 18px 40px -18px rgba(0, 0, 0, 0.7);
-  --shadow-deep: 0 30px 60px -24px rgba(0, 0, 0, 0.8);
-  --shadow-menu: 0 24px 48px -20px rgba(0, 0, 0, 0.75);
+  --color-highlight: rgba(215, 255, 61, 0.22);
+  --color-highlight-ink: #d7ff3d;
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 18px 40px -18px rgba(0, 0, 0, 0.75);
+  --shadow-deep: 0 0 0 1px #2a2e37, 0 30px 60px -24px rgba(0, 0, 0, 0.85);
+  --shadow-menu: 0 24px 48px -20px rgba(0, 0, 0, 0.8);
+  --shadow-thumb: inset 0 0 0 1px #2a2e37;
+
+  /* The hero film's colours (src/components/hero-film/theme.ts; light mode uses its fallbacks) */
+  --film-ink: #f2f3f5;
+  --film-muted: #a0a6b2;
+  --film-line: #2a2e37;
+  --film-stage: #0b0c10;
+  --film-surface: #15171d;
+  --film-glass: rgba(21, 23, 29, 0.92);
+  --film-preview: #1b1e25;
+  --film-canvas: #1b1e25;
+  --film-field: #1b1e25;
+  --film-on-ink: #0d0e12;
+  --film-badge: #d7ff3d;
+  --film-badge-ink: #0d0e12;
+  --film-accent: #8e85ff;
+  --film-tint: color-mix(in srgb, #8e85ff 18%, #15171d);
+  --film-wire: #2c303a;
+  --film-wire-soft: #23262e;
+  --film-bar: #353a46;
+  --film-dot: #1c1f26;
+  --film-outline: #1f222a;
+  --film-window-dot: #3a3f4b;
+  --film-globe: #3a3f4b;
+  --film-globe-soft: #2c303a;
+  --film-mark: rgba(215, 255, 61, 0.22);
+  --film-mark-ink: #d7ff3d;
+  --film-sweep-blend: screen;
+  --film-code-bg: #0f1116;
+  --film-code-chrome: #1a1d24;
+  --film-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 18px 40px -18px rgba(0, 0, 0, 0.75);
+  --film-shadow-deep: 0 0 0 1px #2a2e37, 0 30px 60px -24px rgba(0, 0, 0, 0.85);
 }
 
 /*
- * A light island inside a dark page: the hero (the film is always light), the lime contact panel, the logo square,
- * project thumbs, lime badges and code windows. Restates the light values from @theme above (keep them in sync). The
- * text colour reset is in @layer base below, so utilities like text-white still win over it.
+ * A light island inside a dark page: the lime contact panel, lime badges and the preview banner. Restates the light
+ * values from @theme above (keep them in sync). The text colour reset is in @layer base below, so utilities like
+ * text-white still win over it.
  */
 :root[data-theme="dark"] [data-theme="light"] {
   color-scheme: light;
@@ -117,17 +175,25 @@
   --color-accent-hover: #2417c9;
   --color-tint: color-mix(in srgb, #3b2bff 10%, #fff);
   --color-thumb: #e9ebf0;
+  --color-thumb-ink: #0d0e12;
   --color-dot: #e1e4ea;
   --color-wire: #e6e8ee;
   --color-wire-soft: #eef0f4;
   --color-outline-num: #e4e7ed;
   --color-dot-placeholder: #c9cdd6;
   --color-ink-soft: #23252b;
+  --color-film: #ffffff;
+  --color-badge: #0d0e12;
+  --color-badge-ink: #d7ff3d;
+  --color-code-bg: #0d0e12;
+  --color-code-chrome: #1c1e25;
   --color-danger: #b91c1c;
   --color-highlight: #d7ff3d;
+  --color-highlight-ink: currentColor;
   --shadow-card: 0 1px 0 rgba(13, 14, 18, 0.04), 0 18px 40px -18px rgba(13, 14, 18, 0.22);
   --shadow-deep: 0 30px 60px -24px rgba(13, 14, 18, 0.5);
   --shadow-menu: 0 24px 48px -20px rgba(13, 14, 18, 0.3);
+  --shadow-thumb: 0 0 #0000;
 }
 
 @layer base {
@@ -180,15 +246,10 @@
   }
 }
 
-/*
- * Code blocks in posts and case studies: Shiki's css-variables theme (src/lib/code-theme.ts) mapped to the code tokens.
- * Also declared on light islands: a var() inside a custom property resolves where it's declared, so the code window
- * (a light island) needs its own copy to get the dark ink background in dark mode.
- */
-:root,
-[data-theme="light"] {
+/* Code blocks in posts and case studies: Shiki's css-variables theme (src/lib/code-theme.ts) mapped to the code tokens */
+:root {
   --shiki-foreground: var(--color-code-text);
-  --shiki-background: var(--color-ink);
+  --shiki-background: var(--color-code-bg);
   --shiki-token-keyword: var(--color-code-keyword);
   --shiki-token-constant: var(--color-code-keyword);
   --shiki-token-parameter: var(--color-code-text);
@@ -204,7 +265,7 @@
 }
 
 @utility dot-grid {
-  background-color: var(--color-white);
+  background-color: var(--color-film);
   background-image: radial-gradient(circle, var(--color-dot) 1px, transparent 1.3px);
   background-size: 26px 26px;
 }
