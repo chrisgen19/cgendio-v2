@@ -65,7 +65,7 @@
       "title": "Dark mode refresh with a themed hero film",
       "branch": "feature/phase-7.1-dark-mode-refresh",
       "pr": 33,
-      "status": "In review"
+      "status": "Done"
     },
     "8": {
       "issue": 9,
@@ -73,6 +73,13 @@
       "branch": "feature/phase-8-tests-qa",
       "pr": 31,
       "status": "Done"
+    },
+    "8.1": {
+      "issue": 35,
+      "title": "Real content before launch",
+      "branch": null,
+      "pr": null,
+      "status": "Not started"
     },
     "9": {
       "issue": 10,

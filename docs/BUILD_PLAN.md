@@ -417,6 +417,40 @@ Verify: everything green locally and in CI. List anything you couldn't test and 
 
 ---
 
+<!-- phase:8.1 -->
+## Phase 8.1: Real content before launch
+
+**Goal:** every placeholder on the public site is replaced with Christian's real content before Phase 9 puts it live, and a test stops a placeholder from ever shipping.
+
+**Before you start:** the content is yours: Claude Code collects it from you and never invents facts. Decide:
+
+- Where real content lives: committed seed data in `prisma/seed-data/` (reviewed in the PR, and what Phase 9's first production seed inserts) or typed into the admin after launch. Seed data is the default.
+- Which media bucket holds the photo, CV and covers in production (the `R2_BUCKET` question on #22).
+- What happens to posts and case studies that aren't written yet: write them now, or set them to draft so they don't show.
+
+**Prompt:**
+
+```text
+Phase 8.1 of docs/BUILD_PLAN.md: real content before launch. Follow CLAUDE.md, especially the copy rules: never invent stats or facts, ask me for each one.
+
+1. Audit: list every placeholder that renders on a public page or in the seed data (`[YOUR PHOTO]`, `[YOUR EMAIL]`, `[START]`, `[YEAR]`, `[Earlier role]`, `[Company]`, `[Excerpt]`, `[Client]`, `[Role]`, and any other bracketed text), plus the CV, the LinkedIn URL (#16) and each project's case-study write-up. Group them by section and show me the list as a checklist I can fill in.
+2. Collect: ask me for the values, a section at a time. For the photo, CV and covers, ask for the files and upload them to the bucket we chose.
+3. Apply: put the content where we decided (seed data by default, keeping the Zod schemas valid); unwritten posts and case studies become drafts if that's the decision. Keep the "we" voice and the canvas copy everywhere else.
+4. Guard: add a test that fails if bracketed placeholder text renders on `/`, `/blog`, a post or a case study, so a placeholder can't reach production.
+5. Update the tests and visual baselines that relied on placeholder content (refresh the baselines with `pnpm test:e2e --update-snapshots`, check the new images, and take the Linux ones from CI).
+
+Verify: typecheck, lint, test, build and test:e2e; check the home page, a post and a case study at 1440px and 390px in both themes.
+```
+
+**Done when:**
+
+- [ ] No placeholder text renders on any public page, and a test enforces it
+- [ ] The photo, contact email, CV and timeline (start year and earlier role) are real
+- [ ] Every published post and case study has real content; unfinished ones are drafts
+- [ ] The production seed (or admin) has everything Phase 9 needs for the first deploy
+
+---
+
 <!-- phase:9 -->
 ## Phase 9 — Deploy to Coolify and go live
 
@@ -470,8 +504,9 @@ Prompt C updates this table when a phase finishes. **Status** is one of `Not sta
 | 5 — Admin | Better Auth, CRUD, uploads, instant revalidation | [#6](https://github.com/chrisgen19/cgendio-v2/issues/6) | Done | [#23](https://github.com/chrisgen19/cgendio-v2/pull/23) |
 | 6 — Blog & contact | Posts, case studies, contact form, CV, RSS | [#7](https://github.com/chrisgen19/cgendio-v2/issues/7) | Done | [#27](https://github.com/chrisgen19/cgendio-v2/pull/27) |
 | 7 — Polish | SEO, Lighthouse 90+, axe clean, dark mode | [#8](https://github.com/chrisgen19/cgendio-v2/issues/8) | Done | [#29](https://github.com/chrisgen19/cgendio-v2/pull/29) |
-| 7.1: Dark refresh | Dark mockup applied, themed hero film, sun/moon toggle | [#32](https://github.com/chrisgen19/cgendio-v2/issues/32) | In review | [#33](https://github.com/chrisgen19/cgendio-v2/pull/33) |
+| 7.1: Dark refresh | Dark mockup applied, themed hero film, sun/moon toggle | [#32](https://github.com/chrisgen19/cgendio-v2/issues/32) | Done | [#33](https://github.com/chrisgen19/cgendio-v2/pull/33) |
 | 8 — Tests | Vitest + Playwright in CI, all green | [#9](https://github.com/chrisgen19/cgendio-v2/issues/9) | Done | [#31](https://github.com/chrisgen19/cgendio-v2/pull/31) |
+| 8.1: Real content | Placeholders replaced, guard test | [#35](https://github.com/chrisgen19/cgendio-v2/issues/35) | Not started | |
 | 9 — Launch | Live on cgdiomampo.dev, previews per PR | [#10](https://github.com/chrisgen19/cgendio-v2/issues/10) | Not started | |
 
 **Open items to fill before launch:**
