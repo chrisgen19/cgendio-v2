@@ -6,5 +6,6 @@ export const slugify = (value: string) =>
     .toLowerCase()
     .replace(/&/g, ' ')
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80);
+    // Cut before trimming, so a cut that lands on a hyphen doesn't leave one at the end (the slug schema rejects it)
+    .slice(0, 80)
+    .replace(/^-+|-+$/g, '');
