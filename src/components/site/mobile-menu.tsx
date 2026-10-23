@@ -2,11 +2,11 @@
 
 import {type KeyboardEvent, useEffect, useId, useRef, useState} from 'react';
 import {MOBILE_NAV_LINKS} from './nav-links';
-import {ThemeSegmented} from './theme-toggle';
+import {ThemeMenuItem} from './theme-toggle';
 
 /**
  * Menu button and disclosure panel for phones (under 860px). While open, focus moves to the first link,
- * Tab cycles between the button, the links and the theme choice, and Esc, an outside click or a link closes it.
+ * Tab cycles between the button, the links and the theme switch, and Esc, an outside click or a link closes it.
  */
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
@@ -42,8 +42,7 @@ export function MobileMenu() {
       return;
     }
     if (event.key !== 'Tab') return;
-    // The radio group is one tab stop: the checked radio
-    const stops = panelRef.current?.querySelectorAll<HTMLElement>('a[href], input[type="radio"]:checked');
+    const stops = panelRef.current?.querySelectorAll<HTMLElement>('a[href], button');
     const last = stops?.[stops.length - 1];
     if (!event.shiftKey && document.activeElement === last) {
       event.preventDefault();
@@ -74,7 +73,7 @@ export function MobileMenu() {
         ref={panelRef}
         id={panelId}
         hidden={!open}
-        className="absolute inset-x-4 top-[76px] z-30 flex flex-col rounded-card border border-line bg-white p-2.5 shadow-menu"
+        className="absolute inset-x-4 top-[76px] z-30 flex flex-col rounded-card border border-line bg-white p-2.5 shadow-(--shadow-menu)"
       >
         {MOBILE_NAV_LINKS.map((link) => (
           <a
@@ -86,8 +85,8 @@ export function MobileMenu() {
             {link.label}
           </a>
         ))}
-        <div className="mt-1.5 border-t border-line px-1 pt-2.5">
-          <ThemeSegmented className="w-full justify-between" />
+        <div className="mt-1.5 border-t border-line pt-1.5">
+          <ThemeMenuItem />
         </div>
       </div>
     </div>

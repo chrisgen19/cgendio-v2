@@ -25,7 +25,7 @@ const Cursor: React.FC = () => {
   return (
     <div style={{position: 'absolute', left: 0, top: 0, transform: `translate(${x}px, ${y}px)`, opacity, zIndex: 10}}>
       <svg aria-hidden="true" viewBox="0 0 24 24" width={36} height={36}>
-        <path d="M3 2l7.5 19 2.4-7.6L20.5 11z" fill={theme.accent} stroke="#fff" strokeWidth={1.5} strokeLinejoin="round" />
+        <path d="M3 2l7.5 19 2.4-7.6L20.5 11z" style={{fill: theme.accent}} stroke="#fff" strokeWidth={1.5} strokeLinejoin="round" />
       </svg>
       <span
         style={{
@@ -34,7 +34,7 @@ const Cursor: React.FC = () => {
           padding: '7px 14px',
           borderRadius: 99,
           background: theme.accent,
-          color: '#fff',
+          color: theme.onAccent,
           fontSize: 16,
           fontWeight: 600,
         }}
@@ -58,7 +58,7 @@ export const Design: React.FC = () => {
       tags={['Wireframes', 'Design system', 'Prototype']}
     >
       <Appear delay={8} y={16} style={{position: 'absolute', inset: 0}}>
-        <div style={{...cardStyle, position: 'absolute', inset: 0, overflow: 'hidden', background: '#FBFBFC'}}>
+        <div style={{...cardStyle, position: 'absolute', inset: 0, overflow: 'hidden', background: theme.canvas}}>
           {/* toolbar */}
           <div
             style={{
@@ -67,7 +67,7 @@ export const Design: React.FC = () => {
               right: 0,
               top: 0,
               height: 64,
-              background: '#fff',
+              background: theme.surface,
               borderBottom: `1px solid ${theme.line}`,
               display: 'flex',
               alignItems: 'center',
@@ -88,7 +88,7 @@ export const Design: React.FC = () => {
               top: 112,
               width: 600,
               height: 640,
-              background: '#fff',
+              background: theme.surface,
               border: `1px solid ${theme.line}`,
               borderRadius: 12,
               overflow: 'hidden',
@@ -108,7 +108,7 @@ export const Design: React.FC = () => {
                 top: 118,
                 width: 528,
                 height: 160,
-                background: '#fff',
+                background: theme.surface,
                 fontFamily: fonts.display,
                 fontWeight: 700,
                 fontSize: 54,
@@ -130,7 +130,7 @@ export const Design: React.FC = () => {
               <MonoLabel size={16}>STYLES</MonoLabel>
             </Appear>
             <div style={{display: 'flex', gap: 12}}>
-              {[theme.accent, theme.lime, theme.ink, '#fff'].map((c, i) => (
+              {[theme.accent, theme.lime, theme.brandInk, theme.white].map((c, i) => (
                 <Pop key={c} delay={40 + i * 3}>
                   <span style={{display: 'block', width: 46, height: 46, borderRadius: '50%', background: c, border: `1px solid ${theme.line}`}} />
                 </Pop>

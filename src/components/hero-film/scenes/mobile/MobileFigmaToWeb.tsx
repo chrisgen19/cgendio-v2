@@ -75,7 +75,7 @@ export const MobileFigmaToWeb: React.FC = () => (
     {/* Figma frame */}
     <Appear delay={10} style={{position: 'absolute', left: 0, top: 0, width: 350, height: 120}}>
       <div style={{...cardStyle, borderRadius: 18, height: '100%', padding: 14, display: 'flex', gap: 14}}>
-        <div style={{flex: 1, borderRadius: 12, background: '#F3F4F7', display: 'grid', placeItems: 'center'}}>
+        <div style={{flex: 1, borderRadius: 12, background: theme.preview, display: 'grid', placeItems: 'center'}}>
           <span
             style={{
               position: 'relative',
@@ -83,7 +83,7 @@ export const MobileFigmaToWeb: React.FC = () => (
               padding: '10px 16px',
               borderRadius: 99,
               background: theme.accent,
-              color: '#fff',
+              color: theme.onAccent,
               fontSize: 14,
               fontWeight: 600,
             }}

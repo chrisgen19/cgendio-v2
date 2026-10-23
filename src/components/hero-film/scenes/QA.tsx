@@ -48,13 +48,13 @@ const Ring: React.FC<{delay: number; label: string}> = ({delay, label}) => {
     <div style={{display: 'flex', alignItems: 'center', gap: 14}}>
       <span style={{position: 'relative', width: 62, height: 62, flex: 'none'}}>
         <svg aria-hidden="true" viewBox="0 0 40 40" width={62} height={62} style={{transform: 'rotate(-90deg)'}}>
-          <circle cx="20" cy="20" r="16" fill="none" stroke={theme.wire} strokeWidth={4} />
+          <circle cx="20" cy="20" r="16" fill="none" style={{stroke: theme.wire}} strokeWidth={4} />
           <circle
             cx="20"
             cy="20"
             r="16"
             fill="none"
-            stroke={theme.accent}
+            style={{stroke: theme.accent}}
             strokeWidth={4}
             strokeLinecap="round"
             pathLength={100}
@@ -69,7 +69,7 @@ const Ring: React.FC<{delay: number; label: string}> = ({delay, label}) => {
             width={22}
             height={22}
             fill="none"
-            stroke={theme.accent}
+            style={{stroke: theme.accent}}
             strokeWidth={3.2}
             strokeLinecap="round"
             strokeLinejoin="round"

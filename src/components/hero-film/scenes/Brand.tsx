@@ -92,7 +92,7 @@ export const Brand: React.FC<BrandProps> = ({worksHref = '#work', onReplay}) => 
               <Appear key={s.title} delay={30 + i * 4}>
                 <div
                   style={{
-                    background: theme.white,
+                    background: theme.surface,
                     border: `1px solid ${theme.line}`,
                     borderRadius: 22,
                     boxShadow: theme.shadow,
@@ -124,14 +124,14 @@ export const Brand: React.FC<BrandProps> = ({worksHref = '#work', onReplay}) => 
           )}
 
           <Appear delay={52} style={{display: 'flex', flexWrap: 'wrap', gap: L.portrait ? 8 : 12}}>
-            <a href={worksHref} style={{...btnBase, ...(L.portrait ? compact : null), background: theme.ink, color: '#fff'}}>
+            <a href={worksHref} style={{...btnBase, ...(L.portrait ? compact : null), background: theme.ink, color: theme.onInk}}>
               See our work <Arrow />
             </a>
             <button
               type="button"
               onClick={onReplay}
               disabled={!onReplay}
-              style={{...btnBase, ...(L.portrait ? compact : null), background: '#fff', color: theme.ink, borderColor: theme.line}}
+              style={{...btnBase, ...(L.portrait ? compact : null), background: theme.surface, color: theme.ink, borderColor: theme.line}}
             >
               <ReplayIcon />
               {narrow ? 'Replay' : 'Replay the film'}

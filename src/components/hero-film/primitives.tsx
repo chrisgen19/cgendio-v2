@@ -103,7 +103,7 @@ export const Abs: React.FC<{
 export const Mark: React.FC<{delay: number; children: React.ReactNode}> = ({delay, children}) => {
   const p = useSpringIn(delay, {damping: 30, stiffness: 140});
   return (
-    <span style={{position: 'relative', display: 'inline-block', zIndex: 0}}>
+    <span style={{position: 'relative', display: 'inline-block', zIndex: 0, color: theme.markInk}}>
       <span
         style={{
           position: 'absolute',
@@ -111,7 +111,7 @@ export const Mark: React.FC<{delay: number; children: React.ReactNode}> = ({dela
           right: '-0.06em',
           bottom: '0.07em',
           height: '0.36em',
-          background: theme.lime,
+          background: theme.mark,
           zIndex: -1,
           transform: `scaleX(${p})`,
           transformOrigin: 'left center',
@@ -123,7 +123,7 @@ export const Mark: React.FC<{delay: number; children: React.ReactNode}> = ({dela
 };
 
 export const cardStyle: React.CSSProperties = {
-  background: theme.white,
+  background: theme.surface,
   border: `1px solid ${theme.line}`,
   borderRadius: 22,
   boxShadow: theme.shadow,
@@ -132,7 +132,7 @@ export const cardStyle: React.CSSProperties = {
 export const WindowDots: React.FC<{dark?: boolean; size?: number}> = ({dark, size = 13}) => (
   <div style={{display: 'flex', gap: size * 0.7}}>
     {[0, 1, 2].map((i) => (
-      <span key={i} style={{width: size, height: size, borderRadius: '50%', background: dark ? theme.code.dots : '#D5D8DF'}} />
+      <span key={i} style={{width: size, height: size, borderRadius: '50%', background: dark ? theme.code.dots : theme.windowDot}} />
     ))}
   </div>
 );
@@ -144,8 +144,8 @@ export const Check: React.FC<{size?: number; dark?: boolean}> = ({size = 28, dar
       height: size,
       flex: 'none',
       borderRadius: '50%',
-      background: dark ? theme.ink : theme.accent,
-      color: dark ? theme.lime : theme.white,
+      background: dark ? theme.badge : theme.accent,
+      color: dark ? theme.badgeInk : theme.onAccent,
       display: 'grid',
       placeItems: 'center',
     }}
@@ -176,8 +176,8 @@ export const Tag: React.FC<{children: React.ReactNode; size?: number; inverted?:
       padding: `${size * 0.65}px ${size * 0.9}px`,
       borderRadius: 999,
       border: `1px solid ${inverted ? theme.ink : theme.line}`,
-      background: inverted ? theme.ink : theme.white,
-      color: inverted ? theme.white : theme.ink,
+      background: inverted ? theme.ink : theme.surface,
+      color: inverted ? theme.onInk : theme.ink,
       whiteSpace: 'nowrap',
     }}
   >

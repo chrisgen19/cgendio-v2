@@ -2,9 +2,9 @@ import type {ProjectTheme} from '@/server/content';
 
 /** Background and text colour of a project's thumb (canvas th-ink/tint/lime/gray). Full class names so Tailwind sees them. */
 export const PROJECT_THEMES: Record<ProjectTheme, string> = {
-  ink: 'bg-ink text-white',
+  ink: 'bg-thumb-ink text-on-dark shadow-(--shadow-thumb)',
   tint: 'bg-tint text-accent',
-  lime: 'bg-lime text-ink',
+  lime: 'bg-lime text-on-lime',
   gray: 'bg-thumb text-ink',
 };
 

@@ -8,6 +8,7 @@ Portfolio and dev blog for Christian Diomampo, branded as a "we" web studio. Aud
 
 - **Plan:** `docs/BUILD_PLAN.md`. One phase per session, branch, PR and issue. Start and finish phases with Prompts B and C in `docs/prompts/GITHUB_TRACKING.md`.
 - **Design:** `docs/design/design-reference.dc.html`. Read it as a spec for layout, copy, colours, type and spacing (its `<helmet><style>` block and inline styles hold the exact values, `renderVals()` holds the content). It runs on a custom `<x-dc>` runtime: never copy the runtime, `support.js` or `vendor/` into the app.
+- **Dark mode design:** `docs/design/dark-version/Main.dc.html`, the same canvas with a dark token layer (`.pg[data-theme="dark"]`). Read it the same way.
 - **Hero film:** `docs/design/remotion-src/` (read its README first). It is the production hero, with a desktop and a mobile cut. Where it differs from the canvas's CSS film, the Remotion code wins.
 
 ## Stack
@@ -50,7 +51,7 @@ Define these in `src/app/globals.css` with `@theme` and use the Tailwind utiliti
 - Breakpoints: the design switches at **860px** (phone layout, mobile menu, one-column grids) and **1080px** (milestones go 2-up). Set Tailwind's `md` to 860px and `lg` to 1080px instead of the defaults.
 - The hero follows `HeroPlayer`: `min(100svh, 980px)` on desktop and `100svh` on phones (not the canvas's fixed 820px).
 
-**Theme:** light is the default and the only theme until Phase 7 adds dark mode.
+**Theme:** light is the default (no cookie). The header's sun/moon button switches to dark and stores `theme=light|dark` in a cookie. Dark values override the tokens under `:root[data-theme="dark"]` in `globals.css`; the accent stays `#8E85FF` there for contrast. The hero film follows through `--film-*` variables, with its `theme.ts` values as the light fallbacks. Use shadows as `shadow-(--shadow-card)`: Tailwind copies theme shadows into `shadow-card`, so their dark overrides would never apply.
 
 ## Fonts
 

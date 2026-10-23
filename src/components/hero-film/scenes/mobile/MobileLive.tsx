@@ -66,7 +66,7 @@ const Notification: React.FC<{y: number; delay: number; icon: React.ReactNode; t
           display: 'flex',
           alignItems: 'center',
           gap: 12,
-          background: 'rgba(255,255,255,.94)',
+          background: theme.glass,
           backdropFilter: 'blur(10px)',
         }}
       >
@@ -114,9 +114,9 @@ export const MobileLive: React.FC = () => (
       <div style={{...cardStyle, height: '100%', borderRadius: 26, overflow: 'hidden'}}>
         <div style={{height: 46, borderBottom: `1px solid ${theme.line}`, display: 'flex', alignItems: 'center', gap: 8, padding: '0 12px'}}>
           <div
-            style={{flex: 1, height: 28, borderRadius: 99, background: '#F1F2F5', display: 'flex', alignItems: 'center', gap: 6, padding: '0 10px'}}
+            style={{flex: 1, height: 28, borderRadius: 99, background: theme.field, display: 'flex', alignItems: 'center', gap: 6, padding: '0 10px'}}
           >
-            <svg aria-hidden="true" viewBox="0 0 24 24" width={12} height={12} fill="none" stroke={theme.ink} strokeWidth={2.6}>
+            <svg aria-hidden="true" viewBox="0 0 24 24" width={12} height={12} fill="none" style={{stroke: theme.ink}} strokeWidth={2.6}>
               <rect x="5" y="11" width="14" height="10" rx="2" />
               <path d="M8 11V8a4 4 0 0 1 8 0v3" />
             </svg>
@@ -137,7 +137,7 @@ export const MobileLive: React.FC = () => (
             that <Mark delay={36}>work.</Mark>
           </div>
           <div style={{display: 'flex', gap: 8}}>
-            <span style={{padding: '9px 14px', borderRadius: 99, background: theme.ink, color: '#fff', fontSize: 12, fontWeight: 600}}>
+            <span style={{padding: '9px 14px', borderRadius: 99, background: theme.ink, color: theme.onInk, fontSize: 12, fontWeight: 600}}>
               See our work
             </span>
             <span style={{padding: '9px 14px', borderRadius: 99, border: `1px solid ${theme.line}`, fontSize: 12, fontWeight: 600}}>
@@ -159,7 +159,7 @@ export const MobileLive: React.FC = () => (
       delay={30}
       title="Deployment ready"
       sub="production"
-      icon={iconBox(theme.ink, theme.lime, <span style={{fontSize: 17}}>✓</span>)}
+      icon={iconBox(theme.badge, theme.badgeInk, <span style={{fontSize: 17}}>✓</span>)}
     />
     <Notification
       y={62}
@@ -168,7 +168,7 @@ export const MobileLive: React.FC = () => (
       sub="contact form"
       icon={iconBox(
         theme.accent,
-        '#fff',
+        theme.onAccent,
         <svg aria-hidden="true" viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
           <rect x="3" y="5" width="18" height="14" rx="2" />
           <path d="m3 7 9 6 9-6" />

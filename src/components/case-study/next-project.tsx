@@ -9,7 +9,7 @@ export function NextProject({project}: {project: ContentLink | null}) {
     <Section padding="cta" className="pt-14">
       <Link
         href={`/work/${project.slug}`}
-        className="group flex items-center justify-between gap-6 rounded-card border border-line bg-white p-6 text-ink no-underline shadow-card transition-colors duration-200 hover:border-ink hover:text-ink"
+        className="group flex items-center justify-between gap-6 rounded-card border border-line bg-white p-6 text-ink no-underline shadow-(--shadow-card) transition-colors duration-200 hover:border-ink hover:text-ink"
       >
         <span className="flex flex-col gap-2">
           <span className="font-mono text-xs tracking-[0.06em] text-muted uppercase">Next project</span>

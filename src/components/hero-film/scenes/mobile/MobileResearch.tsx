@@ -36,7 +36,16 @@ export const MobileResearch: React.FC = () => (
     {/* search query */}
     <Appear delay={10} style={{position: 'absolute', left: 0, top: 0, width: 350}}>
       <div style={{...cardStyle, height: 52, borderRadius: 999, display: 'flex', alignItems: 'center', gap: 12, padding: '0 18px'}}>
-        <svg aria-hidden="true" viewBox="0 0 24 24" width={20} height={20} fill="none" stroke={theme.ink} strokeWidth={2.4} strokeLinecap="round">
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          width={20}
+          height={20}
+          fill="none"
+          style={{stroke: theme.ink}}
+          strokeWidth={2.4}
+          strokeLinecap="round"
+        >
           <circle cx="11" cy="11" r="7" />
           <path d="m20 20-3.5-3.5" />
         </svg>
@@ -77,7 +86,7 @@ export const MobileResearch: React.FC = () => (
             <GrowY
               key={i}
               delay={46 + i * 3}
-              style={{flex: 1, height: `${h}%`, borderRadius: 5, background: i === bars.length - 1 ? theme.accent : '#DCDFE6'}}
+              style={{flex: 1, height: `${h}%`, borderRadius: 5, background: i === bars.length - 1 ? theme.accent : theme.bar}}
             />
           ))}
         </div>
