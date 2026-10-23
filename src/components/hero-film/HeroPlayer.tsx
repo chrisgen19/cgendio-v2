@@ -352,7 +352,8 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
                       : 'border-line bg-white/90 text-muted hover:border-ink hover:text-ink',
                 ].join(' ')}
               >
-                <span className="font-mono text-[11px] opacity-70">{c.number}</span>
+                {/* Dimmed only on ink and done chips: on upcoming chips the label is already muted, and 70% of muted fails 4.5:1 */}
+                <span className={active || done ? 'font-mono text-[11px] opacity-70' : 'font-mono text-[11px]'}>{c.number}</span>
                 {c.label}
               </button>
             );
