@@ -4,8 +4,10 @@
  *
  * Run with `pnpm db:seed` (prisma.config.ts runs it with Node's built-in TypeScript support).
  */
+import {existsSync, readFileSync} from 'node:fs';
 import {PrismaPg} from '@prisma/adapter-pg';
 import {type Prisma, PrismaClient} from '../src/generated/prisma/client.ts';
+import {readMinutesFor} from '../src/server/admin/action-helpers.ts';
 import {milestones} from './seed-data/milestones.ts';
 import {pageCopy} from './seed-data/page-copy.ts';
 import {posts} from './seed-data/posts.ts';
@@ -29,6 +31,12 @@ const toKey = (...parts: string[]) =>
 const upper = <T extends string>(value: T) => value.toUpperCase() as Uppercase<T>;
 
 const PLACEHOLDER_BODY = '[Post body]';
+
+/** A post's Markdown from seed-data/posts/<slug>.md, or the placeholder for posts that aren't written yet. */
+const postBody = (slug: string) => {
+  const file = new URL(`./seed-data/posts/${slug}.md`, import.meta.url);
+  return existsSync(file) ? readFileSync(file, 'utf8') : PLACEHOLDER_BODY;
+};
 
 const seed = async () => {
   const results = await db.$transaction([
@@ -70,21 +78,32 @@ const seed = async () => {
       skipDuplicates: true,
     }),
     db.post.createMany({
-      data: posts.map((p) => ({
-        slug: p.slug,
-        title: p.title,
-        excerpt: p.excerpt,
-        tag: p.tag,
-        body: PLACEHOLDER_BODY,
-        readMinutes: p.readMinutes,
-        status: 'PUBLISHED' as const,
-        publishedAt: new Date(`${p.date}T00:00:00Z`),
-      })),
+      data: posts.map((p) => {
+        const body = postBody(p.slug);
+        return {
+          slug: p.slug,
+          title: p.title,
+          excerpt: p.excerpt,
+          tag: p.tag,
+          body,
+          readMinutes: readMinutesFor(body),
+          status: p.status,
+          publishedAt: p.status === 'PUBLISHED' ? new Date(`${p.date}T00:00:00Z`) : null,
+        };
+      }),
       skipDuplicates: true,
     }),
     db.siteSettings.createMany({
-      // LinkedIn stays null until the profile URL is known (issue #16)
-      data: [{id: 'site', contactEmail: '[YOUR EMAIL]', openToProjects: true, socials: {github: 'https://github.com/chrisgen19', linkedin: null}}],
+      // The photo's r2.dev URL in cgendio-media; it changes when the bucket gets its custom domain
+      data: [
+        {
+          id: 'site',
+          contactEmail: 'chrisgen19@gmail.com',
+          openToProjects: true,
+          photoUrl: 'https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/eaae01e4-c164-4d78-bcf3-f6657aa845c2.png',
+          socials: {github: 'https://github.com/chrisgen19', linkedin: 'https://www.linkedin.com/in/cgdiomampo/'},
+        },
+      ],
       skipDuplicates: true,
     }),
     db.pageCopy.createMany({data: Object.entries(pageCopy).map(([key, value]) => ({key, value})), skipDuplicates: true}),

@@ -9,7 +9,7 @@ import {SITE_DESCRIPTION, SITE_NAME} from './metadata';
 
 const origin = () => siteEnv().NEXT_PUBLIC_SITE_URL;
 
-/** Christian, from the About copy. The role line reads "Full-stack developer · Taguig, PH"; the job title is its first part. */
+/** Christian, from the About copy. The role line reads "Senior full-stack developer · Pasig, PH"; the job title is its first part. */
 const person = (copy: PageCopy, settings?: SiteSettings) => ({
   '@type': 'Person',
   '@id': `${origin()}/#person`,

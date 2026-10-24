@@ -506,7 +506,7 @@ Prompt C updates this table when a phase finishes. **Status** is one of `Not sta
 | 7 — Polish | SEO, Lighthouse 90+, axe clean, dark mode | [#8](https://github.com/chrisgen19/cgendio-v2/issues/8) | Done | [#29](https://github.com/chrisgen19/cgendio-v2/pull/29) |
 | 7.1: Dark refresh | Dark mockup applied, themed hero film, sun/moon toggle | [#32](https://github.com/chrisgen19/cgendio-v2/issues/32) | Done | [#33](https://github.com/chrisgen19/cgendio-v2/pull/33) |
 | 8 — Tests | Vitest + Playwright in CI, all green | [#9](https://github.com/chrisgen19/cgendio-v2/issues/9) | Done | [#31](https://github.com/chrisgen19/cgendio-v2/pull/31) |
-| 8.1: Real content | Placeholders replaced, guard test | [#35](https://github.com/chrisgen19/cgendio-v2/issues/35) | Not started | |
+| 8.1: Real content | Placeholders replaced, guard test | [#35](https://github.com/chrisgen19/cgendio-v2/issues/35) | In review | [#40](https://github.com/chrisgen19/cgendio-v2/pull/40) |
 | 9 — Launch | Live on cgdiomampo.dev, previews per PR | [#10](https://github.com/chrisgen19/cgendio-v2/issues/10) | Not started | |
 
 **Open items to fill before launch:**

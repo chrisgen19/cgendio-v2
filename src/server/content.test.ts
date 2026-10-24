@@ -193,12 +193,14 @@ describe('getSiteSettings', () => {
       contactEmail: '[YOUR EMAIL]',
       openToProjects: true,
       cvUrl: null,
+      photoUrl: null,
       socials: {github: 'https://github.com/chrisgen19', linkedin: null},
     });
     expect(await getSiteSettings()).toEqual({
       contactEmail: '[YOUR EMAIL]',
       openToProjects: true,
       cvUrl: null,
+      photoUrl: null,
       socials: {github: 'https://github.com/chrisgen19', linkedin: null},
     });
     expect(db.siteSettings.findUniqueOrThrow).toHaveBeenCalledWith({where: {id: 'site'}});

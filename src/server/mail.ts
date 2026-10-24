@@ -8,7 +8,7 @@ import {db} from './db';
 
 /**
  * Emails a stored contact message to the contact address from admin Settings, then records it as emailed. Without a
- * Resend key or a real contact address (still `[YOUR EMAIL]`) nothing is sent: development prints the email instead,
+ * Resend key or a real contact address (such as the `[YOUR EMAIL]` placeholder) nothing is sent: development prints the email instead,
  * production logs one line so the gap is visible. The message itself is already safe in the database either way.
  */
 export const notifyContactMessage = async (id: string) => {

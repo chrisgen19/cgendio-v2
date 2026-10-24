@@ -83,6 +83,7 @@ export const siteSettingsSchema = z.object({
   contactEmail: z.string().min(1),
   openToProjects: z.boolean(),
   cvUrl: z.url().nullable(),
+  photoUrl: z.url().nullable(),
   /** Profile URLs by network, null until known */
   socials: z.record(z.string(), z.url().nullable()),
 });

@@ -86,6 +86,7 @@ describe('settingsFormSchema', () => {
       contactEmail: 'me@example.com',
       openToProjects: false,
       cvUrl: null,
+      photoUrl: null,
       linkedinUrl: null,
     });
     expect(settingsFormSchema.safeParse({contactEmail: 'me@example.com', cvUrl: 'ftp://example.com/cv.pdf'}).success).toBe(false);

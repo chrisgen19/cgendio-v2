@@ -5,7 +5,7 @@ import {E2E_BASE_URL} from '../support/test-env';
 const PAGES = [
   {name: 'home', path: '/'},
   {name: 'blog', path: '/blog'},
-  {name: 'post', path: '/blog/migrating-20-wordpress-sites-to-nextjs-without-losing-seo'},
+  {name: 'post', path: '/blog/redirect-maps-wordpress-to-nextjs'},
   {name: 'case study', path: '/work/edge-redirect-architecture'},
   {name: 'contact', path: '/contact'},
 ];

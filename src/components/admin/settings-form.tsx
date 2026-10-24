@@ -9,7 +9,7 @@ import {useActionToast} from './use-action-toast';
 import {useAdminForm} from './use-admin-form';
 
 type SettingsFormProps = {
-  settings: {contactEmail: string; openToProjects: boolean; cvUrl: string | null; linkedinUrl: string | null};
+  settings: {contactEmail: string; openToProjects: boolean; cvUrl: string | null; photoUrl: string | null; linkedinUrl: string | null};
 };
 
 export function SettingsForm({settings}: SettingsFormProps) {
@@ -45,11 +45,18 @@ export function SettingsForm({settings}: SettingsFormProps) {
               errors={errors}
             />
             <UploadField
+              name="photoUrl"
+              label="About photo"
+              kind="image"
+              defaultValue={settings.photoUrl}
+              hint="JPEG, PNG, WebP or AVIF, up to 5 MB. Portrait (4:5) works best; without one the About section shows a placeholder."
+            />
+            <UploadField
               name="cvUrl"
               label="CV"
               kind="cv"
               defaultValue={settings.cvUrl}
-              hint="PDF, up to 10 MB. The Download CV buttons link to it; without one they go to the contact section."
+              hint="PDF, up to 10 MB. The Download CV buttons link to it; without one they're hidden."
             />
             <div>
               <SubmitButton pending={pending}>Save settings</SubmitButton>
