@@ -21,11 +21,12 @@ export async function StackStrip() {
 
   return (
     <Section id="stack" className="dot-grid border-y border-line" innerClassName="flex flex-col gap-10 max-md:gap-8">
-      <div className="flex flex-wrap items-end justify-between gap-6">
+      {/* Above the list, so a plate still falling into place passes behind the heading instead of over it */}
+      <div className="relative z-10 flex flex-wrap items-end justify-between gap-6">
         <div data-reveal className="flex flex-col gap-[18px]">
           <Eyebrow>{copy['stack.eyebrow']}</Eyebrow>
           <SectionHeading>
-            Built layer by <Mark>layer.</Mark>
+            The <Mark>stack</Mark>, layer by layer.
           </SectionHeading>
         </div>
         <p className="m-0 max-w-[380px] text-base leading-[1.55] text-muted">The tools we use at each level of a site, from hosting up to design.</p>

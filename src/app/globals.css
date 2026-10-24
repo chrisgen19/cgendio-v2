@@ -287,10 +287,11 @@
 @keyframes stack-drop {
   0% {
     opacity: 0;
-    translate: 0 -200px;
+    /* A short fall, mostly transparent while high, so a plate in flight never covers the heading above the stack */
+    translate: 0 -120px;
     animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
   }
-  30% {
+  45% {
     opacity: 1;
   }
   72% {
@@ -317,8 +318,11 @@
     .stack-drop {
       animation: stack-drop linear both;
       animation-timeline: --stack-layers;
-      /* From the stack's top edge at about 60% down the viewport to about 20%, so it settles with the heading in view */
-      animation-range: cover calc(23% + var(--layer) * 4%) cover calc(32% + var(--layer) * 4%);
+      /*
+       * Measured on the list's own height (entry), not the viewport's (cover), so the last plate always lands by the time
+       * the whole list is on screen, at any viewport height, and never hangs over the heading when the section is parked.
+       */
+      animation-range: entry calc(48% + var(--layer) * 9%) entry calc(64% + var(--layer) * 9%);
     }
   }
 
