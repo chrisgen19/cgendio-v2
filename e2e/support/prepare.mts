@@ -1,11 +1,12 @@
 /**
  * Gets the e2e database ready: recreates it, applies the migrations, seeds the Phase 3 content, points the contact
- * email at the test inbox, and signs in a test admin (cookies saved for the Playwright `admin` project).
+ * email at the test inbox, swaps the About photo for a local fixture, and signs in a test admin (cookies saved for the
+ * Playwright `admin` project).
  *
  * Run with `pnpm test:e2e:prepare` (part of `pnpm test:e2e`), before the build: the build prerenders from this data.
  */
 import {spawnSync} from 'node:child_process';
-import {mkdirSync, writeFileSync} from 'node:fs';
+import {mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {dirname} from 'node:path';
 import {PrismaPg} from '@prisma/adapter-pg';
 import {betterAuth} from 'better-auth';
@@ -65,9 +66,12 @@ await recreateDatabase();
 prisma('migrate', 'deploy');
 prisma('db', 'seed');
 
+// The seeded photo lives on r2.dev; a data URL keeps the About screenshot offline and the same on every run
+const photo = readFileSync(new URL('./fixtures/about-photo.png', import.meta.url)).toString('base64');
+
 const db = new PrismaClient({adapter: new PrismaPg({connectionString: testEnv.DATABASE_URL})});
 try {
-  await db.siteSettings.update({where: {id: 'site'}, data: {contactEmail: CONTACT_EMAIL}});
+  await db.siteSettings.update({where: {id: 'site'}, data: {contactEmail: CONTACT_EMAIL, photoUrl: `data:image/png;base64,${photo}`}});
   await signInAdmin(db);
 } finally {
   await db.$disconnect();
