@@ -1,0 +1,46 @@
+import {expect, type Page, test} from '@playwright/test';
+
+/*
+ * No placeholder reaches production: bracketed stand-ins like [YOUR PHOTO], [Excerpt] or [Earlier role] fail the build.
+ * Checks what a visitor or a crawler gets: the visible text, the title, meta and Open Graph descriptions, image alt text
+ * and JSON-LD. Markdown link text is fine, since it renders without brackets. Case studies join once #38 replaces
+ * their [Client] / [Role] / [Case study write-up] placeholders.
+ */
+
+const PLACEHOLDER = /\[[A-Z][A-Za-z0-9 .,'/&+-]{0,60}\]/g;
+
+const placeholdersOn = async (page: Page, path: string) => {
+  await page.goto(path);
+  const text = await page.evaluate(() => {
+    const meta = [...document.querySelectorAll('meta[name="description"], meta[property^="og:"], meta[name^="twitter:"]')];
+    const jsonLd = [...document.querySelectorAll('script[type="application/ld+json"]')];
+    const alts = [...document.querySelectorAll('img[alt]')];
+    return [
+      document.body.innerText,
+      document.title,
+      ...meta.map((tag) => tag.getAttribute('content') ?? ''),
+      ...jsonLd.map((script) => script.textContent ?? ''),
+      ...alts.map((img) => img.getAttribute('alt') ?? ''),
+    ].join('\n');
+  });
+  return [...new Set(text.match(PLACEHOLDER) ?? [])];
+};
+
+for (const path of ['/', '/blog']) {
+  test(`${path} has no placeholder text`, async ({page}) => {
+    expect(await placeholdersOn(page, path)).toEqual([]);
+  });
+}
+
+test('every published post has no placeholder text', async ({page, request}) => {
+  // The RSS feed lists every published post, so a new one is covered without touching this test
+  const xml = await (await request.get('/blog/rss.xml')).text();
+  const paths = [...xml.matchAll(/<item>[\s\S]*?<link>([^<]+)<\/link>/g)].map(([, link]) => new URL(link).pathname);
+  expect(paths.length).toBeGreaterThan(0);
+
+  for (const path of paths) {
+    await test.step(path, async () => {
+      expect(await placeholdersOn(page, path)).toEqual([]);
+    });
+  }
+});
