@@ -77,9 +77,9 @@
     "8.1": {
       "issue": 35,
       "title": "Real content before launch",
-      "branch": null,
+      "branch": "feature/phase-8.1-real-content",
       "pr": null,
-      "status": "Not started"
+      "status": "In progress"
     },
     "9": {
       "issue": 10,
