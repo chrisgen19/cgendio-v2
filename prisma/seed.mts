@@ -38,6 +38,12 @@ const postBody = (slug: string) => {
   return existsSync(file) ? readFileSync(file, 'utf8') : PLACEHOLDER_BODY;
 };
 
+/** A project's case study from seed-data/projects/<slug>.md, or null (the page then shows its placeholder). */
+const caseStudy = (slug: string) => {
+  const file = new URL(`./seed-data/projects/${slug}.md`, import.meta.url);
+  return existsSync(file) ? readFileSync(file, 'utf8') : null;
+};
+
 const seed = async () => {
   const results = await db.$transaction([
     db.stackItem.createMany({data: stack.map(({name, order}) => ({name, order})), skipDuplicates: true}),
@@ -56,6 +62,12 @@ const seed = async () => {
           featured: p.featured,
           order: p.order,
           status: 'PUBLISHED',
+          caseStudy: caseStudy(p.slug),
+          coverImageUrl: p.coverImageUrl,
+          liveUrl: p.liveUrl,
+          repoUrl: p.repoUrl,
+          client: p.client,
+          role: p.role,
         }),
       ),
       skipDuplicates: true,

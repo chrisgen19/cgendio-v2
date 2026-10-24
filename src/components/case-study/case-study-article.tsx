@@ -94,9 +94,13 @@ export async function CaseStudyArticle({project}: {project: ProjectDetail}) {
             </span>
           </Fact>
           {project.liveUrl || project.repoUrl ? (
-            <div className="flex flex-col gap-2">
-              {project.liveUrl ? <ExternalLink href={project.liveUrl}>Live site</ExternalLink> : null}
-              {project.repoUrl ? <ExternalLink href={project.repoUrl}>Repository</ExternalLink> : null}
+            // A dl only allows dt/dd groups: the links get a term for screen readers and no visible label, as designed
+            <div>
+              <dt className="sr-only">Links</dt>
+              <dd className="m-0 flex flex-col gap-2">
+                {project.liveUrl ? <ExternalLink href={project.liveUrl}>Live site</ExternalLink> : null}
+                {project.repoUrl ? <ExternalLink href={project.repoUrl}>Repository</ExternalLink> : null}
+              </dd>
             </div>
           ) : null}
         </dl>
