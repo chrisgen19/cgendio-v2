@@ -247,6 +247,118 @@
   }
 }
 
+/*
+ * The stack section's isometric plates (src/components/sections/stack/), desktop only. The plate is turned flat onto
+ * the dot grid and its thickness is a stack of solid shadows: in the plate's own (rotated) space an offset of
+ * (-n, n) points straight down the screen, so each 1px copy extrudes the edge downwards. The last copy is the rim.
+ */
+.stack-plate {
+  --plate-edge: var(--color-line);
+  --plate-rim: var(--color-dot-placeholder);
+  transform: rotateX(60deg) rotateZ(-45deg);
+  box-shadow:
+    -1px 1px 0 var(--plate-edge),
+    -2px 2px 0 var(--plate-edge),
+    -3px 3px 0 var(--plate-edge),
+    -4px 4px 0 var(--plate-edge),
+    -5px 5px 0 var(--plate-edge),
+    -6px 6px 0 var(--plate-edge),
+    -7px 7px 0 var(--plate-edge),
+    -8px 8px 0 var(--plate-edge),
+    -9px 9px 0 var(--plate-edge),
+    -10px 10px 0 var(--plate-edge),
+    -11px 11px 0 var(--plate-edge),
+    -12px 12px 0 var(--plate-edge),
+    -13px 13px 0 var(--plate-edge),
+    -14px 14px 0 var(--plate-rim),
+    var(--shadow-deep);
+}
+
+.stack-plate[data-ink] {
+  --plate-edge: var(--color-ink-soft);
+  --plate-rim: var(--color-ink);
+}
+
+/* Logos on a plate are turned back to face the viewer (undoing the plate's turn and squash), like decals */
+.stack-decal {
+  transform: rotate(45deg) scaleY(2);
+}
+
+@keyframes stack-drop {
+  0% {
+    opacity: 0;
+    translate: 0 -200px;
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  30% {
+    opacity: 1;
+  }
+  72% {
+    translate: 0 6px;
+    animation-timing-function: ease-out;
+  }
+  86% {
+    translate: 0 -3px;
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* Only with JavaScript on (no JS shows the assembled stack, static) and only when motion is welcome */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) and (width >= 860px) {
+  /* The assembly: each plate drops in turn, bottom first */
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    .stack-layers {
+      view-timeline: --stack-layers block;
+    }
+
+    .stack-drop {
+      animation: stack-drop linear both;
+      animation-timeline: --stack-layers;
+      /* From the stack's top edge at about 60% down the viewport to about 20%, so it settles with the heading in view */
+      animation-range: cover calc(23% + var(--layer) * 4%) cover calc(32% + var(--layer) * 4%);
+    }
+  }
+
+  /* No scroll-driven animations (StackAssembly sets these): the same drop on a clock, once */
+  [data-stack-fallback]:not([data-assembled]) .stack-drop {
+    opacity: 0;
+  }
+
+  [data-stack-fallback][data-assembled] .stack-drop {
+    animation: stack-drop 0.8s linear both;
+    animation-delay: calc(var(--layer) * 0.16s);
+    /* Browsers with partial support must not keep the scroll timeline from the rule above */
+    animation-timeline: auto;
+    animation-range: normal;
+  }
+
+  /* Hover answers with space: the plate rises and everything above it rises further, opening a gap on both sides */
+  .stack-lift {
+    transition: translate 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .stack-plate {
+    transition: border-color 0.2s ease-out;
+  }
+
+  @media (hover: hover) {
+    .stack-layer:hover .stack-lift {
+      translate: 0 -14px;
+    }
+
+    .stack-layer:hover ~ .stack-layer .stack-lift {
+      translate: 0 -30px;
+    }
+
+    .stack-layer:hover .stack-plate {
+      border-color: var(--color-accent);
+    }
+  }
+}
+
 /* Code blocks in posts and case studies: Shiki's css-variables theme (src/lib/code-theme.ts) mapped to the code tokens */
 :root {
   --shiki-foreground: var(--color-code-text);
