@@ -66,7 +66,8 @@ await recreateDatabase();
 prisma('migrate', 'deploy');
 prisma('db', 'seed');
 
-// The seeded photo lives on r2.dev; a data URL keeps the About screenshot offline and the same on every run
+// The seeded photo lives on r2.dev; a data URL keeps the About screenshot offline and the same on every run. The
+// Settings form only accepts http(s) URLs, so a test that saves Settings has to set its own photo URL first.
 const photo = readFileSync(new URL('./fixtures/about-photo.png', import.meta.url)).toString('base64');
 
 const db = new PrismaClient({adapter: new PrismaPg({connectionString: testEnv.DATABASE_URL})});

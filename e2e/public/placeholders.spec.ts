@@ -33,9 +33,9 @@ for (const path of ['/', '/blog']) {
 }
 
 test('every published post has no placeholder text', async ({page, request}) => {
-  // The RSS feed lists every published post, so a new one is covered without touching this test
-  const xml = await (await request.get('/blog/rss.xml')).text();
-  const paths = [...xml.matchAll(/<item>[\s\S]*?<link>([^<]+)<\/link>/g)].map(([, link]) => new URL(link).pathname);
+  // The sitemap lists every published post (the RSS feed stops at 20), so a new one is covered without touching this test
+  const xml = await (await request.get('/sitemap.xml')).text();
+  const paths = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => new URL(loc).pathname).filter((path) => path.startsWith('/blog/'));
   expect(paths.length).toBeGreaterThan(0);
 
   for (const path of paths) {
