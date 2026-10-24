@@ -515,7 +515,7 @@ Prompt C updates this table when a phase finishes. **Status** is one of `Not sta
 - [x] Contact email
 - [ ] CV file
 - [x] Timeline start year and earlier role
-- [ ] Real case-study write-ups for each project card
+- [x] Real case-study write-ups for each project card
 
 ---
 

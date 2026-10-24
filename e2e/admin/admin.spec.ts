@@ -29,13 +29,13 @@ const renameProject = async (page: Page, from: string, to: string) => {
 };
 
 test('a project title edited in the admin shows on the home page', async ({page}) => {
-  const original = 'CV Tailor';
-  const edited = `CV Tailor ${uniqueToken()}`;
+  const original = 'Budget Tracker';
+  const edited = `Budget Tracker ${uniqueToken()}`;
   const workTitles = () => page.locator('#work').getByRole('heading', {level: 3});
 
   // A failed earlier attempt (CI retries once, on the same database) can leave its edited title behind, so start from
   // the seeded title, found by the slug that never changes. The save below revalidates the home page.
-  await queryTestDb('UPDATE projects SET title = $1 WHERE slug = $2', [original, 'cv-tailor']);
+  await queryTestDb('UPDATE projects SET title = $1 WHERE slug = $2', [original, 'budget-tracker']);
 
   await renameProject(page, original, edited);
   await page.goto('/');

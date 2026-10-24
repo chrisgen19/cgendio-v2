@@ -6,7 +6,7 @@ const PAGES = [
   {name: 'home', path: '/'},
   {name: 'blog', path: '/blog'},
   {name: 'post', path: '/blog/redirect-maps-wordpress-to-nextjs'},
-  {name: 'case study', path: '/work/edge-redirect-architecture'},
+  {name: 'case study', path: '/work/access-hire'},
   {name: 'contact', path: '/contact'},
 ];
 
