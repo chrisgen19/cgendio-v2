@@ -69,7 +69,13 @@ describe('timelineEntrySchema', () => {
 
 describe('siteSettingsSchema', () => {
   it('keeps the placeholder email and allows unknown socials as null', () => {
-    const settings = {contactEmail: '[YOUR EMAIL]', openToProjects: true, cvUrl: null, socials: {github: 'https://github.com/x', linkedin: null}};
+    const settings = {
+      contactEmail: '[YOUR EMAIL]',
+      openToProjects: true,
+      cvUrl: null,
+      photoUrl: null,
+      socials: {github: 'https://github.com/x', linkedin: null},
+    };
     expect(siteSettingsSchema.parse(settings)).toEqual(settings);
     expect(siteSettingsSchema.safeParse({...settings, socials: {github: 'not a url'}}).success).toBe(false);
   });

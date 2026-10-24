@@ -7,7 +7,7 @@ import {requireAdmin} from '../admin-session';
 import {CACHE_TAGS} from '../content';
 import {db} from '../db';
 
-/** Contact email, the "Open to projects" status, the CV link and the LinkedIn profile (kept in socials). */
+/** Contact email, the "Open to projects" status, the CV link, the About photo and the LinkedIn profile (kept in socials). */
 export async function saveSettings(_previous: ActionResult | null, formData: FormData): Promise<ActionResult> {
   await requireAdmin();
   const input = settingsFormSchema.safeParse(Object.fromEntries(formData));

@@ -1,10 +1,12 @@
+import Image from 'next/image';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {MarkedText} from '@/components/ui-site/marked-text';
 import {Section} from '@/components/ui-site/section';
-import {getPageCopy} from '@/server/content';
+import {getPageCopy, getSiteSettings} from '@/server/content';
 
 export async function About() {
-  const copy = await getPageCopy();
+  const [copy, settings] = await Promise.all([getPageCopy(), getSiteSettings()]);
+  const r2 = process.env.R2_PUBLIC_URL?.replace(/\/+$/, '');
   const facts = [
     {title: copy['about.fact1.title'], body: copy['about.fact1.body']},
     {title: copy['about.fact2.title'], body: copy['about.fact2.body']},
@@ -14,7 +16,19 @@ export async function About() {
   return (
     <Section id="about" innerClassName="grid grid-cols-[minmax(0,4fr)_minmax(0,8fr)] items-start gap-16 max-md:grid-cols-1 max-md:gap-8">
       <div data-reveal className="relative grid aspect-[4/5] place-items-center overflow-hidden rounded-photo bg-tint">
-        <span className="font-mono text-[14px] text-accent">[YOUR PHOTO]</span>
+        {/* Uploaded in admin Settings; R2 uploads go through the image optimizer, like CoverImage */}
+        {settings.photoUrl ? (
+          <Image
+            src={settings.photoUrl}
+            alt={`Photo of ${copy['about.name']}`}
+            fill
+            sizes="(max-width: 860px) calc(100vw - 40px), 420px"
+            unoptimized={!r2 || !settings.photoUrl.startsWith(`${r2}/`)}
+            className="object-cover"
+          />
+        ) : (
+          <span className="font-mono text-[14px] text-accent">[YOUR PHOTO]</span>
+        )}
         <div className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 rounded-[20px] border border-line bg-white px-[18px] py-4">
           <span className="flex flex-col gap-1">
             <b className="text-[16px]">{copy['about.name']}</b>

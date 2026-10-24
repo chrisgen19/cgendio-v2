@@ -284,13 +284,19 @@ export const getSitemapEntries = async (): Promise<{posts: SitemapEntry[]; proje
   return {posts: toEntries(posts), projects: toEntries(projects)};
 };
 
-/** The single settings row: the header status, contact details, CV link and social profiles. */
+/** The single settings row: the header status, contact details, CV link, About photo and social profiles. */
 export const getSiteSettings = async (): Promise<SiteSettings> => {
   'use cache';
   cacheTag(CACHE_TAGS.settings);
   cacheLife('max');
   const row = await db.siteSettings.findUniqueOrThrow({where: {id: 'site'}});
-  return siteSettingsSchema.parse({contactEmail: row.contactEmail, openToProjects: row.openToProjects, cvUrl: row.cvUrl, socials: row.socials});
+  return siteSettingsSchema.parse({
+    contactEmail: row.contactEmail,
+    openToProjects: row.openToProjects,
+    cvUrl: row.cvUrl,
+    photoUrl: row.photoUrl,
+    socials: row.socials,
+  });
 };
 
 /** Every editable piece of home page copy, keyed by PAGE_COPY_KEYS. A missing key fails the parse (and the build). */

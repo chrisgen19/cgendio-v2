@@ -143,6 +143,8 @@ model SiteSettings {
   contactEmail   String   @map("contact_email")
   openToProjects Boolean  @default(true) @map("open_to_projects")
   cvUrl          String?  @map("cv_url")
+  /// The About section photo, uploaded in admin Settings
+  photoUrl       String?  @map("photo_url")
   /// {github, linkedin, ...}: profile URLs, null until known
   socials        Json     @default("{}")
   createdAt      DateTime @default(now()) @map("created_at")
