@@ -83,12 +83,13 @@ const seed = async () => {
       skipDuplicates: true,
     }),
     db.siteSettings.createMany({
-      // photoUrl is set once the production media bucket exists
+      // The photo's r2.dev URL in cgendio-media; it changes when the bucket gets its custom domain
       data: [
         {
           id: 'site',
           contactEmail: 'chrisgen19@gmail.com',
           openToProjects: true,
+          photoUrl: 'https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/eaae01e4-c164-4d78-bcf3-f6657aa845c2.png',
           socials: {github: 'https://github.com/chrisgen19', linkedin: 'https://www.linkedin.com/in/cgdiomampo/'},
         },
       ],
