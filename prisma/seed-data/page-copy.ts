@@ -1,18 +1,18 @@
 import type {PageCopy} from '../../src/server/content-schema';
 
-/** The canvas copy, word for word. `[[...]]` marks the highlighted words in a heading or statement. */
+/** The canvas copy, with the facts corrected against the CV in Phase 8.1. `[[...]]` marks the highlighted words in a heading or statement. */
 export const pageCopy: PageCopy = {
   'stack.eyebrow': 'The stack we ship with',
 
   'about.eyebrow': 'About',
   'about.statement':
-    "Hi, I'm Christian — a full-stack developer in Taguig, Philippines. Through Cgdiomampo.dev, we take brands from research and Figma to [[fast WordPress and Next.js sites]], then keep them running.",
+    "Hi, I'm Christian — a full-stack developer in Pasig City, Philippines. Through Cgdiomampo.dev, we take brands from research and Figma to [[fast WordPress and Next.js sites]], then keep them running.",
   'about.name': 'Christian Diomampo',
-  'about.role': 'Full-stack developer · Taguig, PH',
+  'about.role': 'Senior full-stack developer · Pasig, PH',
   'about.fact1.title': 'Full-stack',
   'about.fact1.body': 'React, Next.js, TypeScript, PHP and WordPress — front to back.',
-  'about.fact2.title': '20+ sites',
-  'about.fact2.body': 'Built and looked after for Access Group Australia.',
+  'about.fact2.title': '40+ sites',
+  'about.fact2.body': 'Maintained across 40 brands for Access Group Australia.',
   'about.fact3.title': 'UTC+8',
   'about.fact3.body': 'Working hours that overlap Australia and APAC.',
 
@@ -38,5 +38,5 @@ export const pageCopy: PageCopy = {
   'contact.lede': "Agencies, recruiters and founders: tell us what you're building and we'll come back with next steps.",
   'contact.primaryLabel': 'Start a project',
   'contact.cvLabel': 'Download CV',
-  'contact.location': 'Taguig, Philippines · Asia/Manila (UTC+8)',
+  'contact.location': 'Pasig City, Philippines · Asia/Manila (UTC+8)',
 };

@@ -83,8 +83,15 @@ const seed = async () => {
       skipDuplicates: true,
     }),
     db.siteSettings.createMany({
-      // LinkedIn stays null until the profile URL is known (issue #16)
-      data: [{id: 'site', contactEmail: '[YOUR EMAIL]', openToProjects: true, socials: {github: 'https://github.com/chrisgen19', linkedin: null}}],
+      // photoUrl is set once the production media bucket exists
+      data: [
+        {
+          id: 'site',
+          contactEmail: 'chrisgen19@gmail.com',
+          openToProjects: true,
+          socials: {github: 'https://github.com/chrisgen19', linkedin: 'https://www.linkedin.com/in/cgdiomampo/'},
+        },
+      ],
       skipDuplicates: true,
     }),
     db.pageCopy.createMany({data: Object.entries(pageCopy).map(([key, value]) => ({key, value})), skipDuplicates: true}),
