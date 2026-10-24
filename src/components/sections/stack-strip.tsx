@@ -1,20 +1,48 @@
+import {ArrowUp} from 'lucide-react';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
+import {Mark} from '@/components/ui-site/mark';
 import {Section} from '@/components/ui-site/section';
-import {Tag} from '@/components/ui-site/tag';
+import {SectionHeading} from '@/components/ui-site/section-heading';
+import {groupStack} from '@/lib/stack-groups';
 import {getPageCopy, getStack} from '@/server/content';
+import {StackAssembly} from './stack/stack-assembly';
+import {StackLayer} from './stack/stack-layer';
 
+const LIST_ID = 'stack-layers';
+
+/**
+ * "The layered stack": the tools grouped into the layers of a site, drawn as plates stacked bottom (hosting) to top
+ * (design) on the dot grid. The list is server-rendered in that order; CSS stacks it upwards and, on desktop, drops
+ * the plates into place as the section scrolls into view.
+ */
 export async function StackStrip() {
   const [stack, copy] = await Promise.all([getStack(), getPageCopy()]);
+  const groups = groupStack(stack.map((item) => item.name));
+
   return (
-    <Section padding="strip" className="border-b border-line bg-white" innerClassName="flex flex-wrap items-center justify-between gap-x-8 gap-y-5">
-      <Eyebrow>{copy['stack.eyebrow']}</Eyebrow>
-      <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-        {stack.map((item) => (
-          <li key={item.name}>
-            <Tag size="lg">{item.name}</Tag>
-          </li>
-        ))}
-      </ul>
+    <Section id="stack" className="dot-grid border-y border-line" innerClassName="flex flex-col gap-10 max-md:gap-8">
+      {/* Above the list, so a plate still falling into place passes behind the heading instead of over it */}
+      <div className="relative z-10 flex flex-wrap items-end justify-between gap-6">
+        <div data-reveal className="flex flex-col gap-[18px]">
+          <Eyebrow>{copy['stack.eyebrow']}</Eyebrow>
+          <SectionHeading>
+            The <Mark>stack</Mark>, layer by layer.
+          </SectionHeading>
+        </div>
+        <p className="m-0 max-w-[380px] text-base leading-[1.55] text-muted">The tools we use at each level of a site, from hosting up to design.</p>
+      </div>
+      <div>
+        <ol id={LIST_ID} className="stack-layers m-0 flex list-none flex-col-reverse p-0 md:pt-12 md:pb-10 max-md:gap-2.5">
+          {groups.map((group, index) => (
+            <StackLayer key={group.id} group={group} index={index} />
+          ))}
+        </ol>
+        <p className="m-0 mt-5 flex items-center gap-2 font-mono text-xs leading-none font-medium tracking-[0.08em] text-muted uppercase md:hidden">
+          <ArrowUp aria-hidden="true" className="size-4" />
+          From the ground up
+        </p>
+        <StackAssembly targetId={LIST_ID} />
+      </div>
     </Section>
   );
 }
