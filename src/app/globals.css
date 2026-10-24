@@ -317,12 +317,15 @@
 
     .stack-drop {
       animation: stack-drop linear both;
+      /* Firefox skips a scroll-driven animation with no time-based duration; scroll timelines ignore the value itself */
+      animation-duration: 1ms;
       animation-timeline: --stack-layers;
       /*
        * Measured on the list's own height (entry), not the viewport's (cover), so the last plate always lands by the time
        * the whole list is on screen, at any viewport height, and never hangs over the heading when the section is parked.
+       * The 7.2% stagger lands the sixth plate (groupStack's most: five groups plus Other, --layer 5) at exactly 100%.
        */
-      animation-range: entry calc(48% + var(--layer) * 9%) entry calc(64% + var(--layer) * 9%);
+      animation-range: entry calc(48% + var(--layer) * 7.2%) entry calc(64% + var(--layer) * 7.2%);
     }
   }
 
