@@ -33,3 +33,6 @@ next-env.d.ts
 
 # Claude Code worktrees
 .claude/worktrees/
+
+# Private CV (phone number and home address): never commit, see #39
+/docs/Christian-Diomampo-Senior-Full-Stack-Developer.pdf
