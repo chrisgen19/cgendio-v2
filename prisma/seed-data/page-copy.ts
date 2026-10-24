@@ -25,7 +25,7 @@ export const pageCopy: PageCopy = {
 
   'timeline.eyebrow': 'Work timeline',
   'timeline.heading': 'The road [[here.]]',
-  'timeline.lede': 'Roles, promotions and the projects in between.',
+  'timeline.lede': 'Roles and the projects in between.',
   'timeline.cvLabel': 'Download CV',
 
   'blog.eyebrow': 'Dev notes & tech news',
