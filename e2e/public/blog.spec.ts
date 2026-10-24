@@ -1,21 +1,21 @@
 import {expect, test} from '@playwright/test';
 
-/* Seeded posts, newest first: "Migrating 20+ WordPress sites…", "Bulk redirects…", "My Claude Code setup…", "Two reviewers…". */
+/* Seeded published posts, newest first: "WordPress news, October 2026…", "Redirect maps…". The four canvas posts are drafts. */
 
 test('blog list, then a post, then the next post', async ({page}) => {
   await page.goto('/blog');
-  await page.getByRole('link', {name: /Bulk redirects at the edge/}).click();
+  await page.getByRole('link', {name: /Redirect maps for a WordPress/}).click();
 
-  await expect(page).toHaveURL(/\/blog\/bulk-redirects-at-the-edge-with-cloudflare-and-vercel$/);
-  await expect(page.getByRole('heading', {level: 1})).toHaveText('Bulk redirects at the edge with Cloudflare and Vercel');
+  await expect(page).toHaveURL(/\/blog\/redirect-maps-wordpress-to-nextjs$/);
+  await expect(page.getByRole('heading', {level: 1})).toHaveText('Redirect maps for a WordPress to Next.js migration');
 
   // "Next article" is the newer post
   await page
     .getByRole('navigation', {name: 'Previous and next articles'})
-    .getByRole('link', {name: /Next article.*Migrating 20\+ WordPress sites/})
+    .getByRole('link', {name: /Next article.*WordPress news, October 2026/})
     .click();
-  await expect(page).toHaveURL(/\/blog\/migrating-20-wordpress-sites-to-nextjs-without-losing-seo$/);
-  await expect(page.getByRole('heading', {level: 1})).toHaveText('Migrating 20+ WordPress sites to Next.js without losing SEO');
+  await expect(page).toHaveURL(/\/blog\/wordpress-news-october-2026$/);
+  await expect(page.getByRole('heading', {level: 1})).toHaveText("WordPress news, October 2026: what to patch and what's coming in 7.2");
 });
 
 test('the RSS feed is valid XML with every published post', async ({page, request}) => {
@@ -35,6 +35,6 @@ test('the RSS feed is valid XML with every published post', async ({page, reques
 
   expect(feed.error).toBeNull();
   expect(feed.title).toBeTruthy();
-  expect(feed.links).toHaveLength(4);
-  expect(feed.links[0]).toBe('http://localhost:3100/blog/migrating-20-wordpress-sites-to-nextjs-without-losing-seo');
+  expect(feed.links).toHaveLength(2);
+  expect(feed.links[0]).toBe('http://localhost:3100/blog/wordpress-news-october-2026');
 });
