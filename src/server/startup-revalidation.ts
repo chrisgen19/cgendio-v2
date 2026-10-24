@@ -18,6 +18,9 @@ const holder = globalThis as {[TOKEN_KEY]?: string};
 
 const ATTEMPTS = 20;
 const RETRY_MS = 500;
+// Per attempt, so a connection that never answers becomes a retry instead of holding the loop. The route only loops
+// over a few tags; if one did finish after its attempt timed out, the retry's 404 logs a refusal that's harmless.
+const ATTEMPT_TIMEOUT_MS = 5_000;
 
 /** A new one-time token for this server process. */
 export const issueStartupToken = () => {
@@ -48,13 +51,18 @@ export const revalidateContentOnStart = async () => {
   for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
     await new Promise((resolve) => setTimeout(resolve, RETRY_MS));
     try {
-      const response = await fetch(url, {method: 'POST', headers: {[STARTUP_REVALIDATE_HEADER]: token}, cache: 'no-store'});
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {[STARTUP_REVALIDATE_HEADER]: token},
+        cache: 'no-store',
+        signal: AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
+      });
       if (response.ok) return;
       // A refusal won't change on a retry
       console.warn(`Startup revalidation was refused (${response.status}): pages may show build-time content until the next admin save.`);
       return;
     } catch {
-      // Not answering yet: try again
+      // Not answering yet, or timed out: try again
     }
   }
   console.warn('Startup revalidation: the server never answered, so pages may show build-time content until the next admin save.');
