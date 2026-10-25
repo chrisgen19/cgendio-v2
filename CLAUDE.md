@@ -108,8 +108,14 @@ Map them in `@theme inline`. A next/font variable must never share its name with
 Before calling any task done:
 
 - `pnpm typecheck`, `pnpm lint`, `pnpm test` (Vitest) and `pnpm build` pass.
-- `pnpm test:e2e` passes (needs `pnpm db:up`). It resets the `cgendio_test` database, builds against it and runs Playwright at 1440px and 390px. After an intended visual change, refresh the baselines with `pnpm test:e2e --update-snapshots`, check the new images, and get the Linux ones from CI's `linux-snapshots` artifact (run the workflow with `update_snapshots`, or take them from a run that failed on a missing baseline).
+- `pnpm test:e2e` passes (needs `pnpm db:up`). It resets the `cgendio_test` database, builds against it and runs Playwright at 1440px and 390px. After an intended visual change, refresh the baselines with `pnpm test:e2e --update-snapshots`, check the new images, and get the Linux ones from CI's `linux-snapshots` artifact (run the workflow with `update_snapshots`, or take them from a run that failed on a missing baseline). Commit only the Linux images whose tests failed on the PR's own CI run; the rest differ by rendering noise.
 - UI changes are checked at **1440px** and **390px**; say so if they weren't.
+
+## Gotchas
+
+- **Stale `globals.css` (Turbopack):** builds and a restarted `next dev` can serve an old `globals.css` from cache. After a `globals.css` change, grep the built `.next/static/chunks/*.css` for the new rule (clear `.next` except `dev/` if it's missing). To restart `next dev`, stop it, `rm -rf .next/dev`, start it, then check the CSS linked from `/` has the latest rule. Never delete `.next/dev` under a running dev server.
+- **Prisma migrations:** `prisma migrate dev` won't run non-interactively. Generate the SQL with `prisma migrate diff --from-schema <schema.prisma from main> --to-schema prisma/schema.prisma --script` and apply it with `pnpm db:deploy`. Restart `next dev` afterwards: it keeps the old Prisma client on `globalThis`.
+- **e2e specs:** the page has `scroll-behavior: smooth`, so scroll with `behavior: 'instant'`. After a client-side navigation the previous page stays in the DOM, hidden, so scope locators to the visible `main`. Sticky layouts need flattening for element screenshots (`stylePath`, see `e2e/support/flatten-work-stack.css`).
 
 ## Git and tracking
 
