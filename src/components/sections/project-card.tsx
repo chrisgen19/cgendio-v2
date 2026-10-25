@@ -63,10 +63,14 @@ export function ProjectCard({project, place}: ProjectCardProps) {
             {project.kindLabel}
           </p>
           <div className="flex flex-col gap-4 max-md:gap-3">
-            <h3 className="m-0 font-display text-[clamp(32px,3.4vw,52px)] leading-[1.02] font-bold tracking-[-0.035em] max-md:text-[28px]">
+            {/* Title and summary are clamped so admin-length text can't make a card taller than the screen (the case study
+                shows them in full); the title's padding and negative margin keep the clamp from clipping descenders */}
+            <h3 className="m-0 -mb-[0.12em] line-clamp-3 pb-[0.12em] font-display text-[clamp(32px,3.4vw,52px)] leading-[1.02] font-bold tracking-[-0.035em] max-md:text-[28px]">
               {project.title}
             </h3>
-            <p className="m-0 max-w-[440px] text-[17px] leading-[1.55] opacity-80 max-md:text-[15px] max-md:leading-[1.5]">{project.summary}</p>
+            <p className="m-0 line-clamp-4 max-w-[440px] text-[17px] leading-[1.55] opacity-80 max-md:text-[15px] max-md:leading-[1.5]">
+              {project.summary}
+            </p>
             <div className="flex flex-wrap gap-1.5">
               {project.tags.map((tag) => (
                 <Tag key={tag} size="sm">
@@ -121,7 +125,8 @@ function ProjectMedia({project}: {project: Project}) {
     );
   }
   return (
-    <div className="work-media relative min-h-0 flex-1 max-md:mx-5">
+    // On phones the window is absolutely positioned, so the cover would otherwise shrink to nothing next to long text
+    <div className="work-media relative min-h-0 flex-1 max-md:mx-5 max-md:min-h-[140px]">
       <div className="absolute top-12 -bottom-10 left-0 w-[130%] overflow-hidden rounded-[16px] border border-ink/10 bg-white shadow-(--shadow-card) max-md:top-0 max-md:-bottom-6 max-md:w-[125%] max-md:rounded-[12px]">
         <div aria-hidden="true" className="flex h-7 items-center gap-1.5 border-b border-line px-3.5 max-md:h-5 max-md:px-2.5">
           <span className="size-2 rounded-full bg-wire max-md:size-1.5" />

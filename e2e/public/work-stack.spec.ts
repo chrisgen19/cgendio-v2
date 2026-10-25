@@ -69,3 +69,23 @@ test.describe('on short screens', () => {
     expect(Math.min(...heights)).toBeGreaterThanOrEqual(240);
   });
 });
+
+// The admin allows a 160-character title and a 600-character summary: the card clamps them so it never outgrows the
+// screen while stuck, and on phones the cover keeps its space instead of being squeezed out by the text
+test('admin-length text keeps the card within the screen and the cover visible', async ({page}) => {
+  await page.goto('/');
+  const card = cards(page).first();
+  await card.evaluate((el) => {
+    const words = (count: number) => Array.from({length: count}, () => 'Booking platform with payments and reports').join(' ');
+    const title = el.querySelector('h3');
+    const summary = el.querySelector('h3 + p');
+    if (title) title.textContent = words(4).slice(0, 160);
+    if (summary) summary.textContent = words(15).slice(0, 600);
+  });
+  const viewport = page.viewportSize()?.height ?? 0;
+  const top = Number.parseFloat(await card.evaluate((el) => getComputedStyle(el).top));
+  const box = await card.boundingBox();
+  expect(top + (box?.height ?? Number.POSITIVE_INFINITY)).toBeLessThanOrEqual(viewport);
+  const cover = await card.locator('.work-media').boundingBox();
+  expect(cover?.height).toBeGreaterThanOrEqual(140);
+});
