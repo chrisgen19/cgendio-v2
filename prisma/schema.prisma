@@ -54,8 +54,6 @@ model Project {
   group         ProjectGroup
   glyph         String
   theme         ProjectTheme
-  /// Columns out of 12 in the Work grid: 4, 5, 6 or 7
-  span          Int
   tags          String[]
   featured      Boolean       @default(false)
   order         Int

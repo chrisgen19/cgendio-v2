@@ -11,7 +11,6 @@ const projectForm = {
   group: 'CLIENT',
   glyph: 'Oh',
   theme: 'LIME',
-  span: '7',
   tags: 'Next.js, , Tailwind ,',
   coverImageUrl: '',
   caseStudy: '   ',
@@ -31,7 +30,6 @@ describe('projectFormSchema', () => {
       group: 'CLIENT',
       glyph: 'Oh',
       theme: 'LIME',
-      span: 7,
       tags: ['Next.js', 'Tailwind'],
       featured: true,
       status: 'PUBLISHED',
@@ -56,9 +54,8 @@ describe('projectFormSchema', () => {
     expect(result.error?.issues[0]).toMatchObject({path: ['title'], message: 'Title is required'});
   });
 
-  it('rejects a bad slug, span or link', () => {
+  it('rejects a bad slug or link', () => {
     expect(projectFormSchema.safeParse({...projectForm, slug: 'Bad Slug'}).success).toBe(false);
-    expect(projectFormSchema.safeParse({...projectForm, span: '3'}).success).toBe(false);
     expect(projectFormSchema.safeParse({...projectForm, liveUrl: 'javascript:alert(1)'}).success).toBe(false);
     expect(projectFormSchema.safeParse({...projectForm, liveUrl: 'mailto:me@example.com'}).success).toBe(false);
   });
