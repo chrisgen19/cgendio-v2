@@ -1,5 +1,6 @@
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {MarkedText} from '@/components/ui-site/marked-text';
+import {SectionHeading} from '@/components/ui-site/section-heading';
 import {getPageCopy, getSiteSettings} from '@/server/content';
 import {BuildSplit} from './what-we-build/build-split';
 import {buildCopy} from './what-we-build/copy';
@@ -25,9 +26,9 @@ export async function WhatWeBuild() {
         <div className="mx-auto flex max-w-site flex-col gap-20 max-md:gap-12">
           <div className="flex flex-col gap-[18px]">
             <Eyebrow>{build.eyebrow}</Eyebrow>
-            <h2 id="what-we-build-heading" className="m-0 font-display text-[clamp(34px,3.6vw,52px)] leading-[1.02] font-bold tracking-[-0.035em]">
+            <SectionHeading id="what-we-build-heading">
               <MarkedText text={build.heading} />
-            </h2>
+            </SectionHeading>
           </div>
           <BuildSplit photo={photo} sides={build.sides} />
         </div>
