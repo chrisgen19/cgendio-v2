@@ -9,7 +9,6 @@ export const stackItemSchema = z.object({
 
 export const projectGroupSchema = z.enum(['client', 'personal']);
 export const projectThemeSchema = z.enum(['ink', 'lime', 'tint', 'gray']);
-export const projectSpanSchema = z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7)]);
 
 export const projectSchema = z.object({
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
@@ -19,7 +18,6 @@ export const projectSchema = z.object({
   group: projectGroupSchema,
   glyph: z.string().min(1),
   theme: projectThemeSchema,
-  span: projectSpanSchema,
   tags: z.array(z.string().min(1)),
   /** The case study cover, also shown on the home page card when set */
   coverImageUrl: z.url().nullable(),
@@ -131,7 +129,6 @@ export const pageCopySchema = z.record(pageCopyKeySchema, z.string().min(1));
 export type StackItem = z.infer<typeof stackItemSchema>;
 export type ProjectGroup = z.infer<typeof projectGroupSchema>;
 export type ProjectTheme = z.infer<typeof projectThemeSchema>;
-export type ProjectSpan = z.infer<typeof projectSpanSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Milestone = z.infer<typeof milestoneSchema>;
 export type TimelineDot = z.infer<typeof timelineDotSchema>;

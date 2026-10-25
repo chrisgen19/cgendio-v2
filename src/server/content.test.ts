@@ -29,7 +29,6 @@ const projectRow = (slug: string, overrides: Record<string, unknown> = {}) => ({
   group: 'CLIENT',
   glyph: 'Ab',
   theme: 'TINT',
-  span: 6,
   tags: ['Next.js'],
   featured: true,
   order: 1,
@@ -78,7 +77,6 @@ describe('getProjects', () => {
         group: 'client',
         glyph: 'Ab',
         theme: 'tint',
-        span: 6,
         tags: ['Next.js'],
         coverImageUrl: null,
         featured: true,
@@ -94,7 +92,7 @@ describe('getProjects', () => {
   });
 
   it('fails instead of rendering a row that breaks the schema', async () => {
-    db.project.findMany.mockResolvedValue([projectRow('alpha', {span: 3})]);
+    db.project.findMany.mockResolvedValue([projectRow('Not A Slug')]);
     await expect(getProjects()).rejects.toThrow();
   });
 });

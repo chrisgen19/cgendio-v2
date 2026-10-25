@@ -57,7 +57,6 @@ const seed = async () => {
           group: upper(p.group),
           glyph: p.glyph,
           theme: upper(p.theme),
-          span: p.span,
           tags: p.tags,
           featured: p.featured,
           order: p.order,

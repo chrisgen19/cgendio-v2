@@ -19,7 +19,6 @@ export type ProjectFormValues = {
   group: 'CLIENT' | 'PERSONAL';
   glyph: string;
   theme: 'INK' | 'LIME' | 'TINT' | 'GRAY';
-  span: number;
   tags: string[];
   featured: boolean;
   status: 'DRAFT' | 'PUBLISHED';
@@ -40,12 +39,6 @@ const THEMES = [
   {value: 'LIME', label: 'Lime'},
   {value: 'TINT', label: 'Tint (soft blue)'},
   {value: 'GRAY', label: 'Grey'},
-] as const;
-const SPANS = [
-  {value: '7', label: '7 of 12 (wide)'},
-  {value: '6', label: '6 of 12 (half)'},
-  {value: '5', label: '5 of 12'},
-  {value: '4', label: '4 of 12 (narrow)'},
 ] as const;
 
 export function ProjectForm({project}: {project: ProjectFormValues | null}) {
@@ -73,10 +66,9 @@ export function ProjectForm({project}: {project: ProjectFormValues | null}) {
               <TextField name="glyph" label="Glyph" hint="The big text on the card" defaultValue={project?.glyph} errors={errors} required />
               <TextField name="tags" label="Tags" hint="Comma-separated, up to 8" defaultValue={project?.tags.join(', ')} errors={errors} />
             </div>
-            <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
+            <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
               <SelectField name="group" label="Group" options={GROUPS} defaultValue={project?.group ?? 'CLIENT'} errors={errors} />
               <SelectField name="theme" label="Card theme" options={THEMES} defaultValue={project?.theme ?? 'INK'} errors={errors} />
-              <SelectField name="span" label="Card width" options={SPANS} defaultValue={String(project?.span ?? 6)} errors={errors} />
             </div>
             <div className="flex flex-wrap gap-8">
               <SwitchField name="status" label="Published" hint="Drafts never appear on the site" defaultChecked={project?.status === 'PUBLISHED'} />

@@ -9,7 +9,6 @@ const project = {
   group: 'client',
   glyph: 'Oh',
   theme: 'lime',
-  span: 7,
   tags: ['Next.js'],
   coverImageUrl: null,
   featured: true,
@@ -34,9 +33,7 @@ describe('projectSchema', () => {
     expect(projectSchema.safeParse({...project, slug}).success).toBe(false);
   });
 
-  it('only allows bento spans 4 to 7 and the known groups and themes', () => {
-    expect(projectSchema.safeParse({...project, span: 3}).success).toBe(false);
-    expect(projectSchema.safeParse({...project, span: 8}).success).toBe(false);
+  it('only allows the known groups and themes', () => {
     expect(projectSchema.safeParse({...project, group: 'CLIENT'}).success).toBe(false);
     expect(projectSchema.safeParse({...project, theme: 'red'}).success).toBe(false);
   });

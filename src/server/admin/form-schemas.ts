@@ -38,7 +38,6 @@ export const projectFormSchema = z.object({
   group: z.enum(['CLIENT', 'PERSONAL'], {error: 'Pick a group'}),
   glyph: text('Glyph', 40),
   theme: z.enum(['INK', 'LIME', 'TINT', 'GRAY'], {error: 'Pick a theme'}),
-  span: z.coerce.number().pipe(z.union([z.literal(4), z.literal(5), z.literal(6), z.literal(7)], {error: 'Span is 4, 5, 6 or 7'})),
   tags: z
     .string()
     .transform((value) =>
