@@ -1,13 +1,13 @@
 import type {CSSProperties, ReactNode} from 'react';
 import {Button} from '@/components/ui-site/button';
 import {cn} from '@/lib/cn';
-import {ABOUT_COPY} from './copy';
+import type {AboutCopy} from './copy';
 
 type AboutInspectProps = {
+  copy: AboutCopy;
   name: string;
   openToProjects: boolean;
   cvUrl: string | null;
-  cvLabel: string;
 };
 
 type RowProps = {
@@ -36,8 +36,8 @@ function Row({label, pinKey, index, children}: RowProps) {
  * The inspect panel: the frame's facts as real content (a description list in reading order), plus the way on. Rows
  * with a comment pin on the canvas light up with it when either is hovered.
  */
-export function AboutInspect({name, openToProjects, cvUrl, cvLabel}: AboutInspectProps) {
-  const rows = ABOUT_COPY.rows;
+export function AboutInspect({copy, name, openToProjects, cvUrl}: AboutInspectProps) {
+  const rows = copy.rows;
 
   return (
     <div className="flex flex-col bg-white">
@@ -46,27 +46,27 @@ export function AboutInspect({name, openToProjects, cvUrl, cvLabel}: AboutInspec
         {rows.map((row, i) => (
           <Row key={row.label} label={row.label} pinKey={row.pinKey} index={i}>
             <span className="text-[15px] leading-snug font-semibold text-ink">{row.value}</span>
-            {row.note ? <span className="text-sm leading-snug text-muted">{row.note}</span> : null}
+            <span className="text-sm leading-snug text-muted">{row.note}</span>
           </Row>
         ))}
-        <Row label={ABOUT_COPY.statusLabel} index={rows.length}>
+        <Row label={copy.statusLabel} index={rows.length}>
           <span className="flex items-start gap-2.5 text-[15px] leading-snug font-semibold text-ink">
             <span
               aria-hidden="true"
               className={cn('mt-[7px] size-2 shrink-0 rounded-full', openToProjects ? 'bg-status ring-4 ring-status/15' : 'bg-dot-placeholder')}
             />
-            {openToProjects ? ABOUT_COPY.statusOpen : ABOUT_COPY.statusClosed}
+            {openToProjects ? copy.statusOpen : copy.statusClosed}
           </span>
         </Row>
       </dl>
       <div className="flex flex-wrap gap-2.5 border-t border-line px-7 py-5 max-md:px-5">
         <Button href="/contact" size="sm">
-          {ABOUT_COPY.contactLabel}
+          {copy.contactLabel}
         </Button>
         {/* Only once a CV is uploaded in admin Settings, like the Timeline and Contact buttons */}
         {cvUrl ? (
           <Button href={cvUrl} variant="secondary" size="sm">
-            {cvLabel}
+            {copy.cvLabel}
           </Button>
         ) : null}
       </div>

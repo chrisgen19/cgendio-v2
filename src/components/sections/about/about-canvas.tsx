@@ -2,9 +2,10 @@ import Image from 'next/image';
 import type {CSSProperties} from 'react';
 import {AboutGuides} from './about-guides';
 import {AboutPin, type PinPlace} from './about-pin';
-import {ABOUT_COPY, type AboutPinKey} from './copy';
+import {type AboutCopy, type AboutPinKey, PHOTO_PLACEHOLDER} from './copy';
 
 type AboutCanvasProps = {
+  copy: AboutCopy;
   photoUrl: string | null;
   alt: string;
   /** R2 uploads go through the image optimizer, like CoverImage; any other host is shown as is */
@@ -29,8 +30,8 @@ const HANDLES = ['top-0 left-0', 'top-0 left-full', 'top-full left-full', 'top-f
  * guides to the canvas edges and comment pins. The frame's box lives in CSS variables (--fx/--fy/--fw/--fh) so the
  * guides can reach it. Everything but the photo is aria-hidden: the inspect panel beside it carries the same facts.
  */
-export function AboutCanvas({photoUrl, alt, optimizable}: AboutCanvasProps) {
-  const pins = ABOUT_COPY.rows.filter((row) => row.pinKey !== undefined);
+export function AboutCanvas({copy, photoUrl, alt, optimizable}: AboutCanvasProps) {
+  const pins = copy.rows.filter((row) => row.pinKey !== undefined);
 
   return (
     <div
@@ -50,12 +51,12 @@ export function AboutCanvas({photoUrl, alt, optimizable}: AboutCanvasProps) {
               className="object-cover object-[50%_40%]"
             />
           ) : (
-            <span className="font-mono text-[14px] text-accent">{ABOUT_COPY.photoPlaceholder}</span>
+            <span className="font-mono text-[14px] text-accent">{PHOTO_PLACEHOLDER}</span>
           )}
         </div>
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
           <span className="about-wipe absolute bottom-full left-0 mb-2 font-mono text-xs leading-none font-medium whitespace-nowrap text-accent">
-            {ABOUT_COPY.frameLabel}
+            {copy.frameLabel}
           </span>
           <span className="about-snap absolute -inset-px border-[1.5px] border-accent">
             {HANDLES.map((at, i) => (

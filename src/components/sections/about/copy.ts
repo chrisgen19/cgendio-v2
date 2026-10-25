@@ -1,43 +1,41 @@
+import type {PageCopy} from '@/server/content';
+
 /** A fact that has a comment pin on the canvas; the pin and its panel row share the key and light up together. */
 export type AboutPinKey = 'role' | 'timezone' | 'experience' | 'sites';
 
 export type AboutRow = {
   label: string;
   value: string;
-  note?: string;
+  note: string;
   /** Set when the canvas carries a pin for this row; `pin` is the pin's short visible label. */
   pinKey?: AboutPinKey;
   pin?: string;
 };
 
-const ROWS: AboutRow[] = [
-  {
-    label: 'Role',
-    value: 'Senior full-stack developer',
-    note: 'Leads a team of 6 at Access Group Australia',
-    pinKey: 'role',
-    pin: 'Team of 6',
-  },
-  {label: 'Based in', value: 'Pasig City, Philippines', note: 'Metro Manila'},
-  {label: 'Timezone', value: 'UTC+8 (Asia/Manila)', note: 'Working hours overlap Australia and APAC', pinKey: 'timezone', pin: 'UTC+8'},
-  {label: 'On the web', value: '15+ years', note: 'Building sites since 2007', pinKey: 'experience', pin: '15+ years'},
-  {label: 'Looks after', value: '40+ sites', note: 'WordPress and Webflow, across 40 brands', pinKey: 'sites', pin: '40+ sites'},
-];
+export type AboutCopy = ReturnType<typeof aboutCopy>;
+
+/** Not copy: only shows until a photo is uploaded in admin Settings. */
+export const PHOTO_PLACEHOLDER = '[YOUR PHOTO]';
+
+/** A panel row from its `about.<row>.*` page-copy keys. */
+const row = (copy: PageCopy, key: 'based' | AboutPinKey): AboutRow => {
+  const base = {label: copy[`about.${key}.label`], value: copy[`about.${key}.value`], note: copy[`about.${key}.note`]};
+  return key === 'based' ? base : {...base, pinKey: key, pin: copy[`about.${key}.pin`]};
+};
 
 /**
- * Draft copy for the "Inspect canvas" About. Christian reviews every string before it ships; the winning variant's copy
- * moves into the admin's page-copy keys later. `[[...]]` marks the highlighted words, as in the admin copy.
+ * The Inspect canvas About's copy, from the admin's page copy. `[[...]]` in the heading marks the highlighted words.
+ * The rows are in panel order; the canvas pins the ones with a `pinKey`.
  */
-export const ABOUT_COPY = {
-  heading: "Hi, I'm [[Christian.]]",
-  intro:
-    "I'm a senior full-stack developer in Pasig City, Philippines. Through Cgdiomampo.dev, we take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.",
+export const aboutCopy = (copy: PageCopy) => ({
+  heading: copy['about.heading'],
+  intro: copy['about.intro'],
   /** The selected frame's name on the canvas */
-  frameLabel: 'Christian / Pasig City',
-  photoPlaceholder: '[YOUR PHOTO]',
-  contactLabel: 'Get in touch',
-  statusLabel: 'Status',
-  statusOpen: 'Open to projects and roles',
-  statusClosed: 'Not taking new work right now',
-  rows: ROWS,
-};
+  frameLabel: copy['about.frameLabel'],
+  contactLabel: copy['about.contactLabel'],
+  cvLabel: copy['about.cvLabel'],
+  statusLabel: copy['about.status.label'],
+  statusOpen: copy['about.status.open'],
+  statusClosed: copy['about.status.closed'],
+  rows: (['role', 'based', 'timezone', 'experience', 'sites'] as const).map((key) => row(copy, key)),
+});

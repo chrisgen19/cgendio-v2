@@ -1,20 +1,53 @@
 import type {PageCopy} from '../../src/server/content-schema';
 
-/** The canvas copy, with the facts corrected against the CV in Phase 8.1. `[[...]]` marks the highlighted words in a heading or statement. */
+/**
+ * The canvas copy, with the facts corrected against the CV in Phase 8.1, and the About and What we build copy from the
+ * section redesign. `[[...]]` marks the highlighted words in a heading.
+ */
 export const pageCopy: PageCopy = {
   'stack.eyebrow': 'The stack we ship with',
 
   'about.eyebrow': 'About',
-  'about.statement':
-    "Hi, I'm Christian — a full-stack developer in Pasig City, Philippines. Through Cgdiomampo.dev, we take brands from research and Figma to [[fast WordPress and Next.js sites]], then keep them running.",
+  'about.heading': "Hi, I'm [[Christian.]]",
+  'about.intro':
+    "I'm a senior full-stack developer in Pasig City, Philippines. Through Cgdiomampo.dev, we take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.",
   'about.name': 'Christian Diomampo',
-  'about.role': 'Senior full-stack developer · Pasig, PH',
-  'about.fact1.title': 'Full-stack',
-  'about.fact1.body': 'React, Next.js, TypeScript, PHP and WordPress — front to back.',
-  'about.fact2.title': '40+ sites',
-  'about.fact2.body': 'Maintained across 40 brands for Access Group Australia.',
-  'about.fact3.title': 'UTC+8',
-  'about.fact3.body': 'Working hours that overlap Australia and APAC.',
+  'about.frameLabel': 'Christian / Pasig City',
+  'about.role.label': 'Role',
+  'about.role.value': 'Senior full-stack developer',
+  'about.role.note': 'Leads a team of 6 at Access Group Australia',
+  'about.role.pin': 'Team of 6',
+  'about.based.label': 'Based in',
+  'about.based.value': 'Pasig City, Philippines',
+  'about.based.note': 'Metro Manila',
+  'about.timezone.label': 'Timezone',
+  'about.timezone.value': 'UTC+8 (Asia/Manila)',
+  'about.timezone.note': 'Working hours overlap Australia and APAC',
+  'about.timezone.pin': 'UTC+8',
+  'about.experience.label': 'On the web',
+  'about.experience.value': '15+ years',
+  'about.experience.note': 'Building sites since 2007',
+  'about.experience.pin': '15+ years',
+  'about.sites.label': 'Looks after',
+  'about.sites.value': '40+ sites',
+  'about.sites.note': 'WordPress and Webflow, across 40 brands',
+  'about.sites.pin': '40+ sites',
+  'about.status.label': 'Status',
+  'about.status.open': 'Open to projects and roles',
+  'about.status.closed': 'Not taking new work right now',
+  'about.contactLabel': 'Get in touch',
+  'about.cvLabel': 'Download CV',
+
+  'build.eyebrow': 'What we build',
+  'build.heading': 'Two kinds of site, [[both done properly]].',
+  'build.wp.label': 'WordPress',
+  'build.wp.labelSub': '& WooCommerce',
+  'build.wp.line': 'Custom themes, plugins and WooCommerce stores, quick to load and easy for your team to edit.',
+  'build.wp.proof': 'Right now we look after 40+ WordPress and Webflow sites across 40 brands.',
+  'build.next.label': 'Next.js',
+  'build.next.labelSub': '& React',
+  'build.next.line': 'Headless sites and React apps in TypeScript, built for speed and Core Web Vitals.',
+  'build.next.proof': "We built a headless CMS on Builder.io and Next.js, and the site you're on.",
 
   'work.eyebrow': 'Selected work',
   'work.heading': "Things we've [[shipped.]]",
