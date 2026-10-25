@@ -13,16 +13,16 @@ type BuildSideProps = {
 // Literal per side so Tailwind sees every class. The split root is the `split` group and carries data-active.
 const STYLES: Record<BuildSideId, {column: string; label: string; text: string; proof: string; bar: string; dot: string}> = {
   wp: {
-    column: 'md:items-end md:text-right',
+    column: 'lg:items-end lg:text-right',
     label:
-      'origin-bottom-left md:origin-bottom-right group-data-[active=wp]/split:scale-112 group-data-[active=next]/split:scale-88 group-data-[active=next]/split:text-muted',
+      'origin-bottom-left lg:origin-bottom-right group-data-[active=wp]/split:scale-112 group-data-[active=next]/split:scale-88 group-data-[active=next]/split:text-muted',
     text: 'group-data-[active=wp]/split:text-ink group-data-[active=next]/split:text-muted',
-    proof: 'md:flex-row-reverse',
+    proof: 'lg:flex-row-reverse',
     bar: 'bg-side-wp group-data-[active=next]/split:bg-line',
     dot: 'bg-side-wp',
   },
   next: {
-    column: 'md:items-start',
+    column: 'lg:items-start',
     label:
       'origin-bottom-left group-data-[active=next]/split:scale-112 group-data-[active=wp]/split:scale-88 group-data-[active=wp]/split:text-muted',
     text: 'group-data-[active=next]/split:text-ink group-data-[active=wp]/split:text-muted',

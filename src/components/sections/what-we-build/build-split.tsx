@@ -12,7 +12,7 @@ type BuildSplitProps = {
 };
 
 // Hover previews only where the split runs left/right and motion is welcome; a press works everywhere
-const HOVER_PREVIEW = '(hover: hover) and (pointer: fine) and (width >= 860px) and (prefers-reduced-motion: no-preference)';
+const HOVER_PREVIEW = '(hover: hover) and (pointer: fine) and (width >= 1080px) and (prefers-reduced-motion: no-preference)';
 const FOCUS_PREVIEW = '(prefers-reduced-motion: no-preference)';
 
 const allows = (query: string) => window.matchMedia(query).matches;
@@ -45,16 +45,17 @@ export function BuildSplit({photo, sides}: BuildSplitProps) {
     },
   });
 
+  // Three columns only from lg: below 1080px a text column is narrower than the one-word WordPress label, so it stacks
   return (
     <div
       data-active={active ?? 'none'}
       onPointerMove={onPointerMove}
       onPointerLeave={() => setHovered(null)}
-      className="build-split group/split grid grid-cols-[minmax(0,1fr)_clamp(300px,29vw,420px)_minmax(0,1fr)] items-center gap-x-12 gap-y-8 max-md:grid-cols-1 max-md:gap-y-8"
+      className="build-split group/split grid grid-cols-[minmax(0,1fr)_clamp(300px,29vw,420px)_minmax(0,1fr)] items-center gap-x-12 gap-y-8 max-lg:grid-cols-1"
     >
-      <BuildSide side={wp} {...sideProps('wp')} className="md:col-start-1 md:row-start-1" />
-      <BuildPortrait photo={photo} className="md:col-start-2 md:row-start-1" />
-      <BuildSide side={next} {...sideProps('next')} className="md:col-start-3 md:row-start-1" />
+      <BuildSide side={wp} {...sideProps('wp')} className="lg:col-start-1 lg:row-start-1" />
+      <BuildPortrait photo={photo} className="lg:col-start-2 lg:row-start-1" />
+      <BuildSide side={next} {...sideProps('next')} className="lg:col-start-3 lg:row-start-1" />
     </div>
   );
 }

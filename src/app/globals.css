@@ -701,7 +701,8 @@
 
 /*
  * The What we build split (src/components/sections/what-we-build/). One registered property, --build-split, places
- * the seam: each half of the portrait clips to its side of it, left/right on desktop and top/bottom on phones.
+ * the seam: each half of the portrait clips to its side of it, left/right from lg and top/bottom below it, where the
+ * split stacks (a text column there is narrower than the one-word WordPress label).
  * BuildSplit sets data-active from hover, keyboard focus or a pressed side; the spring transition retargets mid-way if
  * that changes. Without JavaScript, or with reduced motion before any press, it stays at 50/50.
  */
@@ -745,7 +746,7 @@
   background: linear-gradient(to bottom, transparent, var(--color-ink) 16% 84%, transparent);
 }
 
-@media (width < 860px) {
+@media (width < 1080px) {
   .build-half-wp {
     clip-path: inset(0 0 calc(100% - var(--build-split)) 0);
   }
@@ -816,12 +817,12 @@
   background: repeating-linear-gradient(-45deg, #000 0, #fff 3.5px, #000 7px);
 }
 
-@media (width < 860px) {
+@media (width < 1080px) {
   .build-screen img {
     scale: 1.36;
   }
 
-  /* Narrower on phones, where the scaled photo brings the window behind him closer to the face */
+  /* Narrower in the square stacked portrait, where the scaled photo brings the window behind him closer to the face */
   .build-screen::before {
     background: radial-gradient(ellipse 42% 50% at 50% 54%, #000 52%, #fff 84%);
   }

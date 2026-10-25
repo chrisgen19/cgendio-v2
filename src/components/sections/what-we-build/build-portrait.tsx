@@ -21,11 +21,14 @@ const HALVES: Record<BuildSideId, {half: string; screen: string; tint: string}> 
 
 /**
  * The split portrait: two copies of the same photo, each through its own print screen (globals.css `.build-screen`),
- * clipped to its side of the seam. The browser fetches the photo once for both.
+ * clipped to its side of the seam. The browser fetches the photo once for both. Stacked (under lg) it's a square,
+ * capped at 440px so a tablet-wide stage doesn't make it a huge one.
  */
 export function BuildPortrait({photo, className}: BuildPortraitProps) {
   return (
-    <div className={cn('relative isolate aspect-[4/5] overflow-hidden bg-ink-stage max-md:aspect-square', className)}>
+    <div
+      className={cn('relative isolate aspect-[4/5] overflow-hidden bg-ink-stage max-lg:aspect-square max-lg:w-full max-lg:max-w-[440px]', className)}
+    >
       {photo ? (
         <>
           <PortraitHalf side="wp" photo={photo} />
@@ -51,7 +54,7 @@ function PortraitHalf({side, photo}: {side: BuildSideId; photo: BuildPhoto}) {
           src={photo.src}
           alt={side === 'wp' ? photo.alt : ''}
           fill
-          sizes="(max-width: 860px) calc(100vw - 56px), 420px"
+          sizes="(max-width: 1079px) min(440px, calc(100vw - 56px)), 420px"
           unoptimized={photo.unoptimized}
           className="object-cover"
         />
