@@ -47,6 +47,8 @@
   /* Fixed in both themes: text on the ink thumb and code windows, and text on lime */
   --color-on-dark: #ffffff;
   --color-on-lime: #0d0e12;
+  /* Text on a solid accent fill (the About canvas's redline labels): white on #3b2bff, ink on the dark #8e85ff */
+  --color-on-accent: #ffffff;
   --color-code-bg: #0d0e12;
   --color-code-chrome: #1c1e25;
   --color-code-dots: #3a3d46;
@@ -84,6 +86,34 @@
   --container-site: 1320px;
 
   --ease-mark: cubic-bezier(0.7, 0, 0.2, 1);
+  /* A damped spring (about 12% overshoot), sampled into linear(): the About canvas's pins and handles */
+  --ease-spring: linear(
+    0,
+    0.079 4.2%,
+    0.264 8.3%,
+    0.487 12.5%,
+    0.701 16.7%,
+    0.877 20.8%,
+    1.005 25%,
+    1.084 29.2%,
+    1.12 33.3%,
+    1.125 37.5%,
+    1.11 41.7%,
+    1.084 45.8%,
+    1.056 50%,
+    1.03 54.2%,
+    1.01 58.3%,
+    0.996 62.5%,
+    0.987 66.7%,
+    0.984 70.8%,
+    0.985 75%,
+    0.987 79.2%,
+    0.991 83.3%,
+    0.994 87.5%,
+    0.997 91.7%,
+    0.999 95.8%,
+    1
+  );
 }
 
 /*
@@ -120,6 +150,7 @@
   --color-code-bg: #0f1116;
   --color-code-chrome: #1a1d24;
   --color-danger: #f87171;
+  --color-on-accent: #0d0e12;
   --color-highlight: rgba(215, 255, 61, 0.22);
   --color-highlight-ink: #d7ff3d;
   --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 18px 40px -18px rgba(0, 0, 0, 0.75);
@@ -189,6 +220,7 @@
   --color-code-bg: #0d0e12;
   --color-code-chrome: #1c1e25;
   --color-danger: #b91c1c;
+  --color-on-accent: #ffffff;
   --color-highlight: #d7ff3d;
   --color-highlight-ink: currentColor;
   --shadow-card: 0 1px 0 rgba(13, 14, 18, 0.04), 0 18px 40px -18px rgba(13, 14, 18, 0.22);
@@ -466,6 +498,158 @@
 
     .work-card:focus-within {
       animation: none;
+    }
+  }
+}
+
+/*
+ * The About section's inspect canvas (src/components/sections/about/). AboutStage arms the entry (data-armed) only with
+ * JavaScript, motion welcome and the stage still below the fold, and plays it (data-play) when the stage scrolls into
+ * view; until then every armed piece waits on its first frame. Order: the selection snaps around the portrait and its
+ * handles pop, the frame name wipes in, the redlines draw and show their numbers, the comment pins drop one by one on a
+ * spring and slide out their labels, and the inspect panel's values settle in as the last pins land. About 2s in all.
+ */
+@keyframes about-snap {
+  from {
+    opacity: 0;
+    scale: 1.08;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes about-pop {
+  from {
+    scale: 0;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes about-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes about-wipe-back {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes about-draw-x {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes about-draw-y {
+  from {
+    scale: 1 0;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes about-drop {
+  from {
+    translate: 0 -24px;
+    scale: 0.3;
+  }
+  to {
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes about-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes about-settle {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-about-stage][data-armed] .about-snap {
+    animation: about-snap 420ms cubic-bezier(0.2, 0.9, 0.3, 1) 120ms both;
+  }
+
+  [data-about-stage][data-armed] .about-handle {
+    animation: about-pop 560ms var(--ease-spring) both;
+    animation-delay: calc(320ms + var(--i) * 50ms);
+  }
+
+  [data-about-stage][data-armed] .about-wipe {
+    animation: about-wipe 360ms var(--ease-mark) 380ms both;
+  }
+
+  [data-about-stage][data-armed] .about-draw-y {
+    animation: about-draw-y 380ms var(--ease-mark) 520ms both;
+  }
+
+  [data-about-stage][data-armed] .about-draw-x {
+    animation: about-draw-x 420ms var(--ease-mark) 600ms both;
+  }
+
+  [data-about-stage][data-armed] .about-measure {
+    animation: about-pop 480ms var(--ease-spring) both;
+    animation-delay: calc(820ms + var(--i) * 80ms);
+  }
+
+  /* The fall and the fade run as two animations, so the spring's overshoot is never cut into keyframe segments */
+  [data-about-stage][data-armed] .about-drop {
+    animation:
+      about-drop 720ms var(--ease-spring) both,
+      about-fade 160ms linear both;
+    animation-delay: calc(980ms + var(--i) * 140ms);
+  }
+
+  [data-about-stage][data-armed] .about-chip {
+    animation: about-wipe 320ms var(--ease-mark) both;
+    animation-delay: calc(1160ms + var(--i) * 140ms);
+  }
+
+  [data-about-stage][data-armed] .about-settle {
+    animation: about-settle 520ms ease-out both;
+    animation-delay: calc(1150ms + var(--i) * 50ms);
+  }
+
+  [data-about-stage][data-armed]:not([data-play])
+    :is(.about-snap, .about-handle, .about-wipe, .about-draw-x, .about-draw-y, .about-measure, .about-drop, .about-chip, .about-settle) {
+    animation-play-state: paused;
+  }
+
+  /* A pin facing left slides its label out to the left (from 860px up; phones turn every pin to the right) */
+  @media (width >= 860px) {
+    [data-about-stage][data-armed] [data-side="left"] .about-chip {
+      animation-name: about-wipe-back;
     }
   }
 }

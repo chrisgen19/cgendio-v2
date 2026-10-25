@@ -1,62 +1,45 @@
-import Image from 'next/image';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {MarkedText} from '@/components/ui-site/marked-text';
 import {Section} from '@/components/ui-site/section';
+import {SectionHeading} from '@/components/ui-site/section-heading';
 import {getPageCopy, getSiteSettings} from '@/server/content';
+import {AboutCanvas} from './about/about-canvas';
+import {AboutInspect} from './about/about-inspect';
+import {AboutStage} from './about/about-stage';
+import {ABOUT_COPY} from './about/copy';
 
+/**
+ * "Inspect canvas": the studio takes brands from research and Figma to live sites, so the About shows Christian the way
+ * a designer sees a frame. The portrait is a selected frame on the dot grid with comment pins on it, and the inspect
+ * panel beside it lists the facts. The panel is the content; the canvas around the photo is decoration.
+ */
 export async function About() {
   const [copy, settings] = await Promise.all([getPageCopy(), getSiteSettings()]);
   const r2 = process.env.R2_PUBLIC_URL?.replace(/\/+$/, '');
-  const facts = [
-    {title: copy['about.fact1.title'], body: copy['about.fact1.body']},
-    {title: copy['about.fact2.title'], body: copy['about.fact2.body']},
-    {title: copy['about.fact3.title'], body: copy['about.fact3.body']},
-  ];
+  const optimizable = Boolean(r2 && settings.photoUrl?.startsWith(`${r2}/`));
 
   return (
-    <Section id="about" innerClassName="grid grid-cols-[minmax(0,4fr)_minmax(0,8fr)] items-start gap-16 max-md:grid-cols-1 max-md:gap-8">
-      <div data-reveal className="relative grid aspect-[4/5] place-items-center overflow-hidden rounded-photo bg-tint">
-        {/* Uploaded in admin Settings; R2 uploads go through the image optimizer, like CoverImage */}
-        {settings.photoUrl ? (
-          <Image
-            src={settings.photoUrl}
-            alt={`Photo of ${copy['about.name']}`}
-            fill
-            sizes="(max-width: 860px) calc(100vw - 40px), 420px"
-            unoptimized={!r2 || !settings.photoUrl.startsWith(`${r2}/`)}
-            className="object-cover"
+    <Section id="about" innerClassName="flex flex-col gap-12 max-md:gap-8">
+      <div className="flex flex-wrap items-end justify-between gap-x-16 gap-y-6">
+        <div data-reveal className="flex flex-col gap-[18px]">
+          <Eyebrow>{copy['about.eyebrow']}</Eyebrow>
+          <SectionHeading>
+            <MarkedText text={ABOUT_COPY.heading} />
+          </SectionHeading>
+        </div>
+        <p className="m-0 max-w-[480px] text-lg leading-[1.55] text-muted max-md:text-base">{ABOUT_COPY.intro}</p>
+      </div>
+      <AboutStage className="grid overflow-hidden rounded-panel border border-line bg-white min-[1360px]:grid-cols-[minmax(0,1fr)_400px]">
+        <AboutCanvas photoUrl={settings.photoUrl} alt={`Photo of ${copy['about.name']}`} optimizable={optimizable} />
+        <div className="border-line max-[1359px]:border-t min-[1360px]:border-l">
+          <AboutInspect
+            name={copy['about.name']}
+            openToProjects={settings.openToProjects}
+            cvUrl={settings.cvUrl}
+            cvLabel={copy['timeline.cvLabel']}
           />
-        ) : (
-          <span className="font-mono text-[14px] text-accent">[YOUR PHOTO]</span>
-        )}
-        <div className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 rounded-[20px] border border-line bg-white px-[18px] py-4">
-          <span className="flex flex-col gap-1">
-            <b className="text-[16px]">{copy['about.name']}</b>
-            <span className="text-[13px] text-muted">{copy['about.role']}</span>
-          </span>
-          <span
-            aria-hidden="true"
-            data-theme="light"
-            className="grid size-10 place-items-center rounded-xl bg-lime font-display text-[15px] leading-none font-extrabold"
-          >
-            cg
-          </span>
         </div>
-      </div>
-      <div className="flex flex-col gap-9 pt-2">
-        <Eyebrow>{copy['about.eyebrow']}</Eyebrow>
-        <p data-reveal className="m-0 font-display text-[clamp(28px,3.4vw,46px)] leading-[1.12] font-semibold tracking-[-0.03em]">
-          <MarkedText text={copy['about.statement']} />
-        </p>
-        <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-          {facts.map((fact) => (
-            <div key={fact.title} data-reveal className="flex flex-col gap-1.5 border-t-2 border-ink pt-4">
-              <b className="font-display text-[24px] tracking-[-0.02em]">{fact.title}</b>
-              <span className="text-[15px] leading-normal text-muted">{fact.body}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      </AboutStage>
     </Section>
   );
 }
