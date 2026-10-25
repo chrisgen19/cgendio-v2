@@ -10,6 +10,7 @@ import {Hero} from './hero';
 import {Milestones} from './milestones';
 import {StackStrip} from './stack-strip';
 import {Timeline} from './timeline';
+import {WhatWeBuild} from './what-we-build';
 import {Work} from './work';
 
 type HomePageProps = {
@@ -29,6 +30,7 @@ export function HomePage({filter}: HomePageProps) {
         <Hero />
         <StackStrip />
         <About />
+        <WhatWeBuild />
         <Work filter={filter} />
         <Milestones />
         <Timeline />

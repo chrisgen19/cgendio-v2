@@ -22,7 +22,6 @@ const ROWS: AboutRow[] = [
   {label: 'Timezone', value: 'UTC+8 (Asia/Manila)', note: 'Working hours overlap Australia and APAC', pinKey: 'timezone', pin: 'UTC+8'},
   {label: 'On the web', value: '15+ years', note: 'Building sites since 2007', pinKey: 'experience', pin: '15+ years'},
   {label: 'Looks after', value: '40+ sites', note: 'WordPress and Webflow, across 40 brands', pinKey: 'sites', pin: '40+ sites'},
-  {label: 'Builds', value: 'WordPress, WooCommerce, Shopify, Webflow and Next.js'},
 ];
 
 /**

@@ -114,6 +114,31 @@
     0.999 95.8%,
     1
   );
+
+  /* The What we build stage: ink in light mode; a deep indigo in dark mode, so it stands off the dark page */
+  --color-ink-stage: #0d0e12;
+  /* The What we build split's two keys: lime for WordPress, lavender (the code keyword colour) for Next.js */
+  --color-side-wp: #d7ff3d;
+  --color-side-next: #b9b2ff;
+  /* A damped spring (about 4% overshoot) for the What we build split; a CSS transition retargets from wherever it is */
+  --ease-split: linear(
+    0,
+    0.081 5%,
+    0.258 10%,
+    0.46 15%,
+    0.644 20%,
+    0.793 25%,
+    0.901 30%,
+    0.972 35%,
+    1.013 40%,
+    1.033 45%,
+    1.038 50%,
+    1.033 57.5%,
+    1.021 65%,
+    1.008 75%,
+    1.001 85%,
+    1
+  );
 }
 
 /*
@@ -157,6 +182,7 @@
   --shadow-deep: 0 0 0 1px #2a2e37, 0 30px 60px -24px rgba(0, 0, 0, 0.85);
   --shadow-menu: 0 24px 48px -20px rgba(0, 0, 0, 0.8);
   --shadow-thumb: inset 0 0 0 1px #2a2e37;
+  --color-ink-stage: color-mix(in srgb, #3b2bff 16%, #0b0c10);
 
   /* The hero film's colours (src/components/hero-film/theme.ts; light mode uses its fallbacks) */
   --film-ink: #f2f3f5;
@@ -229,9 +255,28 @@
   --shadow-thumb: 0 0 #0000;
 }
 
+/*
+ * A dark island in both themes: the What we build stage (src/components/sections/what-we-build/). Restates the dark
+ * values from above (keep them in sync), so text, lines, the accent, focus rings and the Mark take their dark look.
+ */
+[data-ink-stage] {
+  color-scheme: dark;
+  --color-white: #15171d;
+  --color-ink: #f2f3f5;
+  --color-muted: #a0a6b2;
+  --color-line: #2a2e37;
+  --color-accent: #8e85ff;
+  --color-accent-hover: #a69dff;
+  --color-ink-soft: #c9ccd4;
+  --color-on-accent: #0d0e12;
+  --color-highlight: rgba(215, 255, 61, 0.22);
+  --color-highlight-ink: #d7ff3d;
+}
+
 @layer base {
   /* An island's inherited text colour was resolved against the dark tokens; resolve it again inside */
-  :root[data-theme="dark"] [data-theme="light"] {
+  :root[data-theme="dark"] [data-theme="light"],
+  [data-ink-stage] {
     color: var(--color-ink);
   }
 
@@ -651,6 +696,134 @@
     [data-about-stage][data-armed] [data-side="left"] .about-chip {
       animation-name: about-wipe-back;
     }
+  }
+}
+
+/*
+ * The What we build split (src/components/sections/what-we-build/). One registered property, --build-split, places
+ * the seam: each half of the portrait clips to its side of it, left/right on desktop and top/bottom on phones.
+ * BuildSplit sets data-active from hover, keyboard focus or a pressed side; the spring transition retargets mid-way if
+ * that changes. Without JavaScript, or with reduced motion before any press, it stays at 50/50.
+ */
+@property --build-split {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+
+.build-split {
+  --build-split: 50%;
+}
+
+.build-split[data-active="wp"] {
+  --build-split: 76%;
+}
+
+.build-split[data-active="next"] {
+  --build-split: 24%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .build-split {
+    transition: --build-split 0.8s var(--ease-split);
+  }
+}
+
+.build-half-wp {
+  clip-path: inset(0 calc(100% - var(--build-split)) 0 0);
+}
+
+.build-half-next {
+  clip-path: inset(0 0 0 var(--build-split));
+}
+
+.build-seam {
+  inset-block: 0;
+  left: var(--build-split);
+  width: 2px;
+  translate: -50% 0;
+  background: linear-gradient(to bottom, transparent, var(--color-ink) 16% 84%, transparent);
+}
+
+@media (width < 860px) {
+  .build-half-wp {
+    clip-path: inset(0 0 calc(100% - var(--build-split)) 0);
+  }
+
+  .build-half-next {
+    clip-path: inset(var(--build-split) 0 0 0);
+  }
+
+  .build-seam {
+    inset-block: auto;
+    top: var(--build-split);
+    left: 0;
+    width: 100%;
+    height: 2px;
+    translate: 0 -50%;
+    background: linear-gradient(to right, transparent, var(--color-ink) 12% 88%, transparent);
+  }
+}
+
+/*
+ * Each half is the same photo through a print screen, made in CSS: the photo (grey, inverted, softened) is screened with
+ * a pattern, then contrast() snaps the mix to hard shapes that grow with the photo's brightness and invert() turns them
+ * light on black. brightness() first moves that snap point to about 68%, so the face's shading still prints. A soft
+ * vignette fades the room behind him, a multiply layer colours the shapes, and the half screens onto the stage, so black
+ * becomes the stage. WordPress gets the dot grid as a halftone; Next.js gets a line screen: one technique, equal weight.
+ */
+.build-half {
+  mix-blend-mode: screen;
+}
+
+.build-screen {
+  position: absolute;
+  inset: 0;
+  filter: brightness(0.74) contrast(24) invert(1);
+}
+
+/* Scaled up around the face, so the screen has more of it to draw */
+.build-screen img {
+  filter: grayscale(1) contrast(1.1) invert(1) blur(1px);
+  scale: 1.3;
+  transform-origin: 50% 56%;
+}
+
+.build-screen::before,
+.build-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* Lighten on the inverted photo darkens the original towards the edges */
+.build-screen::before {
+  z-index: 1;
+  mix-blend-mode: lighten;
+  background: radial-gradient(ellipse 50% 52% at 50% 54%, #000 46%, #fff 80%);
+}
+
+.build-screen::after {
+  z-index: 2;
+  mix-blend-mode: screen;
+}
+
+.build-screen-dots::after {
+  background: radial-gradient(circle at center, #000 0, #fff 7px) 0 0 / 7px 7px;
+}
+
+.build-screen-lines::after {
+  background: repeating-linear-gradient(-45deg, #000 0, #fff 3.5px, #000 7px);
+}
+
+@media (width < 860px) {
+  .build-screen img {
+    scale: 1.36;
+  }
+
+  /* Narrower on phones, where the scaled photo brings the window behind him closer to the face */
+  .build-screen::before {
+    background: radial-gradient(ellipse 42% 50% at 50% 54%, #000 52%, #fff 84%);
   }
 }
 
