@@ -1,12 +1,13 @@
 'use client';
 
-import {createContext, type MouseEvent, type ReactNode, useContext, useState} from 'react';
+import {type CSSProperties, createContext, type MouseEvent, type ReactNode, useContext, useState} from 'react';
 import {cn} from '@/lib/cn';
 import {WORK_FILTERS, type WorkFilter, workFilterHref, workFilterUrl} from '@/lib/work-filter';
+import {stackScope} from '@/lib/work-stack';
 
 /*
  * The Work filter as progressive enhancement. Without JavaScript the pills are links to `/?filter=…`, served from
- * prerendered variants. With JavaScript they filter in place: every card is already in the grid, `data-filter` hides
+ * prerendered variants. With JavaScript they filter in place: every card is already in the stack, `data-filter` hides
  * the others with CSS, and the address bar is updated with replaceState. Nothing navigates, so the hero film keeps
  * playing where it was.
  */
@@ -72,19 +73,21 @@ export function WorkFilters() {
   );
 }
 
-type WorkGridProps = {
+type WorkStackProps = {
+  /** The number of cards: their view timelines are scoped to the stack so each card can follow the next one. */
+  count: number;
   children: ReactNode;
 };
 
-/** The 12-column bento grid. Cards carry `data-group`; the active filter hides the other group. */
-export function WorkGrid({children}: WorkGridProps) {
+/**
+ * The card stack (`.work-stack` in globals.css). Cards carry `data-group`; `data-filter` hides the other group and picks
+ * each card's per-filter stack index, so the sticky offsets stay evenly spaced whatever the filter hides.
+ */
+export function WorkStack({count, children}: WorkStackProps) {
   const {filter, counts} = useWorkFilter();
   return (
     <>
-      <div
-        data-filter={filter}
-        className="grid grid-flow-dense grid-cols-12 gap-5 data-[filter=client]:[&>[data-group=personal]]:hidden data-[filter=personal]:[&>[data-group=client]]:hidden"
-      >
+      <div data-filter={filter} style={{'--scope': stackScope(count)} as CSSProperties} className="work-stack flex flex-col gap-6 max-md:gap-4">
         {children}
       </div>
       <p aria-live="polite" className="sr-only">

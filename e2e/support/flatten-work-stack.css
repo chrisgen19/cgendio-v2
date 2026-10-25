@@ -1,0 +1,9 @@
+/*
+ * Applied while taking the Work screenshot: lays the card stack out in plain flow. A tall element screenshot scrolls
+ * through the page, so sticky cards would pile up wherever the capture happened to be; work-stack.spec.ts covers the
+ * stacking itself.
+ */
+.work-card {
+  position: relative;
+  top: auto;
+}
