@@ -14,6 +14,14 @@ const isVariantFilter = (value: string): value is VariantFilter => (FILTERS as r
 
 export const generateStaticParams = () => FILTERS.map((filter) => ({filter}));
 
+/**
+ * Never the target of a client-side navigation: with JavaScript the filter pills switch in place (replaceState), and
+ * without it they're plain links, so every visit is a full load of a prerendered variant. Opting out of instant
+ * navigation validation is the fix for awaiting `params` outside `<Suspense>`; a boundary around the whole page would
+ * only add a fallback copy of the home page to the route's shell.
+ */
+export const instant = false;
+
 export const metadata: Metadata = {
   robots: {index: false},
   alternates: {canonical: '/'},
