@@ -87,7 +87,7 @@ describe('pageCopySchema', () => {
   });
 
   it('fails loudly on a missing or empty key', () => {
-    const {'about.statement': _missing, ...withoutOne} = full;
+    const {'about.heading': _missing, ...withoutOne} = full;
     expect(pageCopySchema.safeParse(withoutOne).success).toBe(false);
     expect(pageCopySchema.safeParse({...full, 'work.heading': ''}).success).toBe(false);
   });

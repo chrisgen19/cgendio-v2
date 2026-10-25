@@ -47,6 +47,8 @@
   /* Fixed in both themes: text on the ink thumb and code windows, and text on lime */
   --color-on-dark: #ffffff;
   --color-on-lime: #0d0e12;
+  /* Text on a solid accent fill (the About canvas's redline labels): white on #3b2bff, ink on the dark #8e85ff */
+  --color-on-accent: #ffffff;
   --color-code-bg: #0d0e12;
   --color-code-chrome: #1c1e25;
   --color-code-dots: #3a3d46;
@@ -84,6 +86,59 @@
   --container-site: 1320px;
 
   --ease-mark: cubic-bezier(0.7, 0, 0.2, 1);
+  /* A damped spring (about 12% overshoot), sampled into linear(): the About canvas's pins and handles */
+  --ease-spring: linear(
+    0,
+    0.079 4.2%,
+    0.264 8.3%,
+    0.487 12.5%,
+    0.701 16.7%,
+    0.877 20.8%,
+    1.005 25%,
+    1.084 29.2%,
+    1.12 33.3%,
+    1.125 37.5%,
+    1.11 41.7%,
+    1.084 45.8%,
+    1.056 50%,
+    1.03 54.2%,
+    1.01 58.3%,
+    0.996 62.5%,
+    0.987 66.7%,
+    0.984 70.8%,
+    0.985 75%,
+    0.987 79.2%,
+    0.991 83.3%,
+    0.994 87.5%,
+    0.997 91.7%,
+    0.999 95.8%,
+    1
+  );
+
+  /* The What we build stage: ink in light mode; a deep indigo in dark mode, so it stands off the dark page */
+  --color-ink-stage: #0d0e12;
+  /* The What we build split's two keys: lime for WordPress, lavender (the code keyword colour) for Next.js */
+  --color-side-wp: #d7ff3d;
+  --color-side-next: #b9b2ff;
+  /* A damped spring (about 4% overshoot) for the What we build split; a CSS transition retargets from wherever it is */
+  --ease-split: linear(
+    0,
+    0.081 5%,
+    0.258 10%,
+    0.46 15%,
+    0.644 20%,
+    0.793 25%,
+    0.901 30%,
+    0.972 35%,
+    1.013 40%,
+    1.033 45%,
+    1.038 50%,
+    1.033 57.5%,
+    1.021 65%,
+    1.008 75%,
+    1.001 85%,
+    1
+  );
 }
 
 /*
@@ -120,12 +175,14 @@
   --color-code-bg: #0f1116;
   --color-code-chrome: #1a1d24;
   --color-danger: #f87171;
+  --color-on-accent: #0d0e12;
   --color-highlight: rgba(215, 255, 61, 0.22);
   --color-highlight-ink: #d7ff3d;
   --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 18px 40px -18px rgba(0, 0, 0, 0.75);
   --shadow-deep: 0 0 0 1px #2a2e37, 0 30px 60px -24px rgba(0, 0, 0, 0.85);
   --shadow-menu: 0 24px 48px -20px rgba(0, 0, 0, 0.8);
   --shadow-thumb: inset 0 0 0 1px #2a2e37;
+  --color-ink-stage: color-mix(in srgb, #3b2bff 16%, #0b0c10);
 
   /* The hero film's colours (src/components/hero-film/theme.ts; light mode uses its fallbacks) */
   --film-ink: #f2f3f5;
@@ -189,6 +246,7 @@
   --color-code-bg: #0d0e12;
   --color-code-chrome: #1c1e25;
   --color-danger: #b91c1c;
+  --color-on-accent: #ffffff;
   --color-highlight: #d7ff3d;
   --color-highlight-ink: currentColor;
   --shadow-card: 0 1px 0 rgba(13, 14, 18, 0.04), 0 18px 40px -18px rgba(13, 14, 18, 0.22);
@@ -197,9 +255,28 @@
   --shadow-thumb: 0 0 #0000;
 }
 
+/*
+ * A dark island in both themes: the What we build stage (src/components/sections/what-we-build/). Restates the dark
+ * values from above (keep them in sync), so text, lines, the accent, focus rings and the Mark take their dark look.
+ */
+[data-ink-stage] {
+  color-scheme: dark;
+  --color-white: #15171d;
+  --color-ink: #f2f3f5;
+  --color-muted: #a0a6b2;
+  --color-line: #2a2e37;
+  --color-accent: #8e85ff;
+  --color-accent-hover: #a69dff;
+  --color-ink-soft: #c9ccd4;
+  --color-on-accent: #0d0e12;
+  --color-highlight: rgba(215, 255, 61, 0.22);
+  --color-highlight-ink: #d7ff3d;
+}
+
 @layer base {
   /* An island's inherited text colour was resolved against the dark tokens; resolve it again inside */
-  :root[data-theme="dark"] [data-theme="light"] {
+  :root[data-theme="dark"] [data-theme="light"],
+  [data-ink-stage] {
     color: var(--color-ink);
   }
 
@@ -467,6 +544,287 @@
     .work-card:focus-within {
       animation: none;
     }
+  }
+}
+
+/*
+ * The About section's inspect canvas (src/components/sections/about/). AboutStage arms the entry (data-armed) only with
+ * JavaScript, motion welcome and the stage still below the fold, and plays it (data-play) when the stage scrolls into
+ * view; until then every armed piece waits on its first frame. Order: the selection snaps around the portrait and its
+ * handles pop, the frame name wipes in, the redlines draw and show their numbers, the comment pins drop one by one on a
+ * spring and slide out their labels, and the inspect panel's values settle in as the last pins land. About 2s in all.
+ */
+@keyframes about-snap {
+  from {
+    opacity: 0;
+    scale: 1.08;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes about-pop {
+  from {
+    scale: 0;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes about-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes about-wipe-back {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes about-draw-x {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes about-draw-y {
+  from {
+    scale: 1 0;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes about-drop {
+  from {
+    translate: 0 -24px;
+    scale: 0.3;
+  }
+  to {
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes about-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes about-settle {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-about-stage][data-armed] .about-snap {
+    animation: about-snap 420ms cubic-bezier(0.2, 0.9, 0.3, 1) 120ms both;
+  }
+
+  [data-about-stage][data-armed] .about-handle {
+    animation: about-pop 560ms var(--ease-spring) both;
+    animation-delay: calc(320ms + var(--i) * 50ms);
+  }
+
+  [data-about-stage][data-armed] .about-wipe {
+    animation: about-wipe 360ms var(--ease-mark) 380ms both;
+  }
+
+  [data-about-stage][data-armed] .about-draw-y {
+    animation: about-draw-y 380ms var(--ease-mark) 520ms both;
+  }
+
+  [data-about-stage][data-armed] .about-draw-x {
+    animation: about-draw-x 420ms var(--ease-mark) 600ms both;
+  }
+
+  [data-about-stage][data-armed] .about-measure {
+    animation: about-pop 480ms var(--ease-spring) both;
+    animation-delay: calc(820ms + var(--i) * 80ms);
+  }
+
+  /* The fall and the fade run as two animations, so the spring's overshoot is never cut into keyframe segments */
+  [data-about-stage][data-armed] .about-drop {
+    animation:
+      about-drop 720ms var(--ease-spring) both,
+      about-fade 160ms linear both;
+    animation-delay: calc(980ms + var(--i) * 140ms);
+  }
+
+  [data-about-stage][data-armed] .about-chip {
+    animation: about-wipe 320ms var(--ease-mark) both;
+    animation-delay: calc(1160ms + var(--i) * 140ms);
+  }
+
+  [data-about-stage][data-armed] .about-settle {
+    animation: about-settle 520ms ease-out both;
+    animation-delay: calc(1150ms + var(--i) * 50ms);
+  }
+
+  [data-about-stage][data-armed]:not([data-play])
+    :is(.about-snap, .about-handle, .about-wipe, .about-draw-x, .about-draw-y, .about-measure, .about-drop, .about-chip, .about-settle) {
+    animation-play-state: paused;
+  }
+
+  /* A pin facing left slides its label out to the left (from 860px up; phones turn every pin to the right) */
+  @media (width >= 860px) {
+    [data-about-stage][data-armed] [data-side="left"] .about-chip {
+      animation-name: about-wipe-back;
+    }
+  }
+}
+
+/*
+ * The What we build split (src/components/sections/what-we-build/). One registered property, --build-split, places
+ * the seam: each half of the portrait clips to its side of it, left/right from lg and top/bottom below it, where the
+ * split stacks (a text column there is narrower than the one-word WordPress label).
+ * BuildSplit sets data-active from hover, keyboard focus or a pressed side; the spring transition retargets mid-way if
+ * that changes. Without JavaScript, or with reduced motion before any press, it stays at 50/50.
+ */
+@property --build-split {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+
+.build-split {
+  --build-split: 50%;
+}
+
+.build-split[data-active="wp"] {
+  --build-split: 76%;
+}
+
+.build-split[data-active="next"] {
+  --build-split: 24%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .build-split {
+    transition: --build-split 0.8s var(--ease-split);
+  }
+}
+
+.build-half-wp {
+  clip-path: inset(0 calc(100% - var(--build-split)) 0 0);
+}
+
+.build-half-next {
+  clip-path: inset(0 0 0 var(--build-split));
+}
+
+.build-seam {
+  inset-block: 0;
+  left: var(--build-split);
+  width: 2px;
+  translate: -50% 0;
+  background: linear-gradient(to bottom, transparent, var(--color-ink) 16% 84%, transparent);
+}
+
+@media (width < 1080px) {
+  .build-half-wp {
+    clip-path: inset(0 0 calc(100% - var(--build-split)) 0);
+  }
+
+  .build-half-next {
+    clip-path: inset(var(--build-split) 0 0 0);
+  }
+
+  .build-seam {
+    inset-block: auto;
+    top: var(--build-split);
+    left: 0;
+    width: 100%;
+    height: 2px;
+    translate: 0 -50%;
+    background: linear-gradient(to right, transparent, var(--color-ink) 12% 88%, transparent);
+  }
+}
+
+/*
+ * Each half is the same photo through a print screen, made in CSS: the photo (grey, inverted, softened) is screened with
+ * a pattern, then contrast() snaps the mix to hard shapes that grow with the photo's brightness and invert() turns them
+ * light on black. brightness() first moves that snap point to about 68%, so the face's shading still prints. A soft
+ * vignette fades the room behind him, a multiply layer colours the shapes, and the half screens onto the stage, so black
+ * becomes the stage. WordPress gets the dot grid as a halftone; Next.js gets a line screen: one technique, equal weight.
+ */
+.build-half {
+  mix-blend-mode: screen;
+}
+
+.build-screen {
+  position: absolute;
+  inset: 0;
+  filter: brightness(0.74) contrast(24) invert(1);
+}
+
+/* Scaled up around the face, so the screen has more of it to draw */
+.build-screen img {
+  filter: grayscale(1) contrast(1.1) invert(1) blur(1px);
+  scale: 1.3;
+  transform-origin: 50% 56%;
+}
+
+.build-screen::before,
+.build-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* Lighten on the inverted photo darkens the original towards the edges */
+.build-screen::before {
+  z-index: 1;
+  mix-blend-mode: lighten;
+  background: radial-gradient(ellipse 50% 52% at 50% 54%, #000 46%, #fff 80%);
+}
+
+.build-screen::after {
+  z-index: 2;
+  mix-blend-mode: screen;
+}
+
+.build-screen-dots::after {
+  background: radial-gradient(circle at center, #000 0, #fff 7px) 0 0 / 7px 7px;
+}
+
+.build-screen-lines::after {
+  background: repeating-linear-gradient(-45deg, #000 0, #fff 3.5px, #000 7px);
+}
+
+@media (width < 1080px) {
+  .build-screen img {
+    scale: 1.36;
+  }
+
+  /* Narrower in the square stacked portrait, where the scaled photo brings the window behind him closer to the face */
+  .build-screen::before {
+    background: radial-gradient(ellipse 42% 50% at 50% 54%, #000 52%, #fff 84%);
   }
 }
 

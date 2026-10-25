@@ -9,12 +9,12 @@ import {SITE_DESCRIPTION, SITE_NAME} from './metadata';
 
 const origin = () => siteEnv().NEXT_PUBLIC_SITE_URL;
 
-/** Christian, from the About copy. The role line reads "Senior full-stack developer · Pasig, PH"; the job title is its first part. */
+/** Christian, from the About copy: the name and the Role row's value. */
 const person = (copy: PageCopy, settings?: SiteSettings) => ({
   '@type': 'Person',
   '@id': `${origin()}/#person`,
   name: copy['about.name'],
-  jobTitle: copy['about.role'].split(' · ')[0],
+  jobTitle: copy['about.role.value'],
   url: `${origin()}/`,
   ...(settings ? {sameAs: Object.values(settings.socials).filter((url): url is string => Boolean(url))} : {}),
 });

@@ -9,7 +9,7 @@ import {heroControls} from '../support/hero';
 
 test.use({reducedMotion: 'reduce'});
 
-const SECTIONS = ['about', 'work', 'milestones', 'timeline', 'blog', 'contact'];
+const SECTIONS = ['about', 'what-we-build', 'work', 'milestones', 'timeline', 'blog', 'contact'];
 
 test.beforeEach(async ({page}) => {
   await page.goto('/');
