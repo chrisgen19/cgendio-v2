@@ -43,7 +43,7 @@ export const pageCopy: PageCopy = {
   'build.wp.label': 'WordPress',
   'build.wp.labelSub': '& WooCommerce',
   'build.wp.line': 'Custom themes, plugins and WooCommerce stores, quick to load and easy for your team to edit.',
-  'build.wp.proof': 'Right now we look after 40+ WordPress and Webflow sites across 40 brands.',
+  'build.wp.proof': 'We built a membership store on WooCommerce, Stripe and MemberPress.',
   'build.next.label': 'Next.js',
   'build.next.labelSub': '& React',
   'build.next.line': 'Headless sites and React apps in TypeScript, built for speed and Core Web Vitals.',
