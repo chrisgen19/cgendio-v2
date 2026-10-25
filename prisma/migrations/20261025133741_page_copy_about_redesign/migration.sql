@@ -1,0 +1,43 @@
+-- The About redesign and the What we build section (PR #48) add these page-copy keys, and every key is required
+-- (pageCopySchema). Insert them with their seed values so `prisma migrate deploy` alone brings an existing database
+-- up to date. ON CONFLICT DO NOTHING keeps any value already there, such as an admin edit, and the seed then skips
+-- these rows. Keep these values equal to prisma/seed-data/page-copy.ts (src/server/page-copy-migration.test.ts checks).
+INSERT INTO "page_copy" ("key", "value", "updated_at") VALUES
+  ('about.heading', 'Hi, I''m [[Christian.]]', CURRENT_TIMESTAMP),
+  ('about.intro', 'I''m a senior full-stack developer in Pasig City, Philippines. Through Cgdiomampo.dev, we take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.', CURRENT_TIMESTAMP),
+  ('about.frameLabel', 'Christian / Pasig City', CURRENT_TIMESTAMP),
+  ('about.role.label', 'Role', CURRENT_TIMESTAMP),
+  ('about.role.value', 'Senior full-stack developer', CURRENT_TIMESTAMP),
+  ('about.role.note', 'Leads a team of 6 at Access Group Australia', CURRENT_TIMESTAMP),
+  ('about.role.pin', 'Team of 6', CURRENT_TIMESTAMP),
+  ('about.based.label', 'Based in', CURRENT_TIMESTAMP),
+  ('about.based.value', 'Pasig City, Philippines', CURRENT_TIMESTAMP),
+  ('about.based.note', 'Metro Manila', CURRENT_TIMESTAMP),
+  ('about.timezone.label', 'Timezone', CURRENT_TIMESTAMP),
+  ('about.timezone.value', 'UTC+8 (Asia/Manila)', CURRENT_TIMESTAMP),
+  ('about.timezone.note', 'Working hours overlap Australia and APAC', CURRENT_TIMESTAMP),
+  ('about.timezone.pin', 'UTC+8', CURRENT_TIMESTAMP),
+  ('about.experience.label', 'On the web', CURRENT_TIMESTAMP),
+  ('about.experience.value', '15+ years', CURRENT_TIMESTAMP),
+  ('about.experience.note', 'Building sites since 2007', CURRENT_TIMESTAMP),
+  ('about.experience.pin', '15+ years', CURRENT_TIMESTAMP),
+  ('about.sites.label', 'Looks after', CURRENT_TIMESTAMP),
+  ('about.sites.value', '40+ sites', CURRENT_TIMESTAMP),
+  ('about.sites.note', 'WordPress and Webflow, across 40 brands', CURRENT_TIMESTAMP),
+  ('about.sites.pin', '40+ sites', CURRENT_TIMESTAMP),
+  ('about.status.label', 'Status', CURRENT_TIMESTAMP),
+  ('about.status.open', 'Open to projects and roles', CURRENT_TIMESTAMP),
+  ('about.status.closed', 'Not taking new work right now', CURRENT_TIMESTAMP),
+  ('about.contactLabel', 'Get in touch', CURRENT_TIMESTAMP),
+  ('about.cvLabel', 'Download CV', CURRENT_TIMESTAMP),
+  ('build.eyebrow', 'What we build', CURRENT_TIMESTAMP),
+  ('build.heading', 'Two kinds of site, [[both done properly]].', CURRENT_TIMESTAMP),
+  ('build.wp.label', 'WordPress', CURRENT_TIMESTAMP),
+  ('build.wp.labelSub', '& WooCommerce', CURRENT_TIMESTAMP),
+  ('build.wp.line', 'Custom themes, plugins and WooCommerce stores, quick to load and easy for your team to edit.', CURRENT_TIMESTAMP),
+  ('build.wp.proof', 'We built a membership store on WooCommerce, Stripe and MemberPress.', CURRENT_TIMESTAMP),
+  ('build.next.label', 'Next.js', CURRENT_TIMESTAMP),
+  ('build.next.labelSub', '& React', CURRENT_TIMESTAMP),
+  ('build.next.line', 'Headless sites and React apps in TypeScript, built for speed and Core Web Vitals.', CURRENT_TIMESTAMP),
+  ('build.next.proof', 'We built a headless CMS on Builder.io and Next.js, and the site you''re on.', CURRENT_TIMESTAMP)
+ON CONFLICT ("key") DO NOTHING;
