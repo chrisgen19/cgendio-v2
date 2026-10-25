@@ -372,7 +372,9 @@
  * - A card's top offset grows with its index among the visible cards (--i, picked per filter from the server-computed
  *   --i-all/-client/-personal), so a sliver of every earlier card stays in view and hidden cards leave no gaps.
  * - A card is never taller than the viewport minus the deepest offset, or its bottom (and its link) would stay cut off
- *   once stuck. Short viewports (phones in landscape) drop the stacking and flow normally.
+ *   once stuck, unless its content needs more: then it grows to fit (min-content), so the link is never clipped.
+ *   Short viewports (phones in landscape) drop the stacking and flow normally; the cover keeps a minimum height there,
+ *   since its browser window is absolutely positioned and gives the card no height of its own.
  * - Depth: a card scales down and dims while the next visible card slides over it. A stuck card's own view() timeline
  *   freezes, so the animation runs on the covering card's named view timeline (--work-c<n>, scoped to the list), from
  *   the moment it first overlaps this card until it sticks on top. Browsers without scroll-driven animations keep the
@@ -395,6 +397,7 @@
   position: sticky;
   top: calc(var(--t0) + var(--i) * var(--step));
   height: var(--h);
+  min-height: min-content;
   transform-origin: 50% 0;
   view-timeline: var(--own) block;
 }
@@ -436,6 +439,10 @@
     top: auto;
     height: auto;
     min-height: 440px;
+  }
+
+  .work-media {
+    min-height: 240px;
   }
 }
 

@@ -121,7 +121,7 @@ function ProjectMedia({project}: {project: Project}) {
     );
   }
   return (
-    <div className="relative min-h-0 flex-1 max-md:mx-5">
+    <div className="work-media relative min-h-0 flex-1 max-md:mx-5">
       <div className="absolute top-12 -bottom-10 left-0 w-[130%] overflow-hidden rounded-[16px] border border-ink/10 bg-white shadow-(--shadow-card) max-md:top-0 max-md:-bottom-6 max-md:w-[125%] max-md:rounded-[12px]">
         <div aria-hidden="true" className="flex h-7 items-center gap-1.5 border-b border-line px-3.5 max-md:h-5 max-md:px-2.5">
           <span className="size-2 rounded-full bg-wire max-md:size-1.5" />

@@ -43,3 +43,29 @@ test('a filter restacks the cards it shows without gaps', async ({page}) => {
   await page.getByRole('navigation', {name: 'Filter projects'}).getByRole('link', {name: 'All'}).click();
   expect((await stickyTops(page))[0]).toBe(tops[0]);
 });
+
+test.describe('on short screens', () => {
+  // Just above the phone layout and barely tall enough to stack: the cards are at their smallest, so content must fit
+  test('every case study link stays inside its card', async ({page}) => {
+    await page.setViewportSize({width: 900, height: 560});
+    await page.goto('/');
+    // How far each link's bottom sits past its card's bottom; a missing link counts as clipped
+    const overflow = await cards(page).evaluateAll((els) =>
+      els.map((el) => {
+        const link = el.querySelector('a[href^="/work/"]');
+        return link ? link.getBoundingClientRect().bottom - el.getBoundingClientRect().bottom : Number.POSITIVE_INFINITY;
+      }),
+    );
+    expect(overflow).toHaveLength(9);
+    expect(Math.max(...overflow)).toBeLessThanOrEqual(0);
+  });
+
+  // A phone in landscape drops the stacking; the cover's window is absolutely positioned, so it needs a height of its own
+  test('covers keep their height when the stack falls back to plain flow', async ({page}) => {
+    await page.setViewportSize({width: 740, height: 360});
+    await page.goto('/');
+    const heights = await page.locator('#work .work-media').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height));
+    expect(heights.length).toBeGreaterThan(0);
+    expect(Math.min(...heights)).toBeGreaterThanOrEqual(240);
+  });
+});
