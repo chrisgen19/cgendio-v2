@@ -80,6 +80,7 @@ describe('getProjects', () => {
         theme: 'tint',
         span: 6,
         tags: ['Next.js'],
+        coverImageUrl: null,
         featured: true,
         order: 1,
       },

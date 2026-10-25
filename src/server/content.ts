@@ -82,6 +82,7 @@ const projectFields = (row: ProjectRow) => ({
   theme: lower(row.theme),
   span: row.span,
   tags: row.tags,
+  coverImageUrl: row.coverImageUrl,
   featured: row.featured,
   order: row.order,
 });
@@ -102,7 +103,6 @@ export const toProjectDetail = (row: ProjectRow): ProjectDetail =>
   projectDetailSchema.parse({
     ...projectFields(row),
     caseStudy: row.caseStudy,
-    coverImageUrl: row.coverImageUrl,
     liveUrl: row.liveUrl,
     repoUrl: row.repoUrl,
     client: row.client,

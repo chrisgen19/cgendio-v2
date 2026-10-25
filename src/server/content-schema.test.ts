@@ -11,6 +11,7 @@ const project = {
   theme: 'lime',
   span: 7,
   tags: ['Next.js'],
+  coverImageUrl: null,
   featured: true,
   order: 1,
 };

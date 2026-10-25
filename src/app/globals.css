@@ -366,6 +366,110 @@
   }
 }
 
+/*
+ * The Work section's card stack (src/components/sections/work.tsx). Every card is sticky in one tall list, so each new
+ * card slides over the last.
+ * - A card's top offset grows with its index among the visible cards (--i, picked per filter from the server-computed
+ *   --i-all/-client/-personal), so a sliver of every earlier card stays in view and hidden cards leave no gaps.
+ * - A card is never taller than the viewport minus the deepest offset, or its bottom (and its link) would stay cut off
+ *   once stuck, unless its content needs more: then it grows to fit (min-content), so the link is never clipped.
+ *   Short viewports (phones in landscape) drop the stacking and flow normally; the cover keeps a minimum height there,
+ *   since its browser window is absolutely positioned and gives the card no height of its own.
+ * - Depth: a card scales down and dims while the next visible card slides over it. A stuck card's own view() timeline
+ *   freezes, so the animation runs on the covering card's named view timeline (--work-c<n>, scoped to the list), from
+ *   the moment it first overlaps this card until it sticks on top. Browsers without scroll-driven animations keep the
+ *   plain sticky stack.
+ * - Keyboard: a covered card that takes focus comes to the front and drops its depth, so the focused link is never
+ *   hidden under the cards stacked on it.
+ */
+.work-stack {
+  counter-reset: work;
+  timeline-scope: var(--scope);
+}
+
+.work-card {
+  --t0: 24px;
+  --step: 14px;
+  --h: min(640px, 78svh, calc(100svh - 160px));
+  --i: var(--i-all);
+  --next: var(--next-all);
+  counter-increment: work;
+  position: sticky;
+  top: calc(var(--t0) + var(--i) * var(--step));
+  height: var(--h);
+  min-height: min-content;
+  transform-origin: 50% 0;
+  view-timeline: var(--own) block;
+}
+
+[data-filter="client"] .work-card {
+  --i: var(--i-client);
+  --next: var(--next-client);
+}
+
+[data-filter="personal"] .work-card {
+  --i: var(--i-personal);
+  --next: var(--next-personal);
+}
+
+[data-filter="client"] .work-card[data-group="personal"],
+[data-filter="personal"] .work-card[data-group="client"] {
+  display: none;
+}
+
+.work-num::before {
+  content: counter(work, decimal-leading-zero);
+}
+
+.work-card:focus-within {
+  z-index: 1;
+}
+
+@media (width < 860px) {
+  .work-card {
+    --t0: 12px;
+    --step: 10px;
+    --h: min(600px, calc(100svh - 112px));
+  }
+}
+
+@media (height < 560px) {
+  .work-card {
+    position: relative;
+    top: auto;
+    height: auto;
+    min-height: 440px;
+  }
+
+  .work-media {
+    min-height: 240px;
+  }
+}
+
+@keyframes work-recede {
+  to {
+    scale: 0.92;
+    filter: brightness(0.7);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (height >= 560px) {
+  @supports (animation-timeline: view()) and (timeline-scope: none) {
+    .work-card {
+      animation: work-recede linear both;
+      /* Firefox (behind its flag) needs a non-zero duration to run a scroll-driven animation */
+      animation-duration: 1ms;
+      animation-timeline: var(--next);
+      animation-range: cover calc(100svh - var(--t0) - var(--i) * var(--step) - var(--h)) cover
+        calc(100svh - var(--t0) - (var(--i) + 1) * var(--step));
+    }
+
+    .work-card:focus-within {
+      animation: none;
+    }
+  }
+}
+
 /* Code blocks in posts and case studies: Shiki's css-variables theme (src/lib/code-theme.ts) mapped to the code tokens */
 :root {
   --shiki-foreground: var(--color-code-text);

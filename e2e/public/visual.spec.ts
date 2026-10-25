@@ -28,8 +28,11 @@ test('stack strip', async ({page}) => {
   await expect(page.locator('#about').locator('xpath=preceding-sibling::section[1]')).toHaveScreenshot('stack.png');
 });
 
+// The Work cards are sticky: flatten the stack so the screenshot doesn't depend on where the capture scrolled to
+const STYLES: Record<string, string> = {work: 'e2e/support/flatten-work-stack.css'};
+
 for (const id of SECTIONS) {
   test(`#${id}`, async ({page}) => {
-    await expect(page.locator(`#${id}`)).toHaveScreenshot(`${id}.png`);
+    await expect(page.locator(`#${id}`)).toHaveScreenshot(`${id}.png`, {stylePath: STYLES[id]});
   });
 }

@@ -21,6 +21,8 @@ export const projectSchema = z.object({
   theme: projectThemeSchema,
   span: projectSpanSchema,
   tags: z.array(z.string().min(1)),
+  /** The case study cover, also shown on the home page card when set */
+  coverImageUrl: z.url().nullable(),
   featured: z.boolean(),
   order: z.int(),
 });
@@ -72,7 +74,6 @@ export const postTagSchema = z.object({label: z.string().min(1), slug: z.string(
 /** A case study page: the card fields plus the Markdown case study, cover, links and the facts row. */
 export const projectDetailSchema = projectSchema.extend({
   caseStudy: z.string().nullable(),
-  coverImageUrl: z.url().nullable(),
   liveUrl: z.url().nullable(),
   repoUrl: z.url().nullable(),
   client: z.string().nullable(),
