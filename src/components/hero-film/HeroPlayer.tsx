@@ -104,10 +104,15 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
     // autoPlay starts in the Player's own mount effect, before this listener exists, so read the state instead
     setPlaying(player.isPlaying());
 
+    // The Player fires frameupdate from a useEffect, so setting state right away counts as a nested passive update.
+    // When slow frames batch every commit together, React warns "Maximum update depth exceeded"; a microtask runs after the flush.
     const onFrame = (e: {detail: {frame: number}}) => {
       notifyFirstFrame();
-      setFrame(e.detail.frame);
-      if (e.detail.frame < lastFrame) setEnded(false);
+      const next = e.detail.frame;
+      queueMicrotask(() => {
+        setFrame(next);
+        if (next < lastFrame) setEnded(false);
+      });
     };
     const onPlay = () => {
       notifyFirstFrame();
