@@ -74,6 +74,9 @@ test.describe('on short screens', () => {
 // screen while stuck, and on phones the cover keeps its space instead of being squeezed out by the text
 test('admin-length text keeps the card within the screen and the cover visible', async ({page}) => {
   await page.goto('/');
+  // Edit only once React has hydrated: text changed before that is a hydration mismatch, and React swaps the card back
+  // to the server's, mid-measurement on a busy machine. The theme button reads "Switch theme" until hydration is done.
+  await expect(page.locator('button[aria-label^="Switch to"]')).toBeAttached();
   const card = cards(page).first();
   await card.evaluate((el) => {
     const words = (count: number) => Array.from({length: count}, () => 'Booking platform with payments and reports').join(' ');
