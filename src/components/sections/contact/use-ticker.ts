@@ -1,6 +1,6 @@
 'use client';
 
-import {type RefObject, useCallback, useEffect, useRef, useState} from 'react';
+import {type RefObject, useCallback, useEffect, useRef, useState, useSyncExternalStore} from 'react';
 
 /** Cruising speed in px/s, with each address taking between 6s and 12s to pass (so phones don't crawl) */
 const SPEED = 95;
@@ -30,13 +30,13 @@ type Ticker = {
 
 const easeOut = (t: number) => 1 - (1 - t) ** 3;
 
-/** Calls `apply` on every frame with a value eased from `from` to `to`; returns a cancel function. */
-const tween = (from: number, to: number, ms: number, apply: (value: number) => void, done?: () => void) => {
+/** Calls `apply` on every frame with a value eased from `from` to `to` (and the frame time); returns a cancel function. */
+const tween = (from: number, to: number, ms: number, apply: (value: number, now: number) => void, done?: () => void) => {
   const start = performance.now();
   let frame = 0;
   const step = (now: number) => {
     const t = Math.min(1, (now - start) / ms);
-    apply(from + (to - from) * easeOut(t));
+    apply(from + (to - from) * easeOut(t), now);
     if (t < 1) frame = requestAnimationFrame(step);
     else done?.();
   };
@@ -46,15 +46,25 @@ const tween = (from: number, to: number, ms: number, apply: (value: number) => v
 
 const timeOf = (anim: Animation) => (typeof anim.currentTime === 'number' ? anim.currentTime : 0);
 
-/** Eases the stream to its speed: slow while engaged, cruising otherwise. Does nothing while held, off screen or armed. */
+/**
+ * Eases the stream to its speed: slow while engaged, cruising otherwise. Does nothing while held, off screen or armed.
+ * Setting playbackRate on a running animation can jump when the compositor runs it (Web Animations 4.4.15.2), so the
+ * ease runs on the main thread: paused, stepped forward each frame at the eased rate, then played at the final rate.
+ */
 const cruise = (t: Ticker, ms = 500) => {
   const {anim} = t;
   if (!anim || t.held || !t.visible || t.waiting) return;
   t.stop();
-  if (anim.playState !== 'running') anim.play();
-  t.stop = tween(anim.playbackRate, t.engaged ? SLOW_RATE : 1, ms, (rate) => {
+  anim.pause();
+  let last: number | undefined;
+  const step = (rate: number, now: number) => {
+    // The first frame only settles the pause: a running stream has already moved until then
+    anim.currentTime = timeOf(anim) + (last === undefined ? 0 : (now - last) * rate);
+    // Kept on the paused animation (no jump there), so an interrupted ease resumes from this rate
     anim.playbackRate = rate;
-  });
+    last = now;
+  };
+  t.stop = tween(anim.playbackRate, t.engaged ? SLOW_RATE : 1, ms, step, () => anim.play());
 };
 
 /** Glides the stream on to the next stop with an address in the centre (one every `unitMs`), then holds it there. */
@@ -159,19 +169,30 @@ const animateTrack = (track: HTMLElement, t: Ticker, perLoop: number) => {
   t.anim.pause();
 };
 
+const subscribeMotion = (onChange: () => void) => {
+  const query = window.matchMedia(MOTION_OK);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+};
+
+const readMotion = () => window.matchMedia(MOTION_OK).matches;
+
 /**
  * The ticker band's marquee, on the Web Animations API. The track holds 3 × `perLoop` + 1 copies of the address and
  * rests with copy `perLoop` centred, which is also how it renders without JavaScript or with reduced motion (CSS hides
- * the other copies there, and this hook does nothing). One loop moves the track by `perLoop` copies.
+ * the other copies there, and this hook does nothing). One loop moves the track by `perLoop` copies. The motion
+ * preference is followed live: turning reduced motion on mid-visit stops the stream, turning it off starts it.
  */
 export const useTicker = (rootRef: RefObject<HTMLElement | null>, trackRef: RefObject<HTMLElement | null>, perLoop: number, live: boolean) => {
   const [held, setHeld] = useState(false);
   const ticker = useRef<Ticker>({anim: null, unitMs: UNIT_MS.max, held: false, engaged: false, visible: false, waiting: false, stop: () => {}});
+  // False while server rendering and hydrating, like the no-JavaScript render
+  const motionOk = useSyncExternalStore(subscribeMotion, readMotion, () => false);
 
   useEffect(() => {
     const root = rootRef.current;
     const track = trackRef.current;
-    if (!live || !root || !track || !window.matchMedia(MOTION_OK).matches) return;
+    if (!live || !motionOk || !root || !track) return;
     const t = ticker.current;
     animateTrack(track, t, perLoop);
     const cleanups = [watchEngagement(root, t), watchView(root, t)];
@@ -181,7 +202,7 @@ export const useTicker = (rootRef: RefObject<HTMLElement | null>, trackRef: RefO
       t.anim?.cancel();
       t.anim = null;
     };
-  }, [rootRef, trackRef, perLoop, live]);
+  }, [rootRef, trackRef, perLoop, live, motionOk]);
 
   const setHeldBoth = useCallback((value: boolean) => {
     ticker.current.held = value;
