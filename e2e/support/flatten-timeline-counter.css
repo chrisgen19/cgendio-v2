@@ -1,0 +1,7 @@
+/*
+ * Applied while taking the Work timeline screenshot: puts the sticky year counter back in flow at the top of its column.
+ * A tall element screenshot scrolls through the page, so a sticky counter would land wherever the capture happened to be.
+ */
+.tl-counter {
+  position: static;
+}

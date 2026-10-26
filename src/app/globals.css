@@ -991,616 +991,31 @@
   padding: 0.25em 0.5em;
 }
 
-/* Timeline lab (design explorations at /lab/timeline). Each variant keeps its CSS between its own markers. */
-/* timeline-lab v1: start */
 /*
- * V1, the scroll-drawn rail (src/components/sections/timeline-lab/timeline-v1*.tsx). The default is the finished state
- * (no JS, reduced motion): every segment accent, every stop lit. TimelineV1Stage sets data-armed: the segments fall back
- * to `line` as a track, the measured .tl1-rail draws the accent fill over them, and stops without data-reached go muted
- * (a colour change only, never below AA).
- */
-.tl1 {
-  /* Rail centre inside a row (date column, gap, half the node), the dot centre from the row top, the node radius */
-  --tl1-x: 210px;
-  --tl1-c: 16px;
-  --tl1-r: 16px;
-}
-
-@media (width < 860px) {
-  .tl1 {
-    --tl1-x: 8px;
-    --tl1-c: 10px;
-    --tl1-r: 8px;
-    --tl1-halo: 3px;
-    --tl1-head: 8px;
-  }
-}
-
-.tl1-stop {
-  --tl1-dash: var(--color-accent);
-}
-
-/* The rail between this dot and the next */
-.tl1-stop::before {
-  content: "";
-  position: absolute;
-  left: calc(var(--tl1-x) - 1px);
-  width: 2px;
-  top: var(--tl1-c);
-  bottom: calc(var(--tl1-c) * -1);
-  background: var(--color-accent);
-}
-
-/* The last row groups 2007 to 2018: past its dot the rail runs on as a fading dashed line, the years before */
-.tl1-stop:last-child::before {
-  top: calc(var(--tl1-c) + var(--tl1-r) + 6px);
-  bottom: 0;
-  background: repeating-linear-gradient(to bottom, var(--tl1-dash) 0 4px, transparent 4px 10px);
-  mask-image: linear-gradient(#000 25%, transparent);
-}
-
-.tl1-node {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 0 var(--color-lime);
-}
-
-/* The current role wears a lime ring, like its NOW badge */
-.tl1-stop[data-current] .tl1-node {
-  box-shadow: 0 0 0 var(--tl1-halo, 4px) var(--color-lime);
-}
-
-.tl1-when,
-.tl1-role {
-  color: var(--color-ink);
-}
-
-.tl1-org {
-  color: var(--color-accent);
-}
-
-.tl1-tick {
-  background: var(--color-accent);
-}
-
-.tl1-meter {
-  display: none;
-}
-
-@media (width >= 860px) {
-  .tl1[data-armed] .tl1-meter {
-    display: flex;
-  }
-}
-
-/* The fill: one rail from the first dot's centre to the last one's, placed by TimelineV1Stage */
-.tl1-rail {
-  display: none;
-  position: absolute;
-  width: 2px;
-  margin-left: -1px;
-  pointer-events: none;
-}
-
-.tl1[data-armed] .tl1-rail {
-  display: block;
-}
-
-.tl1-fill {
-  position: absolute;
-  inset: 0;
-  background: var(--color-accent);
-  transform-origin: 50% 0;
-  scale: 1 var(--tl1-p, 0);
-}
-
-/* The head rides the fill's tip: a full-length track slid up by what's left, with the head at its bottom edge */
-.tl1-head-track {
-  position: absolute;
-  inset: 0;
-  translate: 0 calc((var(--tl1-p, 0) - 1) * 100%);
-}
-
-.tl1-head {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: var(--tl1-head, 10px);
-  height: var(--tl1-head, 10px);
-  border-radius: 50%;
-  translate: -50% 50%;
-  background: var(--color-accent);
-  box-shadow: 0 0 0 var(--tl1-halo, 4px) var(--color-tint);
-  opacity: 0;
-  transition: opacity 0.2s ease-out;
-}
-
-.tl1[data-moving] .tl1-head {
-  opacity: 1;
-}
-
-/* Armed: the track, and every stop the fill hasn't reached yet */
-.tl1[data-armed] .tl1-stop::before {
-  background: var(--color-line);
-}
-
-.tl1[data-armed] .tl1-stop:last-child::before {
-  background: repeating-linear-gradient(to bottom, var(--tl1-dash) 0 4px, transparent 4px 10px);
-}
-
-.tl1[data-armed] .tl1-stop:not([data-reached]) {
-  --tl1-dash: var(--color-line);
-}
-
-.tl1[data-armed] .tl1-stop:not([data-reached]) :is(.tl1-when, .tl1-role, .tl1-org) {
-  color: var(--color-muted);
-}
-
-.tl1[data-armed] .tl1-stop:not([data-reached]) .tl1-node {
-  border-color: var(--color-line);
-  box-shadow: 0 0 0 0 var(--color-lime);
-}
-
-.tl1[data-armed] .tl1-stop:not([data-reached]) .tl1-pip {
-  background: var(--color-line);
-  scale: 0.5;
-}
-
-.tl1[data-armed] .tl1-tick:not([data-reached]) {
-  background: var(--color-line);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .tl1[data-armed] :is(.tl1-when, .tl1-role, .tl1-org) {
-    transition: color 0.45s ease-out;
-  }
-
-  .tl1[data-armed] .tl1-node {
-    transition:
-      border-color 0.35s ease-out,
-      box-shadow 0.6s var(--ease-spring);
-  }
-
-  .tl1[data-armed] .tl1-pip {
-    transition:
-      scale 0.55s var(--ease-spring),
-      background-color 0.3s ease-out;
-  }
-
-  .tl1[data-armed] .tl1-tick {
-    transition: background-color 0.3s ease-out;
-  }
-
-  /* Where supported the fill runs on the compositor: from the rail's top on the reading line (60% down) to its bottom */
-  @supports (animation-timeline: view()) {
-    .tl1[data-armed] .tl1-rail {
-      view-timeline: --tl1 block;
-    }
-
-    .tl1[data-armed] :is(.tl1-fill, .tl1-head-track) {
-      animation: tl1-fill linear both;
-      /* Firefox (behind its flag) needs a non-zero duration to run a scroll-driven animation */
-      animation-duration: 1ms;
-      animation-timeline: --tl1;
-      animation-range: cover 40vh cover calc(100% - 60vh);
-    }
-
-    .tl1[data-armed] .tl1-head-track {
-      animation-name: tl1-head;
-    }
-  }
-}
-
-/* The first armed frame: stops below the reading line start unlit without fading out */
-.tl1[data-settling] * {
-  transition: none !important;
-}
-
-@keyframes tl1-fill {
-  from {
-    scale: 1 0;
-  }
-  to {
-    scale: 1 1;
-  }
-}
-
-@keyframes tl1-head {
-  from {
-    translate: 0 -100%;
-  }
-  to {
-    translate: 0 0;
-  }
-}
-/* timeline-lab v1: end */
-/* timeline-lab v2: start */
-/*
- * Career span chart (src/components/sections/timeline-lab/timeline-v2*.tsx). Bars and labels sit on the axis through
- * --s (left edge) and --w (width), as fractions. The entrance only runs once TimelineV2Grow arms a chart (data-armed),
- * so the server HTML, no-JS and reduced motion all show the finished chart.
- */
-.tl2-chart {
-  --tl2-sweep: 1800ms;
-}
-
-.tl2-when[data-side="end"] {
-  left: calc(var(--s) * 100% + max(10px, var(--w) * 100%) + 10px);
-}
-
-.tl2-when[data-side="start"] {
-  right: calc((1 - var(--s)) * 100% + 10px);
-}
-
-.tl2-when[data-side="inside"] {
-  left: calc(var(--s) * 100% + 6px);
-}
-
-/* The playhead: a wash of accent trailing a 2px line, parked out of sight until the sweep runs */
-.tl2-sweep {
-  opacity: 0;
-  translate: -100% 0;
-  background: linear-gradient(to right, transparent calc(100% - 140px), color-mix(in srgb, var(--color-accent) 14%, transparent));
-  border-right: 2px solid var(--color-accent);
-}
-
-/* Without JavaScript the tabs can't switch, so every role's card is shown, one after another */
-@media (scripting: none) {
-  .tl2-panels {
-    gap: 12px;
-  }
-
-  .tl2-panels > [role="tabpanel"] {
-    grid-area: auto;
-    visibility: visible;
-    opacity: 1;
-  }
-}
-
-/* Labels close to NOW would collide with the NOW flag where the axis is narrow */
-@media (width < 1080px) {
-  .tl2-axis [data-near-end] {
-    display: none;
-  }
-}
-
-@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-  /*
-   * Each bar grows from its start exactly while the playhead crosses it: delay = start, duration = width. Transitions
-   * only exist once data-in is set, so arming hides everything at once instead of shrinking it on the same timings.
-   */
-  [data-armed][data-in] .tl2-bar {
-    transform-origin: left center;
-    transition:
-      scale max(140ms, calc(var(--w) * var(--tl2-sweep))) linear calc(var(--s) * var(--tl2-sweep)),
-      background-color 0.2s ease;
-  }
-
-  [data-armed]:not([data-in]) .tl2-bar {
-    scale: 0 1;
-  }
-
-  [data-armed][data-in] .tl2-when[data-side] {
-    transition: opacity 0.35s ease-out calc(var(--s) * var(--tl2-sweep));
-  }
-
-  [data-armed][data-in] .tl2-when[data-side="end"] {
-    transition-delay: calc((var(--s) + var(--w)) * var(--tl2-sweep));
-  }
-
-  [data-armed]:not([data-in]) .tl2-when[data-side]:not([data-side="none"]) {
-    opacity: 0;
-  }
-
-  /* The lime cap lands on the NOW edge as the playhead arrives */
-  [data-armed][data-in] .tl2-cap {
-    transition: scale 0.5s var(--ease-spring) var(--tl2-sweep);
-  }
-
-  [data-armed]:not([data-in]) .tl2-cap {
-    scale: 0;
-  }
-
-  /*
-   * The playhead is a transition, not a keyframe animation: an animation restarts whenever the chart leaves
-   * display: none (crossing 860px) or is re-laid out, which replayed the sweep over bars that were already drawn.
-   * Armed, it waits just off the left edge (clipped); in view, it crosses the axis and then fades out at NOW.
-   */
-  [data-armed] .tl2-sweep {
-    opacity: 1;
-  }
-
-  [data-armed][data-in] .tl2-sweep {
-    opacity: 0;
-    translate: 0 0;
-    transition:
-      translate var(--tl2-sweep) linear,
-      opacity 0.4s ease-out var(--tl2-sweep);
-  }
-
-  /* Phone rows: each mini bar simply grows in when its row arrives */
-  [data-armed][data-in] .tl2-bar-mini {
-    transition: scale 0.7s var(--ease-mark) 0.15s;
-  }
-}
-/* timeline-lab v2: end */
-/* timeline-lab v3: start */
-/* The ledger's shared columns: No. | When | Role | Organisation | toggle. The head row, every row button and every panel use them. */
-.tlv3-grid {
-  display: grid;
-  column-gap: 24px;
-  grid-template-columns: 56px 180px minmax(0, 1.15fr) minmax(0, 0.85fr) 44px;
-  grid-template-areas: "idx when role org chev";
-  align-items: baseline;
-}
-
-.tlv3-panel-body {
-  grid-template-areas: "idx when desc desc chev";
-}
-
-.tlv3-intro {
-  display: grid;
-  column-gap: 24px;
-  grid-template-columns: 56px 180px minmax(0, 1.15fr) minmax(0, 0.85fr) 44px;
-  grid-template-areas: "head head head lede lede";
-  align-items: end;
-  padding-inline: 16px 8px;
-}
-
-.tlv3-label {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-}
-
-.tlv3-head-row .tlv3-toggle {
-  grid-column: 4 / 6;
-  grid-row: 1;
-  justify-self: end;
-}
-
-.tlv3-chev {
-  align-self: center;
-}
-
-@media (max-width: 1079.98px) {
-  .tlv3-grid {
-    grid-template-columns: 160px minmax(0, 1.15fr) minmax(0, 0.85fr) 44px;
-    grid-template-areas: "when role org chev";
-  }
-
-  .tlv3-panel-body {
-    grid-template-areas: "when desc desc chev";
-  }
-
-  .tlv3-intro {
-    grid-template-columns: 160px minmax(0, 1.15fr) minmax(0, 0.85fr) 44px;
-    grid-template-areas: "head head lede lede";
-  }
-
-  .tlv3-idx {
-    display: none;
-  }
-
-  .tlv3-head-row .tlv3-toggle {
-    grid-column: 3 / 5;
-  }
-}
-
-/* Phones: when (with the number) on an eyebrow line, then role, then organisation; the toggle stays on the right */
-@media (max-width: 859.98px) {
-  .tlv3-grid {
-    column-gap: 14px;
-    row-gap: 8px;
-    grid-template-columns: auto minmax(0, 1fr) 44px;
-    grid-template-areas:
-      "idx when chev"
-      "role role chev"
-      "org org chev";
-  }
-
-  .tlv3-idx {
-    display: flex;
-  }
-
-  .tlv3-panel-body {
-    grid-template-areas: "desc desc desc";
-  }
-
-  .tlv3-intro {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "head" "lede";
-    row-gap: 20px;
-    padding-inline: 0;
-  }
-
-  .tlv3-head-row .tlv3-label {
-    display: none;
-  }
-
-  .tlv3-head-row .tlv3-toggle {
-    grid-column: 1 / -1;
-  }
-}
-
-/* The disclosure: a 0fr to 1fr grid row, so the description stays in the HTML and animates in every engine */
-.tlv3-panel {
-  display: grid;
-  grid-template-rows: 0fr;
-}
-
-.tlv3-panel[data-open] {
-  grid-template-rows: 1fr;
-}
-
-/* Without JavaScript the toggles can't work, so every row shows its description and the toggles step aside */
-@media (scripting: none) {
-  .tlv3-panel {
-    grid-template-rows: 1fr;
-  }
-
-  .tlv3-chev,
-  .tlv3-toggle {
-    visibility: hidden;
-  }
-}
-
-@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-  .tlv3-panel {
-    transition: grid-template-rows 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-
-  .tlv3-panel-body {
-    transition:
-      opacity 200ms ease-out,
-      translate 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-
-  .tlv3-panel:not([data-open]) .tlv3-panel-body {
-    opacity: 0;
-    translate: 0 -8px;
-  }
-
-  .tlv3-panel[data-open] .tlv3-panel-body {
-    transition-delay: 70ms;
-  }
-
-  /* The entrance, once: the heavy rule and each hairline draw from the left, and each row settles in behind its rule.
-     The transitions only exist once ruled, so arming (the jump to the hidden start) is instant and never visibly fades out. */
-  .tlv3[data-ruled] .tlv3-rule,
-  .tlv3[data-ruled] .tlv3-hair {
-    transform-origin: left center;
-    transition: transform 700ms var(--ease-mark) calc(var(--i, 0) * 60ms + 100ms);
-  }
-
-  .tlv3[data-ruled] .tlv3-in {
-    transition:
-      opacity 450ms ease-out calc(var(--i, 0) * 60ms + 220ms),
-      translate 550ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--i, 0) * 60ms + 220ms);
-  }
-
-  .tlv3[data-armed]:not([data-ruled]) .tlv3-rule,
-  .tlv3[data-armed]:not([data-ruled]) .tlv3-hair {
-    transform: scaleX(0);
-  }
-
-  .tlv3[data-armed]:not([data-ruled]) .tlv3-in {
-    opacity: 0;
-    translate: -12px 0;
-  }
-}
-/* timeline-lab v3: end */
-/* timeline-lab v4: start */
-/*
- * v4 Pinned horizontal track (src/components/sections/timeline-lab/timeline-v4*.tsx). Without this query the markup is a
- * swipe row on phones and a grid on wider screens. Inside it the stage sticks for a short distance while the track pans:
- * keep the query in sync with PIN_QUERY in timeline-v4-track.tsx. The section is the size container, so 100cqw is the
- * section's content width (the viewport minus its 56px gutters, without any scrollbar). The section keeps its usual
- * 112px padding, so the rhythm with Milestones and the blog is the same as everywhere else; only while pinned is the
- * stage centred in the window.
- */
-@media (scripting: enabled) and (prefers-reduced-motion: no-preference) and (min-width: 860px) and (min-height: 680px) and (pointer: fine) {
-  #timeline.tl-v4 {
-    container-type: inline-size;
-  }
-
-  .tl-v4 .tl-v4-wrap {
-    --tl-v4-card: 380px;
-    --tl-v4-gap: 24px;
-  }
-
-  /* The pinned scroll distance, after the stage. The client measures the real pan; the estimate only holds the height until it does */
-  .tl-v4 .tl-v4-wrap::after {
-    content: "";
-    display: block;
-    height: var(
-      --tl-v4-overflow,
-      calc(var(--tl-v4-count, 6) * var(--tl-v4-card) + (var(--tl-v4-count, 6) - 1) * var(--tl-v4-gap) - min(1320px, 100cqw))
-    );
-  }
-
-  /* Sticks centred in the window (the client measures the offset; the estimate assumes a 620px stage) */
-  .tl-v4 .tl-v4-stage {
-    position: sticky;
-    top: var(--tl-v4-top, max(0px, calc((100svh - 620px) / 2)));
-    gap: 44px;
-  }
-
-  /* Full bleed, so cards slide in from the right edge of the window and out past the left one */
-  .tl-v4 .tl-v4-pane {
-    margin-inline: calc((100% - 100cqw) / 2 - 56px);
-    overflow-x: clip;
-  }
-
-  /* The side padding lines the first card up with the heading at the start, and the last with the right edge at the end */
-  .tl-v4 .tl-v4-track {
-    width: max-content;
-    padding-inline: calc(56px + (100cqw - min(1320px, 100cqw)) / 2);
-    will-change: transform;
-  }
-
-  .tl-v4 .tl-v4-list {
-    display: flex;
-    gap: 0;
-  }
-
-  /* The gap is the item's own padding, so the ruler segments join into one line */
-  .tl-v4 .tl-v4-item {
-    width: calc(var(--tl-v4-card) + var(--tl-v4-gap));
-    padding-right: var(--tl-v4-gap);
-  }
-
-  .tl-v4 .tl-v4-item:last-child {
-    width: var(--tl-v4-card);
-    padding-right: 0;
-  }
-
-  /* Room above the ruler for the playhead's chip */
-  .tl-v4 .tl-v4-ruler {
-    margin-top: 40px;
-  }
-
-  /* Only once the client has measured the track, so the playhead never sits at x = 0 before hydration */
-  .tl-v4 .tl-v4-wrap[data-measured] :is(.tl-v4-fill, .tl-v4-head) {
-    display: block;
-  }
-
-  /* Narrower cards on small laptops (under 1180px) */
-  @media (max-width: 1179px) {
-    .tl-v4 .tl-v4-wrap {
-      --tl-v4-card: 340px;
-    }
-  }
-}
-/* timeline-lab v4: end */
-/* timeline-lab v5: start */
-/*
- * Year counter (src/components/sections/timeline-lab/timeline-v5*.tsx). The counter's top hairline sticks on the
+ * Work timeline, the year counter (src/components/sections/timeline*.tsx). The counter's top hairline sticks on the
  * reading line (45% down), the same line the entries' hairlines cross to become active, so the two meet at each roll.
  */
-.tlv5-counter {
+.tl-counter {
   position: sticky;
   top: 45svh;
   /* Fits the column four digits wide, and the viewport below the reading line */
-  --tlv5-size: min(220px, 40cqi, 26svh);
+  --tl-size: min(220px, 40cqi, 26svh);
 }
 
-.tlv5-when {
+.tl-when {
   opacity: 0;
   translate: 0 0.6em;
 }
 
-.tlv5-when[data-on] {
+.tl-when[data-on] {
   opacity: 1;
   translate: 0 0;
 }
 
-.tlv5-odometer {
+.tl-odometer {
   display: flex;
   font-family: var(--font-display);
-  font-size: var(--tlv5-size);
+  font-size: var(--tl-size);
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -1608,7 +1023,7 @@
 }
 
 /* Fixed-width cells, so a narrow 1 never shifts its neighbours; the clip is a touch taller than the digits' ink */
-.tlv5-cell {
+.tl-cell {
   display: block;
   width: 0.575em;
   height: 0.8em;
@@ -1616,60 +1031,60 @@
   text-align: center;
 }
 
-.tlv5-strip {
+.tl-strip {
   display: flex;
   flex-direction: column;
   /* Each digit is 1em tall; the glyphs' ink sits about 0.12em down, so lift it into the 0.8em cell */
   margin-top: -0.12em;
 }
 
-.tlv5-strip > span {
+.tl-strip > span {
   display: block;
   height: 1em;
 }
 
-.tlv5-odometer[data-empty] {
+.tl-odometer[data-empty] {
   opacity: 0;
 }
 
 /* The next role's year, outlined and fading out downwards, peeking under the active one */
 /* Out of flow, so the counter's sticky height is only the solid year: the last role can still meet it on the reading line */
-.tlv5-ghost {
+.tl-ghost {
   position: absolute;
   inset-inline: 0;
   top: 100%;
-  margin-top: calc(var(--tlv5-size) * 0.06);
-  height: calc(var(--tlv5-size) * 0.52);
+  margin-top: calc(var(--tl-size) * 0.06);
+  height: calc(var(--tl-size) * 0.52);
   overflow: clip;
   mask-image: linear-gradient(to bottom, #000 10%, transparent);
 }
 
-.tlv5-ghost .tlv5-odometer {
+.tl-ghost .tl-odometer {
   color: transparent;
   -webkit-text-stroke: 1.5px var(--color-outline-num);
 }
 
-:root[data-theme="dark"] .tlv5-ghost .tlv5-odometer {
+:root[data-theme="dark"] .tl-ghost .tl-odometer {
   -webkit-text-stroke-color: var(--color-line);
 }
 
-.tlv5-ghost[data-empty] {
+.tl-ghost[data-empty] {
   opacity: 0;
 }
 
 /* Phones: each role's own year, outlined until the role reaches the reading line, then filled */
-.tlv5-year {
+.tl-year {
   color: transparent;
   -webkit-text-stroke: 1.5px var(--color-dot-placeholder);
 }
 
-.tlv5-entry[data-tlv5-active] .tlv5-year {
+.tl-entry[data-tl-active] .tl-year {
   color: var(--color-ink);
   -webkit-text-stroke-color: var(--color-ink);
 }
 
 /* The active role's org gets the lime highlighter; the server marks the first role, the counter moves it */
-.tlv5-org {
+.tl-org {
   /* 0.06em past each end, like the heading highlighter */
   margin-inline: -0.06em;
   padding-inline: 0.06em;
@@ -1681,38 +1096,38 @@
   -webkit-box-decoration-break: clone;
 }
 
-.tlv5-entry[data-tlv5-active] .tlv5-org {
+.tl-entry[data-tl-active] .tl-org {
   background-size: 100% 0.5em;
   color: var(--color-highlight-ink);
 }
 
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-  .tlv5-strip {
+  .tl-strip {
     transition: transform 0.56s var(--ease-split);
   }
 
-  .tlv5-strip[data-snap] {
+  .tl-strip[data-snap] {
     transition: none;
   }
 
-  .tlv5-odometer,
-  .tlv5-ghost {
+  .tl-odometer,
+  .tl-ghost {
     transition: opacity 0.3s ease-out;
   }
 
-  .tlv5-when {
+  .tl-when {
     transition:
       opacity 0.22s ease-out,
       translate 0.22s ease-out;
   }
 
-  .tlv5-year {
+  .tl-year {
     transition:
       color 0.45s ease-out,
       -webkit-text-stroke-color 0.45s ease-out;
   }
 
-  .tlv5-org {
+  .tl-org {
     transition:
       background-size 0.7s var(--ease-mark),
       color 0.3s ease-out;
@@ -1721,182 +1136,7 @@
 
 /* Without JavaScript the counter can't follow the list, so only the entries' own dates show */
 @media (scripting: none) {
-  .tlv5-rail {
+  .tl-rail {
     visibility: hidden;
   }
 }
-/* timeline-lab v5: end */
-/* timeline-lab v6: start */
-/*
- * Master and detail (src/components/sections/timeline-lab/timeline-v6-board.tsx). The detail panel stays dark in both
- * themes: from 860px up the whole panel, below it the open row. Both restate the dark tokens, like [data-ink-stage].
- */
-@media (width >= 860px) {
-  .tl6-detail {
-    color-scheme: dark;
-    --color-white: #15171d;
-    --color-ink: #f2f3f5;
-    --color-muted: #a0a6b2;
-    --color-line: #2a2e37;
-    --color-accent: #8e85ff;
-    --color-accent-hover: #a69dff;
-    --color-dot: #30343e;
-    color: var(--color-ink);
-  }
-
-  /* The stage's dot grid, fading out from the top right corner behind the numeral */
-  .tl6-detail::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background-image: radial-gradient(circle, var(--color-dot) 1px, transparent 1.3px);
-    background-size: 26px 26px;
-    mask-image: radial-gradient(ellipse 80% 90% at 100% 0%, #000 10%, transparent 75%);
-    pointer-events: none;
-  }
-
-  /* Dark mode needs no extra border: the dark --shadow-deep already draws a 1px line ring */
-
-  /* Every entry's li shares one cell, so the panel is as tall as the longest entry and never jumps */
-  .tl6-detail > .tl6-cell {
-    grid-area: 1 / 1;
-  }
-
-  /* visibility (not display) keeps every panel in the HTML while taking the inactive ones out of the a11y tree */
-  .tl6-item:not([data-active]) {
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  .tl6-num {
-    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--color-accent) 42%, transparent);
-  }
-
-  .tl6-glide {
-    translate: 0 calc(var(--tl6-sel, 0) * 100%);
-  }
-}
-
-@media (width < 860px) {
-  .tl6-item[data-open] {
-    color-scheme: dark;
-    --color-ink: #f2f3f5;
-    --color-muted: #a0a6b2;
-    --color-line: #2a2e37;
-    --color-accent: #8e85ff;
-    --color-accent-hover: #a69dff;
-    color: var(--color-ink);
-  }
-
-  :root[data-theme="dark"] .tl6-item[data-open] {
-    border-color: rgb(255 255 255 / 0.1);
-  }
-
-  /* The cross-browser height animation: 0fr to 1fr around a min-h-0, overflow-hidden child */
-  .tl6-body {
-    grid-template-rows: 0fr;
-  }
-
-  .tl6-item[data-open] .tl6-body {
-    grid-template-rows: 1fr;
-  }
-
-  .tl6-item[data-open] .tl6-plus {
-    rotate: 45deg;
-  }
-}
-
-/* Motion only with JS and no reduced-motion request; otherwise every change is instant */
-@media (width >= 860px) and (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-  /* The incoming panel waits for the outgoing one to clear, so the two texts barely overlap */
-  .tl6-item {
-    transition:
-      opacity 240ms ease-out 90ms,
-      translate 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 60ms,
-      visibility 0s;
-  }
-
-  /* The outgoing panel fades quickly and stays visible until it has */
-  .tl6-item:not([data-active]) {
-    transition:
-      opacity 110ms ease-in,
-      translate 160ms ease-in,
-      visibility 0s linear 160ms;
-  }
-
-  /* Panels wait on the side of the selection they belong to, so moving down the list scrolls the content up */
-  .tl6-item[data-pos="after"] {
-    translate: 0 10px;
-  }
-
-  .tl6-item[data-pos="before"] {
-    translate: 0 -10px;
-  }
-
-  /* The numeral rolls further than the text, like an odometer */
-  .tl6-num {
-    transition: translate 640ms var(--ease-split);
-  }
-
-  .tl6-item[data-pos="after"] .tl6-num {
-    translate: 0 45%;
-  }
-
-  .tl6-item[data-pos="before"] .tl6-num {
-    translate: 0 -45%;
-  }
-
-  .tl6-glide {
-    transition: translate 520ms var(--ease-split);
-  }
-}
-
-@media (width < 860px) and (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-  .tl6-body {
-    transition: grid-template-rows 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-
-  .tl6-item {
-    transition:
-      background-color 300ms ease-out,
-      border-color 300ms ease-out;
-  }
-
-  .tl6-item :is(h3, p, span, svg) {
-    transition:
-      color 300ms ease-out,
-      rotate 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-}
-
-/* Without JavaScript nothing can switch, so every entry is shown */
-@media (scripting: none) {
-  .tl6-master {
-    display: none;
-  }
-
-  .tl6-body {
-    grid-template-rows: 1fr;
-  }
-
-  .tl6-plus {
-    display: none;
-  }
-}
-
-@media (width >= 860px) and (scripting: none) {
-  .tl6-detail {
-    grid-column: 1 / -1;
-  }
-
-  .tl6-detail > .tl6-cell {
-    grid-area: auto;
-  }
-
-  .tl6-item:not([data-active]) {
-    opacity: 1;
-    visibility: visible;
-  }
-}
-/* timeline-lab v6: end */

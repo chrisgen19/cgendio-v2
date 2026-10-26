@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {parseStartYear} from './timeline-v5-years';
+import {parseStartYear} from './timeline-years';
 
 describe('parseStartYear', () => {
   it('reads a month and year start', () => {

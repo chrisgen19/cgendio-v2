@@ -9,9 +9,9 @@ export type CounterStop = {
   when: string;
 };
 
-type TimelineV5CounterProps = {
+type TimelineYearCounterProps = {
   stops: CounterStop[];
-  /** The id of the server-rendered <ol>; its <li>s get `data-tlv5-active` as they cross the reading line */
+  /** The id of the server-rendered <ol>; its <li>s get `data-tl-active` as they cross the reading line */
   listId: string;
 };
 
@@ -55,9 +55,9 @@ function Digit({digit, year}: DigitProps) {
   };
 
   return (
-    <span className="tlv5-cell">
+    <span className="tl-cell">
       <span
-        className="tlv5-strip"
+        className="tl-strip"
         data-snap={strip.snap || undefined}
         style={{transform: `translate3d(0, ${-strip.pos}em, 0)`}}
         onTransitionEnd={settle}
@@ -84,7 +84,7 @@ function Odometer({year, className}: OdometerProps) {
   if (year !== null && year !== shownYear) setShownYear(year);
   const digits = String(shownYear).padStart(4, '0').slice(-4).split('').map(Number);
   return (
-    <span className={cn('tlv5-odometer', className)} data-empty={year === null || undefined}>
+    <span className={cn('tl-odometer', className)} data-empty={year === null || undefined}>
       {digits.map((d, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: one cell per digit place
         <Digit key={i} digit={d} year={shownYear} />
@@ -118,7 +118,7 @@ const useActiveEntry = (listId: string) => {
   useEffect(() => {
     const items = Array.from(document.getElementById(listId)?.children ?? []);
     items.forEach((item, i) => {
-      item.toggleAttribute('data-tlv5-active', i === active);
+      item.toggleAttribute('data-tl-active', i === active);
     });
   }, [active, listId]);
 
@@ -126,7 +126,7 @@ const useActiveEntry = (listId: string) => {
 };
 
 /** The giant sticky year beside the roles: the active role's start year in solid ink, the next one as an outlined ghost below. */
-export function TimelineV5Counter({stops, listId}: TimelineV5CounterProps) {
+export function TimelineYearCounter({stops, listId}: TimelineYearCounterProps) {
   const active = useActiveEntry(listId);
 
   const current = stops[active];
@@ -134,7 +134,7 @@ export function TimelineV5Counter({stops, listId}: TimelineV5CounterProps) {
   const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
-    <div aria-hidden="true" className="tlv5-counter">
+    <div aria-hidden="true" className="tl-counter">
       <div className="border-t border-line pt-8">
         {/* 24px tall like each entry's date row, so the two dates sit level when the hairlines meet */}
         <div className="flex min-h-6 items-center gap-4 font-mono text-[13px] leading-none font-medium tracking-[0.08em] text-muted uppercase">
@@ -143,15 +143,15 @@ export function TimelineV5Counter({stops, listId}: TimelineV5CounterProps) {
           </span>
           <span className="grid">
             {stops.map((stop, i) => (
-              <span key={stop.when + String(i)} className="tlv5-when col-start-1 row-start-1" data-on={i === active || undefined}>
+              <span key={stop.when + String(i)} className="tl-when col-start-1 row-start-1" data-on={i === active || undefined}>
                 {stop.when}
               </span>
             ))}
           </span>
         </div>
       </div>
-      <Odometer year={current?.year ?? null} className="tlv5-solid mt-5" />
-      <div className="tlv5-ghost" data-empty={!next || undefined}>
+      <Odometer year={current?.year ?? null} className="tl-solid mt-5" />
+      <div className="tl-ghost" data-empty={!next || undefined}>
         <Odometer year={next?.year ?? null} />
       </div>
     </div>
