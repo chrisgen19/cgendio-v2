@@ -29,13 +29,14 @@ const renameProject = async (page: Page, from: string, to: string) => {
 };
 
 test('a project title edited in the admin shows on the home page', async ({page}) => {
-  const original = 'Budget Tracker';
-  const edited = `Budget Tracker ${uniqueToken()}`;
+  const original = 'Fresh Fruit and Veg Shop';
+  const edited = `Fresh Fruit and Veg Shop ${uniqueToken()}`;
   const workTitles = () => page.locator('#work').getByRole('heading', {level: 3});
 
   // A failed earlier attempt (CI retries once, on the same database) can leave its edited title behind, so start from
-  // the seeded title, found by the slug that never changes. The save below revalidates the home page.
-  await queryTestDb('UPDATE projects SET title = $1 WHERE slug = $2', [original, 'budget-tracker']);
+  // the seeded title, found by the slug that never changes. The save below revalidates the home page. The form rejects
+  // the data URL cover e2e/support/prepare.mts gives every project, so drop it (the public snapshots have already run).
+  await queryTestDb('UPDATE projects SET title = $1, cover_image_url = NULL WHERE slug = $2', [original, 'fresh-fruit-and-veg']);
 
   await renameProject(page, original, edited);
   await page.goto('/');

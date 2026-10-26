@@ -36,17 +36,12 @@ type ProjectCardProps = {
 export function ProjectCard({project, place}: ProjectCardProps) {
   const style = {
     '--own': place.own,
-    '--i-all': place.index.all,
-    '--i-client': place.index.client,
-    '--i-personal': place.index.personal,
-    '--next-all': place.next.all,
-    '--next-client': place.next.client,
-    '--next-personal': place.next.personal,
+    '--i': place.index,
+    '--next': place.next,
   } as CSSProperties;
 
   return (
     <article
-      data-group={project.group}
       data-theme={project.theme === 'lime' ? 'light' : undefined}
       style={style}
       className={cn(

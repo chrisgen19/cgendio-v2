@@ -1,7 +1,7 @@
 import type {Project, ProjectDetail} from '../../src/server/content-schema';
 
 /**
- * The nine projects from the v1 site, with its slugs, one-liners and stacks. Case studies live in
+ * The six client projects from the v1 site, with its slugs, one-liners and stacks. Case studies live in
  * prisma/seed-data/projects/<slug>.md (prisma/seed.mts reads them). Covers are the v1 desktop screenshots, cropped to
  * the top 16:9 and copied into cgendio-media; they change when the bucket gets its custom domain.
  */
@@ -112,56 +112,5 @@ export const projects: SeedProject[] = [
     repoUrl: null,
     client: 'Fresh Fruit and Veg Shop',
     role: 'Freelance developer',
-  },
-  {
-    slug: 'budget-tracker',
-    title: 'Budget Tracker',
-    summary: 'A personal budget app I use every day to log spending across accounts and cards.',
-    kindLabel: 'PERSONAL · PRODUCT',
-    group: 'personal',
-    glyph: 'Budget',
-    theme: 'tint',
-    tags: ['Next.js', 'TypeScript', 'Prisma', 'PostgreSQL'],
-    featured: true,
-    order: 7,
-    coverImageUrl: null,
-    liveUrl: null,
-    repoUrl: 'https://github.com/chrisgen19/budget-tracker-2026',
-    client: null,
-    role: 'Design and build',
-  },
-  {
-    slug: 'ph-job-board-scraper',
-    title: 'PH Job Board Scraper',
-    summary: 'Collects job listings from Philippine job boards into one database.',
-    kindLabel: 'PERSONAL · IN PROGRESS',
-    group: 'personal',
-    glyph: 'Jobs',
-    theme: 'gray',
-    tags: ['Next.js', 'Prisma', 'PostgreSQL', 'Scraping'],
-    featured: true,
-    order: 8,
-    coverImageUrl: null,
-    liveUrl: null,
-    repoUrl: null,
-    client: null,
-    role: 'Design and build',
-  },
-  {
-    slug: 'self-hosted-platform',
-    title: 'Self-hosted app platform',
-    summary: 'The server my side projects run on.',
-    kindLabel: 'PERSONAL · INFRASTRUCTURE',
-    group: 'personal',
-    glyph: 'VPS',
-    theme: 'ink',
-    tags: ['Coolify', 'Docker', 'PostgreSQL', 'Ubuntu'],
-    featured: true,
-    order: 9,
-    coverImageUrl: null,
-    liveUrl: null,
-    repoUrl: null,
-    client: null,
-    role: 'Design and build',
   },
 ];
