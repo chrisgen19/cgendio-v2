@@ -1,7 +1,18 @@
 /*
- * Applied while taking the Work timeline screenshot: puts the sticky year counter back in flow at the top of its column.
- * A tall element screenshot scrolls through the page, so a sticky counter would land wherever the capture happened to be.
+ * Applied while taking the Work timeline screenshot. The counter and the active role follow the scroll position, and a
+ * tall element screenshot scrolls through the page, so the capture would freeze whichever role it passed last. Hide the
+ * counter (its column keeps its space) and draw every role as inactive; timeline.spec.ts covers the counter itself.
  */
-.tl-counter {
-  position: static;
+.tl-rail {
+  visibility: hidden;
+}
+
+.tl-entry[data-tl-active] .tl-year {
+  color: transparent;
+  -webkit-text-stroke-color: var(--color-dot-placeholder);
+}
+
+.tl-entry[data-tl-active] .tl-org {
+  background-size: 0% 0.5em;
+  color: inherit;
 }

@@ -28,8 +28,8 @@ test('stack strip', async ({page}) => {
   await expect(page.locator('#about').locator('xpath=preceding-sibling::section[1]')).toHaveScreenshot('stack.png');
 });
 
-// The Work cards and the timeline's year counter are sticky: flatten them so the screenshot doesn't depend on where the
-// capture scrolled to
+// The Work cards are sticky and the timeline's counter follows the scroll: flatten them so the screenshot doesn't depend
+// on where the capture scrolled to
 const STYLES: Record<string, string> = {work: 'e2e/support/flatten-work-stack.css', timeline: 'e2e/support/flatten-timeline-counter.css'};
 
 for (const id of SECTIONS) {
