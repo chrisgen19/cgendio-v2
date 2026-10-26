@@ -990,3 +990,153 @@
   border: 1px solid var(--border);
   padding: 0.25em 0.5em;
 }
+
+/*
+ * Work timeline, the year counter (src/components/sections/timeline*.tsx). The counter's top hairline sticks on the
+ * reading line (45% down), the same line the entries' hairlines cross to become active, so the two meet at each roll.
+ */
+.tl-counter {
+  position: sticky;
+  top: 45svh;
+  /* Fits the column four digits wide, and the viewport below the reading line */
+  --tl-size: min(220px, 40cqi, 26svh);
+}
+
+.tl-when {
+  opacity: 0;
+  translate: 0 0.6em;
+}
+
+.tl-when[data-on] {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.tl-odometer {
+  display: flex;
+  font-family: var(--font-display);
+  font-size: var(--tl-size);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+/* Fixed-width cells, so a narrow 1 never shifts its neighbours; the clip is a touch taller than the digits' ink */
+.tl-cell {
+  display: block;
+  width: 0.575em;
+  height: 0.8em;
+  overflow: clip;
+  text-align: center;
+}
+
+.tl-strip {
+  display: flex;
+  flex-direction: column;
+  /* Each digit is 1em tall; the glyphs' ink sits about 0.12em down, so lift it into the 0.8em cell */
+  margin-top: -0.12em;
+}
+
+.tl-strip > span {
+  display: block;
+  height: 1em;
+}
+
+.tl-odometer[data-empty] {
+  opacity: 0;
+}
+
+/* The next role's year, outlined and fading out downwards, peeking under the active one */
+/* Out of flow, so the counter's sticky height is only the solid year: the last role can still meet it on the reading line */
+.tl-ghost {
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  margin-top: calc(var(--tl-size) * 0.06);
+  height: calc(var(--tl-size) * 0.52);
+  overflow: clip;
+  mask-image: linear-gradient(to bottom, #000 10%, transparent);
+}
+
+.tl-ghost .tl-odometer {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-outline-num);
+}
+
+:root[data-theme="dark"] .tl-ghost .tl-odometer {
+  -webkit-text-stroke-color: var(--color-line);
+}
+
+.tl-ghost[data-empty] {
+  opacity: 0;
+}
+
+/* Phones: each role's own year, outlined until the role reaches the reading line, then filled */
+.tl-year {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-dot-placeholder);
+}
+
+.tl-entry[data-tl-active] .tl-year {
+  color: var(--color-ink);
+  -webkit-text-stroke-color: var(--color-ink);
+}
+
+/* The active role's org gets the lime highlighter; the server marks the first role, the counter moves it */
+.tl-org {
+  /* 0.06em past each end, like the heading highlighter */
+  margin-inline: -0.06em;
+  padding-inline: 0.06em;
+  background-image: linear-gradient(var(--color-highlight), var(--color-highlight));
+  background-repeat: no-repeat;
+  background-position: 0 calc(100% - 0.24em);
+  background-size: 0% 0.5em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.tl-entry[data-tl-active] .tl-org {
+  background-size: 100% 0.5em;
+  color: var(--color-highlight-ink);
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .tl-strip {
+    transition: transform 0.56s var(--ease-split);
+  }
+
+  .tl-strip[data-snap] {
+    transition: none;
+  }
+
+  .tl-odometer,
+  .tl-ghost {
+    transition: opacity 0.3s ease-out;
+  }
+
+  .tl-when {
+    transition:
+      opacity 0.22s ease-out,
+      translate 0.22s ease-out;
+  }
+
+  .tl-year {
+    transition:
+      color 0.45s ease-out,
+      -webkit-text-stroke-color 0.45s ease-out;
+  }
+
+  .tl-org {
+    transition:
+      background-size 0.7s var(--ease-mark),
+      color 0.3s ease-out;
+  }
+}
+
+/* Without JavaScript the counter can't follow the list, so only the entries' own dates show */
+@media (scripting: none) {
+  .tl-rail {
+    visibility: hidden;
+  }
+}

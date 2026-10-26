@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       update_snapshots:
-        description: Regenerate the Linux visual baselines and upload them as an artifact (commit them by hand)
+        description: Regenerate the Linux and macOS visual baselines and upload them as artifacts (commit them by hand)
         type: boolean
         default: false
 
@@ -94,5 +94,55 @@ jobs:
         with:
           name: linux-snapshots
           path: e2e/**/__screenshots__/**/*-linux.png
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # Only on a manual run with update_snapshots: writes the -darwin.png baselines (screenshots differ between macOS and
+  # Linux font rendering) so they don't have to come from a Mac. It never gates a PR.
+  darwin-snapshots:
+    name: macOS visual baselines
+    if: inputs.update_snapshots
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # macOS runners have no Docker for a service container: a throwaway Postgres 18 from Homebrew on the same port and
+      # user as compose.yaml, with trust auth like the Linux job's service
+      - name: Start Postgres
+        run: |
+          brew install postgresql@18
+          PG_BIN="$(brew --prefix postgresql@18)/bin"
+          "$PG_BIN/initdb" -D "$RUNNER_TEMP/pg" -U cgendio --auth=trust --encoding=UTF8 --locale=C
+          "$PG_BIN/pg_ctl" -D "$RUNNER_TEMP/pg" -o "-p 5437" -l "$RUNNER_TEMP/pg.log" -w start
+
+      - name: Prepare the e2e database
+        run: pnpm test:e2e:prepare
+
+      - name: Build
+        run: pnpm test:e2e:build
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium
+
+      - name: Regenerate the macOS visual baselines
+        run: pnpm exec playwright test e2e/public/visual.spec.ts --project=desktop --project=mobile --update-snapshots=all
+
+      - name: Upload the macOS visual baselines
+        if: success() || failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: darwin-snapshots
+          path: e2e/**/__screenshots__/**/*-darwin.png
           if-no-files-found: ignore
           retention-days: 7
