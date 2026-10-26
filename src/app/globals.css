@@ -828,6 +828,82 @@
   }
 }
 
+/*
+ * The contact ticker (src/components/sections/contact/). The tab under the band meets it with concave corners. On the
+ * dark page both take the page colour (the dark --color-ground, which the light panel can't see), so the band reads as a
+ * cut through the lime panel. The first view is armed (data-armed) only with JavaScript, motion welcome and the band
+ * below the fold, and plays (data-play) as it scrolls into view: the band shoots in from the right while useTicker
+ * launches the stream fast and brakes it, then the tab drops out from under the band.
+ */
+.contact-band,
+.contact-tab {
+  --ticker-ink: var(--color-ink);
+  background-color: var(--ticker-ink);
+}
+
+:root[data-theme="dark"] :is(.contact-band, .contact-tab) {
+  --ticker-ink: #0b0c10;
+}
+
+/* 1px wider than the curve and tucked 1px into the tab, so no hairline shows at the joins */
+.contact-tab::before,
+.contact-tab::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 19px;
+  height: 18px;
+}
+
+.contact-tab::before {
+  right: calc(100% - 1px);
+  background: radial-gradient(circle at 0 100%, transparent 17.5px, var(--ticker-ink) 18px);
+}
+
+.contact-tab::after {
+  left: calc(100% - 1px);
+  background: radial-gradient(circle at 100% 100%, transparent 17.5px, var(--ticker-ink) 18px);
+}
+
+@keyframes contact-shoot {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+/* Hidden until it starts to move, so it never shows through the band before the band has shot past it */
+@keyframes contact-drop {
+  from {
+    visibility: hidden;
+    translate: 0 -100%;
+  }
+  to {
+    visibility: visible;
+    translate: 0 0;
+  }
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-armed] > .contact-band {
+    clip-path: inset(0 0 0 100%);
+  }
+
+  [data-armed]:not([data-play]) > .contact-tab {
+    visibility: hidden;
+  }
+
+  [data-armed][data-play] > .contact-band {
+    animation: contact-shoot 0.7s var(--ease-mark) both;
+  }
+
+  [data-armed][data-play] > .contact-tab {
+    animation: contact-drop 0.6s var(--ease-spring) 0.55s both;
+  }
+}
+
 /* Code blocks in posts and case studies: Shiki's css-variables theme (src/lib/code-theme.ts) mapped to the code tokens */
 :root {
   --shiki-foreground: var(--color-code-text);

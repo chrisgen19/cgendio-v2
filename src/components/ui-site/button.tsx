@@ -1,7 +1,7 @@
 import type {AnchorHTMLAttributes, ButtonHTMLAttributes} from 'react';
 import {cn} from '@/lib/cn';
 
-type Variant = 'primary' | 'secondary' | 'outline';
+type Variant = 'primary' | 'secondary' | 'outline' | 'lime';
 type Size = 'md' | 'sm';
 
 type BaseProps = {
@@ -21,6 +21,8 @@ const VARIANTS: Record<Variant, string> = {
   secondary: 'border-line bg-white text-ink hover:border-ink hover:text-ink',
   // Secondary with an ink border, for coloured panels (the lime contact CTA)
   outline: 'border-ink bg-white text-ink hover:text-ink',
+  // On ink surfaces (the contact ticker's tab), with a lime focus ring that shows on the ink
+  lime: 'border-transparent bg-lime text-ink hover:bg-white hover:text-ink focus-visible:outline-lime',
 };
 
 const SIZES: Record<Size, string> = {
