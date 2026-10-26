@@ -5,7 +5,12 @@ import {Section} from '@/components/ui-site/section';
 import {SectionHeading} from '@/components/ui-site/section-heading';
 import {isEmail} from '@/lib/email';
 import {getPageCopy, getSiteSettings} from '@/server/content';
+import {ContactTicker} from './contact/contact-ticker';
 
+/**
+ * The closing call to action. The email address is the main action: it runs on an ink ticker band across the lime
+ * panel (ContactTicker), with the contact form as the secondary path below. The section clips the band's full bleed.
+ */
 export async function ContactCta() {
   const [copy, settings] = await Promise.all([getPageCopy(), getSiteSettings()]);
 
@@ -14,17 +19,18 @@ export async function ContactCta() {
       id="contact"
       padding="cta"
       innerTheme="light"
-      innerClassName="relative flex flex-col gap-7 overflow-hidden rounded-cta bg-lime p-[clamp(36px,6vw,80px)]"
+      className="overflow-x-clip"
+      innerClassName="relative flex flex-col gap-7 rounded-cta bg-lime p-[clamp(36px,6vw,80px)]"
     >
-      <div aria-hidden="true" className="absolute -top-30 -right-30 size-105 rounded-full border-2 border-ink opacity-12" />
-      <div aria-hidden="true" className="absolute -top-10 -right-10 size-65 rounded-full border-2 border-ink opacity-12" />
       <Eyebrow tone="ink">{copy['contact.eyebrow']}</Eyebrow>
       <SectionHeading size="cta" className="max-w-[1000px]">
         <MarkedText text={copy['contact.heading']} />
       </SectionHeading>
       <p className="m-0 max-w-[560px] text-lg leading-[1.55] text-ink-soft">{copy['contact.lede']}</p>
-      <div className="flex flex-wrap gap-3">
-        <Button href="/contact">
+      {/* The [YOUR EMAIL] placeholder shows as plain text on the band, with no link and no copy button */}
+      <ContactTicker address={settings.contactEmail} live={isEmail(settings.contactEmail)} />
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+        <Button href="/contact" variant="outline">
           {copy['contact.primaryLabel']}
           <svg
             viewBox="0 0 24 24"
@@ -45,18 +51,8 @@ export async function ContactCta() {
             {copy['contact.cvLabel']}
           </Button>
         ) : null}
+        <span className="font-mono text-[13px] text-ink-soft">{copy['contact.location']}</span>
       </div>
-      <span className="font-mono text-[13px] text-ink-soft">
-        {/* A mailto link once the address is real; the [YOUR EMAIL] placeholder stays plain text */}
-        {isEmail(settings.contactEmail) ? (
-          <a href={`mailto:${settings.contactEmail}`} className="text-ink-soft underline underline-offset-2 hover:text-ink">
-            {settings.contactEmail}
-          </a>
-        ) : (
-          settings.contactEmail
-        )}{' '}
-        · {copy['contact.location']}
-      </span>
     </Section>
   );
 }
