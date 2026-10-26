@@ -1,10 +1,13 @@
 name: CI
 
-# Every PR: typecheck, lint, unit tests, a production build and the Playwright e2e suite against a seeded Postgres.
-# The test environment (database URL, auth secret, mock Resend) comes from e2e/support/test-env.ts: test-only values.
+# Every PR and every push to main: typecheck, lint, unit tests, a production build and the Playwright e2e suite against
+# a seeded Postgres. The test environment (database URL, auth secret, mock Resend) comes from e2e/support/test-env.ts:
+# test-only values.
 
 on:
   pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       update_snapshots:
@@ -12,9 +15,10 @@ on:
         type: boolean
         default: false
 
+# A newer push to a PR branch cancels its older run; on main every merge runs to the end, so each one gets a result
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
   contents: read
