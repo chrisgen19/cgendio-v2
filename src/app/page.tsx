@@ -15,7 +15,7 @@ export default async function Home() {
   return (
     <>
       <JsonLd data={homeJsonLd(copy, settings)} />
-      <HomePage filter="all" />
+      <HomePage />
     </>
   );
 }

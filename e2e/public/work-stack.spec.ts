@@ -1,10 +1,10 @@
 import {expect, type Page, test} from '@playwright/test';
 
-/* The Work cards pin and stack: each card sticks one step lower than the card before it among the visible cards. */
+/* The Work cards pin and stack: each card sticks one step lower than the card before it. */
 
-const cards = (page: Page) => page.locator('#work article.work-card').locator('visible=true');
+const cards = (page: Page) => page.locator('#work article.work-card');
 
-/** The sticky `top` of every visible card, in px. */
+/** The sticky `top` of every card, in px. */
 const stickyTops = (page: Page) => cards(page).evaluateAll((els) => els.map((el) => Number.parseFloat(getComputedStyle(el).top)));
 
 const expectEvenSteps = (tops: number[]) => {
@@ -16,7 +16,7 @@ const expectEvenSteps = (tops: number[]) => {
 test('cards stick one step below the card before them', async ({page}) => {
   await page.goto('/');
   const tops = await stickyTops(page);
-  expect(tops).toHaveLength(9);
+  expect(tops).toHaveLength(6);
   expectEvenSteps(tops);
 
   // Scroll until the third card has reached its sticky spot: the first three now sit stacked at their offsets
@@ -33,17 +33,6 @@ test('cards stick one step below the card before them', async ({page}) => {
   }
 });
 
-test('a filter restacks the cards it shows without gaps', async ({page}) => {
-  await page.goto('/');
-  await page.getByRole('navigation', {name: 'Filter projects'}).getByRole('link', {name: 'Personal'}).click();
-  const tops = await stickyTops(page);
-  expect(tops).toHaveLength(3);
-  expectEvenSteps(tops);
-  // The first personal card takes the first spot, as the first card does under All
-  await page.getByRole('navigation', {name: 'Filter projects'}).getByRole('link', {name: 'All'}).click();
-  expect((await stickyTops(page))[0]).toBe(tops[0]);
-});
-
 test.describe('on short screens', () => {
   // Just above the phone layout and barely tall enough to stack: the cards are at their smallest, so content must fit
   test('every case study link stays inside its card', async ({page}) => {
@@ -56,7 +45,7 @@ test.describe('on short screens', () => {
         return link ? link.getBoundingClientRect().bottom - el.getBoundingClientRect().bottom : Number.POSITIVE_INFINITY;
       }),
     );
-    expect(overflow).toHaveLength(9);
+    expect(overflow).toHaveLength(6);
     expect(Math.max(...overflow)).toBeLessThanOrEqual(0);
   });
 
