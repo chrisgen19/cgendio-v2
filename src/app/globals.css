@@ -1222,3 +1222,102 @@
     visibility: hidden;
   }
 }
+
+/*
+ * The milestones' scroll-scrubbed values (src/components/sections/milestones.tsx). Each line is a view timeline; while
+ * it travels from the bottom of the viewport towards the middle, the registered integer --ms-n runs from --ms-from (the
+ * smallest number with as many digits, so never '0+') to the value, and a counter prints it over the hidden final
+ * digits. Word values start as outlines and an ink copy wipes across them. Reduced motion, no JS and browsers without
+ * view timelines get the plain final values.
+ */
+@property --ms-n {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes ms-count {
+  from {
+    --ms-n: var(--ms-from);
+  }
+}
+
+@keyframes ms-wipe {
+  from {
+    clip-path: inset(-0.3em 100% -0.3em 0);
+  }
+
+  to {
+    clip-path: inset(-0.3em);
+  }
+}
+
+/*
+ * The value's size: the design size, or smaller when a long value (an admin entry like "Nov ’25") wouldn't fit its
+ * line. --ms-chars is the value's length; 0.66em covers the widest seeded glyphs (CMS), so seeded values keep the design
+ * size. Desktop leaves room for the 360px text column and its 48px gap. Each line is the size container. The estimate
+ * can't know glyph widths (W is about 0.9em), so MilestoneFit measures each value and sets --ms-fit below 1 only for
+ * one that still overflows; without JS the estimate stands.
+ */
+.ms-value {
+  /* The text column's room, which MilestoneFit reads too */
+  --ms-reserve: 408px;
+  font-size: calc(min(clamp(80px, 15vw, 220px), calc((100cqi - var(--ms-reserve)) / (var(--ms-chars) * 0.66))) * var(--ms-fit, 1));
+}
+
+@media (width < 860px) {
+  .ms-value {
+    --ms-reserve: 0px;
+    font-size: calc(min(40vw, 160px, calc(100cqi / (var(--ms-chars) * 0.66))) * var(--ms-fit, 1));
+  }
+}
+
+.ms-tick,
+.ms-fill {
+  display: none;
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .ms-row {
+      view-timeline: --ms-row block;
+    }
+
+    .ms-final {
+      visibility: hidden;
+    }
+
+    .ms-tick,
+    .ms-fill {
+      display: block;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --ms-row;
+      animation-range: cover 5% cover 40%;
+    }
+
+    .ms-tick {
+      --ms-n: var(--ms-to);
+      counter-reset: ms var(--ms-n);
+      animation-name: ms-count;
+    }
+
+    .ms-tick::before {
+      content: counter(ms);
+    }
+
+    /* The fill carries the same hairline stroke, so it covers the outline exactly */
+    .ms-word,
+    .ms-fill {
+      -webkit-text-stroke: 0.012em var(--color-ink);
+    }
+
+    .ms-word {
+      color: transparent;
+    }
+
+    .ms-fill {
+      animation-name: ms-wipe;
+    }
+  }
+}
