@@ -548,6 +548,11 @@
   --brand-on-button: var(--brand-on-button-dark);
 }
 
+/* The site's accent focus ring can fall under 3:1 on a card washed from a near-white tint; the card's accent never does */
+.brand-panel :focus-visible {
+  outline-color: var(--brand-accent);
+}
+
 /*
  * The About section's inspect canvas (src/components/sections/about/). AboutStage arms the entry (data-armed) only with
  * JavaScript, motion welcome and the stage still below the fold, and plays it (data-play) when the stage scrolls into
