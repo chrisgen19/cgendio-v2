@@ -24,4 +24,14 @@ describe('parseCountedValue', () => {
     expect(parseCountedValue('CMS')).toBeNull();
     expect(parseCountedValue('VPS')).toBeNull();
   });
+
+  it('returns null for digits that would not print back as typed', () => {
+    expect(parseCountedValue('007+')).toBeNull();
+    expect(parseCountedValue('9007199254740993+')).toBeNull();
+    expect(parseCountedValue('1234567890')).toBeNull();
+  });
+
+  it('still counts the longest allowed number', () => {
+    expect(parseCountedValue('999999999+')).toEqual({from: 100_000_000, to: 999_999_999, suffix: '+'});
+  });
 });
