@@ -66,6 +66,10 @@ model Project {
   /// Case study facts row; the page shows [Client] / [Role] placeholders while these are empty
   client        String?
   role          String?
+  /// The client's brand colour (#rrggbb): the card's number, rule and button. Null uses `theme`
+  brandColor    String?       @map("brand_color")
+  /// The colour the card background is washed from (#rrggbb); null uses brandColor
+  brandTint     String?       @map("brand_tint")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 

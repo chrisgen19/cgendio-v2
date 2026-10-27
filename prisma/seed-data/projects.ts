@@ -3,7 +3,8 @@ import type {Project, ProjectDetail} from '../../src/server/content-schema';
 /**
  * The six client projects from the v1 site, with its slugs, one-liners and stacks. Case studies live in
  * prisma/seed-data/projects/<slug>.md (prisma/seed.mts reads them). Covers are the v1 desktop screenshots, cropped to
- * the top 16:9 and copied into cgendio-media; they change when the bucket gets its custom domain.
+ * the top 16:9 and copied into cgendio-media; they change when the bucket gets its custom domain. Brand colours are
+ * sampled from the covers; the 20261027120000_project_brand_colours migration backfills the same values, so change both.
  */
 export type SeedProject = Project & Pick<ProjectDetail, 'coverImageUrl' | 'liveUrl' | 'repoUrl' | 'client' | 'role'>;
 
@@ -23,6 +24,8 @@ export const projects: SeedProject[] = [
     featured: true,
     order: 1,
     coverImageUrl: `${COVERS}/3af02638-eea6-4831-945b-ed83d99a0bfe.webp`,
+    brandColor: '#e31836',
+    brandTint: null,
     liveUrl: 'https://www.accesshire.net/',
     repoUrl: null,
     client: 'Access Hire Australia',
@@ -40,6 +43,8 @@ export const projects: SeedProject[] = [
     featured: true,
     order: 2,
     coverImageUrl: `${COVERS}/ed966c78-3dc5-4367-a1ac-47b2366229f4.webp`,
+    brandColor: '#005fe5',
+    brandTint: null,
     liveUrl: 'https://myimprov.com/',
     repoUrl: null,
     client: 'MyImprov',
@@ -57,6 +62,8 @@ export const projects: SeedProject[] = [
     featured: true,
     order: 3,
     coverImageUrl: `${COVERS}/48b51505-fd46-4415-81f3-36ff8ead733c.webp`,
+    brandColor: '#415c5a',
+    brandTint: null,
     liveUrl: 'https://www.merthyrvillage.com.au/',
     repoUrl: null,
     client: 'Merthyr Village',
@@ -74,6 +81,8 @@ export const projects: SeedProject[] = [
     featured: true,
     order: 4,
     coverImageUrl: `${COVERS}/1ca99913-680a-4b8b-bda5-ef15350e381a.webp`,
+    brandColor: '#aa0212',
+    brandTint: null,
     liveUrl: 'https://www.experiencesunnybank.com.au/',
     repoUrl: null,
     client: 'Experience Sunnybank',
@@ -91,6 +100,8 @@ export const projects: SeedProject[] = [
     featured: true,
     order: 5,
     coverImageUrl: `${COVERS}/619447c7-aecb-4d4a-bbb6-78ec265ff6a3.webp`,
+    brandColor: '#e53845',
+    brandTint: '#6b6460',
     liveUrl: 'https://premiummobilecarvaletingglasgow.co.uk/',
     repoUrl: null,
     client: 'Premium Mobile Car Valeting Glasgow',
@@ -108,6 +119,8 @@ export const projects: SeedProject[] = [
     featured: true,
     order: 6,
     coverImageUrl: `${COVERS}/f42332bd-c882-423f-8255-fb994436ff7a.webp`,
+    brandColor: '#35b65a',
+    brandTint: null,
     liveUrl: 'https://www.freshfruitandvegshop.com/',
     repoUrl: null,
     client: 'Fresh Fruit and Veg Shop',

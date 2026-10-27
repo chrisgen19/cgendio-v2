@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type {ReactNode} from 'react';
 import {renderMarkdown} from '@/components/prose/markdown';
 import {CoverImage} from '@/components/ui-site/cover-image';
-import {PROJECT_RINGS, PROJECT_THEMES} from '@/components/ui-site/project-theme';
+import {brandPanelStyle, PROJECT_RINGS, PROJECT_THEMES} from '@/components/ui-site/project-theme';
 import {Section} from '@/components/ui-site/section';
 import {Tag} from '@/components/ui-site/tag';
 import {cn} from '@/lib/cn';
@@ -33,12 +33,13 @@ function ExternalLink({href, children}: {href: string; children: ReactNode}) {
 }
 
 /**
- * A case study: a hero band in the project's thumb theme, the title and summary, a facts row (client, role, stack and
+ * A case study: a hero band in the project's brand tint (or its thumb theme without one), the title and summary, a facts row (client, role, stack and
  * links when present) and the Markdown write-up. Missing facts stay as visible placeholders.
  */
 export async function CaseStudyArticle({project}: {project: ProjectDetail}) {
   const markdown = project.caseStudy?.trim() ? await renderMarkdown(project.caseStudy) : null;
   const client = project.client ?? (project.group === 'personal' ? 'Personal project' : '[Client]');
+  const brand = brandPanelStyle(project.brandColor, project.brandTint);
   return (
     <article>
       <Section padding="cta" innerClassName="flex flex-col gap-6 pt-6 max-md:pt-0">
@@ -64,13 +65,17 @@ export async function CaseStudyArticle({project}: {project: ProjectDetail}) {
           className={cn(
             'relative flex min-h-90 flex-col justify-between gap-10 overflow-hidden rounded-panel p-[clamp(24px,4vw,48px)] max-md:min-h-70',
             PROJECT_RINGS,
-            PROJECT_THEMES[project.theme],
+            brand ? 'brand-panel bg-(--brand-bg) text-ink' : PROJECT_THEMES[project.theme],
           )}
+          style={brand}
         >
           <span className="relative z-1 font-mono text-[12px] tracking-[0.08em]">{project.kindLabel}</span>
           <span
             aria-hidden="true"
-            className="relative z-1 font-display text-[clamp(64px,11vw,148px)] leading-[0.9] font-extrabold tracking-[-0.05em] break-words"
+            className={cn(
+              'relative z-1 font-display text-[clamp(64px,11vw,148px)] leading-[0.9] font-extrabold tracking-[-0.05em] break-words',
+              brand && 'text-(--brand-accent)',
+            )}
           >
             {project.glyph}
           </span>

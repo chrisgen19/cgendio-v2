@@ -39,6 +39,8 @@ const projectRow = (slug: string, overrides: Record<string, unknown> = {}) => ({
   repoUrl: null,
   client: null,
   role: null,
+  brandColor: null,
+  brandTint: null,
   createdAt: new Date(),
   updatedAt: new Date(),
   ...overrides,
@@ -79,10 +81,18 @@ describe('getProjects', () => {
         theme: 'tint',
         tags: ['Next.js'],
         coverImageUrl: null,
+        brandColor: null,
+        brandTint: null,
         featured: true,
         order: 1,
       },
     ]);
+  });
+
+  it('passes the brand colours through', async () => {
+    db.project.findMany.mockResolvedValue([projectRow('alpha', {brandColor: '#005fe5'})]);
+    const [project] = await getProjects();
+    expect(project).toMatchObject({brandColor: '#005fe5', brandTint: null});
   });
 
   it('filters by group', async () => {

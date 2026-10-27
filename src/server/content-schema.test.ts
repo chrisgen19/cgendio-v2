@@ -11,6 +11,8 @@ const project = {
   theme: 'lime',
   tags: ['Next.js'],
   coverImageUrl: null,
+  brandColor: null,
+  brandTint: null,
   featured: true,
   order: 1,
 };
@@ -36,6 +38,14 @@ describe('projectSchema', () => {
   it('only allows the known groups and themes', () => {
     expect(projectSchema.safeParse({...project, group: 'CLIENT'}).success).toBe(false);
     expect(projectSchema.safeParse({...project, theme: 'red'}).success).toBe(false);
+  });
+
+  it('takes brand colours as lowercase hex', () => {
+    expect(projectSchema.parse({...project, brandColor: '#E31836', brandTint: '#6b6460'})).toMatchObject({
+      brandColor: '#e31836',
+      brandTint: '#6b6460',
+    });
+    for (const bad of ['#fff', 'red', 'e31836', '#e3183']) expect(projectSchema.safeParse({...project, brandColor: bad}).success, bad).toBe(false);
   });
 });
 

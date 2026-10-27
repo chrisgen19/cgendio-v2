@@ -20,6 +20,16 @@ const optionalUrl = z.preprocess(
   z.url({protocol: /^https?$/, hostname: z.regexes.domain, error: 'Enter a full URL'}).nullable(),
 );
 const optionalText = z.preprocess((value) => (typeof value === 'string' && value.trim() === '' ? null : value), z.string().trim().nullable());
+/** A `#rrggbb` colour saved lowercase, or null when the field is empty or missing */
+const optionalHex = z.preprocess(
+  (value) => (value === undefined || (typeof value === 'string' && value.trim() === '') ? null : value),
+  z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/, {error: 'Use a hex colour like #e31836'})
+    .transform((value) => value.toLowerCase())
+    .nullable(),
+);
 
 const slug = z
   .string({error: 'Slug is required'})
@@ -55,6 +65,8 @@ export const projectFormSchema = z.object({
   repoUrl: optionalUrl,
   client: optionalText.pipe(z.string().max(120).nullable()),
   role: optionalText.pipe(z.string().max(120).nullable()),
+  brandColor: optionalHex,
+  brandTint: optionalHex,
 });
 
 export const postFormSchema = z.object({

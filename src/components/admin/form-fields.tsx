@@ -1,4 +1,4 @@
-import type {ComponentProps, ReactNode} from 'react';
+import {type ComponentProps, type ReactNode, useState} from 'react';
 import {useFormStatus} from 'react-dom';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -50,6 +50,38 @@ export function TextField({name, label, hint, errors, ...props}: TextFieldProps)
   return (
     <FieldShell name={name} label={label} hint={hint} errors={errors}>
       {(aria) => <Input name={name} {...aria} {...props} />}
+    </FieldShell>
+  );
+}
+
+type ColorFieldProps = {name: string; label: string; hint?: string; defaultValue?: string | null; errors: FieldErrors};
+
+const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+
+/**
+ * A `#rrggbb` text field with a swatch of the colour typed so far. A text input rather than `type="color"`, which always
+ * posts a colour and so can't be left empty. No maxLength: it would cut a pasted ` #E31836 ` before the server trims it.
+ */
+export function ColorField({name, label, hint, defaultValue, errors}: ColorFieldProps) {
+  const [value, setValue] = useState(defaultValue ?? '');
+  const valid = HEX_COLOR.test(value.trim());
+  return (
+    <FieldShell name={name} label={label} hint={hint} errors={errors}>
+      {(aria) => (
+        <div className="flex items-center gap-2">
+          <Input
+            name={name}
+            {...aria}
+            defaultValue={defaultValue ?? ''}
+            onChange={(event) => setValue(event.target.value)}
+            placeholder="#e31836"
+            spellCheck={false}
+            autoComplete="off"
+            className="font-mono"
+          />
+          <span aria-hidden="true" className="size-9 shrink-0 rounded-md border" style={valid ? {backgroundColor: value.trim()} : undefined} />
+        </div>
+      )}
     </FieldShell>
   );
 }
