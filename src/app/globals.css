@@ -530,6 +530,25 @@
 }
 
 /*
+ * A project card or case study panel in its client's brand tint. brandPanelStyle() (src/components/ui-site/
+ * project-theme.ts) sets both palettes inline; this picks the one for the page theme, so the server-rendered theme
+ * never flashes the other.
+ */
+.brand-panel {
+  --brand-bg: var(--brand-bg-light);
+  --brand-accent: var(--brand-accent-light);
+  --brand-button: var(--brand-button-light);
+  --brand-on-button: var(--brand-on-button-light);
+}
+
+:root[data-theme="dark"]:not(:has(.admin-theme)) .brand-panel {
+  --brand-bg: var(--brand-bg-dark);
+  --brand-accent: var(--brand-accent-dark);
+  --brand-button: var(--brand-button-dark);
+  --brand-on-button: var(--brand-on-button-dark);
+}
+
+/*
  * The About section's inspect canvas (src/components/sections/about/). AboutStage arms the entry (data-armed) only with
  * JavaScript, motion welcome and the stage still below the fold, and plays it (data-play) when the stage scrolls into
  * view; until then every armed piece waits on its first frame. Order: the selection snaps around the portrait and its

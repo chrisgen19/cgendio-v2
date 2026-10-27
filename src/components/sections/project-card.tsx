@@ -2,15 +2,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type {CSSProperties} from 'react';
 import {isOptimizableCover} from '@/components/ui-site/cover-image';
-import {PROJECT_RINGS} from '@/components/ui-site/project-theme';
+import {brandPanelStyle, PROJECT_RINGS} from '@/components/ui-site/project-theme';
 import {Tag} from '@/components/ui-site/tag';
 import {cn} from '@/lib/cn';
 import type {StackPlace} from '@/lib/work-stack';
 import type {Project, ProjectTheme} from '@/server/content';
 
 /*
- * Card colours per project theme. Unlike the case study thumb, text on the tint card is ink (the accent is kept for the
- * glyph), and the lime card is a light island so it stays lime with ink text in dark mode.
+ * Card colours per project theme, for projects without a brand colour (those get their brand tint, see brandPanelStyle).
+ * Unlike the case study thumb, text on the tint card is ink (the accent is kept for the glyph), and the lime card is a
+ * light island so it stays lime with ink text in dark mode.
  */
 const CARD_THEMES: Record<ProjectTheme, string> = {
   ink: 'bg-thumb-ink text-on-dark shadow-(--shadow-thumb)',
@@ -20,6 +21,7 @@ const CARD_THEMES: Record<ProjectTheme, string> = {
 };
 
 // The pill link: the primary button, except on the ink card where it turns lime
+const BRAND_LINK = 'bg-(--brand-button) text-(--brand-on-button) hover:bg-ink hover:text-white';
 const LINK_THEMES: Record<ProjectTheme, string> = {
   ink: 'bg-lime text-on-lime hover:bg-on-dark hover:text-on-lime',
   tint: 'bg-ink text-white hover:bg-accent hover:text-white',
@@ -39,22 +41,24 @@ export function ProjectCard({project, place}: ProjectCardProps) {
     '--i': place.index,
     '--next': place.next,
   } as CSSProperties;
+  const brand = brandPanelStyle(project.brandColor, project.brandTint);
 
   return (
     <article
-      data-theme={project.theme === 'lime' ? 'light' : undefined}
-      style={style}
+      // A brand-tinted card follows the page theme, so only a plain lime card is a light island
+      data-theme={!brand && project.theme === 'lime' ? 'light' : undefined}
+      style={{...style, ...brand}}
       className={cn(
         'work-card overflow-hidden rounded-panel shadow-(--shadow-deep) max-md:before:hidden max-md:after:hidden',
         PROJECT_RINGS,
-        CARD_THEMES[project.theme],
+        brand ? 'brand-panel bg-(--brand-bg) text-ink' : CARD_THEMES[project.theme],
       )}
     >
       <div className="relative z-1 grid h-full grid-cols-[minmax(0,5fr)_minmax(0,7fr)] max-md:flex max-md:flex-col">
         <div className="flex flex-col justify-between gap-6 p-10 max-lg:p-8 max-md:justify-start max-md:gap-3.5 max-md:p-5 max-md:pb-4">
           <p className="m-0 flex items-center gap-3 font-mono text-[12px] leading-none font-medium tracking-[0.08em]">
-            <span aria-hidden="true" className="work-num" />
-            <span aria-hidden="true" className="h-px w-6 bg-current opacity-40" />
+            <span aria-hidden="true" className={cn('work-num', brand && 'text-(--brand-accent)')} />
+            <span aria-hidden="true" className={cn('h-px w-6 bg-current', brand ? 'text-(--brand-accent)' : 'opacity-40')} />
             {project.kindLabel}
           </p>
           <div className="flex flex-col gap-4 max-md:gap-3">
@@ -77,7 +81,7 @@ export function ProjectCard({project, place}: ProjectCardProps) {
               href={`/work/${project.slug}`}
               className={cn(
                 'mt-2 inline-flex min-h-11 items-center gap-2.5 self-start rounded-pill px-[18px] text-sm leading-none font-semibold no-underline transition-[background-color,color,translate] duration-200 hover:-translate-y-px motion-reduce:transition-none motion-reduce:hover:translate-y-0 max-md:mt-1',
-                LINK_THEMES[project.theme],
+                brand ? BRAND_LINK : LINK_THEMES[project.theme],
               )}
             >
               View case study<span className="sr-only">: {project.title}</span>
@@ -111,7 +115,7 @@ function ProjectMedia({project}: {project: Project}) {
         <span
           className={cn(
             'font-display text-[clamp(96px,12vw,184px)] leading-[0.82] font-extrabold tracking-[-0.06em] max-md:text-[72px]',
-            project.theme === 'tint' && 'text-accent',
+            project.brandColor ? 'text-(--brand-accent)' : project.theme === 'tint' && 'text-accent',
           )}
         >
           {project.glyph}
