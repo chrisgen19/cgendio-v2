@@ -48,6 +48,25 @@ test('a project title edited in the admin shows on the home page', async ({page}
   await expect(workTitles().filter({hasText: original})).toHaveText(original);
 });
 
+test('a brand colour pasted with spaces and capitals saves as #rrggbb', async ({page}) => {
+  // Start from no colour, and drop the data URL cover the form would reject (as above)
+  await queryTestDb('UPDATE projects SET brand_color = NULL, cover_image_url = NULL WHERE slug = $1', ['access-hire']);
+
+  await page.goto('/admin/projects');
+  await page.getByRole('link', {name: 'Edit Access Hire Australia'}).click();
+  const field = page.getByLabel('Brand colour', {exact: true});
+  await field.clear();
+  // Typed text as a paste delivers it, so the input's own limits apply
+  await field.focus();
+  await page.keyboard.insertText(' #E31836 ');
+  await expect(field).toHaveValue(' #E31836 ');
+  await page.getByRole('button', {name: 'Save project'}).click();
+  await expect(page.getByText('Project saved.')).toBeVisible();
+
+  const {rows} = await queryTestDb('SELECT brand_color FROM projects WHERE slug = $1', ['access-hire']);
+  expect(rows[0]?.brand_color).toBe('#e31836');
+});
+
 test('a contact message arrives in the admin inbox', async ({page}, testInfo) => {
   const name = `Inbox ${uniqueToken()}`;
   await useOwnIp(page, testInfo);

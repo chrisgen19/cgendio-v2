@@ -60,7 +60,7 @@ const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
 /**
  * A `#rrggbb` text field with a swatch of the colour typed so far. A text input rather than `type="color"`, which always
- * posts a colour and so can't be left empty.
+ * posts a colour and so can't be left empty. No maxLength: it would cut a pasted ` #E31836 ` before the server trims it.
  */
 export function ColorField({name, label, hint, defaultValue, errors}: ColorFieldProps) {
   const [value, setValue] = useState(defaultValue ?? '');
@@ -75,7 +75,6 @@ export function ColorField({name, label, hint, defaultValue, errors}: ColorField
             defaultValue={defaultValue ?? ''}
             onChange={(event) => setValue(event.target.value)}
             placeholder="#e31836"
-            maxLength={7}
             spellCheck={false}
             autoComplete="off"
             className="font-mono"
