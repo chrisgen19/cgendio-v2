@@ -42,6 +42,32 @@ test('each count runs from its first same-width number up to the value', async (
   });
 });
 
+// Admin values longer than the seeded ones (the admin hint suggests "Nov ’25"); a 9-digit number is the longest that counts
+const LONG_VALUES = ['Nov ’25', 'Q3 2025', 'Launch', '999999999+'];
+
+test('long values shrink to fit their line instead of scrolling the page sideways', async ({page}) => {
+  await page.goto('/');
+  for (const value of LONG_VALUES) {
+    // Put the value in the CMS line, with the length the server would have set
+    const fit = await page.evaluate((value) => {
+      const p = document.querySelector('#milestones .ms-word')?.closest('p');
+      const line = p?.closest('li');
+      if (!p || !line) return null;
+      for (const el of p.querySelectorAll('.ms-word, .ms-fill, .sr-only')) el.textContent = value;
+      p.style.setProperty('--ms-chars', String([...value].length));
+      return {
+        valueRight: p.getBoundingClientRect().right,
+        lineRight: line.getBoundingClientRect().right,
+        pageWidth: document.documentElement.scrollWidth,
+        viewport: window.innerWidth,
+      };
+    }, value);
+    expect(fit, value).not.toBeNull();
+    expect(fit?.pageWidth, value).toBeLessThanOrEqual(fit?.viewport ?? 0);
+    expect(fit?.valueRight, value).toBeLessThanOrEqual(fit?.lineRight ?? 0);
+  }
+});
+
 test.describe('with reduced motion', () => {
   test.use({reducedMotion: 'reduce'});
 

@@ -8,7 +8,6 @@ import {parseCountedValue} from '@/lib/milestone-value';
 import {getMilestones, getPageCopy} from '@/server/content';
 import type {Milestone} from '@/server/content-schema';
 
-const VALUE_SIZE = 'text-[clamp(80px,15vw,220px)] max-md:text-[min(40vw,160px)]';
 // Stacks the final value and its animated layer in one grid cell
 const STACK = 'col-start-1 row-start-1';
 
@@ -19,7 +18,11 @@ const STACK = 'col-start-1 row-start-1';
 function BigValue({value}: {value: string}) {
   const counted = parseCountedValue(value);
   return (
-    <p className={cn('m-0 pr-[0.05em] font-display leading-[0.8] font-extrabold tracking-[-0.05em] whitespace-nowrap tabular-nums', VALUE_SIZE)}>
+    <p
+      className="ms-value m-0 pr-[0.05em] font-display leading-[0.8] font-extrabold tracking-[-0.05em] whitespace-nowrap tabular-nums"
+      // Code points, so a curly apostrophe counts once; sizes the value to fit its line (globals.css)
+      style={{'--ms-chars': [...value].length} as CSSProperties}
+    >
       <span className="sr-only">{value}</span>
       <span aria-hidden="true" className="inline-flex items-baseline">
         {counted ? (
@@ -47,7 +50,7 @@ function MilestoneLine({milestone, flip}: {milestone: Milestone; flip: boolean})
   return (
     <li
       className={cn(
-        'ms-row flex items-end justify-end gap-12 border-t border-line py-12 last:border-b',
+        'ms-row @container flex items-end justify-end gap-12 border-t border-line py-12 last:border-b',
         flip ? 'flex-row' : 'flex-row-reverse',
         'max-md:flex-col-reverse max-md:items-start max-md:gap-6 max-md:py-9',
       )}

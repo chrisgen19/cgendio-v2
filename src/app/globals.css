@@ -1252,6 +1252,21 @@
   }
 }
 
+/*
+ * The value's size: the design size, or smaller when a long value (an admin entry like "Nov ’25") wouldn't fit its
+ * line. --ms-chars is the value's length; 0.66em covers the widest seeded glyphs (CMS), so seeded values keep the design
+ * size. Desktop leaves room for the 360px text column and its 48px gap. Each line is the size container.
+ */
+.ms-value {
+  font-size: min(clamp(80px, 15vw, 220px), calc((100cqi - 408px) / (var(--ms-chars) * 0.66)));
+}
+
+@media (width < 860px) {
+  .ms-value {
+    font-size: min(40vw, 160px, calc(100cqi / (var(--ms-chars) * 0.66)));
+  }
+}
+
 .ms-tick,
 .ms-fill {
   display: none;
