@@ -2,19 +2,22 @@
 
 import {useEffect} from 'react';
 
+// Each pass closes most of the remaining gap; the cap only guards against a value that never settles
+const MAX_PASSES = 10;
+
 /** Sets `--ms-fit` on one value so it fits the room its line leaves it, or clears it when the CSS estimate already fits. */
 const fitValue = (value: HTMLElement) => {
   const line = value.closest('li');
   if (!line) return;
   value.style.removeProperty('--ms-fit');
   const room = line.clientWidth - Number.parseFloat(getComputedStyle(value).getPropertyValue('--ms-reserve'));
-  // The display face's optical size widens its glyphs as it shrinks, so one ratio falls short: re-measure a few times
+  // The display face's optical size widens its glyphs as it shrinks, so one ratio falls short: re-measure until it fits
   let fit = 1;
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < MAX_PASSES; i++) {
     const width = value.getBoundingClientRect().width;
     if (width <= room) break;
-    // Rounded down, so sub-pixel rounding never leaves it a hair too wide
-    fit = Math.floor(fit * (room / width) * 1000) / 1000;
+    // Aim half a pixel inside and round down, so sub-pixel rendering never leaves it a hair too wide
+    fit = Math.floor(fit * ((room - 0.5) / width) * 1000) / 1000;
     value.style.setProperty('--ms-fit', String(fit));
   }
 };
