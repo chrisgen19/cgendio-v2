@@ -7,7 +7,9 @@ import {cn} from '@/lib/cn';
 import {parseCountedValue} from '@/lib/milestone-value';
 import {getMilestones, getPageCopy} from '@/server/content';
 import type {Milestone} from '@/server/content-schema';
+import {MilestoneFit} from './milestone-fit';
 
+const SECTION_ID = 'milestones';
 // Stacks the final value and its animated layer in one grid cell
 const STACK = 'col-start-1 row-start-1';
 
@@ -73,7 +75,7 @@ function MilestoneLine({milestone, flip}: {milestone: Milestone; flip: boolean})
 export async function Milestones() {
   const [milestones, copy] = await Promise.all([getMilestones(), getPageCopy()]);
   return (
-    <Section id="milestones" innerClassName="flex flex-col gap-16 max-md:gap-10">
+    <Section id={SECTION_ID} innerClassName="flex flex-col gap-16 max-md:gap-10">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div data-reveal className="flex flex-col gap-[18px]">
           <Eyebrow>{copy['milestones.eyebrow']}</Eyebrow>
@@ -88,6 +90,7 @@ export async function Milestones() {
           <MilestoneLine key={m.order} milestone={m} flip={i % 2 === 1} />
         ))}
       </ul>
+      <MilestoneFit sectionId={SECTION_ID} />
     </Section>
   );
 }

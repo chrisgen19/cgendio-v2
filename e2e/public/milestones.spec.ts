@@ -42,29 +42,33 @@ test('each count runs from its first same-width number up to the value', async (
   });
 });
 
-// Admin values longer than the seeded ones (the admin hint suggests "Nov ’25"); a 9-digit number is the longest that counts
-const LONG_VALUES = ['Nov ’25', 'Q3 2025', 'Launch', '999999999+'];
+/*
+ * Admin values longer than the seeded ones: the admin hint suggests "Nov ’25", a 9-digit number is the longest that
+ * counts, and W-heavy words outrun the CSS estimate until MilestoneFit measures them
+ */
+const LONG_VALUES = ['Nov ’25', 'Q3 2025', 'Launch', '999999999+', 'WWWWWWWW', 'WOW', 'WOOCOMMERCE'];
+
+/** How far the CMS line's value pokes past its line, and the page past the viewport (0 when it fits). */
+const overflow = (page: Page) =>
+  page.evaluate(() => {
+    const p = document.querySelector('#milestones .ms-word')?.closest('p');
+    const line = p?.closest('li');
+    if (!p || !line) return Number.POSITIVE_INFINITY;
+    const valueOver = p.getBoundingClientRect().right - line.getBoundingClientRect().right;
+    const pageOver = document.documentElement.scrollWidth - window.innerWidth;
+    return Math.max(0, valueOver, pageOver);
+  });
 
 test('long values shrink to fit their line instead of scrolling the page sideways', async ({page}) => {
   await page.goto('/');
   for (const value of LONG_VALUES) {
-    // Put the value in the CMS line, with the length the server would have set
-    const fit = await page.evaluate((value) => {
+    // Put the value in the CMS line, with the length the server would have set; MilestoneFit refits on the size change
+    await page.evaluate((value) => {
       const p = document.querySelector('#milestones .ms-word')?.closest('p');
-      const line = p?.closest('li');
-      if (!p || !line) return null;
-      for (const el of p.querySelectorAll('.ms-word, .ms-fill, .sr-only')) el.textContent = value;
-      p.style.setProperty('--ms-chars', String([...value].length));
-      return {
-        valueRight: p.getBoundingClientRect().right,
-        lineRight: line.getBoundingClientRect().right,
-        pageWidth: document.documentElement.scrollWidth,
-        viewport: window.innerWidth,
-      };
+      for (const el of p?.querySelectorAll('.ms-word, .ms-fill, .sr-only') ?? []) el.textContent = value;
+      p?.style.setProperty('--ms-chars', String([...value].length));
     }, value);
-    expect(fit, value).not.toBeNull();
-    expect(fit?.pageWidth, value).toBeLessThanOrEqual(fit?.viewport ?? 0);
-    expect(fit?.valueRight, value).toBeLessThanOrEqual(fit?.lineRight ?? 0);
+    await expect.poll(() => overflow(page), {message: value}).toBe(0);
   }
 });
 
