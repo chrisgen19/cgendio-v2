@@ -129,7 +129,7 @@ The seed only inserts into an empty table (`createMany` with `skipDuplicates`, `
 - Quality gate: `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build`, `pnpm test:e2e`; UI checked at 1440px and 390px, light and dark.
 - After the `globals.css` change, grep the built CSS for `.brand-panel` (Turbopack stale CSS gotcha); restart `next dev` after the migration (stale Prisma client).
 - Biome style (single quotes, no bracket spacing, width 150); utilities are arrow functions with JSDoc; no em or en dashes in comments or copy.
-- Production: the migration is additive and runs on the Coolify deploy. Revert by a migration that drops both columns; cards then fall back to their themes. Confirm with Christian before merging.
+- Production: the migration is additive and runs on the Coolify deploy. To revert, roll back the application and leave the columns in place: the previous code and Prisma schema never read them. Drop them only later, in a migration shipped with code whose schema no longer has them; dropping them while this version runs breaks every project query, since those load all columns. Confirm with Christian before merging.
 
 ## Left to the builder
 

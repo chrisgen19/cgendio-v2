@@ -433,4 +433,4 @@ git commit -m "test(work): refresh the work baselines for brand tint cards"
 
 - [ ] **Step 6: Open the PR** (with Christian's go-ahead)
 
-Title `feat(work): show project cards in their client's brand tint`. Body: summary, the spec link, the migration note (additive columns plus a guarded backfill; runs on the Coolify deploy; revert by dropping the two columns), and the 1440px/390px light/dark check. Confirm CI is green before asking to merge. After merging, restart `next dev` the CLAUDE.md way (the `globals.css` change).
+Title `feat(work): show project cards in their client's brand tint`. Body: summary, the spec link, the migration note (additive columns plus a guarded backfill; runs on the Coolify deploy; revert by rolling back the app and keeping the columns, dropping them only with code that no longer reads them), and the 1440px/390px light/dark check. Confirm CI is green before asking to merge. After merging, restart `next dev` the CLAUDE.md way (the `globals.css` change).
