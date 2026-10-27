@@ -63,6 +63,8 @@ const seed = async () => {
           status: 'PUBLISHED',
           caseStudy: caseStudy(p.slug),
           coverImageUrl: p.coverImageUrl,
+          brandColor: p.brandColor,
+          brandTint: p.brandTint,
           liveUrl: p.liveUrl,
           repoUrl: p.repoUrl,
           client: p.client,

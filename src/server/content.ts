@@ -81,6 +81,8 @@ const projectFields = (row: ProjectRow) => ({
   theme: lower(row.theme),
   tags: row.tags,
   coverImageUrl: row.coverImageUrl,
+  brandColor: row.brandColor,
+  brandTint: row.brandTint,
   featured: row.featured,
   order: row.order,
 });

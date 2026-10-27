@@ -9,6 +9,11 @@ export const stackItemSchema = z.object({
 
 export const projectGroupSchema = z.enum(['client', 'personal']);
 export const projectThemeSchema = z.enum(['ink', 'lime', 'tint', 'gray']);
+/** A `#rrggbb` colour in any case, read as lowercase (the admin saves lowercase; a hand edit may not) */
+export const hexColorSchema = z
+  .string()
+  .regex(/^#[0-9a-fA-F]{6}$/)
+  .transform((value) => value.toLowerCase());
 
 export const projectSchema = z.object({
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
@@ -21,6 +26,9 @@ export const projectSchema = z.object({
   tags: z.array(z.string().min(1)),
   /** The case study cover, also shown on the home page card when set */
   coverImageUrl: z.url().nullable(),
+  /** The card's brand tint (src/lib/brand-palette.ts); without a brand colour the card uses its theme */
+  brandColor: hexColorSchema.nullable(),
+  brandTint: hexColorSchema.nullable(),
   featured: z.boolean(),
   order: z.int(),
 });
