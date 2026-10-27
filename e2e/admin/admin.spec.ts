@@ -8,6 +8,10 @@ import {E2E_BASE_URL} from '../support/test-env';
  * never a real GitHub login). This project runs after the public ones, so the title edit can't change their snapshots.
  */
 
+// One at a time: a save revalidates the home page, and another test's render of it still in flight can cache the data
+// from before that save, so a test reading the page after its own save would see the old version
+test.describe.configure({mode: 'default'});
+
 test.describe('signed out', () => {
   test.use({storageState: {cookies: [], origins: []}});
 
