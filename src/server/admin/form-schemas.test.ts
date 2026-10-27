@@ -18,6 +18,8 @@ const projectForm = {
   repoUrl: '',
   client: '',
   role: 'Lead developer',
+  brandColor: '',
+  brandTint: '',
 };
 
 describe('projectFormSchema', () => {
@@ -39,7 +41,24 @@ describe('projectFormSchema', () => {
       repoUrl: null,
       client: null,
       role: 'Lead developer',
+      brandColor: null,
+      brandTint: null,
     });
+  });
+
+  it('lowercases brand colours and rejects anything but #rrggbb', () => {
+    expect(projectFormSchema.parse({...projectForm, brandColor: ' #E31836 ', brandTint: '#6B6460'})).toMatchObject({
+      brandColor: '#e31836',
+      brandTint: '#6b6460',
+    });
+    const result = projectFormSchema.safeParse({...projectForm, brandColor: '#fff'});
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe('Use a hex colour like #e31836');
+  });
+
+  it('treats missing brand colours as none', () => {
+    const {brandColor: _brandColor, brandTint: _brandTint, ...rest} = projectForm;
+    expect(projectFormSchema.parse(rest)).toMatchObject({brandColor: null, brandTint: null});
   });
 
   it('treats a missing switch as off and draft', () => {

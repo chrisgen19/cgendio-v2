@@ -2,7 +2,7 @@
 
 import {Card, CardContent} from '@/components/ui/card';
 import {saveProject} from '@/server/actions/projects';
-import {SelectField, SubmitButton, SwitchField, TextAreaField, TextField} from './form-fields';
+import {ColorField, SelectField, SubmitButton, SwitchField, TextAreaField, TextField} from './form-fields';
 import {MarkdownField} from './markdown-field';
 import {TitleSlugFields} from './title-slug-fields';
 import {UploadField} from './upload-field';
@@ -28,6 +28,8 @@ export type ProjectFormValues = {
   repoUrl: string | null;
   client: string | null;
   role: string | null;
+  brandColor: string | null;
+  brandTint: string | null;
 };
 
 const GROUPS = [
@@ -68,7 +70,29 @@ export function ProjectForm({project}: {project: ProjectFormValues | null}) {
             </div>
             <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
               <SelectField name="group" label="Group" options={GROUPS} defaultValue={project?.group ?? 'CLIENT'} errors={errors} />
-              <SelectField name="theme" label="Card theme" options={THEMES} defaultValue={project?.theme ?? 'INK'} errors={errors} />
+              <SelectField
+                name="theme"
+                label="Card theme (when no brand colour)"
+                options={THEMES}
+                defaultValue={project?.theme ?? 'INK'}
+                errors={errors}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+              <ColorField
+                name="brandColor"
+                label="Brand colour"
+                hint="Number, rule and button. Empty uses the card theme"
+                defaultValue={project?.brandColor}
+                errors={errors}
+              />
+              <ColorField
+                name="brandTint"
+                label="Tint colour"
+                hint="The card background is washed from this. Empty uses the brand colour"
+                defaultValue={project?.brandTint}
+                errors={errors}
+              />
             </div>
             <div className="flex flex-wrap gap-8">
               <SwitchField name="status" label="Published" hint="Drafts never appear on the site" defaultChecked={project?.status === 'PUBLISHED'} />
