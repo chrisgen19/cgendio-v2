@@ -1222,3 +1222,82 @@
     visibility: hidden;
   }
 }
+
+/*
+ * The milestones' scroll-scrubbed values (src/components/sections/milestones.tsx). Each line is a view timeline; while
+ * it travels from the bottom of the viewport towards the middle, the registered integer --ms-n runs from --ms-from (the
+ * smallest number with as many digits, so never '0+') to the value, and a counter prints it over the hidden final
+ * digits. Word values start as outlines and an ink copy wipes across them. Reduced motion, no JS and browsers without
+ * view timelines get the plain final values.
+ */
+@property --ms-n {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes ms-count {
+  from {
+    --ms-n: var(--ms-from);
+  }
+}
+
+@keyframes ms-wipe {
+  from {
+    clip-path: inset(-0.3em 100% -0.3em 0);
+  }
+
+  to {
+    clip-path: inset(-0.3em);
+  }
+}
+
+.ms-tick,
+.ms-fill {
+  display: none;
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .ms-row {
+      view-timeline: --ms-row block;
+    }
+
+    .ms-final {
+      visibility: hidden;
+    }
+
+    .ms-tick,
+    .ms-fill {
+      display: block;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --ms-row;
+      animation-range: cover 5% cover 40%;
+    }
+
+    .ms-tick {
+      --ms-n: var(--ms-to);
+      counter-reset: ms var(--ms-n);
+      animation-name: ms-count;
+    }
+
+    .ms-tick::before {
+      content: counter(ms);
+    }
+
+    /* The fill carries the same hairline stroke, so it covers the outline exactly */
+    .ms-word,
+    .ms-fill {
+      -webkit-text-stroke: 0.012em var(--color-ink);
+    }
+
+    .ms-word {
+      color: transparent;
+    }
+
+    .ms-fill {
+      animation-name: ms-wipe;
+    }
+  }
+}
