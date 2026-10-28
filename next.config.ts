@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
   turbopack: {
     rules: {
       '*.css': {
+        // Plain CSS modules must retain their module identity and scoped class exports.
+        condition: {not: {path: '*.module.css'}},
         loaders: ['@tailwindcss/turbopack'],
         as: '*.css',
       },

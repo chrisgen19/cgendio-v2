@@ -1,0 +1,90 @@
+.toolbar {
+  position: relative;
+  z-index: 50;
+  display: flex;
+  height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 clamp(12px, 2.5vw, 40px);
+  background: #fafbf7;
+  color: #233d2d;
+  border-bottom: 1px solid #233d2d20;
+  font-family: var(--font-geist), Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.toolbar a,
+.toolbar button {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: inherit;
+  background: none;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.toolbar a:hover,
+.toolbar button:hover {
+  color: #227240;
+}
+
+.gallery {
+  white-space: nowrap;
+}
+.selectWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.count {
+  color: #5e6b61;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.selectWrap select {
+  max-width: 180px;
+  min-height: 44px;
+  color: #233d2d;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.actions .replay {
+  padding: 0 12px;
+}
+
+@media (max-width: 620px) {
+  .toolbar {
+    gap: 4px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+  .gallery span,
+  .replay span,
+  .count {
+    display: none;
+  }
+  .selectWrap {
+    flex: 1;
+  }
+  .selectWrap select {
+    max-width: 160px;
+    width: 100%;
+  }
+  .actions .replay {
+    padding: 0;
+  }
+}
