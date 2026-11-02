@@ -41,12 +41,13 @@ describe('project walkthrough migration', () => {
     expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
   });
 
-  it('gives only the four finished projects a tour', () => {
+  it('gives only the five finished projects a tour', () => {
     expect(projects.filter((project) => project.tourStops?.length).map(({slug}) => slug)).toEqual([
       'access-hire',
       'myimprov',
       'merthyr-village',
       'experience-sunnybank',
+      'fresh-fruit-and-veg',
     ]);
   });
 });
@@ -140,6 +141,37 @@ describe('project experience sunnybank tour migration', () => {
       expect(stop.captures.desktop.url).toContain('/images/2026/experience-sunnybank-tour/');
       expect(stop.captures.mobile.url).toContain('/images/2026/experience-sunnybank-tour/');
       expect(tourHref(stop.path, sunnybank?.liveUrl ?? null)).not.toBeNull();
+    }
+  });
+
+  it('leaves the reasoning empty', () => {
+    expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
+  });
+});
+
+describe('project fresh fruit tour migration', () => {
+  const sql = readFileSync(new URL('../../prisma/migrations/20261102160000_project_fresh_fruit_tour/migration.sql', import.meta.url), 'utf8');
+  const freshFruit = projects.find((project) => project.slug === 'fresh-fruit-and-veg');
+
+  it('seeds a valid tour with an opening and three notes', () => {
+    const stops = tourStopsSchema.parse(freshFruit?.tourStops);
+    expect(stops).toHaveLength(4);
+    expect(stops[0]?.note).toBe('');
+    expect(stops.slice(1).every((stop) => stop.note !== '')).toBe(true);
+  });
+
+  it('backfills the seed tour, only while empty', () => {
+    const match = sql.match(
+      /UPDATE "projects" SET "tour_stops" = '(.+)'::jsonb WHERE "slug" = 'fresh-fruit-and-veg' AND "tour_stops" = '\[\]'::jsonb;/,
+    );
+    expect(JSON.parse(unquote(match?.[1] ?? 'null'))).toEqual(freshFruit?.tourStops);
+  });
+
+  it('keeps every capture in the tour folder and every page on the live site', () => {
+    for (const stop of freshFruit?.tourStops ?? []) {
+      expect(stop.captures.desktop.url).toContain('/images/2026/fresh-fruit-tour/');
+      expect(stop.captures.mobile.url).toContain('/images/2026/fresh-fruit-tour/');
+      expect(tourHref(stop.path, freshFruit?.liveUrl ?? null)).not.toBeNull();
     }
   });
 

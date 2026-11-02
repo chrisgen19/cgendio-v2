@@ -46,9 +46,9 @@ for (const theme of ['light', 'dark'] as const) {
       await page.goto('/');
       const card = page
         .locator('main:visible #work article.work-card')
-        .filter({has: page.getByRole('heading', {level: 3, name: 'Fresh Fruit and Veg Shop'})});
+        .filter({has: page.getByRole('heading', {level: 3, name: 'Premium Mobile Car Valeting Glasgow'})});
       const tint = await card.evaluate((node) => getComputedStyle(node).backgroundColor);
-      await page.goto('/work/fresh-fruit-and-veg');
+      await page.goto('/work/premium-mobile-car-valeting');
       const panel = page.locator('main:visible .brand-panel');
       await expect(panel).toHaveCSS('background-color', tint);
     });
