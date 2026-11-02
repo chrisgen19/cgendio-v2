@@ -1,5 +1,6 @@
 import type {Project, ProjectDetail} from '../../src/server/content-schema';
 import {accessHireTour} from './access-hire-tour.ts';
+import {merthyrVillageTour} from './merthyr-village-tour.ts';
 import {myimprovTour} from './myimprov-tour.ts';
 
 /**
@@ -74,6 +75,7 @@ export const projects: SeedProject[] = [
     repoUrl: null,
     client: 'Merthyr Village',
     role: ACCESS_GROUP_ROLE,
+    tourStops: merthyrVillageTour,
   },
   {
     slug: 'experience-sunnybank',
