@@ -1321,3 +1321,340 @@
     }
   }
 }
+
+/*
+ * The Walkthrough, a case study's tour (src/components/case-study/walkthrough*). A browser frame stays pinned beside the
+ * notes, moves through captures of the live site, and draws a selection box on each stop.
+ */
+/* The layout's left edge lines up with the site's 1320px container */
+.walkthrough-tour {
+  --gutter: max(56px, calc((100vw - 1320px) / 2 + 56px));
+  overflow-x: clip;
+}
+
+/* Without JavaScript or under reduced motion the pinned frame goes away and each note shows its own capture */
+@media (scripting: none), (prefers-reduced-motion: reduce) {
+  .walkthrough-tour-only {
+    display: none;
+  }
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .walkthrough-static-only {
+    display: none;
+  }
+}
+
+@media (scripting: none) {
+  .walkthrough-script-only {
+    display: none;
+  }
+}
+
+/* A static note: text and capture side by side from 1080px */
+@media (min-width: 1080px) and (scripting: none), (min-width: 1080px) and (prefers-reduced-motion: reduce) {
+  .walkthrough-static-row {
+    display: grid;
+    grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+    padding-right: var(--gutter);
+  }
+}
+
+/* The switch names its devices only where the chrome has room: a wide desktop frame */
+.walkthrough-switch-label {
+  display: none;
+}
+
+@media (min-width: 1080px) {
+  .walkthrough-tour:not([data-device="mobile"]) .walkthrough-switch-label {
+    display: inline;
+  }
+}
+
+/* The pinned stage: compact and full width over the notes, then a tall column once there is room beside them */
+.walkthrough-stage {
+  position: sticky;
+  top: 0;
+}
+
+@media (min-width: 1080px) {
+  /* The site header does not stick. 110px keeps the frame clear of the page's end when stuck and of the fold at the very top. */
+  .walkthrough-stage {
+    top: 16px;
+    height: calc(100svh - 110px);
+    padding: 24px 40px 0;
+    container-type: inline-size;
+  }
+}
+
+.walkthrough-frame {
+  view-transition-name: walkthrough-frame;
+  border-radius: 14px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+@media (max-width: 1079.98px) {
+  .walkthrough-frame {
+    max-width: 560px;
+  }
+
+  .walkthrough-viewport {
+    flex: none;
+    height: clamp(180px, 31svh, 270px);
+  }
+}
+
+@media (min-width: 1080px) {
+  /* Caps how much of a tall capture one view can show, whatever the window's shape */
+  .walkthrough-frame {
+    flex: 1;
+    max-width: 1040px;
+    max-height: 88cqw;
+  }
+
+  .walkthrough-tour[data-device="mobile"] .walkthrough-frame {
+    flex: 1;
+    width: min(360px, calc((100svh - 180px) * 0.52));
+    max-height: none;
+    border: 8px solid var(--color-thumb-ink);
+    border-radius: 34px;
+  }
+
+  .walkthrough-tour[data-device="mobile"] .walkthrough-dots {
+    display: none;
+  }
+}
+
+.walkthrough-viewport {
+  container-type: size;
+  isolation: isolate;
+}
+
+/* Which device's captures show. Before hydration the breakpoint decides. */
+.walkthrough-tour[data-device="desktop"] .walkthrough-page[data-layer="mobile"],
+.walkthrough-tour[data-device="mobile"] .walkthrough-page[data-layer="desktop"] {
+  display: none;
+}
+
+@media (max-width: 1079.98px) {
+  .walkthrough-tour[data-device="auto"] .walkthrough-page[data-layer="desktop"] {
+    display: none;
+  }
+}
+
+@media (min-width: 1080px) {
+  .walkthrough-tour[data-device="auto"] .walkthrough-page[data-layer="mobile"] {
+    display: none;
+  }
+}
+
+/* One page of the site: it slides like a navigation, forward from the right and back from the left */
+.walkthrough-page {
+  position: absolute;
+  inset: 0;
+  transition:
+    opacity 260ms ease,
+    transform 420ms var(--ease-mark),
+    visibility 0s linear 420ms;
+}
+
+.walkthrough-page[data-state="active"] {
+  transition:
+    opacity 260ms ease,
+    transform 420ms var(--ease-mark),
+    visibility 0s;
+}
+
+.walkthrough-page[data-state="after"] {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(6%);
+}
+
+.walkthrough-page[data-state="before"] {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-6%);
+}
+
+/* The pan. --cap-w, --cap-h, --x, --y and --zoom are capture pixels, set inline. The y clamp stops it running past the end of the page. */
+.walkthrough-pan {
+  --unit: calc(100cqw * var(--zoom) / var(--cap-w));
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100cqw * var(--zoom));
+  transform: translate(calc(var(--x) * var(--unit) * -1), calc(-1 * max(0px, min(var(--y) * var(--unit), var(--cap-h) * var(--unit) - 100cqh))));
+  transition: transform 0s linear 420ms;
+}
+
+.walkthrough-page[data-state="active"] .walkthrough-pan {
+  transition: transform 1100ms var(--ease-mark) 180ms;
+}
+
+/* The selection: everything else on the capture dims a little, so the box is the loud thing */
+.walkthrough-selection {
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.walkthrough-selection[data-on] {
+  opacity: 1;
+}
+
+.walkthrough-outline {
+  box-shadow: 0 0 0 4000px color-mix(in srgb, var(--color-thumb-ink) 7%, transparent);
+}
+
+.walkthrough-handle {
+  display: block;
+}
+
+@keyframes walkthrough-snap {
+  from {
+    opacity: 0;
+    scale: 1.05;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes walkthrough-pop {
+  from {
+    scale: 0;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes walkthrough-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes walkthrough-progress {
+  0% {
+    opacity: 1;
+    transform: scaleX(0);
+  }
+  70% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .walkthrough-selection[data-on] {
+    transition-delay: 760ms;
+  }
+
+  .walkthrough-selection[data-on] .walkthrough-outline {
+    animation: walkthrough-snap 360ms cubic-bezier(0.2, 0.9, 0.3, 1) 760ms both;
+  }
+
+  .walkthrough-selection[data-on] .walkthrough-handle {
+    animation: walkthrough-pop 480ms var(--ease-spring) 860ms both;
+  }
+
+  .walkthrough-selection[data-on] .walkthrough-label {
+    animation: walkthrough-wipe 320ms var(--ease-mark) 940ms both;
+  }
+
+  .walkthrough-address {
+    animation: walkthrough-wipe 420ms var(--ease-mark) both;
+  }
+}
+
+.walkthrough-progress {
+  transform-origin: left;
+  opacity: 0;
+  animation: walkthrough-progress 760ms ease-out both;
+}
+
+/* A note on the tour's spine: the rail fills while it is on the reading line */
+.walkthrough-note {
+  position: relative;
+}
+
+.walkthrough-note::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: -1px;
+  width: 2px;
+  background: var(--color-accent);
+  transform: scaleY(0);
+  transform-origin: top;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .walkthrough-note::before {
+    transition: transform 420ms var(--ease-mark);
+  }
+}
+
+.walkthrough-note[data-current]::before {
+  transform: scaleY(1);
+}
+
+/* A frame in a static note: phone-shaped when the switch says mobile, from 1080px */
+.walkthrough-static-frame {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  border-radius: 0 0 14px 14px;
+}
+
+@media (min-width: 1080px) {
+  .walkthrough-static-frame {
+    aspect-ratio: 16 / 10;
+  }
+
+  .walkthrough-tour[data-device="mobile"] .walkthrough-static-frame {
+    aspect-ratio: 9 / 16;
+    max-width: 340px;
+  }
+
+  .walkthrough-tour[data-device="mobile"] .walkthrough-static-caption {
+    max-width: 340px;
+  }
+}
+
+.walkthrough-static-frame .walkthrough-pan {
+  transition: none;
+}
+
+/*
+ * The device switch's view transition. The class is on <html> only while it runs, so nothing else on the site is affected. Taking the root out of the
+ * transition leaves the page live, so only the frame morphs. Both snapshots use contain, so neither stretches on the way between the two shapes.
+ */
+.walkthrough-device-swap {
+  view-transition-name: none;
+}
+
+.walkthrough-device-swap::view-transition-group(walkthrough-frame) {
+  animation-duration: 520ms;
+  animation-timing-function: var(--ease-mark);
+}
+
+.walkthrough-device-swap::view-transition-old(walkthrough-frame),
+.walkthrough-device-swap::view-transition-new(walkthrough-frame) {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation-duration: 320ms;
+}

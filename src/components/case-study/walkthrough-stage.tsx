@@ -1,0 +1,242 @@
+'use client';
+
+import {Monitor, Smartphone} from 'lucide-react';
+import {type ReactNode, useEffect, useRef, useState} from 'react';
+import {flushSync} from 'react-dom';
+import {cn} from '@/lib/cn';
+import {captureGroups, captureKey} from '@/lib/tour';
+import type {TourStop} from '@/server/content';
+import {CaptureImage, PanSurface, Selection, type TourDevice} from './walkthrough-capture';
+
+const DEVICES: {key: TourDevice; label: string; icon: typeof Monitor}[] = [
+  {key: 'desktop', label: 'Desktop', icon: Monitor},
+  {key: 'mobile', label: 'Mobile', icon: Smartphone},
+];
+
+type DeviceSwitchProps = {
+  device: TourDevice | 'auto';
+  onChange: (device: TourDevice) => void;
+  className?: string;
+};
+
+function DeviceSwitch({device, onChange, className}: DeviceSwitchProps) {
+  return (
+    <fieldset className={cn('m-0 flex min-w-0 gap-0.5 border-0 p-0', className)}>
+      <legend className="sr-only">Show the site on</legend>
+      {DEVICES.map(({key, label, icon: Icon}) => (
+        <button
+          key={key}
+          type="button"
+          aria-pressed={device === key}
+          onClick={() => onChange(key)}
+          aria-label={label}
+          title={label}
+          className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-1.5 rounded-pill border-0 bg-transparent px-3 text-[13px] font-semibold text-muted hover:text-ink aria-pressed:bg-ink aria-pressed:text-white"
+        >
+          <Icon size={15} aria-hidden="true" />
+          <span className="walkthrough-switch-label">{label}</span>
+        </button>
+      ))}
+    </fieldset>
+  );
+}
+
+type AddressProps = {
+  stop: TourStop;
+  host: string | null;
+};
+
+/** The address bar's text. The home page reads as the bare host; with no live site there is only the path. */
+function Address({stop, host}: AddressProps) {
+  const isHome = stop.path === '/';
+  return (
+    <span key={stop.path} className="walkthrough-address truncate font-mono text-xs leading-none">
+      {host ? <span className={isHome ? undefined : 'max-sm:hidden'}>{host}</span> : null}
+      {isHome && host ? '' : stop.path}
+    </span>
+  );
+}
+
+/** The active frame and the furthest frame reached, from the note on the reading line. */
+function useReadingLine(root: React.RefObject<HTMLDivElement | null>, frameCount: number) {
+  const [active, setActive] = useState(0);
+  const [reached, setReached] = useState(0);
+
+  useEffect(() => {
+    const narrow = window.matchMedia('(max-width: 1079.98px)');
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let observer: IntersectionObserver | undefined;
+    const observe = () => {
+      observer?.disconnect();
+      // The notes run under the pinned frame on phones, so the reading line sits lower there
+      const line = narrow.matches ? 62 : 50;
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            const stop = Number((entry.target as HTMLElement).dataset.stop);
+            if (entry.isIntersecting) setActive(stop);
+            else if (stop === 1 && entry.boundingClientRect.top > 0) setActive(0);
+            else if (stop === frameCount - 1 && entry.boundingClientRect.bottom < 0) setActive(stop);
+          }
+        },
+        {rootMargin: `-${line}% 0px -${100 - line}% 0px`},
+      );
+      for (const note of root.current?.querySelectorAll('[data-stop]') ?? []) observer.observe(note);
+    };
+    observe();
+    narrow.addEventListener('change', observe);
+    return () => {
+      narrow.removeEventListener('change', observe);
+      observer?.disconnect();
+    };
+  }, [root, frameCount]);
+
+  useEffect(() => {
+    setReached((previous) => Math.max(previous, active));
+    for (const note of root.current?.querySelectorAll<HTMLElement>('[data-stop]') ?? []) {
+      note.toggleAttribute('data-current', Number(note.dataset.stop) === active);
+    }
+  }, [root, active]);
+
+  return {active, reached};
+}
+
+type PagesProps = {
+  frames: TourStop[];
+  current: TourStop;
+  reached: number;
+  optimizedUrls: string[];
+};
+
+/** Every page the frame has reached, and the next one, so it is ready to slide in. Stops that share captures share a page and pan within it. */
+function Pages({frames, current, reached, optimizedUrls}: PagesProps) {
+  const groups = captureGroups(frames);
+  const indexOf = (stop: TourStop) => groups.findIndex(({key}) => key === captureKey(stop));
+  const currentPage = indexOf(current);
+  const lastMounted = indexOf(frames[reached] ?? frames[0]) + 1;
+  return DEVICES.map(({key: layer}) =>
+    groups.map((group, index) => {
+      if (index > lastMounted && index !== currentPage) return null;
+      const isCurrent = index === currentPage;
+      const shown = isCurrent ? current : group.stops[0];
+      return (
+        <div
+          key={`${layer}-${group.key}`}
+          data-layer={layer}
+          data-state={isCurrent ? 'active' : index < currentPage ? 'before' : 'after'}
+          aria-hidden={!isCurrent || undefined}
+          className="walkthrough-page"
+        >
+          <PanSurface view={shown.positions[layer]} capture={shown.captures[layer]} atStart={!isCurrent}>
+            <CaptureImage stop={group.stops[0]} device={layer} optimized={optimizedUrls.includes(shown.captures[layer].url)} eager={index === 0} />
+            {group.stops.map((stop) => (
+              <Selection key={stop.key} stop={stop} device={layer} on={stop.key === current.key} />
+            ))}
+          </PanSurface>
+        </div>
+      );
+    }),
+  );
+}
+
+type TourProps = {
+  /** frames[0] is what the frame opens on; frames[i + 1] is the note marked data-stop={i + 1}. */
+  frames: TourStop[];
+  liveUrl: string | null;
+  host: string | null;
+  optimizedUrls: string[];
+  hero: ReactNode;
+  notes: ReactNode;
+};
+
+/**
+ * The pinned browser and the state behind it. A note on the reading line sets the active stop (an IntersectionObserver, so it also works where scroll
+ * timelines do not), the switch sets the device. Everything else is server-rendered: without JavaScript or with reduced motion this frame is hidden
+ * by CSS and each note shows its own capture.
+ */
+export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, notes}: TourProps) {
+  const root = useRef<HTMLDivElement>(null);
+  const {active, reached} = useReadingLine(root, frames.length);
+  const [device, setDevice] = useState<TourDevice | 'auto'>('auto');
+
+  useEffect(() => {
+    setDevice(window.matchMedia('(max-width: 1079.98px)').matches ? 'mobile' : 'desktop');
+  }, []);
+
+  const choose = (next: TourDevice) => {
+    if (next === device) return;
+    const html = document.documentElement;
+    if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setDevice(next);
+      return;
+    }
+    html.classList.add('walkthrough-device-swap');
+    const transition = document.startViewTransition(() => flushSync(() => setDevice(next)));
+    transition.finished.finally(() => html.classList.remove('walkthrough-device-swap'));
+  };
+
+  const current = frames[active] ?? frames[0];
+  const href = liveUrl ? new URL(current.path, liveUrl).toString() : undefined;
+
+  return (
+    <div
+      ref={root}
+      data-device={device}
+      className="walkthrough-tour motion-js:lg:grid motion-js:lg:grid-cols-[calc(var(--gutter)+clamp(320px,28vw,400px)+40px)_minmax(0,1fr)]"
+    >
+      <div className="motion-js:lg:col-start-1 motion-js:lg:row-start-1">{hero}</div>
+
+      <div className="walkthrough-tour-only dot-grid max-lg:contents lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:border-l lg:border-line">
+        <figure
+          aria-label="The live site, in a browser"
+          className="walkthrough-stage z-20 m-0 flex flex-col gap-2 max-lg:border-b max-lg:border-line max-lg:bg-ground max-lg:px-5 max-lg:py-2"
+        >
+          <div className="walkthrough-frame flex min-h-0 flex-col overflow-hidden border border-line bg-white shadow-(--shadow-deep)">
+            <div className="relative flex min-h-13 shrink-0 items-center gap-3 border-b border-line pr-1.5 pl-3">
+              <span aria-hidden="true" className="walkthrough-dots flex gap-1.5 max-lg:hidden">
+                <i className="size-2.5 rounded-full bg-line" />
+                <i className="size-2.5 rounded-full bg-line" />
+                <i className="size-2.5 rounded-full bg-line" />
+              </span>
+              {href ? (
+                <a href={href} rel="noreferrer" className="flex min-h-10 min-w-0 flex-1 items-center gap-2 text-ink no-underline hover:text-accent">
+                  <Address stop={current} host={host} />
+                  <span className="sr-only">: open {current.heading} on the live site</span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    width="12"
+                    height="12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    className="shrink-0"
+                  >
+                    <path d="M7 17 17 7M9 7h8v8" />
+                  </svg>
+                </a>
+              ) : (
+                <span className="flex min-w-0 flex-1 text-ink">
+                  <Address stop={current} host={host} />
+                </span>
+              )}
+              <DeviceSwitch device={device} onChange={choose} className="shrink-0" />
+              <span key={captureKey(current)} aria-hidden="true" className="walkthrough-progress absolute inset-x-0 -bottom-px h-0.5 bg-accent" />
+            </div>
+            <div data-theme="light" className="walkthrough-viewport relative min-h-0 flex-1 overflow-hidden bg-white">
+              <Pages frames={frames} current={current} reached={reached} optimizedUrls={optimizedUrls} />
+            </div>
+          </div>
+        </figure>
+      </div>
+
+      <div className="motion-js:lg:col-start-1 motion-js:lg:row-start-2">
+        <div className="walkthrough-static-only walkthrough-script-only px-5 pt-6 md:px-(--gutter)">
+          <DeviceSwitch device={device} onChange={choose} className="w-fit" />
+        </div>
+        {notes}
+      </div>
+    </div>
+  );
+}
