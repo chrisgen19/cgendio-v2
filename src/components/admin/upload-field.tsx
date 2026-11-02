@@ -8,6 +8,15 @@ import {Label} from '@/components/ui/label';
 import {getUploadTarget} from '@/server/actions/uploads';
 import {useUploadStatus} from './upload-status';
 
+export type UploadedImage = {url: string; width: number; height: number};
+
+const imageSize = async (file: File) => {
+  const bitmap = await createImageBitmap(file);
+  const size = {width: bitmap.width, height: bitmap.height};
+  bitmap.close();
+  return size;
+};
+
 type UploadFieldProps = {
   /** Form field that receives the public URL */
   name: string;
@@ -15,13 +24,15 @@ type UploadFieldProps = {
   kind: 'image' | 'cv';
   defaultValue?: string | null;
   hint?: string;
+  /** Told about each new image with its size in pixels, and null on Remove. Nothing else changes when it is left out. */
+  onUploaded?: (image: UploadedImage | null) => void;
 };
 
 /**
  * Uploads straight from the browser to R2 with a server-signed URL, then puts the file's public URL in a hidden
  * input. Nothing is saved until the form itself is saved.
  */
-export function UploadField({name, label, kind, defaultValue, hint}: UploadFieldProps) {
+export function UploadField({name, label, kind, defaultValue, hint, onUploaded}: UploadFieldProps) {
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(defaultValue ?? '');
@@ -32,6 +43,8 @@ export function UploadField({name, label, kind, defaultValue, hint}: UploadField
     setBusy(true);
     trackUpload(1);
     try {
+      // Read first: a caller that needs the size gets nothing at all from a file the browser can't decode
+      const size = onUploaded ? await imageSize(file) : null;
       const target = await getUploadTarget({kind, contentType: file.type, size: file.size});
       if (!target.ok) {
         toast.error(target.error);
@@ -43,6 +56,7 @@ export function UploadField({name, label, kind, defaultValue, hint}: UploadField
         return;
       }
       setUrl(target.publicUrl);
+      if (size) onUploaded?.({url: target.publicUrl, ...size});
       toast.success('Uploaded. Save the form to keep it.');
     } catch {
       toast.error('Upload failed. Check your connection and the bucket settings.');
@@ -83,7 +97,15 @@ export function UploadField({name, label, kind, defaultValue, hint}: UploadField
           {busy ? 'Uploading…' : url ? 'Replace' : 'Upload'}
         </Button>
         {url ? (
-          <Button type="button" variant="ghost" onClick={() => setUrl('')} aria-label={`Remove ${label.toLowerCase()}`}>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setUrl('');
+              onUploaded?.(null);
+            }}
+            aria-label={`Remove ${label.toLowerCase()}`}
+          >
             <X />
             Remove
           </Button>

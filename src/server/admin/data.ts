@@ -1,5 +1,6 @@
 import 'server-only';
 import {requireAdmin} from '../admin-session';
+import {tourStopsSchema} from '../content-schema';
 import {db} from '../db';
 
 /*
@@ -18,7 +19,7 @@ export const listProjects = async () => {
 export const getProjectForEdit = async (id: string) => {
   await requireAdmin();
   const row = await db.project.findUnique({where: {id}});
-  return row ? {...row, createdAt: iso(row.createdAt), updatedAt: iso(row.updatedAt)} : null;
+  return row ? {...row, tourStops: tourStopsSchema.parse(row.tourStops), createdAt: iso(row.createdAt), updatedAt: iso(row.updatedAt)} : null;
 };
 
 export const listPosts = async () => {
