@@ -69,6 +69,7 @@ const seed = async () => {
           repoUrl: p.repoUrl,
           client: p.client,
           role: p.role,
+          tourStops: p.tourStops ?? [],
         }),
       ),
       skipDuplicates: true,

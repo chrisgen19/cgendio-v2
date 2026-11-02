@@ -3,7 +3,7 @@ import {notFound} from 'next/navigation';
 import {connection} from 'next/server';
 import {Suspense} from 'react';
 import {PostArticle} from '@/components/blog/post-article';
-import {CaseStudyArticle} from '@/components/case-study/case-study-article';
+import {CaseStudyBody} from '@/components/case-study/case-study-body';
 import {PageShell} from '@/components/site/page-shell';
 import {isPreviewType, verifyPreview} from '@/lib/preview-signature';
 import {getPreviewContent} from '@/server/preview';
@@ -36,7 +36,7 @@ async function Preview({params, searchParams}: Pick<PageProps<'/preview/[type]/[
       <p data-theme="light" className="m-0 bg-lime px-4 py-2 text-center font-mono text-xs text-ink">
         {content.status === 'DRAFT' ? 'Draft preview' : 'Preview'} · link valid for an hour
       </p>
-      <PageShell>{content.type === 'post' ? <PostArticle post={content.post} /> : <CaseStudyArticle project={content.project} />}</PageShell>
+      <PageShell>{content.type === 'post' ? <PostArticle post={content.post} /> : <CaseStudyBody project={content.project} />}</PageShell>
     </>
   );
 }

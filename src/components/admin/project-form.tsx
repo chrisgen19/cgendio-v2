@@ -2,9 +2,11 @@
 
 import {Card, CardContent} from '@/components/ui/card';
 import {saveProject} from '@/server/actions/projects';
+import type {TourStop} from '@/server/content-schema';
 import {ColorField, SelectField, SubmitButton, SwitchField, TextAreaField, TextField} from './form-fields';
 import {MarkdownField} from './markdown-field';
 import {TitleSlugFields} from './title-slug-fields';
+import {TourStopsField} from './tour-stops-field';
 import {UploadField} from './upload-field';
 import {UploadStatusProvider} from './upload-status';
 import {useActionToast} from './use-action-toast';
@@ -30,6 +32,10 @@ export type ProjectFormValues = {
   role: string | null;
   brandColor: string | null;
   brandTint: string | null;
+  decision: string | null;
+  contribution: string | null;
+  outcome: string | null;
+  tourStops: TourStop[];
 };
 
 const GROUPS = [
@@ -127,6 +133,39 @@ export function ProjectForm({project}: {project: ProjectFormValues | null}) {
               />
             </div>
             <MarkdownField name="caseStudy" label="Case study" defaultValue={project?.caseStudy} errors={errors} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex flex-col gap-4">
+            <TextAreaField
+              name="decision"
+              label="The decision"
+              hint="Why this approach. Shown with a tour, and hidden while empty."
+              defaultValue={project?.decision ?? ''}
+              rows={4}
+              errors={errors}
+            />
+            <TextAreaField
+              name="contribution"
+              label="Our part"
+              hint="What we did. Shown with a tour, and hidden while empty."
+              defaultValue={project?.contribution ?? ''}
+              rows={4}
+              errors={errors}
+            />
+            <TextAreaField
+              name="outcome"
+              label="The result"
+              hint="What came of it. Shown with a tour, and hidden while empty."
+              defaultValue={project?.outcome ?? ''}
+              rows={4}
+              errors={errors}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <TourStopsField defaultStops={project?.tourStops ?? []} errors={errors} />
           </CardContent>
         </Card>
         <div>

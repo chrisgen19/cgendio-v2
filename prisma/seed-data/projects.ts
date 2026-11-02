@@ -1,4 +1,5 @@
 import type {Project, ProjectDetail} from '../../src/server/content-schema';
+import {accessHireTour} from './access-hire-tour.ts';
 
 /**
  * The six client projects from the v1 site, with its slugs, one-liners and stacks. Case studies live in
@@ -6,7 +7,9 @@ import type {Project, ProjectDetail} from '../../src/server/content-schema';
  * the top 16:9 and copied into cgendio-media; they change when the bucket gets its custom domain. Brand colours are
  * sampled from the covers; the 20261027120000_project_brand_colours migration backfills the same values, so change both.
  */
-export type SeedProject = Project & Pick<ProjectDetail, 'coverImageUrl' | 'liveUrl' | 'repoUrl' | 'client' | 'role'>;
+export type SeedProject = Project &
+  Pick<ProjectDetail, 'coverImageUrl' | 'liveUrl' | 'repoUrl' | 'client' | 'role'> &
+  Partial<Pick<ProjectDetail, 'tourStops'>>;
 
 const COVERS = 'https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026';
 const ACCESS_GROUP_ROLE = 'Senior Full Stack Developer, Access Group Australia';
@@ -30,6 +33,7 @@ export const projects: SeedProject[] = [
     repoUrl: null,
     client: 'Access Hire Australia',
     role: ACCESS_GROUP_ROLE,
+    tourStops: accessHireTour,
   },
   {
     slug: 'myimprov',

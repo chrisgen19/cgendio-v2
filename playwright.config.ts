@@ -25,8 +25,9 @@ export default defineConfig({
   projects: [
     {name: 'desktop', testDir: 'e2e/public', use: desktop},
     {name: 'mobile', testDir: 'e2e/public', use: mobile},
-    // Runs after the public projects: editing a project title would otherwise race the Work section snapshots
-    {name: 'admin', testDir: 'e2e/admin', dependencies: ['desktop', 'mobile'], use: {...desktop, storageState: ADMIN_STORAGE_STATE}},
+    // Runs after the public projects: editing a project title would otherwise race the Work section snapshots. One worker,
+    // because its files save the same rows and revalidate the same pages, and a save in one can undo what another just checked
+    {name: 'admin', testDir: 'e2e/admin', dependencies: ['desktop', 'mobile'], workers: 1, use: {...desktop, storageState: ADMIN_STORAGE_STATE}},
   ],
   webServer: [
     {

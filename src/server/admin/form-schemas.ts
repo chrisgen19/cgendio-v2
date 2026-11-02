@@ -1,5 +1,6 @@
 import {z} from 'zod';
 import {PAGE_COPY_KEYS} from '../content-schema';
+import {parseTourField} from './tour-form';
 
 /* Zod schemas for the admin forms. Inputs arrive as FormData strings, so these coerce. */
 
@@ -29,6 +30,28 @@ const optionalHex = z.preprocess(
     .regex(/^#[0-9a-fA-F]{6}$/, {error: 'Use a hex colour like #e31836'})
     .transform((value) => value.toLowerCase())
     .nullable(),
+);
+
+/** Optional multi-line text: null when empty, whitespace-only or missing. */
+const optionalLongText = (label: string) =>
+  z.preprocess(
+    (value) => (value === undefined || (typeof value === 'string' && value.trim() === '') ? null : value),
+    z
+      .string()
+      .trim()
+      .max(2000, {error: `${label} is too long (max 2000 characters)`})
+      .nullable(),
+  );
+
+/** The tour editor posts its stops as one JSON string. A form without the field keeps an empty tour. */
+const tourStopsField = z.preprocess(
+  (value) => value ?? '[]',
+  z.string().transform((raw, ctx) => {
+    const result = parseTourField(raw);
+    if (result.ok) return result.stops;
+    ctx.addIssue({code: 'custom', message: result.message});
+    return z.NEVER;
+  }),
 );
 
 const slug = z
@@ -67,6 +90,10 @@ export const projectFormSchema = z.object({
   role: optionalText.pipe(z.string().max(120).nullable()),
   brandColor: optionalHex,
   brandTint: optionalHex,
+  decision: optionalLongText('The decision'),
+  contribution: optionalLongText('Our part'),
+  outcome: optionalLongText('The result'),
+  tourStops: tourStopsField,
 });
 
 export const postFormSchema = z.object({

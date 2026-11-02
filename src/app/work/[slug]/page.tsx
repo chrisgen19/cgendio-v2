@@ -1,6 +1,6 @@
 import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
-import {CaseStudyArticle} from '@/components/case-study/case-study-article';
+import {CaseStudyBody} from '@/components/case-study/case-study-body';
 import {NextProject} from '@/components/case-study/next-project';
 import {ContactCta} from '@/components/sections/contact-cta';
 import {JsonLd} from '@/components/site/json-ld';
@@ -30,7 +30,7 @@ export default async function CaseStudyPage({params}: PageProps<'/work/[slug]'>)
   return (
     <PageShell>
       <JsonLd data={caseStudyJsonLd(project, copy)} />
-      <CaseStudyArticle project={project} />
+      <CaseStudyBody project={project} />
       <NextProject project={next} />
       <ContactCta />
     </PageShell>
