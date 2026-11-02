@@ -43,7 +43,32 @@ describe('projectFormSchema', () => {
       role: 'Lead developer',
       brandColor: null,
       brandTint: null,
+      decision: null,
+      contribution: null,
+      outcome: null,
+      tourStops: [],
     });
+  });
+
+  it('keeps an empty tour when the form posts none', () => {
+    expect(projectFormSchema.parse(projectForm).tourStops).toEqual([]);
+  });
+
+  it('treats whitespace-only reasoning as empty', () => {
+    expect(projectFormSchema.parse({...projectForm, decision: '   '}).decision).toBeNull();
+  });
+
+  it('caps reasoning at 2000 characters', () => {
+    expect(projectFormSchema.safeParse({...projectForm, outcome: 'a'.repeat(2000)}).success).toBe(true);
+    const result = projectFormSchema.safeParse({...projectForm, outcome: 'a'.repeat(2001)});
+    expect(result.success).toBe(false);
+    expect(result.error?.flatten().fieldErrors.outcome).toBeDefined();
+  });
+
+  it('reports a bad tour on the tourStops field with its message', () => {
+    const result = projectFormSchema.safeParse({...projectForm, tourStops: 'nope'});
+    expect(result.success).toBe(false);
+    expect(result.error?.flatten().fieldErrors.tourStops).toEqual(['The tour could not be read. Reload the page and try again.']);
   });
 
   it('lowercases brand colours and rejects anything but #rrggbb', () => {

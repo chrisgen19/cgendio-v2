@@ -56,6 +56,8 @@ export type {
   StackItem,
   TimelineDot,
   TimelineEntry,
+  TourStop,
+  TourView,
 } from './content-schema';
 
 export const CACHE_TAGS = {
@@ -107,6 +109,10 @@ export const toProjectDetail = (row: ProjectRow): ProjectDetail =>
     repoUrl: row.repoUrl,
     client: row.client,
     role: row.role,
+    decision: row.decision,
+    contribution: row.contribution,
+    outcome: row.outcome,
+    tourStops: row.tourStops,
   });
 
 /** A post row as its article page shape; used by getPost and the draft preview. */
