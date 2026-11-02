@@ -4,7 +4,7 @@ import type {TourStop} from '../../src/server/content-schema';
  * The Fresh Fruit and Veg Shop case study tour. Captures of the live site from 2026-11-02, in the cgendio-media bucket, cropped
  * first to remove named customer testimonials. The site now leads with office deliveries and has no public shop pages, so the
  * tour shows what is live. Positions are in each capture's pixels. Note text is the write-up, word for word, except the home
- * stop, which is reworded to match the live site. The
+ * and boxes stops, which are reworded to match the live site. The
  * 20261102160000_project_fresh_fruit_tour migration backfills the same value, so change both.
  */
 const FOLDER = 'https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/fresh-fruit-tour';
@@ -61,7 +61,7 @@ export const freshFruitTour: TourStop[] = [
   {
     key: 'boxes',
     heading: 'Office boxes',
-    note: 'Home and office delivery boxes',
+    note: 'Office delivery boxes',
     emphasis: null,
     selected: 'Box list',
     onScreen: 'Essentials and seasonal boxes with their prices, above a form to get a quote',

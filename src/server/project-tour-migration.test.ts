@@ -185,3 +185,41 @@ describe('project fresh fruit tour migration', () => {
     expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
   });
 });
+
+describe('project fresh fruit copy migration', () => {
+  const sql = readFileSync(new URL('../../prisma/migrations/20261102170000_project_fresh_fruit_copy/migration.sql', import.meta.url), 'utf8');
+  const writeUp = readFileSync(new URL('../../prisma/seed-data/projects/fresh-fruit-and-veg.md', import.meta.url), 'utf8');
+  const freshFruit = projects.find((project) => project.slug === 'fresh-fruit-and-veg');
+  const quoted = (value: string) => `'${value.replaceAll("'", "''")}'`;
+
+  it('describes the office deliveries site in the summary, label and tags', () => {
+    expect(freshFruit?.summary).toMatch(/office/i);
+    expect(freshFruit?.kindLabel).toBe('CLIENT · OFFICE DELIVERIES');
+    expect(`${freshFruit?.summary} ${freshFruit?.kindLabel} ${freshFruit?.tags.join(' ')}`).not.toMatch(/subscription/i);
+  });
+
+  it('keeps the technical story and says the site has moved', () => {
+    expect(writeUp).toContain('A WooCommerce shop for home and office deliveries, with boxes sold as monthly subscriptions');
+    expect(writeUp).toContain('WooCommerce Subscriptions charged on the first of each month');
+    expect(writeUp).toContain('Custom Elementor widgets on an Astra child theme');
+    expect(writeUp).toMatch(/has since moved to office deliveries/);
+  });
+
+  it.each([
+    ['summary', () => quoted(freshFruit?.summary ?? '')],
+    ['kind_label', () => quoted(freshFruit?.kindLabel ?? '')],
+    ['case_study', () => quoted(writeUp)],
+  ])('backfills %s with the seed value, only while it still has the old one', (column, value) => {
+    const set = `UPDATE "projects" SET "${column}" = ${value()} WHERE "slug" = 'fresh-fruit-and-veg' AND "${column}" = '`;
+    expect(sql).toContain(set);
+  });
+
+  it('backfills the tags with the seed value, only while they still have the old ones', () => {
+    const tags = (freshFruit?.tags ?? []).map(quoted).join(', ');
+    expect(sql).toContain(`UPDATE "projects" SET "tags" = ARRAY[${tags}]::text[] WHERE "slug" = 'fresh-fruit-and-veg' AND "tags" = ARRAY[`);
+  });
+
+  it('points the boxes stop at the office site', () => {
+    expect(freshFruit?.tourStops?.find(({key}) => key === 'boxes')?.note).toBe('Office delivery boxes');
+  });
+});
