@@ -13,7 +13,7 @@ const frame = (page: Page) => main(page).getByRole('figure', {name: 'The live si
 
 test.beforeEach(async ({page}) => {
   await page.route(
-    (url) => decodeURIComponent(url.href).includes('access-hire-tour'),
+    (url) => /(access-hire|myimprov)-tour/.test(decodeURIComponent(url.href)),
     (route) => route.fulfill({body: FIXTURE, contentType: 'image/png'}),
   );
 });
@@ -115,8 +115,29 @@ test.describe('without JavaScript', () => {
 });
 
 test('a project without a tour keeps the current layout', async ({page}) => {
-  await page.goto('/work/myimprov');
+  await page.goto('/work/merthyr-village');
   await expect(frame(page)).toHaveCount(0);
   await expect(main(page).getByRole('term').filter({hasText: 'Client'})).toBeVisible();
   await expect(main(page).locator('article img[src^="data:image/png"]')).toBeVisible();
+});
+
+test('a stop on a subdomain shows and links to its own address', async ({page}) => {
+  await page.goto('/work/myimprov');
+  await page.getByRole('heading', {level: 3, name: 'Student login'}).evaluate((heading) => {
+    window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
+  });
+  await expect(frame(page)).toContainText('courses.myimprov.com');
+  await expect(frame(page).getByRole('link', {name: /on the live site/})).toHaveAttribute('href', 'https://courses.myimprov.com/');
+  await expect(
+    main(page)
+      .getByRole('link', {name: /open Student login/})
+      .last(),
+  ).toHaveAttribute('href', 'https://courses.myimprov.com/');
+});
+
+test('MyImprov shows a note for each stop after its opening, including two states', async ({page}) => {
+  await page.goto('/work/myimprov');
+  await expect(main(page).locator('[data-stop]')).toHaveCount(6);
+  await expect(page.getByRole('heading', {level: 3, name: 'California'})).toBeVisible();
+  await expect(page.getByRole('heading', {level: 3, name: 'Texas'})).toBeVisible();
 });

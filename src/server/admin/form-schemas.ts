@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {tourHref} from '@/lib/tour';
 import {PAGE_COPY_KEYS} from '../content-schema';
 import {parseTourField} from './tour-form';
 
@@ -63,38 +64,49 @@ const slug = z
 
 const status = z.preprocess((value) => (value === 'on' ? 'PUBLISHED' : 'DRAFT'), z.enum(['DRAFT', 'PUBLISHED']));
 
-export const projectFormSchema = z.object({
-  title: text('Title', 160),
-  slug,
-  summary: text('Summary', 600),
-  kindLabel: text('Kind label', 80),
-  group: z.enum(['CLIENT', 'PERSONAL'], {error: 'Pick a group'}),
-  glyph: text('Glyph', 40),
-  theme: z.enum(['INK', 'LIME', 'TINT', 'GRAY'], {error: 'Pick a theme'}),
-  tags: z
-    .string()
-    .transform((value) =>
-      value
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter(Boolean),
-    )
-    .pipe(z.array(z.string().max(40)).max(8, {error: 'At most 8 tags'})),
-  featured: checkbox,
-  status,
-  coverImageUrl: optionalUrl,
-  caseStudy: optionalText,
-  liveUrl: optionalUrl,
-  repoUrl: optionalUrl,
-  client: optionalText.pipe(z.string().max(120).nullable()),
-  role: optionalText.pipe(z.string().max(120).nullable()),
-  brandColor: optionalHex,
-  brandTint: optionalHex,
-  decision: optionalLongText('The decision'),
-  contribution: optionalLongText('Our part'),
-  outcome: optionalLongText('The result'),
-  tourStops: tourStopsField,
-});
+export const projectFormSchema = z
+  .object({
+    title: text('Title', 160),
+    slug,
+    summary: text('Summary', 600),
+    kindLabel: text('Kind label', 80),
+    group: z.enum(['CLIENT', 'PERSONAL'], {error: 'Pick a group'}),
+    glyph: text('Glyph', 40),
+    theme: z.enum(['INK', 'LIME', 'TINT', 'GRAY'], {error: 'Pick a theme'}),
+    tags: z
+      .string()
+      .transform((value) =>
+        value
+          .split(',')
+          .map((tag) => tag.trim())
+          .filter(Boolean),
+      )
+      .pipe(z.array(z.string().max(40)).max(8, {error: 'At most 8 tags'})),
+    featured: checkbox,
+    status,
+    coverImageUrl: optionalUrl,
+    caseStudy: optionalText,
+    liveUrl: optionalUrl,
+    repoUrl: optionalUrl,
+    client: optionalText.pipe(z.string().max(120).nullable()),
+    role: optionalText.pipe(z.string().max(120).nullable()),
+    brandColor: optionalHex,
+    brandTint: optionalHex,
+    decision: optionalLongText('The decision'),
+    contribution: optionalLongText('Our part'),
+    outcome: optionalLongText('The result'),
+    tourStops: tourStopsField,
+  })
+  .superRefine(({tourStops, liveUrl}, ctx) => {
+    // A stop's full address depends on this project's live site, so it can only be checked here
+    const index = tourStops.findIndex(({path}) => path.startsWith('https://') && !tourHref(path, liveUrl));
+    if (index >= 0)
+      ctx.addIssue({
+        code: 'custom',
+        path: ['tourStops'],
+        message: `Stop ${index + 1}: a full address must be on the live site or one of its subdomains`,
+      });
+  });
 
 export const postFormSchema = z.object({
   title: text('Title', 200),

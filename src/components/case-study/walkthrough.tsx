@@ -5,7 +5,7 @@ import {isOptimizableCover} from '@/components/ui-site/cover-image';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {Mark} from '@/components/ui-site/mark';
 import {Tag} from '@/components/ui-site/tag';
-import {reasoningRows, tourFrames} from '@/lib/tour';
+import {reasoningRows, tourAddress, tourFrames, tourHref} from '@/lib/tour';
 import type {ProjectDetail, TourStop} from '@/server/content';
 import {CaptureImage, PanSurface, Selection, type TourDevice} from './walkthrough-capture';
 import {WalkthroughTour} from './walkthrough-stage';
@@ -32,11 +32,12 @@ type StaticCaptureProps = {
 
 /** A note's own capture, for readers without the pinned frame: no JavaScript, or reduced motion. One device shows at a time, by CSS. */
 function StaticCapture({stop, host, optimizedUrls, first = false}: StaticCaptureProps) {
+  const caption = tourAddress(stop.path, host);
   return (
     <figure className="walkthrough-static-only m-0 max-lg:mt-6">
       <figcaption className="walkthrough-static-caption flex min-h-9 items-center rounded-t-[14px] border border-b-0 border-line bg-white px-3 font-mono text-xs text-ink">
-        {host}
-        {host && stop.path === '/' ? '' : stop.path}
+        {caption.host}
+        {caption.path}
       </figcaption>
       <div data-theme="light" className="walkthrough-viewport walkthrough-static-frame relative overflow-hidden border border-line bg-white">
         {DEVICES.map((device) => (
@@ -147,6 +148,10 @@ type NoteProps = {
 };
 
 function Note({note, number, liveUrl, host, optimizedUrls}: NoteProps) {
+  const href = tourHref(note.path, liveUrl);
+  // The page row names the path alone, or a full address's own host and path
+  const address = tourAddress(note.path, null);
+  const page = `${address.host ?? ''}${address.path}`;
   return (
     <li data-stop={number} className="walkthrough-note pl-5 lg:pl-7">
       <div className="walkthrough-static-row flex min-h-[46svh] flex-col gap-3 pb-14 lg:min-h-[66svh]">
@@ -170,18 +175,18 @@ function Note({note, number, liveUrl, host, optimizedUrls}: NoteProps) {
             <div className={NOTE_ROW}>
               <dt className={NOTE_TERM}>Page</dt>
               <dd className="m-0">
-                {liveUrl ? (
+                {href ? (
                   <a
-                    href={new URL(note.path, liveUrl).toString()}
+                    href={href}
                     rel="noreferrer"
                     className="-my-3 inline-flex min-h-11 scroll-mt-[46svh] scroll-mb-24 items-center gap-1.5 font-mono text-xs break-all lg:scroll-mt-24"
                   >
-                    {note.path}
+                    {page}
                     <span className="sr-only">: open {note.heading} on the live site</span>
                     {EXTERNAL_ICON}
                   </a>
                 ) : (
-                  <span className="font-mono text-xs">{note.path}</span>
+                  <span className="font-mono text-xs">{page}</span>
                 )}
               </dd>
             </div>

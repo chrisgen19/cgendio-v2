@@ -58,3 +58,27 @@ export const captureSizes = (device: keyof typeof FRAME_WIDTHS, zoom: number) =>
   const {wide, narrow} = FRAME_WIDTHS[device];
   return `(min-width: 1080px) ${scaled(wide)}, ${scaled(narrow)}`;
 };
+
+const isFullAddress = (path: string) => path.startsWith('https://');
+
+/**
+ * Where a stop's page links to, or null for no link. A path joins the live site; a full address must be on its domain or a
+ * subdomain. The admin refuses any other address on save, and this keeps a row edited by hand from linking off-site.
+ */
+export const tourHref = (path: string, liveUrl: string | null) => {
+  if (!liveUrl) return null;
+  const url = new URL(path, liveUrl);
+  if (!isFullAddress(path)) return url.toString();
+  const site = new URL(liveUrl).hostname.replace(/^www\./, '');
+  return url.hostname === site || url.hostname.endsWith(`.${site}`) ? url.toString() : null;
+};
+
+/** What the address bar shows. The home page reads as the bare host; with no live site a path shows alone. A full address shows its own host. */
+export const tourAddress = (path: string, liveHost: string | null): {host: string | null; path: string} => {
+  if (isFullAddress(path)) {
+    const url = new URL(path);
+    const rest = `${url.pathname}${url.search}`;
+    return {host: url.host, path: rest === '/' ? '' : rest};
+  }
+  return {host: liveHost, path: path === '/' && liveHost ? '' : path};
+};

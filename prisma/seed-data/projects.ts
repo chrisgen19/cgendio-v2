@@ -1,5 +1,6 @@
 import type {Project, ProjectDetail} from '../../src/server/content-schema';
 import {accessHireTour} from './access-hire-tour.ts';
+import {myimprovTour} from './myimprov-tour.ts';
 
 /**
  * The six client projects from the v1 site, with its slugs, one-liners and stacks. Case studies live in
@@ -53,6 +54,7 @@ export const projects: SeedProject[] = [
     repoUrl: null,
     client: 'MyImprov',
     role: 'Senior WordPress / Frontend Developer, via Emapta',
+    tourStops: myimprovTour,
   },
   {
     slug: 'merthyr-village',

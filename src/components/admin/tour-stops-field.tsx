@@ -106,7 +106,7 @@ function StopCard({stop, number, total, onChange, onCapture, onMove, onRemove}: 
         <StopField label="Heading" value={stop.heading} onChange={(heading) => onChange({heading})} />
         <StopField
           label="Page path"
-          hint="The path on the live site, such as /category/scissor-lift"
+          hint="A path such as /category/scissor-lift, or a full https address on a subdomain of the live site"
           value={stop.path}
           onChange={(path) => onChange({path})}
         />

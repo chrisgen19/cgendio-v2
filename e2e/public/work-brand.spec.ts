@@ -42,9 +42,15 @@ for (const theme of ['light', 'dark'] as const) {
     });
 
     test('the case study panel takes the same tint', async ({page}) => {
-      await page.goto('/work/myimprov');
+      // Only the standard layout has this panel, so this uses a project without a tour
+      await page.goto('/');
+      const card = page
+        .locator('main:visible #work article.work-card')
+        .filter({has: page.getByRole('heading', {level: 3, name: 'Merthyr Village Community Portal'})});
+      const tint = await card.evaluate((node) => getComputedStyle(node).backgroundColor);
+      await page.goto('/work/merthyr-village');
       const panel = page.locator('main:visible .brand-panel');
-      await expect(panel).toHaveCSS('background-color', COLOURS[theme].card);
+      await expect(panel).toHaveCSS('background-color', tint);
     });
   });
 }
