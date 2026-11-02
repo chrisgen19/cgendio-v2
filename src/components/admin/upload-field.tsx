@@ -5,6 +5,7 @@ import {useId, useRef, useState} from 'react';
 import {toast} from 'sonner';
 import {Button} from '@/components/ui/button';
 import {Label} from '@/components/ui/label';
+import {MAX_IMAGE_BYTES} from '@/lib/upload-limits';
 import {getUploadTarget} from '@/server/actions/uploads';
 import {useUploadStatus} from './upload-status';
 
@@ -43,6 +44,11 @@ export function UploadField({name, label, kind, defaultValue, hint, onUploaded}:
     setBusy(true);
     trackUpload(1);
     try {
+      // Checked before decoding, so an oversized image never takes up browser memory only to be refused
+      if (kind === 'image' && file.size > MAX_IMAGE_BYTES) {
+        toast.error(`That file is over the ${MAX_IMAGE_BYTES / 1024 / 1024} MB limit.`);
+        return;
+      }
       // Read first: a caller that needs the size gets nothing at all from a file the browser can't decode
       const size = onUploaded ? await imageSize(file).catch(() => null) : null;
       if (onUploaded && !size) {

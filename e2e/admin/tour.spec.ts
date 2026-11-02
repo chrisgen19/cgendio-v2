@@ -161,3 +161,13 @@ test('a capture the browser cannot decode gets its own error and changes nothing
   await save(page);
   expect(await tourOf()).toEqual(before);
 });
+
+test('a capture over the size limit is refused before it is decoded', async ({page}) => {
+  await editAccessHire(page);
+  await page
+    .getByLabel('Desktop capture')
+    .first()
+    .setInputFiles({name: 'huge.png', mimeType: 'image/png', buffer: Buffer.alloc(5 * 1024 * 1024 + 1)});
+  await expect(page.getByText('That file is over the 5 MB limit.')).toBeVisible();
+  await expect(page.getByText("That image couldn't be read", {exact: false})).toHaveCount(0);
+});

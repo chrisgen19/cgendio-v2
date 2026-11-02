@@ -2,10 +2,11 @@ import 'server-only';
 import {randomUUID} from 'node:crypto';
 import {AwsClient} from 'aws4fetch';
 import {r2Env} from '@/lib/env';
+import {MAX_IMAGE_BYTES} from '@/lib/upload-limits';
 
 /** What can be uploaded, and how big. Images are covers; the CV is a PDF. */
 export const UPLOAD_KINDS = {
-  image: {folder: 'images', maxBytes: 5 * 1024 * 1024, types: {'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/avif': 'avif'}},
+  image: {folder: 'images', maxBytes: MAX_IMAGE_BYTES, types: {'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/avif': 'avif'}},
   cv: {folder: 'cv', maxBytes: 10 * 1024 * 1024, types: {'application/pdf': 'pdf'}},
 } as const;
 
