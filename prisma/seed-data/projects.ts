@@ -1,6 +1,7 @@
 import type {Project, ProjectDetail} from '../../src/server/content-schema';
 import {accessHireTour} from './access-hire-tour.ts';
 import {experienceSunnybankTour} from './experience-sunnybank-tour.ts';
+import {freshFruitTour} from './fresh-fruit-tour.ts';
 import {merthyrVillageTour} from './merthyr-village-tour.ts';
 import {myimprovTour} from './myimprov-tour.ts';
 
@@ -120,12 +121,12 @@ export const projects: SeedProject[] = [
   {
     slug: 'fresh-fruit-and-veg',
     title: 'Fresh Fruit and Veg Shop',
-    summary: 'Weekly fruit and veg boxes for homes and offices in Glasgow, sold as WooCommerce subscriptions.',
-    kindLabel: 'CLIENT · SUBSCRIPTIONS',
+    summary: 'Office fruit deliveries for workplaces in Glasgow, on a WordPress and WooCommerce site.',
+    kindLabel: 'CLIENT · OFFICE DELIVERIES',
     group: 'client',
     glyph: 'Veg box',
     theme: 'ink',
-    tags: ['WordPress', 'WooCommerce', 'Subscriptions', 'Elementor'],
+    tags: ['WordPress', 'WooCommerce', 'Elementor', 'Astra'],
     featured: true,
     order: 6,
     coverImageUrl: `${COVERS}/f42332bd-c882-423f-8255-fb994436ff7a.webp`,
@@ -135,5 +136,6 @@ export const projects: SeedProject[] = [
     repoUrl: null,
     client: 'Fresh Fruit and Veg Shop',
     role: 'Freelance developer',
+    tourStops: freshFruitTour,
   },
 ];

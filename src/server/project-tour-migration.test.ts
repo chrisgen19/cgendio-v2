@@ -41,12 +41,13 @@ describe('project walkthrough migration', () => {
     expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
   });
 
-  it('gives only the four finished projects a tour', () => {
+  it('gives only the five finished projects a tour', () => {
     expect(projects.filter((project) => project.tourStops?.length).map(({slug}) => slug)).toEqual([
       'access-hire',
       'myimprov',
       'merthyr-village',
       'experience-sunnybank',
+      'fresh-fruit-and-veg',
     ]);
   });
 });
@@ -145,5 +146,80 @@ describe('project experience sunnybank tour migration', () => {
 
   it('leaves the reasoning empty', () => {
     expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
+  });
+});
+
+describe('project fresh fruit tour migration', () => {
+  const sql = readFileSync(new URL('../../prisma/migrations/20261102160000_project_fresh_fruit_tour/migration.sql', import.meta.url), 'utf8');
+  const freshFruit = projects.find((project) => project.slug === 'fresh-fruit-and-veg');
+
+  it('seeds a valid tour with an opening and three notes', () => {
+    const stops = tourStopsSchema.parse(freshFruit?.tourStops);
+    expect(stops).toHaveLength(4);
+    expect(stops[0]?.note).toBe('');
+    expect(stops.slice(1).every((stop) => stop.note !== '')).toBe(true);
+  });
+
+  it('backfills the seed tour, only while empty', () => {
+    const match = sql.match(
+      /UPDATE "projects" SET "tour_stops" = '(.+)'::jsonb WHERE "slug" = 'fresh-fruit-and-veg' AND "tour_stops" = '\[\]'::jsonb;/,
+    );
+    expect(JSON.parse(unquote(match?.[1] ?? 'null'))).toEqual(freshFruit?.tourStops);
+  });
+
+  it('keeps every capture in the tour folder and every page on the live site', () => {
+    for (const stop of freshFruit?.tourStops ?? []) {
+      expect(stop.captures.desktop.url).toContain('/images/2026/fresh-fruit-tour/');
+      expect(stop.captures.mobile.url).toContain('/images/2026/fresh-fruit-tour/');
+      expect(tourHref(stop.path, freshFruit?.liveUrl ?? null)).not.toBeNull();
+    }
+  });
+
+  it('describes the live office deliveries site, not a subscription shop', () => {
+    const home = freshFruit?.tourStops?.find(({key}) => key === 'home');
+    expect(home?.note).toContain('office');
+    expect(`${home?.note} ${home?.onScreen}`).not.toMatch(/subscription|checkout|delivery slots|now leads/i);
+  });
+
+  it('leaves the reasoning empty', () => {
+    expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
+  });
+});
+
+describe('project fresh fruit copy migration', () => {
+  const sql = readFileSync(new URL('../../prisma/migrations/20261102170000_project_fresh_fruit_copy/migration.sql', import.meta.url), 'utf8');
+  const writeUp = readFileSync(new URL('../../prisma/seed-data/projects/fresh-fruit-and-veg.md', import.meta.url), 'utf8');
+  const freshFruit = projects.find((project) => project.slug === 'fresh-fruit-and-veg');
+  const quoted = (value: string) => `'${value.replaceAll("'", "''")}'`;
+
+  it('describes the office deliveries site in the summary, label and tags', () => {
+    expect(freshFruit?.summary).toMatch(/office/i);
+    expect(freshFruit?.kindLabel).toBe('CLIENT · OFFICE DELIVERIES');
+    expect(`${freshFruit?.summary} ${freshFruit?.kindLabel} ${freshFruit?.tags.join(' ')}`).not.toMatch(/subscription/i);
+  });
+
+  it('keeps the technical story and says the site has moved', () => {
+    expect(writeUp).toContain('A WooCommerce shop for home and office deliveries, with boxes sold as monthly subscriptions');
+    expect(writeUp).toContain('WooCommerce Subscriptions charged on the first of each month');
+    expect(writeUp).toContain('Custom Elementor widgets on an Astra child theme');
+    expect(writeUp).toMatch(/has since moved to office deliveries/);
+  });
+
+  it.each([
+    ['summary', () => quoted(freshFruit?.summary ?? '')],
+    ['kind_label', () => quoted(freshFruit?.kindLabel ?? '')],
+    ['case_study', () => quoted(writeUp)],
+  ])('backfills %s with the seed value, only while it still has the old one', (column, value) => {
+    const set = `UPDATE "projects" SET "${column}" = ${value()} WHERE "slug" = 'fresh-fruit-and-veg' AND "${column}" = '`;
+    expect(sql).toContain(set);
+  });
+
+  it('backfills the tags with the seed value, only while they still have the old ones', () => {
+    const tags = (freshFruit?.tags ?? []).map(quoted).join(', ');
+    expect(sql).toContain(`UPDATE "projects" SET "tags" = ARRAY[${tags}]::text[] WHERE "slug" = 'fresh-fruit-and-veg' AND "tags" = ARRAY[`);
+  });
+
+  it('points the boxes stop at the office site', () => {
+    expect(freshFruit?.tourStops?.find(({key}) => key === 'boxes')?.note).toBe('Office delivery boxes');
   });
 });
