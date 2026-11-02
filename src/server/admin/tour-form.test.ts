@@ -60,6 +60,10 @@ describe('parseTourField', () => {
     [[draft(), draft({key: 'b', note: ''})], 'Stop 2: only the first stop can have an empty note'],
     [[draft({path: '//evil.example'})], 'Stop 1: the page path must start with a single /'],
     [[draft({path: 'category'})], 'Stop 1: the page path must start with a single /'],
+    [[draft({path: '/\\'})], 'Stop 1: the page path must start with a single /'],
+    [[draft({path: '/\\evil.example'})], 'Stop 1: the page path must start with a single /'],
+    [[draft({path: '/\t/evil.example'})], 'Stop 1: the page path must start with a single /'],
+    [[draft({path: '/with space'})], 'Stop 1: the page path must start with a single /'],
     [[draft({emphasis: 'absent'})], 'Stop 1: the emphasis must be words from the note'],
     [[draft({heading: ''})], 'Stop 1: the heading is required'],
     [[draft({onScreen: ''})], 'Stop 1: the on screen line is required'],
@@ -69,6 +73,10 @@ describe('parseTourField', () => {
     [[draft({key: 'a'}), draft({key: 'a'})], 'Stop 2: duplicate stop key'],
   ])('rejects %j', (drafts, message) => {
     expect(parseTourField(JSON.stringify(drafts))).toEqual({ok: false, message});
+  });
+
+  it.each(['/', '/category/scissor-lift', '/a?b=c#d', '/caf%C3%A9'])('accepts the path %s', (path) => {
+    expect(parseTourField(JSON.stringify([draft({path})])).ok).toBe(true);
   });
 
   it('rejects a field that is not a JSON array', () => {

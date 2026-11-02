@@ -6,6 +6,7 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {Textarea} from '@/components/ui/textarea';
+import {setStopCapture} from '@/lib/tour';
 import type {TourStop} from '@/server/content-schema';
 import {type UploadedImage, UploadField} from './upload-field';
 
@@ -67,12 +68,12 @@ type StopCardProps = {
   number: number;
   total: number;
   onChange: (patch: Partial<Draft>) => void;
+  onCapture: (device: Device, image: UploadedImage | null) => void;
   onMove: (by: -1 | 1) => void;
   onRemove: () => void;
 };
 
-function StopCard({stop, number, total, onChange, onMove, onRemove}: StopCardProps) {
-  const setCapture = (device: Device, image: UploadedImage | null) => onChange({captures: {...stop.captures, [device]: image ?? NO_CAPTURE}});
+function StopCard({stop, number, total, onChange, onCapture, onMove, onRemove}: StopCardProps) {
   return (
     <fieldset className="m-0 flex min-w-0 flex-col gap-4 rounded-lg border p-4">
       <legend className="px-1 text-sm font-medium">Stop {number}</legend>
@@ -134,14 +135,14 @@ function StopCard({stop, number, total, onChange, onMove, onRemove}: StopCardPro
           label="Desktop capture"
           kind="image"
           defaultValue={stop.captures.desktop.url}
-          onUploaded={(image) => setCapture('desktop', image)}
+          onUploaded={(image) => onCapture('desktop', image)}
         />
         <UploadField
           name={`tourCapture-${stop.key}-mobile`}
           label="Mobile capture"
           kind="image"
           defaultValue={stop.captures.mobile.url}
-          onUploaded={(image) => setCapture('mobile', image)}
+          onUploaded={(image) => onCapture('mobile', image)}
         />
       </div>
       <StopField
@@ -192,6 +193,7 @@ export function TourStopsField({defaultStops, errors}: TourStopsFieldProps) {
           number={index + 1}
           total={stops.length}
           onChange={(patch) => update(stop.key, patch)}
+          onCapture={(device, image) => setStops((current) => setStopCapture(current, stop.key, device, image))}
           onMove={(by) => move(index, by)}
           onRemove={() => setStops((current) => current.filter(({key}) => key !== stop.key))}
         />

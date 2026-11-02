@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
-import type {TourStop} from '@/server/content-schema';
-import {captureGroups, captureKey, hasTour, reasoningRows, tourFrames} from './tour';
+import {type TourStop, tourStopSchema} from '@/server/content-schema';
+import {captureGroups, captureKey, hasTour, reasoningRows, setStopCapture, tourFrames} from './tour';
 
 const baseCaptures: TourStop['captures'] = {
   desktop: {url: 'https://cdn.example.com/home-desktop.webp', width: 1600, height: 2400},
@@ -24,6 +24,18 @@ const stop = (overrides: Partial<TourStop> = {}): TourStop => ({
   captures: baseCaptures,
   positions: {desktop: view, mobile: view},
   ...overrides,
+});
+
+describe('tourStopSchema paths', () => {
+  it.each([
+    '//evil.example',
+    '/\\',
+    '/\\evil.example',
+    '/\t/evil.example',
+    'category',
+  ])('refuses %j, so a hand-edited row fails instead of linking off-site', (path) => {
+    expect(tourStopSchema.safeParse(stop({path})).success).toBe(false);
+  });
 });
 
 describe('hasTour', () => {
@@ -57,6 +69,22 @@ describe('captureGroups', () => {
 
   it('splits on either capture differing', () => {
     expect(captureKey(stop())).not.toBe(captureKey(stop({captures: {...baseCaptures, mobile: otherCaptures.mobile}})));
+  });
+});
+
+describe('setStopCapture', () => {
+  const image = {url: 'https://cdn.example.com/new.webp', width: 10, height: 20};
+
+  it('keeps both captures when two uploads finish one after the other', () => {
+    const stops = [stop({key: 'a'}), stop({key: 'b'})];
+    const next = setStopCapture(setStopCapture(stops, 'a', 'mobile', otherCaptures.mobile), 'a', 'desktop', image);
+    expect(next[0]?.captures).toEqual({desktop: image, mobile: otherCaptures.mobile});
+    expect(next[1]).toBe(stops[1]);
+  });
+
+  it('empties a removed capture and leaves the other device alone', () => {
+    const [first] = setStopCapture([stop()], 'a', 'desktop', null);
+    expect(first?.captures).toEqual({desktop: {url: '', width: 0, height: 0}, mobile: baseCaptures.mobile});
   });
 });
 

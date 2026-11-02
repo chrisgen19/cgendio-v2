@@ -35,3 +35,14 @@ export const reasoningRows = ({decision, contribution, outcome}: Pick<ProjectDet
     {label: 'Our part', text: contribution},
     {label: 'The result', text: outcome},
   ].flatMap(({label, text}) => (text?.trim() ? [{label, text: text.trim()}] : []));
+
+/**
+ * One capture of one stop replaced, or emptied with null. Works from the current list, so uploads that overlap can't
+ * restore each other's old values. A draft has the same captures as a stop, so this takes both.
+ */
+export const setStopCapture = <T extends Pick<TourStop, 'key' | 'captures'>>(
+  stops: T[],
+  key: string,
+  device: keyof TourStop['captures'],
+  image: TourStop['captures'][typeof device] | null,
+): T[] => stops.map((stop) => (stop.key === key ? {...stop, captures: {...stop.captures, [device]: image ?? {url: '', width: 0, height: 0}}} : stop));

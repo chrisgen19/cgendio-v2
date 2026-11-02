@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {MAX_TOUR_STOPS, TOUR_PATH, type TourStop, tourPositionsSchema, tourStopsSchema} from '../content-schema';
+import {isTourPath, MAX_TOUR_STOPS, type TourStop, tourPositionsSchema, tourStopsSchema} from '../content-schema';
 
 const UNREADABLE = 'The tour could not be read. Reload the page and try again.';
 
@@ -32,7 +32,7 @@ const textProblem = (draft: Draft, index: number): string | null => {
   if (emphasis && !note.includes(emphasis)) return 'the emphasis must be words from the note';
   if (!draft.selected.trim()) return 'the selected label is required';
   if (note && !draft.onScreen.trim()) return 'the on screen line is required';
-  if (!TOUR_PATH.test(draft.path.trim())) return 'the page path must start with a single /';
+  if (!isTourPath(draft.path.trim())) return 'the page path must start with a single /';
   if (!draft.alt.trim()) return 'the alt text is required';
   if (!hasCapture(draft.captures.desktop)) return 'the desktop capture is missing';
   if (!hasCapture(draft.captures.mobile)) return 'the mobile capture is missing';

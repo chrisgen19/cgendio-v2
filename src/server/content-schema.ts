@@ -95,8 +95,18 @@ export const tourViewSchema = z.object({
 
 const tourCaptureSchema = z.object({url: z.url(), width: z.int().positive(), height: z.int().positive()});
 
-/** A single leading slash: `//host` would resolve to another site when the path is joined to the live URL. */
-export const TOUR_PATH = /^\/(?!\/)/;
+/**
+ * A path that stays on the live site once joined to its URL. `//host` and `/\\host` would resolve to another site, `/\\`
+ * makes new URL throw, and browsers strip tabs and line breaks before parsing, so all of them are refused.
+ */
+export const isTourPath = (path: string) => {
+  if (!/^\/(?!\/)/.test(path) || /[\s\\]/.test(path)) return false;
+  try {
+    return new URL(path, 'https://site.invalid').host === 'site.invalid';
+  } catch {
+    return false;
+  }
+};
 
 export const tourPositionsSchema = z.object({desktop: tourViewSchema, mobile: tourViewSchema});
 
@@ -110,7 +120,7 @@ export const tourStopSchema = z.object({
   emphasis: z.string().min(1).nullable(),
   selected: z.string().min(1),
   onScreen: z.string(),
-  path: z.string().regex(TOUR_PATH),
+  path: z.string().refine(isTourPath),
   alt: z.string().min(1),
   captures: z.object({desktop: tourCaptureSchema, mobile: tourCaptureSchema}),
   positions: tourPositionsSchema,
