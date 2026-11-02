@@ -46,9 +46,9 @@ for (const theme of ['light', 'dark'] as const) {
       await page.goto('/');
       const card = page
         .locator('main:visible #work article.work-card')
-        .filter({has: page.getByRole('heading', {level: 3, name: 'Merthyr Village Community Portal'})});
+        .filter({has: page.getByRole('heading', {level: 3, name: 'Experience Sunnybank Community Hub'})});
       const tint = await card.evaluate((node) => getComputedStyle(node).backgroundColor);
-      await page.goto('/work/merthyr-village');
+      await page.goto('/work/experience-sunnybank');
       const panel = page.locator('main:visible .brand-panel');
       await expect(panel).toHaveCSS('background-color', tint);
     });

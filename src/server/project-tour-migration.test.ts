@@ -41,8 +41,8 @@ describe('project walkthrough migration', () => {
     expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
   });
 
-  it('gives only Access Hire and MyImprov a tour', () => {
-    expect(projects.filter((project) => project.tourStops?.length).map(({slug}) => slug)).toEqual(['access-hire', 'myimprov']);
+  it('gives only Access Hire, MyImprov and Merthyr Village a tour', () => {
+    expect(projects.filter((project) => project.tourStops?.length).map(({slug}) => slug)).toEqual(['access-hire', 'myimprov', 'merthyr-village']);
   });
 });
 
@@ -68,6 +68,40 @@ describe('project myimprov tour migration', () => {
       expect(stop.captures.mobile.url).toContain('/images/2026/myimprov-tour/');
       expect(tourHref(stop.path, myimprov?.liveUrl ?? null)).not.toBeNull();
     }
+  });
+
+  it('leaves the reasoning empty', () => {
+    expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
+  });
+});
+
+describe('project merthyr village tour migration', () => {
+  const sql = readFileSync(new URL('../../prisma/migrations/20261102140000_project_merthyr_village_tour/migration.sql', import.meta.url), 'utf8');
+  const merthyr = projects.find((project) => project.slug === 'merthyr-village');
+
+  it('seeds a valid tour with an opening and four notes', () => {
+    const stops = tourStopsSchema.parse(merthyr?.tourStops);
+    expect(stops).toHaveLength(5);
+    expect(stops[0]?.note).toBe('');
+    expect(stops.slice(1).every((stop) => stop.note !== '')).toBe(true);
+  });
+
+  it('backfills the seed tour, only while empty', () => {
+    const match = sql.match(/UPDATE "projects" SET "tour_stops" = '(.+)'::jsonb WHERE "slug" = 'merthyr-village' AND "tour_stops" = '\[\]'::jsonb;/);
+    expect(JSON.parse(unquote(match?.[1] ?? 'null'))).toEqual(merthyr?.tourStops);
+  });
+
+  it('keeps every capture in the tour folder and every page on the live site', () => {
+    for (const stop of merthyr?.tourStops ?? []) {
+      expect(stop.captures.desktop.url).toContain('/images/2026/merthyr-village-tour/');
+      expect(stop.captures.mobile.url).toContain('/images/2026/merthyr-village-tour/');
+      expect(tourHref(stop.path, merthyr?.liveUrl ?? null)).not.toBeNull();
+    }
+  });
+
+  it('uses the independent tenant, not a national brand', () => {
+    expect(JSON.stringify(merthyr?.tourStops)).not.toMatch(/coles/i);
+    expect(merthyr?.tourStops?.map(({path}) => path)).toContain('/store/new-farm-deli-cafe/');
   });
 
   it('leaves the reasoning empty', () => {
