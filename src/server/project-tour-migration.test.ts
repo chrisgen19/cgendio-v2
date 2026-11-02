@@ -175,6 +175,12 @@ describe('project fresh fruit tour migration', () => {
     }
   });
 
+  it('describes the live office deliveries site, not a subscription shop', () => {
+    const home = freshFruit?.tourStops?.find(({key}) => key === 'home');
+    expect(home?.note).toContain('office');
+    expect(`${home?.note} ${home?.onScreen}`).not.toMatch(/subscription|checkout|delivery slots|now leads/i);
+  });
+
   it('leaves the reasoning empty', () => {
     expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
   });

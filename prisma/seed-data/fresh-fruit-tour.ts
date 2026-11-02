@@ -3,7 +3,8 @@ import type {TourStop} from '../../src/server/content-schema';
 /**
  * The Fresh Fruit and Veg Shop case study tour. Captures of the live site from 2026-11-02, in the cgendio-media bucket, cropped
  * first to remove named customer testimonials. The site now leads with office deliveries and has no public shop pages, so the
- * tour shows what is live. Positions are in each capture's pixels. Note text is the write-up, word for word. The
+ * tour shows what is live. Positions are in each capture's pixels. Note text is the write-up, word for word, except the home
+ * stop, which is reworded to match the live site. The
  * 20261102160000_project_fresh_fruit_tour migration backfills the same value, so change both.
  */
 const FOLDER = 'https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/fresh-fruit-tour';
@@ -45,10 +46,10 @@ export const freshFruitTour: TourStop[] = [
   {
     key: 'home',
     heading: 'Home page',
-    note: 'A WooCommerce shop for home and office deliveries, with boxes sold as monthly subscriptions and delivery slots picked at checkout.',
+    note: 'A WooCommerce site for office fruit deliveries, with boxes and prices on one page and a form to get a quote.',
     emphasis: null,
     selected: 'Workplace benefits',
-    onScreen: 'The site now leads with office deliveries: no delivery charge and no contract',
+    onScreen: 'Why to have fruit delivered to a workplace: no delivery charge and no contract',
     path: '/',
     alt: ALTS.home,
     captures: captures('home'),
