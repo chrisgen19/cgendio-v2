@@ -41,8 +41,13 @@ describe('project walkthrough migration', () => {
     expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
   });
 
-  it('gives only Access Hire, MyImprov and Merthyr Village a tour', () => {
-    expect(projects.filter((project) => project.tourStops?.length).map(({slug}) => slug)).toEqual(['access-hire', 'myimprov', 'merthyr-village']);
+  it('gives only the four finished projects a tour', () => {
+    expect(projects.filter((project) => project.tourStops?.length).map(({slug}) => slug)).toEqual([
+      'access-hire',
+      'myimprov',
+      'merthyr-village',
+      'experience-sunnybank',
+    ]);
   });
 });
 
@@ -102,6 +107,40 @@ describe('project merthyr village tour migration', () => {
   it('uses the independent tenant, not a national brand', () => {
     expect(JSON.stringify(merthyr?.tourStops)).not.toMatch(/coles/i);
     expect(merthyr?.tourStops?.map(({path}) => path)).toContain('/store/new-farm-deli-cafe/');
+  });
+
+  it('leaves the reasoning empty', () => {
+    expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
+  });
+});
+
+describe('project experience sunnybank tour migration', () => {
+  const sql = readFileSync(
+    new URL('../../prisma/migrations/20261102150000_project_experience_sunnybank_tour/migration.sql', import.meta.url),
+    'utf8',
+  );
+  const sunnybank = projects.find((project) => project.slug === 'experience-sunnybank');
+
+  it('seeds a valid tour with an opening and five notes', () => {
+    const stops = tourStopsSchema.parse(sunnybank?.tourStops);
+    expect(stops).toHaveLength(6);
+    expect(stops[0]?.note).toBe('');
+    expect(stops.slice(1).every((stop) => stop.note !== '')).toBe(true);
+  });
+
+  it('backfills the seed tour, only while empty', () => {
+    const match = sql.match(
+      /UPDATE "projects" SET "tour_stops" = '(.+)'::jsonb WHERE "slug" = 'experience-sunnybank' AND "tour_stops" = '\[\]'::jsonb;/,
+    );
+    expect(JSON.parse(unquote(match?.[1] ?? 'null'))).toEqual(sunnybank?.tourStops);
+  });
+
+  it('keeps every capture in the tour folder and every page on the live site', () => {
+    for (const stop of sunnybank?.tourStops ?? []) {
+      expect(stop.captures.desktop.url).toContain('/images/2026/experience-sunnybank-tour/');
+      expect(stop.captures.mobile.url).toContain('/images/2026/experience-sunnybank-tour/');
+      expect(tourHref(stop.path, sunnybank?.liveUrl ?? null)).not.toBeNull();
+    }
   });
 
   it('leaves the reasoning empty', () => {

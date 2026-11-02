@@ -13,7 +13,7 @@ const frame = (page: Page) => main(page).getByRole('figure', {name: 'The live si
 
 test.beforeEach(async ({page}) => {
   await page.route(
-    (url) => /(access-hire|myimprov|merthyr-village)-tour/.test(decodeURIComponent(url.href)),
+    (url) => /(access-hire|myimprov|merthyr-village|experience-sunnybank)-tour/.test(decodeURIComponent(url.href)),
     (route) => route.fulfill({body: FIXTURE, contentType: 'image/png'}),
   );
 });
@@ -115,7 +115,7 @@ test.describe('without JavaScript', () => {
 });
 
 test('a project without a tour keeps the current layout', async ({page}) => {
-  await page.goto('/work/experience-sunnybank');
+  await page.goto('/work/fresh-fruit-and-veg');
   await expect(frame(page)).toHaveCount(0);
   await expect(main(page).getByRole('term').filter({hasText: 'Client'})).toBeVisible();
   await expect(main(page).locator('article img[src^="data:image/png"]')).toBeVisible();
@@ -147,4 +147,11 @@ test('Merthyr Village shows a note for each stop after its opening', async ({pag
   await expect(frame(page)).toBeVisible();
   await expect(main(page).locator('[data-stop]')).toHaveCount(4);
   await expect(page.getByRole('heading', {level: 3, name: 'Tenant page'})).toBeVisible();
+});
+
+test('Experience Sunnybank shows a note for each stop after its opening', async ({page}) => {
+  await page.goto('/work/experience-sunnybank');
+  await expect(frame(page)).toBeVisible();
+  await expect(main(page).locator('[data-stop]')).toHaveCount(5);
+  await expect(page.getByRole('heading', {level: 3, name: 'Specialty stores'})).toBeVisible();
 });
