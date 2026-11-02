@@ -4,7 +4,7 @@ import {Monitor, Smartphone} from 'lucide-react';
 import {type ReactNode, useEffect, useRef, useState} from 'react';
 import {flushSync} from 'react-dom';
 import {cn} from '@/lib/cn';
-import {captureGroups, captureKey} from '@/lib/tour';
+import {captureGroups, captureKey, tourAddress, tourHref} from '@/lib/tour';
 import type {TourStop} from '@/server/content';
 import {CaptureImage, PanSurface, Selection, type TourDevice} from './walkthrough-capture';
 
@@ -46,13 +46,13 @@ type AddressProps = {
   host: string | null;
 };
 
-/** The address bar's text. The home page reads as the bare host; with no live site there is only the path. */
+/** The address bar's text. On a phone a long path hides the host, so the page's own path stays readable. */
 function Address({stop, host}: AddressProps) {
-  const isHome = stop.path === '/';
+  const address = tourAddress(stop.path, host);
   return (
     <span key={stop.path} className="walkthrough-address truncate font-mono text-xs leading-none">
-      {host ? <span className={isHome ? undefined : 'max-sm:hidden'}>{host}</span> : null}
-      {isHome && host ? '' : stop.path}
+      {address.host ? <span className={address.path ? 'max-sm:hidden' : undefined}>{address.host}</span> : null}
+      {address.path}
     </span>
   );
 }
@@ -182,7 +182,7 @@ export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, not
   };
 
   const current = frames[active] ?? frames[0];
-  const href = liveUrl ? new URL(current.path, liveUrl).toString() : undefined;
+  const href = tourHref(current.path, liveUrl);
 
   return (
     <div

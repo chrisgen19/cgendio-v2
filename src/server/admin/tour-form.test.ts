@@ -58,12 +58,12 @@ describe('parseTourField', () => {
     [[draft(), draft({key: 'b', captures: {...caps, desktop: {url: '', width: 0, height: 0}}})], 'Stop 2: the desktop capture is missing'],
     [[draft(), draft({key: 'b', captures: {...caps, mobile: {url: '', width: 0, height: 0}}})], 'Stop 2: the mobile capture is missing'],
     [[draft(), draft({key: 'b', note: ''})], 'Stop 2: only the first stop can have an empty note'],
-    [[draft({path: '//evil.example'})], 'Stop 1: the page path must start with a single /'],
-    [[draft({path: 'category'})], 'Stop 1: the page path must start with a single /'],
-    [[draft({path: '/\\'})], 'Stop 1: the page path must start with a single /'],
-    [[draft({path: '/\\evil.example'})], 'Stop 1: the page path must start with a single /'],
-    [[draft({path: '/\t/evil.example'})], 'Stop 1: the page path must start with a single /'],
-    [[draft({path: '/with space'})], 'Stop 1: the page path must start with a single /'],
+    [[draft({path: '//evil.example'})], 'Stop 1: the page must be a path starting with a single / or a full https address'],
+    [[draft({path: 'category'})], 'Stop 1: the page must be a path starting with a single / or a full https address'],
+    [[draft({path: '/\\'})], 'Stop 1: the page must be a path starting with a single / or a full https address'],
+    [[draft({path: '/\\evil.example'})], 'Stop 1: the page must be a path starting with a single / or a full https address'],
+    [[draft({path: '/\t/evil.example'})], 'Stop 1: the page must be a path starting with a single / or a full https address'],
+    [[draft({path: '/with space'})], 'Stop 1: the page must be a path starting with a single / or a full https address'],
     [[draft({emphasis: 'absent'})], 'Stop 1: the emphasis must be words from the note'],
     [[draft({heading: ''})], 'Stop 1: the heading is required'],
     [[draft({onScreen: ''})], 'Stop 1: the on screen line is required'],
@@ -75,7 +75,7 @@ describe('parseTourField', () => {
     expect(parseTourField(JSON.stringify(drafts))).toEqual({ok: false, message});
   });
 
-  it.each(['/', '/category/scissor-lift', '/a?b=c#d', '/caf%C3%A9'])('accepts the path %s', (path) => {
+  it.each(['/', '/category/scissor-lift', '/a?b=c#d', '/caf%C3%A9', 'https://courses.example.com/'])('accepts the path %s', (path) => {
     expect(parseTourField(JSON.stringify([draft({path})])).ok).toBe(true);
   });
 

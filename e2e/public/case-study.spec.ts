@@ -12,7 +12,7 @@ test('a home page card opens its case study', async ({page}) => {
 });
 
 test('a case study without a tour shows its cover', async ({page}) => {
-  await page.goto('/work/myimprov');
+  await page.goto('/work/merthyr-village');
   // The cover is decorative (empty alt); e2e swaps the seeded r2.dev URL for a local fixture
   await expect(page.getByRole('main').locator('article img[src^="data:image/png"]')).toBeVisible();
 });

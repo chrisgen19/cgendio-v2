@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {type TourStop, tourStopSchema} from '@/server/content-schema';
-import {captureGroups, captureKey, captureSizes, hasTour, reasoningRows, setStopCapture, tourFrames} from './tour';
+import {captureGroups, captureKey, captureSizes, hasTour, reasoningRows, setStopCapture, tourAddress, tourFrames, tourHref} from './tour';
 
 const baseCaptures: TourStop['captures'] = {
   desktop: {url: 'https://cdn.example.com/home-desktop.webp', width: 1600, height: 2400},
@@ -35,6 +35,67 @@ describe('tourStopSchema paths', () => {
     'category',
   ])('refuses %j, so a hand-edited row fails instead of linking off-site', (path) => {
     expect(tourStopSchema.safeParse(stop({path})).success).toBe(false);
+  });
+});
+
+describe('tourStopSchema full addresses', () => {
+  it('accepts a full https address', () => {
+    expect(tourStopSchema.safeParse(stop({path: 'https://courses.example.com/'})).success).toBe(true);
+  });
+
+  it.each([
+    'http://courses.example.com/',
+    'https://user:pass@courses.example.com/',
+    'https://',
+    'javascript:alert(1)',
+    'https://a b.example/',
+  ])('refuses %j', (path) => {
+    expect(tourStopSchema.safeParse(stop({path})).success).toBe(false);
+  });
+});
+
+describe('tourHref', () => {
+  const live = 'https://www.example.com/';
+
+  it('joins a path to the live site', () => {
+    expect(tourHref('/category', live)).toBe('https://www.example.com/category');
+  });
+
+  it('keeps a full address on the same domain or a subdomain', () => {
+    expect(tourHref('https://courses.example.com/', live)).toBe('https://courses.example.com/');
+    expect(tourHref('https://example.com/a', live)).toBe('https://example.com/a');
+  });
+
+  it.each([
+    'https://evil.example/',
+    'https://notexample.com/',
+    'https://example.com.evil.example/',
+  ])('gives no link for %s, even if a row was edited by hand', (path) => {
+    expect(tourHref(path, live)).toBeNull();
+  });
+
+  it('gives no link without a live site', () => {
+    expect(tourHref('/category', null)).toBeNull();
+    expect(tourHref('https://courses.example.com/', null)).toBeNull();
+  });
+});
+
+describe('tourAddress', () => {
+  it('shows the bare host for the home page', () => {
+    expect(tourAddress('/', 'example.com')).toEqual({host: 'example.com', path: ''});
+  });
+
+  it('shows the host and the path for a page', () => {
+    expect(tourAddress('/category', 'example.com')).toEqual({host: 'example.com', path: '/category'});
+  });
+
+  it('shows only the path without a live site', () => {
+    expect(tourAddress('/', null)).toEqual({host: null, path: '/'});
+  });
+
+  it('shows the full address own host, whatever the live site', () => {
+    expect(tourAddress('https://courses.example.com/', 'example.com')).toEqual({host: 'courses.example.com', path: ''});
+    expect(tourAddress('https://courses.example.com/login?a=1', null)).toEqual({host: 'courses.example.com', path: '/login?a=1'});
   });
 });
 

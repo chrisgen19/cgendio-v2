@@ -1,5 +1,6 @@
 import {readFileSync} from 'node:fs';
 import {describe, expect, it} from 'vitest';
+import {tourHref} from '@/lib/tour';
 import {projects} from '../../prisma/seed-data/projects';
 import {tourStopsSchema} from './content-schema';
 
@@ -40,7 +41,36 @@ describe('project walkthrough migration', () => {
     expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
   });
 
-  it('gives only Access Hire a tour', () => {
-    expect(projects.filter((project) => project.tourStops?.length).map(({slug}) => slug)).toEqual(['access-hire']);
+  it('gives only Access Hire and MyImprov a tour', () => {
+    expect(projects.filter((project) => project.tourStops?.length).map(({slug}) => slug)).toEqual(['access-hire', 'myimprov']);
+  });
+});
+
+describe('project myimprov tour migration', () => {
+  const sql = readFileSync(new URL('../../prisma/migrations/20261102130000_project_myimprov_tour/migration.sql', import.meta.url), 'utf8');
+  const myimprov = projects.find((project) => project.slug === 'myimprov');
+
+  it('seeds a valid tour with an opening and six notes', () => {
+    const stops = tourStopsSchema.parse(myimprov?.tourStops);
+    expect(stops).toHaveLength(7);
+    expect(stops[0]?.note).toBe('');
+    expect(stops.slice(1).every((stop) => stop.note !== '')).toBe(true);
+  });
+
+  it('backfills the seed tour, only while empty', () => {
+    const match = sql.match(/UPDATE "projects" SET "tour_stops" = '(.+)'::jsonb WHERE "slug" = 'myimprov' AND "tour_stops" = '\[\]'::jsonb;/);
+    expect(JSON.parse(unquote(match?.[1] ?? 'null'))).toEqual(myimprov?.tourStops);
+  });
+
+  it('keeps every capture in the tour folder and every full address on the project domain', () => {
+    for (const stop of myimprov?.tourStops ?? []) {
+      expect(stop.captures.desktop.url).toContain('/images/2026/myimprov-tour/');
+      expect(stop.captures.mobile.url).toContain('/images/2026/myimprov-tour/');
+      expect(tourHref(stop.path, myimprov?.liveUrl ?? null)).not.toBeNull();
+    }
+  });
+
+  it('leaves the reasoning empty', () => {
+    expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
   });
 });

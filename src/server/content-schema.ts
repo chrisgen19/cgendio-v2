@@ -96,13 +96,18 @@ export const tourViewSchema = z.object({
 const tourCaptureSchema = z.object({url: z.url(), width: z.int().positive(), height: z.int().positive()});
 
 /**
- * A path that stays on the live site once joined to its URL. `//host` and `/\\host` would resolve to another site, `/\\`
- * makes new URL throw, and browsers strip tabs and line breaks before parsing, so all of them are refused.
+ * Where a stop's page lives: a path on the live site, or a full https address for a page on one of its subdomains. A path
+ * must stay on the site once joined to its URL: `//host` and `/\\host` would resolve elsewhere, `/\\` makes new URL throw,
+ * and browsers strip tabs and line breaks before parsing, so all of them are refused. The domain of a full address depends
+ * on the project, so the admin form and tourHref check that.
  */
 export const isTourPath = (path: string) => {
-  if (!/^\/(?!\/)/.test(path) || /[\s\\]/.test(path)) return false;
+  if (/[\s\\]/.test(path)) return false;
+  const isFull = path.startsWith('https://');
+  if (!isFull && !/^\/(?!\/)/.test(path)) return false;
   try {
-    return new URL(path, 'https://site.invalid').host === 'site.invalid';
+    const url = new URL(path, 'https://site.invalid');
+    return isFull ? url.hostname.includes('.') && !url.username && !url.password : url.host === 'site.invalid';
   } catch {
     return false;
   }

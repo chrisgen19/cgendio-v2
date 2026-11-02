@@ -65,6 +65,41 @@ describe('projectFormSchema', () => {
     expect(result.error?.flatten().fieldErrors.outcome).toBeDefined();
   });
 
+  describe('a stop with a full address', () => {
+    const view = {y: 0, box: {x: 0, y: 0, w: 10, h: 10}};
+    const capture = {url: 'https://cdn.example.com/a.webp', width: 10, height: 10};
+    const tourWith = (path: string) =>
+      JSON.stringify([
+        {
+          key: 'a',
+          heading: 'Login',
+          note: 'A note',
+          emphasis: null,
+          selected: 'Form',
+          onScreen: 'A form',
+          path,
+          alt: 'A form',
+          captures: {desktop: capture, mobile: capture},
+          positions: JSON.stringify({desktop: view, mobile: view}),
+        },
+      ]);
+    const OFF_SITE = 'Stop 1: a full address must be on the live site or one of its subdomains';
+
+    it('saves on a subdomain of the live site', () => {
+      expect(projectFormSchema.safeParse({...projectForm, tourStops: tourWith('https://courses.example.com/')}).success).toBe(true);
+    });
+
+    it.each(['https://evil.example/', 'https://notexample.com/'])('refuses %s', (path) => {
+      const result = projectFormSchema.safeParse({...projectForm, tourStops: tourWith(path)});
+      expect(result.error?.flatten().fieldErrors.tourStops).toEqual([OFF_SITE]);
+    });
+
+    it('refuses one when the project has no live site', () => {
+      const result = projectFormSchema.safeParse({...projectForm, liveUrl: '', tourStops: tourWith('https://courses.example.com/')});
+      expect(result.error?.flatten().fieldErrors.tourStops).toEqual([OFF_SITE]);
+    });
+  });
+
   it('reports a bad tour on the tourStops field with its message', () => {
     const result = projectFormSchema.safeParse({...projectForm, tourStops: 'nope'});
     expect(result.success).toBe(false);

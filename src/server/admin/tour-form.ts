@@ -32,7 +32,7 @@ const textProblem = (draft: Draft, index: number): string | null => {
   if (emphasis && !note.includes(emphasis)) return 'the emphasis must be words from the note';
   if (!draft.selected.trim()) return 'the selected label is required';
   if (note && !draft.onScreen.trim()) return 'the on screen line is required';
-  if (!isTourPath(draft.path.trim())) return 'the page path must start with a single /';
+  if (!isTourPath(draft.path.trim())) return 'the page must be a path starting with a single / or a full https address';
   if (!draft.alt.trim()) return 'the alt text is required';
   if (!hasCapture(draft.captures.desktop)) return 'the desktop capture is missing';
   if (!hasCapture(draft.captures.mobile)) return 'the mobile capture is missing';
