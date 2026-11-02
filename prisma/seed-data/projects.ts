@@ -1,4 +1,5 @@
 import type {Project, ProjectDetail} from '../../src/server/content-schema';
+import {accessHireTour} from './access-hire-tour.ts';
 
 /**
  * The six client projects from the v1 site, with its slugs, one-liners and stacks. Case studies live in
@@ -32,6 +33,7 @@ export const projects: SeedProject[] = [
     repoUrl: null,
     client: 'Access Hire Australia',
     role: ACCESS_GROUP_ROLE,
+    tourStops: accessHireTour,
   },
   {
     slug: 'myimprov',
