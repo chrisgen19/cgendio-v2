@@ -44,7 +44,11 @@ export function UploadField({name, label, kind, defaultValue, hint, onUploaded}:
     trackUpload(1);
     try {
       // Read first: a caller that needs the size gets nothing at all from a file the browser can't decode
-      const size = onUploaded ? await imageSize(file) : null;
+      const size = onUploaded ? await imageSize(file).catch(() => null) : null;
+      if (onUploaded && !size) {
+        toast.error("That image couldn't be read. Try another JPEG, PNG, WebP or AVIF file.");
+        return;
+      }
       const target = await getUploadTarget({kind, contentType: file.type, size: file.size});
       if (!target.ok) {
         toast.error(target.error);

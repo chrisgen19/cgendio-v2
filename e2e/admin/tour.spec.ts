@@ -148,3 +148,16 @@ test('a new stop needs its captures before it saves', async ({page}) => {
   await page.getByRole('button', {name: 'Save project'}).click();
   await expect(page.getByText('Stop 9: the desktop capture is missing')).toBeVisible();
 });
+
+test('a capture the browser cannot decode gets its own error and changes nothing', async ({page}) => {
+  const before = await tourOf();
+  await editAccessHire(page);
+  await page
+    .getByLabel('Desktop capture')
+    .first()
+    .setInputFiles({name: 'broken.png', mimeType: 'image/png', buffer: Buffer.from('not an image')});
+  await expect(page.getByText("That image couldn't be read. Try another JPEG, PNG, WebP or AVIF file.")).toBeVisible();
+  await expect(page.getByText(/Check your connection/)).toHaveCount(0);
+  await save(page);
+  expect(await tourOf()).toEqual(before);
+});

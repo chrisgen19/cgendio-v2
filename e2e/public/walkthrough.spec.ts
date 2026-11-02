@@ -52,6 +52,14 @@ test('stops that share a page stay on one layer of the frame', async ({page}) =>
   await expect(active.getByText("What you'll need", {exact: true})).toBeAttached();
 });
 
+test('the address bar link meets the 44px touch target', async ({page}) => {
+  await page.goto('/work/access-hire');
+  const box = await frame(page)
+    .getByRole('link', {name: /on the live site/})
+    .boundingBox();
+  expect(box?.height).toBeGreaterThanOrEqual(44);
+});
+
 test('the device switch changes the frame', async ({page}, testInfo) => {
   await page.goto('/work/access-hire');
   const target = testInfo.project.name === 'mobile' ? 'desktop' : 'mobile';
