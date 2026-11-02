@@ -27,11 +27,11 @@ type StaticCaptureProps = {
   stop: TourStop;
   host: string | null;
   optimizedUrls: string[];
-  eager?: boolean;
+  first?: boolean;
 };
 
 /** A note's own capture, for readers without the pinned frame: no JavaScript, or reduced motion. One device shows at a time, by CSS. */
-function StaticCapture({stop, host, optimizedUrls, eager = false}: StaticCaptureProps) {
+function StaticCapture({stop, host, optimizedUrls, first = false}: StaticCaptureProps) {
   return (
     <figure className="walkthrough-static-only m-0 max-lg:mt-6">
       <figcaption className="walkthrough-static-caption flex min-h-9 items-center rounded-t-[14px] border border-b-0 border-line bg-white px-3 font-mono text-xs text-ink">
@@ -42,7 +42,13 @@ function StaticCapture({stop, host, optimizedUrls, eager = false}: StaticCapture
         {DEVICES.map((device) => (
           <div key={device} data-layer={device} data-state="active" className="walkthrough-page">
             <PanSurface view={stop.positions[device]} capture={stop.captures[device]}>
-              <CaptureImage stop={stop} device={device} optimized={optimizedUrls.includes(stop.captures[device].url)} eager={eager} />
+              <CaptureImage
+                stop={stop}
+                device={device}
+                optimized={optimizedUrls.includes(stop.captures[device].url)}
+                zoom={stop.positions[device].zoom}
+                first={first}
+              />
               <Selection stop={stop} device={device} on />
             </PanSurface>
           </div>
@@ -114,7 +120,7 @@ function Hero({project, opening, host, optimizedUrls}: HeroProps) {
           </div>
         </dl>
       </div>
-      <StaticCapture stop={opening} host={host} optimizedUrls={optimizedUrls} eager />
+      <StaticCapture stop={opening} host={host} optimizedUrls={optimizedUrls} first />
     </header>
   );
 }

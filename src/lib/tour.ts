@@ -46,3 +46,15 @@ export const setStopCapture = <T extends Pick<TourStop, 'key' | 'captures'>>(
   device: keyof TourStop['captures'],
   image: TourStop['captures'][typeof device] | null,
 ): T[] => stops.map((stop) => (stop.key === key ? {...stop, captures: {...stop.captures, [device]: image ?? {url: '', width: 0, height: 0}}} : stop));
+
+const FRAME_WIDTHS = {
+  desktop: {wide: '62vw', narrow: '560px'},
+  mobile: {wide: '340px', narrow: 'min(100vw, 560px)'},
+} as const;
+
+/** The image `sizes` for a capture. A zoomed stop renders wider than its frame, so it needs a larger file to stay sharp. */
+export const captureSizes = (device: keyof typeof FRAME_WIDTHS, zoom: number) => {
+  const scaled = (width: string) => (zoom === 1 ? width : `calc(${width} * ${zoom})`);
+  const {wide, narrow} = FRAME_WIDTHS[device];
+  return `(min-width: 1080px) ${scaled(wide)}, ${scaled(narrow)}`;
+};

@@ -1,14 +1,10 @@
 import Image from 'next/image';
 import type {CSSProperties, ReactNode} from 'react';
 import {cn} from '@/lib/cn';
+import {captureSizes} from '@/lib/tour';
 import type {TourStop, TourView} from '@/server/content';
 
 export type TourDevice = 'desktop' | 'mobile';
-
-const SIZES: Record<TourDevice, string> = {
-  desktop: '(min-width: 1080px) 62vw, 560px',
-  mobile: '(min-width: 1080px) 340px, min(100vw, 560px)',
-};
 
 const HANDLES = ['top-0 left-0', 'top-0 left-full', 'top-full left-full', 'top-full left-0'];
 
@@ -24,12 +20,14 @@ type CaptureImageProps = {
   device: TourDevice;
   /** Worked out on the server: the R2 host is only known there, and this also renders in the browser. */
   optimized: boolean;
-  /** Only for the capture in the first viewport. */
-  eager?: boolean;
+  /** The largest zoom this capture is shown at. */
+  zoom?: number;
+  /** The capture in the first viewport: fetched first, once the browser knows it is visible. */
+  first?: boolean;
 };
 
 /** A full-page capture of the live site. */
-export function CaptureImage({stop, device, optimized, eager = false}: CaptureImageProps) {
+export function CaptureImage({stop, device, optimized, zoom = 1, first = false}: CaptureImageProps) {
   const {url, width, height} = stop.captures[device];
   return (
     <Image
@@ -37,10 +35,11 @@ export function CaptureImage({stop, device, optimized, eager = false}: CaptureIm
       alt={stop.alt}
       width={width}
       height={height}
-      sizes={SIZES[device]}
+      sizes={captureSizes(device, zoom)}
       unoptimized={!optimized}
-      loading={eager ? 'eager' : 'lazy'}
-      fetchPriority={eager ? 'high' : undefined}
+      // Always lazy: every device's capture is in the markup and CSS hides all but one, and a lazy image that is hidden never downloads
+      loading="lazy"
+      fetchPriority={first ? 'high' : undefined}
       draggable={false}
       className="block h-auto w-full max-w-none select-none"
     />

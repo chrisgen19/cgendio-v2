@@ -128,7 +128,13 @@ function Pages({frames, current, reached, optimizedUrls}: PagesProps) {
           className="walkthrough-page"
         >
           <PanSurface view={shown.positions[layer]} capture={shown.captures[layer]} atStart={!isCurrent}>
-            <CaptureImage stop={group.stops[0]} device={layer} optimized={optimizedUrls.includes(shown.captures[layer].url)} eager={index === 0} />
+            <CaptureImage
+              stop={group.stops[0]}
+              device={layer}
+              optimized={optimizedUrls.includes(shown.captures[layer].url)}
+              zoom={Math.max(...group.stops.map(({positions}) => positions[layer].zoom ?? 1))}
+              first={index === 0}
+            />
             {group.stops.map((stop) => (
               <Selection key={stop.key} stop={stop} device={layer} on={stop.key === current.key} />
             ))}

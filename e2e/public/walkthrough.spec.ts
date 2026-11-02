@@ -48,7 +48,7 @@ test('stops that share a page stay on one layer of the frame', async ({page}) =>
   await expect(frame(page)).toContainText('/credit-application');
   const active = frame(page).locator('[data-state="active"]:visible');
   await expect(active).toHaveCount(1);
-  await expect(active.getByText('Services', {exact: true})).toBeAttached();
+  await expect(active.locator('[data-on]').getByText('Services', {exact: true})).toBeAttached();
   await expect(active.getByText("What you'll need", {exact: true})).toBeAttached();
 });
 
@@ -58,6 +58,17 @@ test('the address bar link meets the 44px touch target', async ({page}) => {
     .getByRole('link', {name: /on the live site/})
     .boundingBox();
   expect(box?.height).toBeGreaterThanOrEqual(44);
+});
+
+test('only the visible device downloads its first capture', async ({page}, testInfo) => {
+  const hidden = testInfo.project.name === 'mobile' ? 'home-desktop' : 'home-mobile';
+  const shown = testInfo.project.name === 'mobile' ? 'home-mobile' : 'home-desktop';
+  const requested: string[] = [];
+  page.on('request', (request) => requested.push(decodeURIComponent(request.url())));
+  await page.goto('/work/access-hire');
+  await expect.poll(() => requested.some((url) => url.includes(shown))).toBe(true);
+  await page.waitForLoadState('networkidle');
+  expect(requested.filter((url) => url.includes(hidden))).toEqual([]);
 });
 
 test('the device switch changes the frame', async ({page}, testInfo) => {
