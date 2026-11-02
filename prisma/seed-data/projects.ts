@@ -1,5 +1,6 @@
 import type {Project, ProjectDetail} from '../../src/server/content-schema';
 import {accessHireTour} from './access-hire-tour.ts';
+import {experienceSunnybankTour} from './experience-sunnybank-tour.ts';
 import {merthyrVillageTour} from './merthyr-village-tour.ts';
 import {myimprovTour} from './myimprov-tour.ts';
 
@@ -95,6 +96,7 @@ export const projects: SeedProject[] = [
     repoUrl: null,
     client: 'Experience Sunnybank',
     role: ACCESS_GROUP_ROLE,
+    tourStops: experienceSunnybankTour,
   },
   {
     slug: 'premium-mobile-car-valeting',
