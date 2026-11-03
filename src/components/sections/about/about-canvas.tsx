@@ -1,5 +1,6 @@
-import Image from 'next/image';
 import type {CSSProperties} from 'react';
+import {CaptureSkeleton} from '@/components/ui-site/capture-skeleton';
+import {LoadingImage} from '@/components/ui-site/loading-image';
 import {AboutGuides} from './about-guides';
 import {AboutPin, type PinPlace} from './about-pin';
 import {type AboutCopy, type AboutPinKey, PHOTO_PLACEHOLDER} from './copy';
@@ -40,16 +41,19 @@ export function AboutCanvas({copy, photoUrl, alt, optimizable}: AboutCanvasProps
     >
       <AboutGuides />
       <div data-frame className="absolute top-(--fy) left-(--fx) h-(--fh) w-(--fw)">
-        <div className="relative grid size-full place-items-center overflow-hidden bg-tint">
+        <div className="skeleton-host relative grid size-full place-items-center overflow-hidden bg-tint">
           {photoUrl ? (
-            <Image
-              src={photoUrl}
-              alt={alt}
-              fill
-              sizes="(max-width: 860px) 216px, 400px"
-              unoptimized={!optimizable}
-              className="object-cover object-[50%_40%]"
-            />
+            <>
+              <CaptureSkeleton variant="plain" />
+              <LoadingImage
+                src={photoUrl}
+                alt={alt}
+                fill
+                sizes="(max-width: 860px) 216px, 400px"
+                unoptimized={!optimizable}
+                className="object-cover object-[50%_40%]"
+              />
+            </>
           ) : (
             <span className="font-mono text-[14px] text-accent">{PHOTO_PLACEHOLDER}</span>
           )}

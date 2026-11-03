@@ -4,15 +4,31 @@ const BAR = 'block rounded-full bg-wire';
 const SOFT = 'block rounded-full bg-wire-soft';
 
 type CaptureSkeletonProps = {
+  /** `page` draws a wireframe web page, for site captures; `plain` is a flat surface, for photos and covers. */
+  variant?: 'page' | 'plain';
+  /** A plain skeleton on a dark stage: a faint light surface and a dimmer sweep, instead of a light grey slab. */
+  onDark?: boolean;
   className?: string;
 };
 
 /**
- * A wireframe web page with a light sweep, shown behind a site capture while it loads. Sized in container units, so it
- * scales from a phone frame to the full walkthrough. Put it before the image inside a `.skeleton-host`: globals.css hides
- * it once the host's `LoadingImage` has loaded, stops the sweep if it failed, and never shows it without JavaScript.
+ * A placeholder with a light sweep, shown while an image loads. The page wireframe is sized in container units, so it
+ * scales from a phone frame to the full walkthrough. Put it inside a `.skeleton-host` with a `LoadingImage`: globals.css
+ * hides it once that image has loaded, stops the sweep if it failed, and never shows it without JavaScript.
  */
-export function CaptureSkeleton({className}: CaptureSkeletonProps) {
+export function CaptureSkeleton({variant = 'page', onDark = false, className}: CaptureSkeletonProps) {
+  if (variant === 'plain') {
+    return (
+      <div
+        aria-hidden="true"
+        className={cn(
+          'capture-skeleton absolute inset-0 overflow-hidden',
+          onDark ? 'bg-on-dark/6 [--skeleton-sweep:color-mix(in_srgb,var(--color-on-dark)_10%,transparent)]' : 'bg-wire-soft',
+          className,
+        )}
+      />
+    );
+  }
   return (
     <div aria-hidden="true" className={cn('capture-skeleton @container absolute inset-0 overflow-hidden bg-white', className)}>
       <div className="flex items-center justify-between gap-[3cqw] border-b border-wire-soft px-[5cqw] py-[clamp(10px,2.6cqw,22px)]">
