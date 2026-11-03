@@ -5,7 +5,11 @@ const r2PublicUrl = process.env.R2_PUBLIC_URL?.replace(/\/+$/, '');
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  images: {remotePatterns: r2PublicUrl ? [new URL(`${r2PublicUrl}/**`)] : []},
+  images: {
+    // AVIF first for browsers that accept it (about 25% smaller on the photo-heavy tour captures), WebP otherwise
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: r2PublicUrl ? [new URL(`${r2PublicUrl}/**`)] : [],
+  },
   partialPrefetching: true,
   // Admin, sign-in and draft previews never go in search results (also set as robots metadata on those pages)
   headers: async () => [
