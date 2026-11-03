@@ -3,13 +3,14 @@ import rehypeShiki, {type RehypeShikiOptions} from '@shikijs/rehype';
 import {cacheLife} from 'next/cache';
 import type {ComponentProps, ReactNode} from 'react';
 import {type Components, MarkdownAsync} from 'react-markdown';
-import rehypeSanitize, {defaultSchema} from 'rehype-sanitize';
+import rehypeSanitize from 'rehype-sanitize';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import {CODE_THEME} from '@/lib/code-theme';
-import {rehypeCollectToc, rehypeDemoteH1, type TocItem} from '@/lib/markdown-plugins';
+import {rehypeCollectToc, rehypeDemoteH1, SANITIZE_SCHEMA, type TocItem} from '@/lib/markdown-plugins';
 
-const SHIKI_OPTIONS: RehypeShikiOptions = {
+/** Shared with the case study write-up (src/components/case-study/write-up-markdown.tsx), which renders with its own components. */
+export const SHIKI_OPTIONS: RehypeShikiOptions = {
   theme: CODE_THEME,
   langs: ['ts', 'tsx', 'js', 'jsx', 'json', 'bash', 'shell', 'css', 'html', 'php', 'sql', 'yaml', 'markdown', 'diff', 'prisma'],
   defaultLanguage: 'text',
@@ -25,16 +26,10 @@ const SHIKI_OPTIONS: RehypeShikiOptions = {
   ],
 };
 
-/**
- * GitHub's sanitize schema without its own id prefix: remark-rehype already prefixes footnote ids and their links with
- * "user-content-", and raw HTML (the only other source of ids) is removed, so a second prefix would only break footnotes.
- */
-const SANITIZE_SCHEMA = {...defaultSchema, clobberPrefix: ''};
-
 type HeadingProps = ComponentProps<'h2'> & {level: 2 | 3};
 
 /** A heading with a "#" link to itself that shows on hover or keyboard focus. */
-function AnchoredHeading({level, id, className, children}: HeadingProps) {
+export function AnchoredHeading({level, id, className, children}: HeadingProps) {
   const Tag = level === 2 ? 'h2' : 'h3';
   // The GFM footnotes label is visually hidden and needs no anchor
   if (!id || className?.includes('sr-only')) {
@@ -89,7 +84,7 @@ function CodeWindow({node, children, className, style, tabIndex}: ComponentProps
   );
 }
 
-const COMPONENTS: Components = {
+export const COMPONENTS: Components = {
   h2: ({node: _node, ...props}) => <AnchoredHeading level={2} {...props} />,
   h3: ({node: _node, ...props}) => <AnchoredHeading level={3} {...props} />,
   h4: ({node: _node, ...props}) => <h4 className="mt-8 mb-2 font-display text-xl font-bold tracking-[-0.01em]" {...props} />,
@@ -143,7 +138,7 @@ const COMPONENTS: Components = {
  * Cached by the Markdown text: Shiki's tokenizer reads the clock (a time limit per line), which Cache Components only
  * allows inside a cache scope, and the same body never needs highlighting twice.
  */
-export const renderMarkdown = async (markdown: string): Promise<{content: ReactNode; body: ReactNode; toc: TocItem[]}> => {
+export const renderMarkdown = async (markdown: string): Promise<{content: ReactNode; toc: TocItem[]}> => {
   'use cache';
   cacheLife('max');
   const toc: TocItem[] = [];
@@ -153,6 +148,5 @@ export const renderMarkdown = async (markdown: string): Promise<{content: ReactN
     rehypePlugins: [[rehypeSanitize, SANITIZE_SCHEMA], rehypeDemoteH1, rehypeSlug, [rehypeCollectToc, {sink: toc}], [rehypeShiki, SHIKI_OPTIONS]],
     components: COMPONENTS,
   });
-  // `body` is the same nodes without the article column, for layouts that set their own measure and type size
-  return {content: <div className="max-w-[68ch] text-lg leading-[1.7] text-ink max-md:text-[17px]">{content}</div>, body: content, toc};
+  return {content: <div className="max-w-[68ch] text-lg leading-[1.7] text-ink max-md:text-[17px]">{content}</div>, toc};
 };
