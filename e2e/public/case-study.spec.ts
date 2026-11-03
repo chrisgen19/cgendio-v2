@@ -1,4 +1,5 @@
 import {expect, test} from '@playwright/test';
+import {NO_TOUR_SLUG} from '../support/test-env';
 
 test('a home page card opens its case study', async ({page}) => {
   await page.goto('/');
@@ -12,7 +13,7 @@ test('a home page card opens its case study', async ({page}) => {
 });
 
 test('a case study without a tour shows its cover', async ({page}) => {
-  await page.goto('/work/premium-mobile-car-valeting');
+  await page.goto(`/work/${NO_TOUR_SLUG}`);
   // The cover is decorative (empty alt); e2e swaps the seeded r2.dev URL for a local fixture
   await expect(page.getByRole('main').locator('article img[src^="data:image/png"]')).toBeVisible();
 });

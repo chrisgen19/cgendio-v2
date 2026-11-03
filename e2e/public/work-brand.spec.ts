@@ -1,5 +1,5 @@
 import {expect, type Page, test} from '@playwright/test';
-import {E2E_BASE_URL} from '../support/test-env';
+import {E2E_BASE_URL, NO_TOUR_SLUG} from '../support/test-env';
 
 /*
  * Projects with a brand colour show their brand tint, and follow the page theme. MyImprov's card theme is lime, the one
@@ -42,13 +42,13 @@ for (const theme of ['light', 'dark'] as const) {
     });
 
     test('the case study panel takes the same tint', async ({page}) => {
-      // Only the standard layout has this panel, so this uses a project without a tour
+      // Only the standard layout has this panel, so this uses the project e2e/support/prepare.mts clears the tour of
       await page.goto('/');
       const card = page
         .locator('main:visible #work article.work-card')
         .filter({has: page.getByRole('heading', {level: 3, name: 'Premium Mobile Car Valeting Glasgow'})});
       const tint = await card.evaluate((node) => getComputedStyle(node).backgroundColor);
-      await page.goto('/work/premium-mobile-car-valeting');
+      await page.goto(`/work/${NO_TOUR_SLUG}`);
       const panel = page.locator('main:visible .brand-panel');
       await expect(panel).toHaveCSS('background-color', tint);
     });

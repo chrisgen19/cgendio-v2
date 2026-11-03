@@ -1,7 +1,7 @@
 /**
  * Gets the e2e database ready: recreates it, applies the migrations, seeds the Phase 3 content, points the contact
- * email at the test inbox, swaps the About photo and project covers for a local fixture, and signs in a test admin
- * (cookies saved for the Playwright `admin` project).
+ * email at the test inbox, swaps the About photo and project covers for a local fixture, clears one project's tour, and
+ * signs in a test admin (cookies saved for the Playwright `admin` project).
  *
  * Run with `pnpm test:e2e:prepare` (part of `pnpm test:e2e`), before the build: the build prerenders from this data.
  */
@@ -14,7 +14,7 @@ import {prismaAdapter} from 'better-auth/adapters/prisma';
 import {testUtils} from 'better-auth/plugins';
 import pg from 'pg';
 import {PrismaClient} from '../../src/generated/prisma/client.ts';
-import {ADMIN_EMAIL, ADMIN_STORAGE_STATE, CONTACT_EMAIL, testEnv} from './test-env.ts';
+import {ADMIN_EMAIL, ADMIN_STORAGE_STATE, CONTACT_EMAIL, NO_TOUR_SLUG, testEnv} from './test-env.ts';
 
 const databaseUrl = new URL(testEnv.DATABASE_URL);
 const databaseName = databaseUrl.pathname.slice(1);
@@ -74,6 +74,8 @@ const db = new PrismaClient({adapter: new PrismaPg({connectionString: testEnv.DA
 try {
   await db.siteSettings.update({where: {id: 'site'}, data: {contactEmail: CONTACT_EMAIL, photoUrl: fixture}});
   await db.project.updateMany({where: {coverImageUrl: {not: null}}, data: {coverImageUrl: fixture}});
+  // Every seeded project has a tour, so the specs for the layout without one use this project with its tour cleared
+  await db.project.update({where: {slug: NO_TOUR_SLUG}, data: {tourStops: []}});
   await signInAdmin(db);
 } finally {
   await db.$disconnect();
