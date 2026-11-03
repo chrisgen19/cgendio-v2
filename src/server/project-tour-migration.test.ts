@@ -41,12 +41,13 @@ describe('project walkthrough migration', () => {
     expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
   });
 
-  it('gives only the five finished projects a tour', () => {
+  it('gives all six projects a tour', () => {
     expect(projects.filter((project) => project.tourStops?.length).map(({slug}) => slug)).toEqual([
       'access-hire',
       'myimprov',
       'merthyr-village',
       'experience-sunnybank',
+      'premium-mobile-car-valeting',
       'fresh-fruit-and-veg',
     ]);
   });
@@ -221,5 +222,82 @@ describe('project fresh fruit copy migration', () => {
 
   it('points the boxes stop at the office site', () => {
     expect(freshFruit?.tourStops?.find(({key}) => key === 'boxes')?.note).toBe('Office delivery boxes');
+  });
+});
+
+describe('project premium mobile car valeting tour migration', () => {
+  const sql = readFileSync(
+    new URL('../../prisma/migrations/20261103120000_project_premium_mobile_car_valeting_tour/migration.sql', import.meta.url),
+    'utf8',
+  );
+  const valeting = projects.find((project) => project.slug === 'premium-mobile-car-valeting');
+
+  it('seeds a valid tour with an opening and three notes', () => {
+    const stops = tourStopsSchema.parse(valeting?.tourStops);
+    expect(stops).toHaveLength(4);
+    expect(stops[0]?.note).toBe('');
+    expect(stops.slice(1).every((stop) => stop.note !== '')).toBe(true);
+  });
+
+  it('backfills the seed tour, only while empty', () => {
+    const match = sql.match(
+      /UPDATE "projects" SET "tour_stops" = '(.+)'::jsonb WHERE "slug" = 'premium-mobile-car-valeting' AND "tour_stops" = '\[\]'::jsonb;/,
+    );
+    expect(JSON.parse(unquote(match?.[1] ?? 'null'))).toEqual(valeting?.tourStops);
+  });
+
+  it('keeps every capture in the tour folder, every box inside its capture and every page on the live site', () => {
+    for (const stop of valeting?.tourStops ?? []) {
+      for (const device of ['desktop', 'mobile'] as const) {
+        const {url, width, height} = stop.captures[device];
+        const {box} = stop.positions[device];
+        expect(url).toContain('/images/2026/premium-mobile-car-valeting-tour/');
+        expect(box.x + box.w).toBeLessThanOrEqual(width);
+        expect(box.y + box.h).toBeLessThanOrEqual(height);
+      }
+      expect(tourHref(stop.path, valeting?.liveUrl ?? null)).not.toBeNull();
+    }
+  });
+
+  it('uses the write-up for every note, word for word', () => {
+    const writeUp = readFileSync(new URL('../../prisma/seed-data/projects/premium-mobile-car-valeting.md', import.meta.url), 'utf8');
+    for (const stop of valeting?.tourStops?.slice(1) ?? []) expect(writeUp).toContain(stop.note);
+  });
+
+  it('leaves the reasoning empty', () => {
+    expect(sql).not.toMatch(/SET "(decision|contribution|outcome)"/);
+  });
+});
+
+describe('project premium mobile car valeting copy migration', () => {
+  const sql = readFileSync(
+    new URL('../../prisma/migrations/20261103130000_project_premium_mobile_car_valeting_copy/migration.sql', import.meta.url),
+    'utf8',
+  );
+  const writeUp = readFileSync(new URL('../../prisma/seed-data/projects/premium-mobile-car-valeting.md', import.meta.url), 'utf8');
+  const valeting = projects.find((project) => project.slug === 'premium-mobile-car-valeting');
+  const quoted = (value: string) => `'${value.replaceAll("'", "''")}'`;
+
+  it('tags the live stack, without AngularJS', () => {
+    expect(valeting?.tags).toEqual(['WordPress', 'WooCommerce', 'PayPal', 'Bootstrap']);
+  });
+
+  it('keeps the original build and says the site has moved on', () => {
+    expect(writeUp).toContain('an AngularJS and Bootstrap front end that worked on phones');
+    expect(writeUp).toMatch(/## Since then\n\nThe site has since moved to a new theme/);
+    expect(writeUp).toContain('## What it included');
+  });
+
+  it('backfills the write-up with the seed value, only while it still has the old one', () => {
+    expect(sql).toContain(
+      `UPDATE "projects" SET "case_study" = ${quoted(writeUp)} WHERE "slug" = 'premium-mobile-car-valeting' AND "case_study" = '`,
+    );
+  });
+
+  it('backfills the tags with the seed value, only while they still have the old ones', () => {
+    const tags = (valeting?.tags ?? []).map(quoted).join(', ');
+    expect(sql).toContain(
+      `UPDATE "projects" SET "tags" = ARRAY[${tags}]::text[] WHERE "slug" = 'premium-mobile-car-valeting' AND "tags" = ARRAY['WordPress', 'WooCommerce', 'PayPal', 'AngularJS']::text[];`,
+    );
   });
 });

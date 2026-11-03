@@ -1,6 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {expect, type Page, test} from '@playwright/test';
+import {NO_TOUR_SLUG} from '../support/test-env';
 
 /*
  * The Walkthrough, on the seeded Access Hire tour. The captures live on R2, so requests for them get the local fixture
@@ -115,7 +116,7 @@ test.describe('without JavaScript', () => {
 });
 
 test('a project without a tour keeps the current layout', async ({page}) => {
-  await page.goto('/work/premium-mobile-car-valeting');
+  await page.goto(`/work/${NO_TOUR_SLUG}`);
   await expect(frame(page)).toHaveCount(0);
   await expect(main(page).getByRole('term').filter({hasText: 'Client'})).toBeVisible();
   await expect(main(page).locator('article img[src^="data:image/png"]')).toBeVisible();

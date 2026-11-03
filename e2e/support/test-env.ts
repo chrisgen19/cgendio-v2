@@ -16,6 +16,8 @@ export const ADMIN_EMAIL = 'e2e-admin@example.test';
 export const CONTACT_EMAIL = 'inbox@example.test';
 /** Signed-in admin cookies, written by the prepare script (gitignored). */
 export const ADMIN_STORAGE_STATE = 'e2e/.auth/admin.json';
+/** Every seeded project has a tour; the prepare script clears this one's, so specs can cover the layout without a tour. */
+export const NO_TOUR_SLUG = 'premium-mobile-car-valeting';
 
 export const testEnv = {
   // The prepare script drops and recreates this database, so it refuses any name that doesn't end in _test

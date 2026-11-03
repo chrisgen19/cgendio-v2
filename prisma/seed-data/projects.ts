@@ -4,6 +4,7 @@ import {experienceSunnybankTour} from './experience-sunnybank-tour.ts';
 import {freshFruitTour} from './fresh-fruit-tour.ts';
 import {merthyrVillageTour} from './merthyr-village-tour.ts';
 import {myimprovTour} from './myimprov-tour.ts';
+import {premiumMobileCarValetingTour} from './premium-mobile-car-valeting-tour.ts';
 
 /**
  * The six client projects from the v1 site, with its slugs, one-liners and stacks. Case studies live in
@@ -107,7 +108,7 @@ export const projects: SeedProject[] = [
     group: 'client',
     glyph: 'Bookings',
     theme: 'lime',
-    tags: ['WordPress', 'WooCommerce', 'PayPal', 'AngularJS'],
+    tags: ['WordPress', 'WooCommerce', 'PayPal', 'Bootstrap'],
     featured: true,
     order: 5,
     coverImageUrl: `${COVERS}/619447c7-aecb-4d4a-bbb6-78ec265ff6a3.webp`,
@@ -117,6 +118,7 @@ export const projects: SeedProject[] = [
     repoUrl: null,
     client: 'Premium Mobile Car Valeting Glasgow',
     role: 'Freelance developer',
+    tourStops: premiumMobileCarValetingTour,
   },
   {
     slug: 'fresh-fruit-and-veg',
