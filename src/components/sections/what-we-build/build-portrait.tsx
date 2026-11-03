@@ -1,4 +1,5 @@
-import Image from 'next/image';
+import {CaptureSkeleton} from '@/components/ui-site/capture-skeleton';
+import {LoadingImage} from '@/components/ui-site/loading-image';
 import {cn} from '@/lib/cn';
 import type {BuildSideId} from './copy';
 
@@ -27,13 +28,18 @@ const HALVES: Record<BuildSideId, {half: string; screen: string; tint: string}> 
 export function BuildPortrait({photo, className}: BuildPortraitProps) {
   return (
     <div
-      className={cn('relative isolate aspect-[4/5] overflow-hidden bg-ink-stage max-lg:aspect-square max-lg:w-full max-lg:max-w-[440px]', className)}
+      className={cn(
+        'skeleton-host relative isolate aspect-[4/5] overflow-hidden bg-ink-stage max-lg:aspect-square max-lg:w-full max-lg:max-w-[440px]',
+        className,
+      )}
     >
       {photo ? (
         <>
           <PortraitHalf side="wp" photo={photo} />
           <PortraitHalf side="next" photo={photo} />
           <span aria-hidden="true" className="build-seam absolute" />
+          {/* Over the halves, not under: their blend modes and tints would bleed through it */}
+          <CaptureSkeleton variant="plain" onDark />
         </>
       ) : (
         <span className="absolute inset-0 grid place-items-center rounded-photo border border-dashed border-line font-mono text-[14px] text-accent">
@@ -50,7 +56,7 @@ function PortraitHalf({side, photo}: {side: BuildSideId; photo: BuildPhoto}) {
     <div className={cn('build-half absolute inset-0', styles.half)}>
       <div className={cn('build-screen', styles.screen)}>
         {/* One description is enough: the second half is the same photo */}
-        <Image
+        <LoadingImage
           src={photo.src}
           alt={side === 'wp' ? photo.alt : ''}
           fill

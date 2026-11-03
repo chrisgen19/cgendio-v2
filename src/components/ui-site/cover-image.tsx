@@ -1,5 +1,6 @@
-import Image from 'next/image';
 import {cn} from '@/lib/cn';
+import {CaptureSkeleton} from './capture-skeleton';
+import {LoadingImage} from './loading-image';
 
 type CoverImageProps = {
   src: string;
@@ -20,16 +21,19 @@ export const isOptimizableCover = (src: string) => {
  */
 export function CoverImage({src, className, aboveTheFold = false}: CoverImageProps) {
   return (
-    <Image
-      src={src}
-      alt=""
-      width={1600}
-      height={900}
-      sizes="(max-width: 860px) calc(100vw - 40px), 1208px"
-      unoptimized={!isOptimizableCover(src)}
-      fetchPriority={aboveTheFold ? 'high' : undefined}
-      loading={aboveTheFold ? 'eager' : 'lazy'}
-      className={cn('aspect-[16/9] h-auto w-full rounded-panel border border-line object-cover', className)}
-    />
+    <div className={cn('skeleton-host relative overflow-hidden rounded-panel', className)}>
+      <CaptureSkeleton variant="plain" />
+      <LoadingImage
+        src={src}
+        alt=""
+        width={1600}
+        height={900}
+        sizes="(max-width: 860px) calc(100vw - 40px), 1208px"
+        unoptimized={!isOptimizableCover(src)}
+        fetchPriority={aboveTheFold ? 'high' : undefined}
+        loading={aboveTheFold ? 'eager' : 'lazy'}
+        className="relative block aspect-[16/9] h-auto w-full rounded-panel border border-line object-cover"
+      />
+    </div>
   );
 }

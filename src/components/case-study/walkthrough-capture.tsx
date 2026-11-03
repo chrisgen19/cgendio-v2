@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import type {CSSProperties, ReactNode} from 'react';
+import {LoadingImage} from '@/components/ui-site/loading-image';
 import {cn} from '@/lib/cn';
 import {captureSizes} from '@/lib/tour';
 import type {TourStop, TourView} from '@/server/content';
@@ -30,7 +30,7 @@ type CaptureImageProps = {
 export function CaptureImage({stop, device, optimized, zoom = 1, first = false}: CaptureImageProps) {
   const {url, width, height} = stop.captures[device];
   return (
-    <Image
+    <LoadingImage
       src={url}
       alt={stop.alt}
       width={width}

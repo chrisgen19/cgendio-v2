@@ -1639,6 +1639,61 @@
 }
 
 /*
+ * The site-capture skeleton (CaptureSkeleton): shown while the LoadingImage in the same .skeleton-host loads, gone once it
+ * has, and kept still if it failed. Without JavaScript nothing would ever mark the image loaded, so it never shows there.
+ */
+.capture-skeleton {
+  display: none;
+}
+
+@media (scripting: enabled) {
+  .capture-skeleton {
+    display: block;
+  }
+
+  .skeleton-host:has(img[data-image="loaded"]) .capture-skeleton {
+    display: none;
+  }
+
+  /* A walkthrough selection points at part of the capture, so it waits for the capture */
+  .skeleton-host:not(:has(img[data-image="loaded"])) .walkthrough-selection {
+    visibility: hidden;
+  }
+}
+
+.capture-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    var(--skeleton-sweep, color-mix(in srgb, var(--color-white) 70%, transparent)) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .capture-skeleton::after {
+    animation-name: skeleton-sweep;
+    animation-duration: 1.6s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+
+  .skeleton-host:has(img[data-image="failed"]) .capture-skeleton::after {
+    animation-name: none;
+  }
+}
+
+@keyframes skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/*
  * The device switch's view transition. The class is on <html> only while it runs, so nothing else on the site is affected. Taking the root out of the
  * transition leaves the page live, so only the frame morphs. Both snapshots use contain, so neither stretches on the way between the two shapes.
  */

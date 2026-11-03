@@ -3,6 +3,7 @@
 import {Monitor, Smartphone} from 'lucide-react';
 import {type ReactNode, useEffect, useRef, useState} from 'react';
 import {flushSync} from 'react-dom';
+import {CaptureSkeleton} from '@/components/ui-site/capture-skeleton';
 import {cn} from '@/lib/cn';
 import {captureGroups, captureKey, tourAddress, tourHref} from '@/lib/tour';
 import type {TourStop} from '@/server/content';
@@ -125,8 +126,9 @@ function Pages({frames, current, reached, optimizedUrls}: PagesProps) {
           data-layer={layer}
           data-state={isCurrent ? 'active' : index < currentPage ? 'before' : 'after'}
           aria-hidden={!isCurrent || undefined}
-          className="walkthrough-page"
+          className="walkthrough-page skeleton-host"
         >
+          <CaptureSkeleton />
           <PanSurface view={shown.positions[layer]} capture={shown.captures[layer]} atStart={!isCurrent}>
             <CaptureImage
               stop={group.stops[0]}
