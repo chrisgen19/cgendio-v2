@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import {Button} from '@/components/ui-site/button';
+import {CaptureSkeleton} from '@/components/ui-site/capture-skeleton';
 import {isOptimizableCover} from '@/components/ui-site/cover-image';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {Mark} from '@/components/ui-site/mark';
@@ -41,7 +42,8 @@ function StaticCapture({stop, host, optimizedUrls, first = false}: StaticCapture
       </figcaption>
       <div data-theme="light" className="walkthrough-viewport walkthrough-static-frame relative overflow-hidden border border-line bg-white">
         {DEVICES.map((device) => (
-          <div key={device} data-layer={device} data-state="active" className="walkthrough-page">
+          <div key={device} data-layer={device} data-state="active" className="walkthrough-page skeleton-host">
+            <CaptureSkeleton />
             <PanSurface view={stop.positions[device]} capture={stop.captures[device]}>
               <CaptureImage
                 stop={stop}

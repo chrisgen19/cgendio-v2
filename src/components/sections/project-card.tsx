@@ -1,7 +1,8 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type {CSSProperties} from 'react';
+import {CaptureSkeleton} from '@/components/ui-site/capture-skeleton';
 import {isOptimizableCover} from '@/components/ui-site/cover-image';
+import {LoadingImage} from '@/components/ui-site/loading-image';
 import {brandPanelStyle, PROJECT_RINGS} from '@/components/ui-site/project-theme';
 import {Tag} from '@/components/ui-site/tag';
 import {cn} from '@/lib/cn';
@@ -132,15 +133,18 @@ function ProjectMedia({project}: {project: Project}) {
           <span className="size-2 rounded-full bg-wire max-md:size-1.5" />
           <span className="size-2 rounded-full bg-wire max-md:size-1.5" />
         </div>
-        <Image
-          src={src}
-          alt=""
-          width={1600}
-          height={900}
-          sizes="(max-width: 860px) 110vw, 900px"
-          unoptimized={!isOptimizableCover(src)}
-          className="h-[calc(100%-28px)] w-full object-cover object-left-top max-md:h-[calc(100%-20px)]"
-        />
+        <div className="skeleton-host relative h-[calc(100%-28px)] max-md:h-[calc(100%-20px)]">
+          <CaptureSkeleton />
+          <LoadingImage
+            src={src}
+            alt=""
+            width={1600}
+            height={900}
+            sizes="(max-width: 860px) 110vw, 900px"
+            unoptimized={!isOptimizableCover(src)}
+            className="relative h-full w-full object-cover object-left-top"
+          />
+        </div>
       </div>
     </div>
   );
