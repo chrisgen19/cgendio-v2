@@ -9,6 +9,9 @@ import {pageMetadata} from '@/lib/metadata';
 import {postJsonLd} from '@/lib/structured-data';
 import {getAdjacentPosts, getPageCopy, getPost, getPostSlugs} from '@/server/content';
 
+/** Blocks on purpose: unknown slugs must 404 before anything streams, so a Suspense boundary would cost the real status. */
+export const instant = false;
+
 /** Published posts are prerendered. With no posts at all, a placeholder slug keeps the build happy and 404s. */
 export async function generateStaticParams() {
   const slugs = await getPostSlugs();

@@ -9,6 +9,9 @@ import {pageMetadata} from '@/lib/metadata';
 import {caseStudyJsonLd} from '@/lib/structured-data';
 import {getNextProject, getPageCopy, getProject, getProjectSlugs} from '@/server/content';
 
+/** Blocks on purpose: unknown slugs must 404 before anything streams, so a Suspense boundary would cost the real status. */
+export const instant = false;
+
 /** Published projects are prerendered. With none at all, a placeholder slug keeps the build happy and 404s. */
 export async function generateStaticParams() {
   const slugs = await getProjectSlugs();
