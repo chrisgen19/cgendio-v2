@@ -84,8 +84,12 @@ test('the device switch changes the frame', async ({page}, testInfo) => {
 
 test('the write-up shows and empty reasoning stays hidden', async ({page}) => {
   await page.goto('/work/access-hire');
-  await expect(page.getByRole('heading', {level: 2, name: 'Built'})).toBeVisible();
-  await expect(page.getByRole('heading', {name: 'Why we built it this way'})).toHaveCount(0);
+  await expect(page.getByRole('heading', {level: 2, name: 'The short version'})).toBeVisible();
+  await expect(page.getByRole('heading', {level: 3, name: 'Built'})).toBeVisible();
+  await expect(page.getByRole('navigation', {name: 'Write-up sections'}).getByRole('link', {name: 'Built'})).toBeVisible();
+  for (const label of ['The decision', 'Our part', 'The result']) {
+    await expect(page.getByRole('heading', {name: label})).toHaveCount(0);
+  }
 });
 
 test('the next project and contact sections follow the tour', async ({page}) => {

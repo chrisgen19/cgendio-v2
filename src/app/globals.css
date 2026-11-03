@@ -1658,3 +1658,117 @@
   object-fit: contain;
   animation-duration: 320ms;
 }
+
+/*
+ * The write-up after a case study's tour (src/components/case-study/write-up*). Scroll-driven only with JavaScript, motion
+ * allowed and scroll timelines supported: an accent fill tracks reading progress beside the index (a bar under the chip
+ * row on phones), and each scope item ticks itself off as it crosses the reading line. Otherwise the ticks are drawn,
+ * the items are ink and the fills stay hidden. Longhands only: the build's minifier expands an `animation: linear both`
+ * shorthand with no name into `ease` and `none`, which drops the fill mode.
+ */
+.write-up-rail-fill,
+.write-up-bar-fill {
+  display: none;
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) and (timeline-scope: none) {
+    .write-up-block {
+      timeline-scope: --write-up-read;
+    }
+
+    .write-up-content {
+      view-timeline: --write-up-read block;
+    }
+
+    .write-up-rail-fill,
+    .write-up-bar-fill {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --write-up-read;
+      animation-range: entry 60% exit 40%;
+    }
+
+    .write-up-rail-fill {
+      animation-name: write-up-fill-y;
+    }
+
+    .write-up-bar-fill {
+      animation-name: write-up-fill-x;
+    }
+
+    @media (width >= 1080px) {
+      .write-up-rail-fill {
+        display: block;
+      }
+    }
+
+    @media (width < 1080px) {
+      .write-up-bar-fill {
+        display: block;
+      }
+    }
+
+    .write-up-tick,
+    .write-up-item-text {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: cover 32% cover 39%;
+    }
+
+    .write-up-tick {
+      animation-name: write-up-tick;
+    }
+
+    .write-up-item-text {
+      animation-name: write-up-item;
+    }
+
+    .write-up-tick-icon {
+      animation-name: write-up-tick-icon;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: cover 34% cover 42%;
+    }
+  }
+}
+
+@keyframes write-up-fill-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes write-up-fill-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes write-up-tick {
+  from {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-line);
+  }
+}
+
+@keyframes write-up-tick-icon {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-25deg);
+  }
+}
+
+@keyframes write-up-item {
+  from {
+    color: var(--color-muted);
+  }
+}

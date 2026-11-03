@@ -1,14 +1,14 @@
 import Link from 'next/link';
-import {renderMarkdown} from '@/components/prose/markdown';
 import {Button} from '@/components/ui-site/button';
 import {isOptimizableCover} from '@/components/ui-site/cover-image';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {Mark} from '@/components/ui-site/mark';
 import {Tag} from '@/components/ui-site/tag';
-import {reasoningRows, tourAddress, tourFrames, tourHref} from '@/lib/tour';
+import {tourAddress, tourFrames, tourHref} from '@/lib/tour';
 import type {ProjectDetail, TourStop} from '@/server/content';
 import {CaptureImage, PanSurface, Selection, type TourDevice} from './walkthrough-capture';
 import {WalkthroughTour} from './walkthrough-stage';
+import {WriteUp} from './write-up';
 
 const hostOf = (url: string | null) => (url ? new URL(url).hostname.replace(/^www\./, '') : null);
 
@@ -198,46 +198,6 @@ function Note({note, number, liveUrl, host, optimizedUrls}: NoteProps) {
   );
 }
 
-/** The case study's write-up, then the reasoning rows that have text. Quiet, so the frame stays the one loud thing on the page. */
-async function AfterTour({project}: {project: ProjectDetail}) {
-  const markdown = project.caseStudy?.trim() ? await renderMarkdown(project.caseStudy) : null;
-  const rows = reasoningRows(project);
-  if (!markdown && rows.length === 0) return null;
-  return (
-    <div className="border-y border-line bg-white px-14 py-28 max-md:px-5 max-md:py-18">
-      <div className="mx-auto flex max-w-site flex-col gap-20 max-md:gap-14">
-        {markdown ? (
-          <section aria-label="The write-up" className="flex flex-col gap-6">
-            <Eyebrow>The write-up</Eyebrow>
-            {markdown.content}
-          </section>
-        ) : null}
-        {rows.length > 0 ? (
-          <section aria-labelledby="walkthrough-why" className="flex flex-col gap-10">
-            <div className="flex flex-col gap-5">
-              <Eyebrow>Reasoning</Eyebrow>
-              <h2 id="walkthrough-why" className={HEADING}>
-                Why we built it <Mark>this way</Mark>
-              </h2>
-            </div>
-            <div>
-              {rows.map(({label, text}) => (
-                <div
-                  key={label}
-                  className="grid gap-6 border-t border-line py-10 first:border-t-0 first:pt-0 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:gap-16"
-                >
-                  <h3 className="m-0 font-display text-[28px] leading-[1.08] font-bold tracking-[-0.03em]">{label}</h3>
-                  <p className="m-0 max-w-[60ch] text-lg leading-[1.55] whitespace-pre-line max-md:text-base">{text}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
 /** "The Walkthrough": an annotated tour of the shipped site. One pinned browser moves through the captures while the notes scroll past it. */
 export function Walkthrough({project}: {project: ProjectDetail}) {
   const host = hostOf(project.liveUrl);
@@ -268,7 +228,7 @@ export function Walkthrough({project}: {project: ProjectDetail}) {
           </section>
         }
       />
-      <AfterTour project={project} />
+      <WriteUp project={project} />
     </article>
   );
 }

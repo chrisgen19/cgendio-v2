@@ -75,8 +75,8 @@ test('only the filled reasoning fields show on the page', async ({page}) => {
   const {rows} = await queryTestDb('SELECT outcome, contribution FROM projects WHERE slug = $1', ['access-hire']);
   expect(rows[0]).toEqual({outcome: 'A result worth reading', contribution: null});
 
-  await openSaved(page, (main) => main.getByRole('heading', {level: 2, name: 'Why we built it this way'}));
-  await expect(page.getByRole('heading', {level: 3, name: 'The result'})).toBeVisible();
+  await openSaved(page, (main) => main.getByRole('heading', {level: 3, name: 'The result'}));
+  await expect(page.getByRole('navigation', {name: 'Write-up sections'}).getByRole('link', {name: 'The result'})).toBeVisible();
   await expect(page.getByText('A result worth reading')).toBeVisible();
   await expect(page.getByRole('heading', {level: 3, name: 'Our part'})).toHaveCount(0);
   await expect(page.getByRole('heading', {level: 3, name: 'The decision'})).toHaveCount(0);

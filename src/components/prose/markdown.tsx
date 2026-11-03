@@ -143,7 +143,7 @@ const COMPONENTS: Components = {
  * Cached by the Markdown text: Shiki's tokenizer reads the clock (a time limit per line), which Cache Components only
  * allows inside a cache scope, and the same body never needs highlighting twice.
  */
-export const renderMarkdown = async (markdown: string): Promise<{content: ReactNode; toc: TocItem[]}> => {
+export const renderMarkdown = async (markdown: string): Promise<{content: ReactNode; body: ReactNode; toc: TocItem[]}> => {
   'use cache';
   cacheLife('max');
   const toc: TocItem[] = [];
@@ -153,5 +153,6 @@ export const renderMarkdown = async (markdown: string): Promise<{content: ReactN
     rehypePlugins: [[rehypeSanitize, SANITIZE_SCHEMA], rehypeDemoteH1, rehypeSlug, [rehypeCollectToc, {sink: toc}], [rehypeShiki, SHIKI_OPTIONS]],
     components: COMPONENTS,
   });
-  return {content: <div className="max-w-[68ch] text-lg leading-[1.7] text-ink max-md:text-[17px]">{content}</div>, toc};
+  // `body` is the same nodes without the article column, for layouts that set their own measure and type size
+  return {content: <div className="max-w-[68ch] text-lg leading-[1.7] text-ink max-md:text-[17px]">{content}</div>, body: content, toc};
 };
