@@ -20,7 +20,7 @@ export function HeroStaticFrame() {
         </div>
       </div>
       <p className="m-0 max-w-[520px] font-body text-lg leading-[1.55] text-muted @max-[860px]:text-base portrait:text-base">
-        Here&apos;s how we take an idea from first question to a live URL — in about thirty seconds.
+        Here&apos;s how I take an idea from first question to a live URL — in about thirty seconds.
       </p>
     </div>
   );

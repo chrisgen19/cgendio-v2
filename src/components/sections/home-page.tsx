@@ -20,7 +20,7 @@ export function HomePage() {
       <SiteHeader overlay />
       <main id="main" tabIndex={-1} className="focus-visible:outline-none">
         {/* Inside <main> so every piece of content sits in a landmark */}
-        <h1 className="sr-only">Cgdiomampo.dev — web design and development studio by Christian</h1>
+        <h1 className="sr-only">Cgdiomampo.dev: Christian Diomampo, full-stack web developer</h1>
         <Hero />
         <StackStrip />
         <About />

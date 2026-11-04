@@ -69,7 +69,7 @@ test('saving without changes keeps the tour identical', async ({page}) => {
 test('only the filled reasoning fields show on the page', async ({page}) => {
   await editAccessHire(page);
   await page.getByLabel('The result').fill('A result worth reading');
-  await page.getByLabel('Our part').fill('   ');
+  await page.getByLabel('My part').fill('   ');
   await save(page);
 
   const {rows} = await queryTestDb('SELECT outcome, contribution FROM projects WHERE slug = $1', ['access-hire']);
@@ -77,7 +77,7 @@ test('only the filled reasoning fields show on the page', async ({page}) => {
 
   await openSaved(page, (main) => main.getByRole('heading', {level: 3, name: 'The result'}));
   await expect(page.getByText('A result worth reading')).toBeVisible();
-  await expect(page.getByRole('heading', {level: 3, name: 'Our part'})).toHaveCount(0);
+  await expect(page.getByRole('heading', {level: 3, name: 'My part'})).toHaveCount(0);
   await expect(page.getByRole('heading', {level: 3, name: 'The decision'})).toHaveCount(0);
 });
 

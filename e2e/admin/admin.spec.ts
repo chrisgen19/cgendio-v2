@@ -112,7 +112,7 @@ test('a contact message arrives in the admin inbox', async ({page}, testInfo) =>
   await page.goto('/contact');
   await fillContactForm(page, {name, message: 'Could you quote a WooCommerce rebuild for us?'});
   await page.getByRole('button', {name: 'Send message'}).click();
-  await expect(page.getByRole('heading', {name: "Thanks, we've got your message."})).toBeVisible();
+  await expect(page.getByRole('heading', {name: "Thanks, I've got your message."})).toBeVisible();
 
   await page.goto('/admin/inbox');
   await expect(page.getByText(name)).toBeVisible();

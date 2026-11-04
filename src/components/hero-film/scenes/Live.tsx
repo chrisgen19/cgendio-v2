@@ -94,7 +94,7 @@ export const Live: React.FC = () => (
     n="06"
     label="Live"
     title={<MarkedTitle before="And it's " marked="live." />}
-    lede="Out in the world — fast, findable and ready for the next inquiry. We stay on for monitoring, updates and whatever comes next."
+    lede="Out in the world — fast, findable and ready for the next inquiry. I stay on for monitoring, updates and whatever comes next."
     tags={['Analytics', 'Monitoring', 'Care plan']}
   >
     <Confetti />
@@ -131,18 +131,18 @@ export const Live: React.FC = () => (
         </div>
         <div style={{padding: 40, display: 'flex', flexDirection: 'column', gap: 24}}>
           <Appear delay={26}>
-            <MonoLabel size={15}>WEB STUDIO · TAGUIG, PH</MonoLabel>
+            <MonoLabel size={15}>WEB DEVELOPER · PASIG CITY, PH</MonoLabel>
           </Appear>
           <Appear delay={30}>
             <div style={{fontFamily: fonts.display, fontSize: 54, fontWeight: 800, lineHeight: 0.98, letterSpacing: '-0.045em'}}>
-              We build websites
+              I build websites
               <br />
               that <Mark delay={52}>work.</Mark>
             </div>
           </Appear>
           <Appear delay={36} style={{display: 'flex', gap: 14}}>
             <span style={{padding: '14px 24px', borderRadius: 99, background: theme.ink, color: theme.onInk, fontSize: 17, fontWeight: 600}}>
-              See our work
+              See my work
             </span>
             <span style={{padding: '14px 24px', borderRadius: 99, border: `1px solid ${theme.line}`, fontSize: 17, fontWeight: 600}}>
               Let&apos;s talk

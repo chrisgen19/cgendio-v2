@@ -93,7 +93,7 @@ test('the write-up shows and empty reasoning stays hidden', async ({page}, testI
   } else {
     await expect(page.getByRole('tab', {name: 'Built'})).toHaveAttribute('aria-selected', 'true');
   }
-  for (const label of ['The decision', 'Our part', 'The result']) {
+  for (const label of ['The decision', 'My part', 'The result']) {
     await expect(page.getByRole('heading', {name: label})).toHaveCount(0);
   }
 });

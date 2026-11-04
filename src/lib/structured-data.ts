@@ -1,7 +1,7 @@
 import type {PageCopy, PostDetail, ProjectDetail, SiteSettings} from '@/server/content';
 import {isEmail} from './email';
 import {siteEnv} from './env';
-import {SITE_DESCRIPTION, SITE_NAME} from './metadata';
+import {SITE_DESCRIPTION} from './metadata';
 
 /*
  * Schema.org JSON-LD built only from real content: no invented address, ratings or prices. Rendered with <JsonLd>.
@@ -19,22 +19,16 @@ const person = (copy: PageCopy, settings?: SiteSettings) => ({
   ...(settings ? {sameAs: Object.values(settings.socials).filter((url): url is string => Boolean(url))} : {}),
 });
 
-const studio = () => ({'@type': 'Organization', '@id': `${origin()}/#studio`, name: SITE_NAME, url: `${origin()}/`});
+/** Points back at the Person above, so posts and case studies name Christian as their publisher without repeating the whole node. */
+const personRef = () => ({'@id': `${origin()}/#person`});
 
-/** Home page: the studio as a ProfessionalService, founded by Christian. */
+/** Home page: Christian as a Person, with the site description, the share image and the contact email. */
 export const homeJsonLd = (copy: PageCopy, settings: SiteSettings) => ({
   '@context': 'https://schema.org',
-  '@graph': [
-    person(copy, settings),
-    {
-      ...studio(),
-      '@type': 'ProfessionalService',
-      description: SITE_DESCRIPTION,
-      image: `${origin()}/opengraph-image.png`,
-      founder: {'@id': `${origin()}/#person`},
-      ...(isEmail(settings.contactEmail) ? {email: settings.contactEmail} : {}),
-    },
-  ],
+  ...person(copy, settings),
+  description: SITE_DESCRIPTION,
+  image: `${origin()}/opengraph-image.png`,
+  ...(isEmail(settings.contactEmail) ? {email: settings.contactEmail} : {}),
 });
 
 export const postJsonLd = (post: PostDetail, copy: PageCopy) => {
@@ -50,7 +44,7 @@ export const postJsonLd = (post: PostDetail, copy: PageCopy) => {
     image: `${url}/opengraph-image`,
     keywords: post.tag,
     author: person(copy),
-    publisher: studio(),
+    publisher: personRef(),
   };
 };
 
@@ -65,6 +59,6 @@ export const caseStudyJsonLd = (project: ProjectDetail, copy: PageCopy) => {
     image: `${url}/opengraph-image`,
     keywords: project.tags.join(', '),
     creator: person(copy),
-    publisher: studio(),
+    publisher: personRef(),
   };
 };

@@ -8,8 +8,8 @@ import {type WriteUpField, WriteUpTabs} from './write-up-tabs';
 
 type Reason = {id: string; label: string; text: string};
 
-/** Our part and the result, pinned beside the heading when they're written: what a reader looks for first. */
-const PINNED = new Set(['Our part', 'The result']);
+/** My part and the result, pinned beside the heading when they're written: what a reader looks for first. */
+const PINNED = new Set(['My part', 'The result']);
 
 function PinnedField({id, label, text}: Reason) {
   return (
@@ -25,7 +25,7 @@ function PinnedField({id, label, text}: Reason) {
 }
 
 /**
- * The write-up after the tour, as a build sheet. Our part and the result (when written) are pinned under the heading;
+ * The write-up after the tour, as a build sheet. My part and the result (when written) are pinned under the heading;
  * the Markdown's chapters, plus the decision, are the sheet's fields: tabs on wide screens, stacked everywhere else.
  */
 export async function WriteUp({project}: {project: ProjectDetail}) {

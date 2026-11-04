@@ -31,15 +31,15 @@ test('a chapter control jumps to its chapter', async ({page}) => {
   await expect(qa).toHaveAttribute('aria-current', 'step');
 });
 
-test('Skip jumps to the brand card, and See our work scrolls to the work', async ({page}) => {
-  const {skip, toggle, seeOurWork} = heroControls(page);
+test('Skip jumps to the brand card, and See my work scrolls to the work', async ({page}) => {
+  const {skip, toggle, seeMyWork} = heroControls(page);
   await skip.click();
   await expect(skip).toHaveCount(0);
   // Focus moves to the play control, so keyboard users aren't dropped on <body>
   await expect(toggle).toBeFocused();
-  await expect(seeOurWork).toBeVisible();
+  await expect(seeMyWork).toBeVisible();
 
-  await seeOurWork.click();
+  await seeMyWork.click();
   await expect(page).toHaveURL(/#work$/);
   await expect(page.locator('#work')).toBeInViewport();
 });
@@ -47,7 +47,7 @@ test('Skip jumps to the brand card, and See our work scrolls to the work', async
 test('the film plays once and holds on the brand card', async ({page}) => {
   // The whole film plays: about 30s on desktop, 26s on the phone cut
   test.setTimeout(120_000);
-  const {skip, toggle, seeOurWork} = heroControls(page);
+  const {skip, toggle, seeMyWork} = heroControls(page);
 
   await expect(toggle).toHaveAccessibleName('Pause film');
   await expect(toggle).toHaveAccessibleName('Replay film', {timeout: 60_000});
@@ -56,6 +56,6 @@ test('the film plays once and holds on the brand card', async ({page}) => {
   await page.waitForTimeout(3_000);
   await expect(toggle).toHaveAccessibleName('Replay film');
   await expect(skip).toHaveCount(0);
-  await expect(seeOurWork).toBeVisible();
+  await expect(seeMyWork).toBeVisible();
   if (!isMobile()) await expect(page.getByText('00:30 / 00:30')).toBeVisible();
 });
