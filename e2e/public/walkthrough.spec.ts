@@ -98,6 +98,20 @@ test('the write-up shows and empty reasoning stays hidden', async ({page}, testI
   }
 });
 
+test('a link to a write-up chapter opens its tab', async ({page}, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile', 'Phones stack every chapter, so there is no tab to open');
+  await page.goto('/work/access-hire#write-up-before');
+  await expect(page.getByRole('tab', {name: 'Before'})).toHaveAttribute('aria-selected', 'true');
+  await expect(main(page).getByText('On WordPress, I connected the off-hire form')).toBeVisible();
+
+  // A hash change on the same page opens that chapter too
+  await page.evaluate(() => {
+    window.location.hash = 'write-up-whats-in-it';
+  });
+  await expect(page.getByRole('tab', {name: "What's in it"})).toHaveAttribute('aria-selected', 'true');
+  await expect(main(page).getByText('On WordPress, I connected the off-hire form')).toBeHidden();
+});
+
 test('the next project and contact sections follow the tour', async ({page}) => {
   await page.goto('/work/access-hire');
   await expect(page.getByRole('navigation', {name: 'Next project'}).getByRole('link')).toHaveAttribute('href', /^\/work\/[a-z0-9-]+$/);

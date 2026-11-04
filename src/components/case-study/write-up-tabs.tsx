@@ -37,6 +37,19 @@ export function WriteUpTabs({fields, tabbed, children}: WriteUpTabsProps) {
     return () => query.removeEventListener('change', update);
   }, [tabbed]);
 
+  // A link to one field (#write-up-billing) opens its tab, on load and whenever the hash changes. The fields share one
+  // grid cell, so the browser's own jump to the target already lands on the sheet.
+  useEffect(() => {
+    if (!tabbed) return;
+    const openFromHash = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      if (fields.some((field) => field.id === id)) setActive(id);
+    };
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+    return () => window.removeEventListener('hashchange', openFromHash);
+  }, [fields, tabbed]);
+
   // Move the open field and, while the tabs show, give the fields their tabpanel role
   useEffect(() => {
     if (!tabbed) return;
@@ -74,6 +87,15 @@ export function WriteUpTabs({fields, tabbed, children}: WriteUpTabsProps) {
     return () => observer.disconnect();
   }, [measure, wide]);
 
+  // A tab row wider than the sheet scrolls sideways: keep the open tab in view without moving the page
+  useEffect(() => {
+    const list = listRef.current;
+    const tab = document.getElementById(`${active}-tab`);
+    if (!list || !tab || !wide || list.scrollWidth <= list.clientWidth) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    list.scrollTo({left: tab.offsetLeft - (list.clientWidth - tab.offsetWidth) / 2, behavior: reduce ? 'auto' : 'smooth'});
+  }, [active, wide]);
+
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const index = fields.findIndex(({id}) => id === active);
     const target = {ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: fields.length - 1}[event.key];
@@ -92,7 +114,8 @@ export function WriteUpTabs({fields, tabbed, children}: WriteUpTabsProps) {
           role="tablist"
           aria-label="Write-up"
           onKeyDown={onKeyDown}
-          className="write-up-tablist relative self-start rounded-pill border border-line bg-white p-1"
+          // Long or many labels scroll inside the sheet instead of pushing past it (the Next button below reaches every field too)
+          className="write-up-tablist relative max-w-full self-start overflow-x-auto overscroll-x-contain rounded-pill border border-line bg-white p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {pill ? (
             <span
