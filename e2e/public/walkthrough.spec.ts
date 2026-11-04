@@ -92,6 +92,33 @@ test('the write-up shows and empty reasoning stays hidden', async ({page}) => {
   }
 });
 
+test.describe('on a tall desktop viewport', () => {
+  // At 1000px tall, a reading line at 30% of the viewport sat below these short chapters, so a jump link marked the next one
+  test.use({viewport: {width: 1440, height: 1000}});
+
+  test('each write-up jump link marks the chapter it jumps to', async ({page}, testInfo) => {
+    test.skip(testInfo.project.name === 'mobile', 'The desktop index; the viewport is set above');
+    for (const slug of ['access-hire', 'fresh-fruit-and-veg']) {
+      await page.goto(`/work/${slug}`);
+      const links = page.getByRole('navigation', {name: 'Write-up sections'}).getByRole('link');
+      const count = await links.count();
+      expect(count).toBeGreaterThan(1);
+      for (let index = 0; index < count; index += 1) {
+        const link = links.nth(index);
+        const id = ((await link.getAttribute('href')) ?? '').slice(1);
+        await link.click();
+        // Check once the smooth scroll has landed the chapter at its scroll margin: mid-scroll the right link can flash current
+        await page.waitForFunction((target) => {
+          const chapter = document.getElementById(target);
+          if (!chapter) return false;
+          return Math.abs(chapter.getBoundingClientRect().top - Number.parseFloat(getComputedStyle(chapter).scrollMarginTop)) < 2;
+        }, id);
+        await expect(link).toHaveAttribute('aria-current', 'true');
+      }
+    }
+  });
+});
+
 test('the next project and contact sections follow the tour', async ({page}) => {
   await page.goto('/work/access-hire');
   await expect(page.getByRole('navigation', {name: 'Next project'}).getByRole('link')).toHaveAttribute('href', /^\/work\/[a-z0-9-]+$/);

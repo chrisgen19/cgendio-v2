@@ -7,7 +7,7 @@ export type WriteUpIndexItem = {id: string; label: string; group: 'write-up' | '
 
 /**
  * The write-up's chapter index: a sticky column of jump links on wide screens, a sticky chip row on phones. The link for
- * the chapter crossing the reading line carries aria-current; the accent fill beside it is CSS (a scroll timeline).
+ * the chapter at the reading line (where jump links land) carries aria-current; the accent fill beside it is CSS (a scroll timeline).
  */
 export function WriteUpIndex({items}: {items: WriteUpIndexItem[]}) {
   const [active, setActive] = useState(items[0]?.id ?? null);
@@ -15,16 +15,28 @@ export function WriteUpIndex({items}: {items: WriteUpIndexItem[]}) {
 
   useEffect(() => {
     const targets = items.map(({id}) => document.getElementById(id)).filter((el): el is HTMLElement => el !== null);
-    // A thin band at about 30% of the viewport is the reading line: the chapter spanning it is the current one
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const hit = entries.find((entry) => entry.isIntersecting);
-        if (hit) setActive(hit.target.id);
-      },
-      {rootMargin: '-30% 0px -66% 0px'},
-    );
-    for (const target of targets) observer.observe(target);
-    return () => observer.disconnect();
+    let observer: IntersectionObserver | null = null;
+    // The reading line is a 1px band just below where a jump link lands a chapter (its scroll-margin-top: 48px wide,
+    // 96px under the phone chip row), so the chapter a link jumps to is the one marked current. Rebuilt on resize,
+    // since both the margin and the viewport height change.
+    const observe = () => {
+      observer?.disconnect();
+      const landing = targets[0] ? Number.parseFloat(getComputedStyle(targets[0]).scrollMarginTop) || 0 : 0;
+      observer = new IntersectionObserver(
+        (entries) => {
+          const hit = entries.find((entry) => entry.isIntersecting);
+          if (hit) setActive(hit.target.id);
+        },
+        {rootMargin: `-${landing + 1}px 0px -${Math.max(window.innerHeight - landing - 2, 0)}px 0px`},
+      );
+      for (const target of targets) observer.observe(target);
+    };
+    observe();
+    window.addEventListener('resize', observe);
+    return () => {
+      window.removeEventListener('resize', observe);
+      observer?.disconnect();
+    };
   }, [items]);
 
   // On phones the chip row scrolls sideways: keep the current chip in view without moving the page
