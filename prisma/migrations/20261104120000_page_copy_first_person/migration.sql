@@ -1,0 +1,12 @@
+-- The site speaks in the first person ("I", not "we"): it is Christian's portfolio, not a studio. Move each page-copy
+-- row from its old seed value to the new one in prisma/seed-data/page-copy.ts. A row only changes while it still holds
+-- the old seed value, so wording edited in the admin is kept. src/server/page-copy-migration.test.ts checks the values.
+
+UPDATE "page_copy" SET "value" = 'The stack I ship with', "updated_at" = CURRENT_TIMESTAMP WHERE "key" = 'stack.eyebrow' AND "value" = 'The stack we ship with';
+UPDATE "page_copy" SET "value" = 'I''m a senior full-stack developer in Pasig City, Philippines. I take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.', "updated_at" = CURRENT_TIMESTAMP WHERE "key" = 'about.intro' AND "value" = 'I''m a senior full-stack developer in Pasig City, Philippines. Through Cgdiomampo.dev, we take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.';
+UPDATE "page_copy" SET "value" = 'What I build', "updated_at" = CURRENT_TIMESTAMP WHERE "key" = 'build.eyebrow' AND "value" = 'What we build';
+UPDATE "page_copy" SET "value" = 'I built a membership store on WooCommerce, Stripe and MemberPress.', "updated_at" = CURRENT_TIMESTAMP WHERE "key" = 'build.wp.proof' AND "value" = 'We built a membership store on WooCommerce, Stripe and MemberPress.';
+UPDATE "page_copy" SET "value" = 'I built a headless CMS on Builder.io and Next.js, and the site you''re on.', "updated_at" = CURRENT_TIMESTAMP WHERE "key" = 'build.next.proof' AND "value" = 'We built a headless CMS on Builder.io and Next.js, and the site you''re on.';
+UPDATE "page_copy" SET "value" = 'Things I''ve [[shipped.]]', "updated_at" = CURRENT_TIMESTAMP WHERE "key" = 'work.heading' AND "value" = 'Things we''ve [[shipped.]]';
+UPDATE "page_copy" SET "value" = 'The moments that shaped how I build — from WordPress roots to full-stack product work.', "updated_at" = CURRENT_TIMESTAMP WHERE "key" = 'milestones.lede' AND "value" = 'The moments that shaped how we build — from WordPress roots to full-stack product work.';
+UPDATE "page_copy" SET "value" = 'Agencies, recruiters and founders: tell me what you''re building and I''ll come back with next steps.', "updated_at" = CURRENT_TIMESTAMP WHERE "key" = 'contact.lede' AND "value" = 'Agencies, recruiters and founders: tell us what you''re building and we''ll come back with next steps.';

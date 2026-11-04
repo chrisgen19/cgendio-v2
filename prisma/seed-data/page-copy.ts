@@ -5,12 +5,12 @@ import type {PageCopy} from '../../src/server/content-schema';
  * section redesign. `[[...]]` marks the highlighted words in a heading.
  */
 export const pageCopy: PageCopy = {
-  'stack.eyebrow': 'The stack we ship with',
+  'stack.eyebrow': 'The stack I ship with',
 
   'about.eyebrow': 'About',
   'about.heading': "Hi, I'm [[Christian.]]",
   'about.intro':
-    "I'm a senior full-stack developer in Pasig City, Philippines. Through Cgdiomampo.dev, we take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.",
+    "I'm a senior full-stack developer in Pasig City, Philippines. I take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.",
   'about.name': 'Christian Diomampo',
   'about.frameLabel': 'Christian / Pasig City',
   'about.role.label': 'Role',
@@ -38,23 +38,23 @@ export const pageCopy: PageCopy = {
   'about.contactLabel': 'Get in touch',
   'about.cvLabel': 'Download CV',
 
-  'build.eyebrow': 'What we build',
+  'build.eyebrow': 'What I build',
   'build.heading': 'Two kinds of site, [[both done properly]].',
   'build.wp.label': 'WordPress',
   'build.wp.labelSub': '& WooCommerce',
   'build.wp.line': 'Custom themes, plugins and WooCommerce stores, quick to load and easy for your team to edit.',
-  'build.wp.proof': 'We built a membership store on WooCommerce, Stripe and MemberPress.',
+  'build.wp.proof': 'I built a membership store on WooCommerce, Stripe and MemberPress.',
   'build.next.label': 'Next.js',
   'build.next.labelSub': '& React',
   'build.next.line': 'Headless sites and React apps in TypeScript, built for speed and Core Web Vitals.',
-  'build.next.proof': "We built a headless CMS on Builder.io and Next.js, and the site you're on.",
+  'build.next.proof': "I built a headless CMS on Builder.io and Next.js, and the site you're on.",
 
   'work.eyebrow': 'Selected work',
-  'work.heading': "Things we've [[shipped.]]",
+  'work.heading': "Things I've [[shipped.]]",
 
   'milestones.eyebrow': 'Achievements & milestones',
   'milestones.heading': 'Milestones, [[so far.]]',
-  'milestones.lede': 'The moments that shaped how we build — from WordPress roots to full-stack product work.',
+  'milestones.lede': 'The moments that shaped how I build — from WordPress roots to full-stack product work.',
 
   'timeline.eyebrow': 'Work timeline',
   'timeline.heading': 'The road [[here.]]',
@@ -68,7 +68,7 @@ export const pageCopy: PageCopy = {
 
   'contact.eyebrow': 'Open to projects & roles',
   'contact.heading': 'Have a project — or a role — in mind?',
-  'contact.lede': "Agencies, recruiters and founders: tell us what you're building and we'll come back with next steps.",
+  'contact.lede': "Agencies, recruiters and founders: tell me what you're building and I'll come back with next steps.",
   'contact.primaryLabel': 'Start a project',
   'contact.cvLabel': 'Download CV',
   'contact.location': 'Pasig City, Philippines · Asia/Manila (UTC+8)',

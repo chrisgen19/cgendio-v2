@@ -170,7 +170,7 @@ describe('reasoningRows', () => {
   it('keeps all three in reading order', () => {
     expect(reasoningRows({decision: 'A', contribution: 'B', outcome: 'C'}).map(({label}) => label)).toEqual([
       'The decision',
-      'Our part',
+      'My part',
       'The result',
     ]);
   });

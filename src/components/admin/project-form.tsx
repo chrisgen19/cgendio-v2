@@ -147,8 +147,8 @@ export function ProjectForm({project}: {project: ProjectFormValues | null}) {
             />
             <TextAreaField
               name="contribution"
-              label="Our part"
-              hint="What we did. Shown with a tour, and hidden while empty."
+              label="My part"
+              hint="What I did. Shown with a tour, and hidden while empty."
               defaultValue={project?.contribution ?? ''}
               rows={4}
               errors={errors}

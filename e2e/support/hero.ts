@@ -10,7 +10,7 @@ export const heroControls = (page: Page) => {
     /** Pause film while playing, Play film when paused, Replay film once the film has ended */
     toggle: hero.getByRole('button', {name: /^(Play|Pause|Replay) film$/}),
     /** The brand card's call to action, rendered inside the film */
-    seeOurWork: hero.getByRole('link', {name: /See our work/}).last(),
+    seeMyWork: hero.getByRole('link', {name: /See my work/}).last(),
     /** Desktop chips read "01 Research" */
     desktopChapter: (label: string) => hero.getByRole('group', {name: 'Film chapters'}).getByRole('button', {name: new RegExp(`^\\d\\d ${label}$`)}),
     mobileSegment: (label: string) => hero.getByRole('button', {name: `Jump to ${label}`}),

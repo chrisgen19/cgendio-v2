@@ -12,7 +12,7 @@ type Size = {width: number; height: number};
 type Variant = 'desktop' | 'mobile';
 
 type HeroPlayerProps = {
-  /** Anchor or route for the "See our work" button. */
+  /** Anchor or route for the "See my work" button. */
   worksHref?: string;
   /** Rendered over the top of the film (your site header). */
   header?: React.ReactNode;
@@ -228,7 +228,7 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
 
   return (
     <section
-      aria-label="Brand film: how we take a website from research to live"
+      aria-label="Brand film: how I take a website from research to live"
       className={className}
       style={{
         position: 'relative',
@@ -241,8 +241,8 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
       }}
     >
       <p className="sr-only">
-        A short animated film of our process in six steps — research, design, Figma to web development, QA, deploying to Vercel and going live —
-        ending with what Cgdiomampo.dev offers, a link to the work and a replay button.
+        A short animated film of my process in six steps — research, design, Figma to web development, QA, deploying to Vercel and going live — ending
+        with what Cgdiomampo.dev offers, a link to the work and a replay button.
       </p>
 
       {/* theme.ts colours follow the site theme through CSS variables; data-film-box lets the visual tests hide the film */}

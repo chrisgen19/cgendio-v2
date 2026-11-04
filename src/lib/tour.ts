@@ -32,7 +32,7 @@ export const captureGroups = (stops: TourStop[]) => {
 export const reasoningRows = ({decision, contribution, outcome}: Pick<ProjectDetail, 'decision' | 'contribution' | 'outcome'>) =>
   [
     {label: 'The decision', text: decision},
-    {label: 'Our part', text: contribution},
+    {label: 'My part', text: contribution},
     {label: 'The result', text: outcome},
   ].flatMap(({label, text}) => (text?.trim() ? [{label, text: text.trim()}] : []));
 

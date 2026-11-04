@@ -64,9 +64,9 @@ export function ContactForm() {
     return (
       <output className="flex flex-col gap-3 rounded-card border border-line bg-white p-8 shadow-(--shadow-card) max-md:p-6">
         <h2 ref={doneRef} tabIndex={-1} className="m-0 font-display text-[32px] leading-[1.1] font-bold tracking-[-0.03em]">
-          Thanks, we&apos;ve got your message.
+          Thanks, I&apos;ve got your message.
         </h2>
-        <p className="m-0 text-lg leading-[1.55] text-muted">We&apos;ll read it and get back to you.</p>
+        <p className="m-0 text-lg leading-[1.55] text-muted">I&apos;ll read it and get back to you.</p>
       </output>
     );
   }

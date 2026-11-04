@@ -2,7 +2,7 @@
 
 # cgdiomampo.dev: project rules
 
-Portfolio and dev blog for Christian Diomampo, branded as a "we" web studio. Audience: job-offer agencies, recruiters and dev clients.
+Portfolio and dev blog for Christian Diomampo, a solo developer (not a studio or company). Audience: job-offer agencies, recruiters and dev clients.
 
 ## Sources of truth
 
@@ -82,7 +82,7 @@ Map them in `@theme inline`. A next/font variable must never share its name with
 
 ## Copy rules
 
-- The brand speaks as **"we"**. The hero button reads **"See our work"** (not "See my works" as in the canvas and the Remotion source; change it in both cuts).
+- The site speaks in the first person as **"I"**, never "we", "us" or "our": it is about Christian's own work as a developer, not a company. This overrides the canvas and the Remotion source, which still say "we". The hero button reads **"See my work"** in both cuts.
 - Never describe WordPress as slow or outdated: we still sell WordPress and WooCommerce.
 - No invented stats or facts. Missing facts stay as visible placeholder text (`[YOUR PHOTO]`, `[YOUR EMAIL]`, `[START]`, `[YEAR]`, `[Earlier role]`).
 - This site is deployed on **Coolify**: the footer reads "Built with Next.js · Deployed on Coolify". The hero film's Deploy scene, the Brand card, the project cards and the stack strip keep Vercel, because they describe client work.

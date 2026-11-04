@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 
 export const SITE_NAME = 'Cgdiomampo.dev';
-export const SITE_DESCRIPTION = 'We take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.';
+export const SITE_DESCRIPTION = 'I take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.';
 
 type PageMetadataInput = {
   /** A plain title goes through the root template ("Blog · Cgdiomampo.dev"); `{absolute}` skips it. */

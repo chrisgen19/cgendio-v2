@@ -12,7 +12,7 @@ import {getPageCopy, getSiteSettings} from '@/server/content';
 
 export const metadata: Metadata = pageMetadata({
   title: 'Contact',
-  description: "Agencies, recruiters and founders: tell us what you're building and we'll come back with next steps.",
+  description: "Agencies, recruiters and founders: tell me what you're building and I'll come back with next steps.",
   path: '/contact',
 });
 
