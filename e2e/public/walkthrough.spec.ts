@@ -82,11 +82,17 @@ test('the device switch changes the frame', async ({page}, testInfo) => {
   await expect(frame(page).locator(`[data-layer="${target}"][data-state="active"]`)).toBeVisible();
 });
 
-test('the write-up shows and empty reasoning stays hidden', async ({page}) => {
+test('the write-up shows and empty reasoning stays hidden', async ({page}, testInfo) => {
   await page.goto('/work/access-hire');
   await expect(page.getByRole('heading', {level: 2, name: 'The short version'})).toBeVisible();
-  await expect(page.getByRole('heading', {level: 3, name: 'Built'})).toBeVisible();
-  await expect(page.getByRole('navigation', {name: 'Write-up sections'}).getByRole('link', {name: 'Built'})).toBeVisible();
+  await expect(page.getByRole('heading', {level: 3, name: 'Built'})).toBeAttached();
+  // Tabs at 1080px and up; phones get every field stacked, with no tab row
+  if (testInfo.project.name === 'mobile') {
+    await expect(page.getByRole('tablist', {name: 'Write-up'})).toBeHidden();
+    await expect(page.getByRole('heading', {level: 3, name: "What's in it"})).toBeVisible();
+  } else {
+    await expect(page.getByRole('tab', {name: 'Built'})).toHaveAttribute('aria-selected', 'true');
+  }
   for (const label of ['The decision', 'Our part', 'The result']) {
     await expect(page.getByRole('heading', {name: label})).toHaveCount(0);
   }
@@ -94,7 +100,7 @@ test('the write-up shows and empty reasoning stays hidden', async ({page}) => {
 
 test('the next project and contact sections follow the tour', async ({page}) => {
   await page.goto('/work/access-hire');
-  await expect(page.getByRole('link', {name: /Next project/})).toBeVisible();
+  await expect(page.getByRole('navigation', {name: 'Next project'}).getByRole('link')).toHaveAttribute('href', /^\/work\/[a-z0-9-]+$/);
   await expect(main(page).locator('#contact')).toBeVisible();
 });
 
