@@ -67,8 +67,8 @@ export const pageCopy: PageCopy = {
   'blog.allLabel': 'All articles',
 
   'contact.eyebrow': 'Open to projects & roles',
-  'contact.heading': 'Have a project — or a role — in mind?',
-  'contact.lede': "Agencies, recruiters and founders: tell me what you're building and I'll come back with next steps.",
+  'contact.heading': "Building something, or hiring? Let's [[talk]].",
+  'contact.lede': "Here's my card. Email me directly, or tell me about it in the form and I'll reply to you myself.",
   'contact.primaryLabel': 'Start a project',
   'contact.cvLabel': 'Download CV',
   'contact.location': 'Pasig City, Philippines · Asia/Manila (UTC+8)',

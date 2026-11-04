@@ -50,17 +50,17 @@ const migratedCopy = () =>
 const unquote = (value: string) => value.replaceAll("''", "'");
 
 /**
- * Every `UPDATE "page_copy" SET "value" = 'to', ... WHERE "key" = 'key' AND "value" = 'from'` a migration runs, in
- * migration order, with SQL quotes unescaped.
+ * Every `UPDATE "page_copy" SET "value" = 'to', ... WHERE "key" = 'key'` a migration runs, in migration order, with SQL
+ * quotes unescaped. `from` is the value a guarded update (`AND "value" = 'from'`) requires, or null for an overwrite.
  */
 const updatedCopy = () =>
   migrationSql()
     .flatMap((sql) => [
       ...sql.matchAll(
-        /UPDATE "page_copy" SET "value" = '((?:[^']|'')+)', "updated_at" = CURRENT_TIMESTAMP WHERE "key" = '((?:[^']|'')+)' AND "value" = '((?:[^']|'')+)';/g,
+        /UPDATE "page_copy" SET "value" = '((?:[^']|'')+)', "updated_at" = CURRENT_TIMESTAMP WHERE "key" = '((?:[^']|'')+)'(?: AND "value" = '((?:[^']|'')+)')?;/g,
       ),
     ])
-    .map(([, to = '', key = '', from = '']) => ({key: unquote(key), from: unquote(from), to: unquote(to)}));
+    .map(([, to = '', key = '', from]) => ({key: unquote(key), from: from === undefined ? null : unquote(from), to: unquote(to)}));
 
 /** Every key a migration deletes with `DELETE FROM "page_copy" WHERE "key" IN (...)`, with SQL quotes unescaped. */
 const deletedKeys = () =>
@@ -77,9 +77,11 @@ describe('page-copy data migrations', () => {
   const rows = migratedCopy();
   const updates = updatedCopy();
 
-  /** The value an inserted key ends on once every later update whose `from` matches has run. */
+  /** The value an inserted key ends on once every later overwrite, and every guarded update whose `from` matches, has run. */
   const finalValue = (key: string, inserted: string) =>
-    updates.filter((update) => update.key === key).reduce((value, update) => (update.from === value ? update.to : value), inserted);
+    updates
+      .filter((update) => update.key === key)
+      .reduce((value, update) => (update.from === null || update.from === value ? update.to : value), inserted);
 
   it('insert known keys, once each', () => {
     const keys = rows.map(([key]) => key);
