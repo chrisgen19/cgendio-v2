@@ -28,7 +28,8 @@ export async function ContactCta({level = 2}: ContactCtaProps) {
     >
       <div className="flex flex-col gap-12 max-md:gap-10 lg:sticky lg:top-28">
         <div className="flex flex-col gap-6">
-          <Eyebrow>{copy['contact.eyebrow']}</Eyebrow>
+          {/* The eyebrow says I'm open only while I am; otherwise it matches the card's closed status */}
+          <Eyebrow>{settings.openToProjects ? copy['contact.eyebrow'] : copy['about.status.closed']}</Eyebrow>
           <SectionHeading id="contact-heading" level={level}>
             <MarkedText text={copy['contact.heading']} />
           </SectionHeading>

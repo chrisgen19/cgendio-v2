@@ -24,7 +24,13 @@ export function StepNav({onBack, onNext, pending}: StepNavProps) {
         </Button>
       )}
       {onBack ? (
-        <Button variant="secondary" onClick={onBack}>
+        // Disabled while sending: edits made now would not be in the message, and success replaces the form
+        <Button
+          variant="secondary"
+          onClick={onBack}
+          disabled={pending}
+          className="disabled:cursor-wait disabled:opacity-70 disabled:hover:translate-y-0"
+        >
           Back
         </Button>
       ) : null}

@@ -1,6 +1,7 @@
 'use client';
 
 import {useState} from 'react';
+import {projectTypeLabel} from '@/lib/contact';
 import {CONTACT_STEPS, LAST_STEP} from '@/lib/contact-steps';
 import {DetailsStep} from './details-step';
 import {ErrorSummary} from './error-summary';
@@ -17,11 +18,11 @@ import {useFormSteps} from './use-form-steps';
  * <form> and send through the shared contact action (useContactForm). Each answered step collapses to one line with a Change button.
  */
 export function ContactForm({headingLevel = 3}: {headingLevel?: 2 | 3}) {
-  const {sent, pending, formError, errors, formRef, doneRef, onSubmit} = useContactForm();
+  const {sent, pending, formError, errors, serverErrors, formRef, doneRef, onSubmit, onEdit} = useContactForm();
   const [topic, setTopic] = useState('');
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState('');
-  const flow = useFormSteps(formRef, errors, [topic !== '', message.trim() !== '']);
+  const flow = useFormSteps(formRef, serverErrors, [topic !== '', message.trim() !== '']);
   const {step, direction, headings, localError} = flow;
 
   if (sent) return <FormSent ref={doneRef} email={email} headingLevel={headingLevel} />;
@@ -37,11 +38,24 @@ export function ContactForm({headingLevel = 3}: {headingLevel?: 2 | 3}) {
     onChange: () => flow.goTo(index),
     headingLevel,
   });
+  /**
+   * Reads the topic and message from the form before checking the step: a browser that restores form values on reload
+   * or back navigation fires no change event, so state alone could block Next while an answer is showing.
+   */
+  const onNext = () => {
+    const form = formRef.current;
+    const picked = form?.querySelector<HTMLInputElement>('input[name="projectType"]:checked')?.value;
+    const typed = form?.querySelector<HTMLTextAreaElement>('textarea[name="message"]')?.value ?? '';
+    const label = picked ? projectTypeLabel(picked) : '';
+    setTopic(label);
+    setMessage(typed);
+    flow.next([label !== '', typed.trim() !== '']);
+  };
   const trimmed = message.trim();
   const snippet = trimmed.length > 60 ? `${trimmed.slice(0, 60)}...` : trimmed;
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} noValidate aria-label="Message me" className="relative">
+    <form ref={formRef} onSubmit={onSubmit} onChange={onEdit} noValidate aria-label="Message me" className="relative">
       <div className="mb-8 flex items-center gap-4">
         <p className="m-0 shrink-0 font-mono text-[13px] font-medium text-muted">{`Step ${step + 1} of ${CONTACT_STEPS.length}`}</p>
         <span aria-hidden="true" className="h-1 flex-1 overflow-hidden rounded-pill bg-line">
@@ -63,11 +77,11 @@ export function ContactForm({headingLevel = 3}: {headingLevel?: 2 | 3}) {
       <ol className="m-0 list-none p-0">
         <StepShell {...shell(0)} summary={topic}>
           <TopicStep headingId="contact-step-0" error={errors?.projectType ?? (step === 0 ? localError : undefined)} onPick={setTopic} />
-          <StepNav onNext={flow.next} />
+          <StepNav onNext={onNext} />
         </StepShell>
         <StepShell {...shell(1)} summary={snippet}>
           <MessageStep error={errors?.message ?? (step === 1 ? localError : undefined)} length={trimmed.length} onType={setMessage} />
-          <StepNav onBack={flow.back} onNext={flow.next} />
+          <StepNav onBack={flow.back} onNext={onNext} pending={pending} />
         </StepShell>
         <StepShell {...shell(LAST_STEP)} summary="" last>
           <DetailsStep errors={errors} onEmail={setEmail} />

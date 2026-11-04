@@ -2,7 +2,7 @@
 
 import {type RefObject, useEffect, useRef, useState} from 'react';
 import type {ContactField} from '@/lib/contact';
-import {CONTACT_STEPS, emptyStepError, firstError} from '@/lib/contact-steps';
+import {CONTACT_STEPS, emptyStepError, firstError, stepOf} from '@/lib/contact-steps';
 
 export type Direction = 'fwd' | 'back';
 
@@ -31,8 +31,9 @@ export const useFormSteps = (
     moved.current = true;
   };
 
-  const next = () => {
-    const error = emptyStepError(step, filled);
+  /** `current` overrides `filled` with values just read from the form (see ContactForm's onNext). */
+  const next = (current: readonly [boolean, boolean] = filled) => {
+    const error = emptyStepError(step, current);
     if (error) setLocalError(error);
     else goTo(step + 1);
   };
@@ -48,8 +49,9 @@ export const useFormSteps = (
   useEffect(() => {
     setAnnounce(`Step ${step + 1} of ${CONTACT_STEPS.length}: ${CONTACT_STEPS[step]?.title}`);
     const field = focusField.current;
-    if (field) {
-      focusField.current = null;
+    focusField.current = null;
+    // Only a field on the step now showing can take focus; a field queued for a hidden step falls back to the heading
+    if (field && stepOf(field) === step) {
       const control = formRef.current?.elements.namedItem(field);
       if (control instanceof HTMLElement) control.focus();
       // A radio group comes back as a RadioNodeList: focus its first option

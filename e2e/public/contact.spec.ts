@@ -49,10 +49,46 @@ test.describe('on /contact', () => {
     await expect(message).toHaveAttribute('aria-invalid', 'true');
     await expect(form.getByText('Add a few more details (at least 20 characters).')).toBeVisible();
 
+    // Editing a field clears its error straight away, and the summary drops the step that is now fixed
+    await message.fill('A longer message with enough detail to send.');
+    await expect(message).not.toHaveAttribute('aria-invalid');
+    await expect(form.getByText('Add a few more details (at least 20 characters).')).toBeHidden();
+    await expect(form.getByText('Before this can send, check your details.')).toBeVisible();
+
     await form.getByRole('button', {name: 'Next'}).click();
     await expect(form.getByText('Tell me your name.')).toBeVisible();
     await expect(form.getByText('Enter a valid email address.')).toBeVisible();
     await expect(form.getByLabel('Email for my reply', {exact: true})).toHaveValue('not-an-email');
+  });
+
+  test('after an error on the last step, Change moves focus to the step it opens', async ({page}) => {
+    const form = contactForm(page);
+    await form.locator('label', {hasText: 'Migration or redesign'}).click();
+    await form.getByRole('button', {name: 'Next'}).click();
+    await form.getByLabel('Your message', {exact: true}).fill('Moving a WooCommerce shop to a new theme.');
+    await form.getByRole('button', {name: 'Next'}).click();
+    await form.getByRole('button', {name: 'Send message'}).click();
+    await expect(form.getByLabel('Your name', {exact: true})).toBeFocused();
+
+    await form.getByRole('button', {name: "Change what's it about"}).click();
+    await expect(form.getByRole('heading', {name: "What's it about?"})).toBeFocused();
+  });
+
+  test('Next accepts answers the browser restored without a change event', async ({page}) => {
+    const form = contactForm(page);
+    // A reload or back navigation can restore a checked radio and typed text without firing input or change
+    await form.locator('input[name="projectType"][value="WORDPRESS"]').evaluate((radio: HTMLInputElement) => {
+      radio.checked = true;
+    });
+    await form.getByRole('button', {name: 'Next'}).click();
+    await expect(form.getByRole('heading', {name: 'Tell me about it'})).toBeFocused();
+    await expect(form.getByRole('paragraph').filter({hasText: 'WordPress & WooCommerce'})).toBeVisible();
+
+    await form.locator('textarea[name="message"]').evaluate((textarea: HTMLTextAreaElement) => {
+      textarea.value = 'Restored text that the browser kept.';
+    });
+    await form.getByRole('button', {name: 'Next'}).click();
+    await expect(form.getByRole('heading', {name: 'Who should I reply to?'})).toBeFocused();
   });
 
   test('a filled honeypot looks like success but nothing is sent', async ({page, request}) => {
@@ -81,6 +117,7 @@ test.describe('on /contact', () => {
       .toMatchObject({
         to: CONTACT_EMAIL,
         subject: `New inquiry: Next.js & React from ${name}`,
+        reply_to: 'visitor@example.test',
       });
   });
 });

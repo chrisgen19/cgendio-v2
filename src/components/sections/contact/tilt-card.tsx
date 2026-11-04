@@ -25,7 +25,11 @@ export function TiltCard({children}: {children: ReactNode}) {
     const query = window.matchMedia(TILT_QUERY);
     const sync = () => {
       enabled.current = query.matches;
-      if (!query.matches) clearTilt(cardRef.current);
+      if (!query.matches) {
+        // A frame queued by the last pointer move would otherwise write the tilt back
+        cancelAnimationFrame(frame.current);
+        clearTilt(cardRef.current);
+      }
     };
     sync();
     query.addEventListener('change', sync);
