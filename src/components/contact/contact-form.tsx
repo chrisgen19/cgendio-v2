@@ -1,149 +1,83 @@
 'use client';
 
-import {type ReactNode, type SubmitEvent, startTransition, useActionState, useEffect, useRef} from 'react';
-import {Button} from '@/components/ui-site/button';
-import {cn} from '@/lib/cn';
-import {CONTACT_FIELDS, type ContactField, type ContactResult, PROJECT_TYPES} from '@/lib/contact';
-import {submitContact} from '@/server/actions/contact';
-
-const CONTROL =
-  'w-full rounded-field border border-line bg-white px-4 text-base text-ink transition-colors duration-150 hover:border-ink aria-invalid:border-danger motion-reduce:transition-none';
-
-type FieldControlProps = {id: string; name: ContactField; 'aria-invalid'?: true; 'aria-describedby'?: string};
-
-function Field({
-  name,
-  label,
-  error,
-  children,
-}: {
-  name: ContactField;
-  label: string;
-  error?: string;
-  children: (props: FieldControlProps) => ReactNode;
-}) {
-  const id = `contact-${name}`;
-  const errorId = `${id}-error`;
-  return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-sm font-semibold text-ink">
-        {label}
-      </label>
-      {children({id, name, ...(error ? {'aria-invalid': true, 'aria-describedby': errorId} : {})})}
-      {error ? (
-        <p id={errorId} className="m-0 text-sm text-danger">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  );
-}
+import {useState} from 'react';
+import {CONTACT_STEPS, LAST_STEP} from '@/lib/contact-steps';
+import {DetailsStep} from './details-step';
+import {ErrorSummary} from './error-summary';
+import {FormSent} from './form-sent';
+import {MessageStep} from './message-step';
+import {StepNav} from './step-nav';
+import {StepShell} from './step-shell';
+import {TopicStep} from './topic-step';
+import {useContactForm} from './use-contact-form';
+import {useFormSteps} from './use-form-steps';
 
 /**
- * The /contact form. It submits from onSubmit rather than <form action>, so React doesn't clear what was typed when
- * the server returns field errors; focus then moves to the first invalid field. On success the form is replaced by a
- * confirmation that takes focus.
+ * The contact form, one question at a time: topic, message, then who to reply to. All three steps sit inside one
+ * <form> and send through the shared contact action (useContactForm). Each answered step collapses to one line with a Change button.
  */
-export function ContactForm() {
-  const [result, dispatch, pending] = useActionState<ContactResult | null, FormData>(submitContact, null);
-  const formRef = useRef<HTMLFormElement>(null);
-  const doneRef = useRef<HTMLHeadingElement>(null);
+export function ContactForm({headingLevel = 3}: {headingLevel?: 2 | 3}) {
+  const {sent, pending, formError, errors, formRef, doneRef, onSubmit} = useContactForm();
+  const [topic, setTopic] = useState('');
+  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState('');
+  const flow = useFormSteps(formRef, errors, [topic !== '', message.trim() !== '']);
+  const {step, direction, headings, localError} = flow;
 
-  useEffect(() => {
-    if (!result) return;
-    if (result.ok) {
-      doneRef.current?.focus();
-      return;
-    }
-    const first = CONTACT_FIELDS.find((field) => result.fieldErrors?.[field]);
-    const control = first ? formRef.current?.elements.namedItem(first) : null;
-    if (control instanceof HTMLElement) control.focus();
-  }, [result]);
+  if (sent) return <FormSent ref={doneRef} email={email} headingLevel={headingLevel} />;
 
-  if (result?.ok) {
-    return (
-      <output className="flex flex-col gap-3 rounded-card border border-line bg-white p-8 shadow-(--shadow-card) max-md:p-6">
-        <h2 ref={doneRef} tabIndex={-1} className="m-0 font-display text-[32px] leading-[1.1] font-bold tracking-[-0.03em]">
-          Thanks, I&apos;ve got your message.
-        </h2>
-        <p className="m-0 text-lg leading-[1.55] text-muted">I&apos;ll read it and get back to you.</p>
-      </output>
-    );
-  }
-
-  const errors = result && !result.ok ? result.fieldErrors : undefined;
-  const onSubmit = (event: SubmitEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    startTransition(() => dispatch(formData));
-  };
+  const shell = (index: number) => ({
+    index,
+    current: step,
+    title: CONTACT_STEPS[index]?.title ?? '',
+    headingRef: (el: HTMLHeadingElement | null) => {
+      headings.current[index] = el;
+    },
+    direction,
+    onChange: () => flow.goTo(index),
+    headingLevel,
+  });
+  const trimmed = message.trim();
+  const snippet = trimmed.length > 60 ? `${trimmed.slice(0, 60)}...` : trimmed;
 
   return (
-    <form
-      ref={formRef}
-      onSubmit={onSubmit}
-      noValidate
-      className="relative flex flex-col gap-5 rounded-card border border-line bg-white p-8 shadow-(--shadow-card) max-md:p-6"
-    >
-      {result && !result.ok && result.error ? (
-        <p role="alert" className="m-0 rounded-field border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">
-          {result.error}
+    <form ref={formRef} onSubmit={onSubmit} noValidate aria-label="Message me" className="relative">
+      <div className="mb-8 flex items-center gap-4">
+        <p className="m-0 shrink-0 font-mono text-[13px] font-medium text-muted">{`Step ${step + 1} of ${CONTACT_STEPS.length}`}</p>
+        <span aria-hidden="true" className="h-1 flex-1 overflow-hidden rounded-pill bg-line">
+          <span
+            className="block h-full origin-left rounded-pill bg-accent motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-mark"
+            style={{transform: `scaleX(${(step + 1) / CONTACT_STEPS.length})`}}
+          />
+        </span>
+      </div>
+      <p aria-live="polite" className="sr-only">
+        {flow.announce}
+      </p>
+      {formError ? (
+        <p role="alert" className="m-0 mb-6 rounded-field border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">
+          {formError}
         </p>
       ) : null}
-      <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
-        <Field name="name" label="Name" error={errors?.name}>
-          {(props) => <input type="text" autoComplete="name" required maxLength={120} className={cn(CONTROL, 'h-13')} {...props} />}
-        </Field>
-        <Field name="email" label="Email" error={errors?.email}>
-          {(props) => <input type="email" autoComplete="email" required maxLength={200} className={cn(CONTROL, 'h-13')} {...props} />}
-        </Field>
-      </div>
-      <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
-        <Field name="company" label="Company (optional)" error={errors?.company}>
-          {(props) => <input type="text" autoComplete="organization" maxLength={120} className={cn(CONTROL, 'h-13')} {...props} />}
-        </Field>
-        <Field name="projectType" label="What's it about?" error={errors?.projectType}>
-          {(props) => (
-            <span className="relative block">
-              <select required defaultValue="" className={cn(CONTROL, 'h-13 cursor-pointer appearance-none pr-11')} {...props}>
-                <option value="" disabled>
-                  Choose one
-                </option>
-                {PROJECT_TYPES.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                width="18"
-                height="18"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-muted"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </span>
-          )}
-        </Field>
-      </div>
-      <Field name="message" label="Message" error={errors?.message}>
-        {(props) => <textarea required rows={7} maxLength={5000} className={cn(CONTROL, 'min-h-40 resize-y py-3 leading-[1.55]')} {...props} />}
-      </Field>
+      <ErrorSummary errors={errors} />
+      <ol className="m-0 list-none p-0">
+        <StepShell {...shell(0)} summary={topic}>
+          <TopicStep headingId="contact-step-0" error={errors?.projectType ?? (step === 0 ? localError : undefined)} onPick={setTopic} />
+          <StepNav onNext={flow.next} />
+        </StepShell>
+        <StepShell {...shell(1)} summary={snippet}>
+          <MessageStep error={errors?.message ?? (step === 1 ? localError : undefined)} length={trimmed.length} onType={setMessage} />
+          <StepNav onBack={flow.back} onNext={flow.next} />
+        </StepShell>
+        <StepShell {...shell(LAST_STEP)} summary="" last>
+          <DetailsStep errors={errors} onEmail={setEmail} />
+          <StepNav onBack={flow.back} pending={pending} />
+        </StepShell>
+      </ol>
       {/* Honeypot: hidden from people and assistive tech; bots that fill every field get a fake success */}
       <div aria-hidden="true" className="absolute -left-[10000px] size-px overflow-hidden">
         <label htmlFor="contact-website">Leave this field empty</label>
         <input id="contact-website" type="text" name="website" tabIndex={-1} autoComplete="off" />
-      </div>
-      <div>
-        <Button type="submit" disabled={pending} className="disabled:cursor-wait disabled:opacity-70 disabled:hover:translate-y-0">
-          {pending ? 'Sending…' : 'Send message'}
-        </Button>
       </div>
     </form>
   );

@@ -218,7 +218,7 @@
 }
 
 /*
- * A light island inside a dark page: the lime contact panel, lime badges and the preview banner. Restates the light
+ * A light island inside a dark page: lime badges and the preview banner. Restates the light
  * values from @theme above (keep them in sync). The text colour reset is in @layer base below, so utilities like
  * text-white still win over it.
  */
@@ -835,78 +835,44 @@
 }
 
 /*
- * The contact ticker (src/components/sections/contact/). The tab under the band meets it with concave corners. On the
- * dark page both take the page colour (the dark --color-ground, which the light panel can't see), so the band reads as a
- * cut through the lime panel. The first view is armed (data-armed) only with JavaScript, motion welcome and the band
- * below the fold, and plays (data-play) as it scrolls into view: the band shoots in from the right while useTicker
- * launches the stream fast and brakes it, then the tab drops out from under the band.
+ * The contact form (src/components/contact/): the step that opens slides in from the side it came from, and the sent
+ * note arrives the same way. Longhands only: a nameless `animation` shorthand is rewritten to `none` in production.
  */
-.contact-band,
-.contact-tab {
-  --ticker-ink: var(--color-ink);
-  background-color: var(--ticker-ink);
-}
-
-:root[data-theme="dark"] :is(.contact-band, .contact-tab) {
-  --ticker-ink: #0b0c10;
-}
-
-/* 1px wider than the curve and tucked 1px into the tab, so no hairline shows at the joins */
-.contact-tab::before,
-.contact-tab::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  width: 19px;
-  height: 18px;
-}
-
-.contact-tab::before {
-  right: calc(100% - 1px);
-  background: radial-gradient(circle at 0 100%, transparent 17.5px, var(--ticker-ink) 18px);
-}
-
-.contact-tab::after {
-  left: calc(100% - 1px);
-  background: radial-gradient(circle at 100% 100%, transparent 17.5px, var(--ticker-ink) 18px);
-}
-
-@keyframes contact-shoot {
+@keyframes contact-step-fwd {
   from {
-    clip-path: inset(0 0 0 100%);
+    opacity: 0;
+    transform: translateX(28px);
   }
   to {
-    clip-path: inset(0);
+    opacity: 1;
+    transform: none;
   }
 }
 
-/* Hidden until it starts to move, so it never shows through the band before the band has shot past it */
-@keyframes contact-drop {
+@keyframes contact-step-back {
   from {
-    visibility: hidden;
-    translate: 0 -100%;
+    opacity: 0;
+    transform: translateX(-28px);
   }
   to {
-    visibility: visible;
-    translate: 0 0;
+    opacity: 1;
+    transform: none;
   }
 }
 
-@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-  [data-armed] > .contact-band {
-    clip-path: inset(0 0 0 100%);
+@media (prefers-reduced-motion: no-preference) {
+  .contact-step {
+    animation-duration: 280ms;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation-fill-mode: both;
   }
 
-  [data-armed]:not([data-play]) > .contact-tab {
-    visibility: hidden;
+  .contact-step[data-dir="fwd"] {
+    animation-name: contact-step-fwd;
   }
 
-  [data-armed][data-play] > .contact-band {
-    animation: contact-shoot 0.7s var(--ease-mark) both;
-  }
-
-  [data-armed][data-play] > .contact-tab {
-    animation: contact-drop 0.6s var(--ease-spring) 0.55s both;
+  .contact-step[data-dir="back"] {
+    animation-name: contact-step-back;
   }
 }
 

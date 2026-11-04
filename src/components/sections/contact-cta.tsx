@@ -1,57 +1,46 @@
-import {Button} from '@/components/ui-site/button';
+import {ContactForm} from '@/components/contact/contact-form';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {MarkedText} from '@/components/ui-site/marked-text';
 import {Section} from '@/components/ui-site/section';
 import {SectionHeading} from '@/components/ui-site/section-heading';
-import {isEmail} from '@/lib/email';
 import {getPageCopy, getSiteSettings} from '@/server/content';
-import {ContactTicker} from './contact/contact-ticker';
+import {ContactCard} from './contact/contact-card';
+import {ContactLinks} from './contact/contact-links';
+
+type ContactCtaProps = {
+  /** 2 on the home page; 1 on /contact, where this section is the whole page */
+  level?: 1 | 2;
+};
 
 /**
- * The closing call to action. The email address is the main action: it runs on an ink ticker band across the lime
- * panel (ContactTicker), with the contact form as the secondary path below. The section clips the band's full bleed.
+ * The contact section: a dot-grid stage with the heading, lede and my business card (email, location, status) on the
+ * left, and the contact form on a white sheet on the right, one question at a time. Under 1080px the card sits on top.
  */
-export async function ContactCta() {
+export async function ContactCta({level = 2}: ContactCtaProps) {
   const [copy, settings] = await Promise.all([getPageCopy(), getSiteSettings()]);
 
   return (
     <Section
       id="contact"
-      padding="cta"
-      innerTheme="light"
-      className="overflow-x-clip"
-      innerClassName="relative flex flex-col gap-7 rounded-cta bg-lime p-[clamp(36px,6vw,80px)]"
+      tone="white"
+      className="bg-[radial-gradient(circle,var(--color-dot)_1px,transparent_1.3px)] bg-size-[26px_26px]"
+      innerClassName="grid grid-cols-[minmax(0,5fr)_minmax(0,7fr)] items-start gap-x-20 gap-y-12 max-lg:grid-cols-1"
     >
-      <Eyebrow tone="ink">{copy['contact.eyebrow']}</Eyebrow>
-      <SectionHeading size="cta" className="max-w-[1000px]">
-        <MarkedText text={copy['contact.heading']} />
-      </SectionHeading>
-      <p className="m-0 max-w-[560px] text-lg leading-[1.55] text-ink-soft">{copy['contact.lede']}</p>
-      {/* The [YOUR EMAIL] placeholder shows as plain text on the band, with no link and no copy button */}
-      <ContactTicker address={settings.contactEmail} live={isEmail(settings.contactEmail)} />
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
-        <Button href="/contact" variant="outline">
-          {copy['contact.primaryLabel']}
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            width="18"
-            height="18"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-          >
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </svg>
-        </Button>
-        {/* Only once a CV is uploaded in admin Settings */}
-        {settings.cvUrl ? (
-          <Button href={settings.cvUrl} variant="outline">
-            {copy['contact.cvLabel']}
-          </Button>
-        ) : null}
-        <span className="font-mono text-[13px] text-ink-soft">{copy['contact.location']}</span>
+      <div className="flex flex-col gap-12 max-md:gap-10 lg:sticky lg:top-28">
+        <div className="flex flex-col gap-6">
+          <Eyebrow>{copy['contact.eyebrow']}</Eyebrow>
+          <SectionHeading id="contact-heading" level={level}>
+            <MarkedText text={copy['contact.heading']} />
+          </SectionHeading>
+          <p className="m-0 max-w-[460px] text-lg leading-[1.55] text-muted max-md:text-base">{copy['contact.lede']}</p>
+        </div>
+        <div className="flex max-w-[500px] flex-col gap-6">
+          <ContactCard copy={copy} settings={settings} />
+          <ContactLinks copy={copy} settings={settings} />
+        </div>
+      </div>
+      <div className="rounded-panel border border-line bg-white p-[clamp(24px,4vw,48px)] shadow-(--shadow-card)">
+        <ContactForm headingLevel={level === 1 ? 2 : 3} />
       </div>
     </Section>
   );

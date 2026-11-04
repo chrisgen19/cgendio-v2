@@ -14,11 +14,18 @@ export const useOwnIp = async (page: Page, testInfo: TestInfo) => {
 /** A token to recognise this test's message among the emails other tests sent. */
 export const uniqueToken = () => `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
+/** The contact form, on /contact or in the home page's contact section. */
+export const contactForm = (page: Page) => page.locator('main #contact').getByRole('form', {name: 'Message me'});
+
+/** Picks a topic, writes the message and fills in who to reply to, one step at a time, ready to send. */
 export const fillContactForm = async (page: Page, {name, message}: {name: string; message: string}) => {
-  await page.getByLabel('Name', {exact: true}).fill(name);
-  await page.getByLabel('Email', {exact: true}).fill('visitor@example.test');
-  await page.getByLabel("What's it about?").selectOption({label: 'Next.js & React'});
-  await page.getByLabel('Message', {exact: true}).fill(message);
+  const form = contactForm(page);
+  await form.locator('label', {hasText: 'Next.js & React'}).click();
+  await form.getByRole('button', {name: 'Next'}).click();
+  await form.getByLabel('Your message', {exact: true}).fill(message);
+  await form.getByRole('button', {name: 'Next'}).click();
+  await form.getByLabel('Your name', {exact: true}).fill(name);
+  await form.getByLabel('Email for my reply', {exact: true}).fill('visitor@example.test');
 };
 
 export const sentEmails = async (request: APIRequestContext): Promise<Email[]> => {
