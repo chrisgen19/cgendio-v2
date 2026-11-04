@@ -83,7 +83,7 @@ Map them in `@theme inline`. A next/font variable must never share its name with
 ## Copy rules
 
 - The site speaks in the first person as **"I"**, never "we", "us" or "our": it is about Christian's own work as a developer, not a company. This overrides the canvas and the Remotion source, which still say "we". The hero button reads **"See my work"** in both cuts.
-- Never describe WordPress as slow or outdated: we still sell WordPress and WooCommerce.
+- Never describe WordPress as slow or outdated: I still sell WordPress and WooCommerce.
 - No invented stats or facts. Missing facts stay as visible placeholder text (`[YOUR PHOTO]`, `[YOUR EMAIL]`, `[START]`, `[YEAR]`, `[Earlier role]`).
 - This site is deployed on **Coolify**: the footer reads "Built with Next.js · Deployed on Coolify". The hero film's Deploy scene, the Brand card, the project cards and the stack strip keep Vercel, because they describe client work.
 - Otherwise use the canvas copy word for word. Ask before rewording anything.
