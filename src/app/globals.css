@@ -1715,116 +1715,115 @@
 }
 
 /*
- * The write-up after a case study's tour (src/components/case-study/write-up*), as a build sheet with two modes. Stacked
- * (under 1080px, or without JavaScript): every field shows, one under the other. Tabbed (1080px and up with scripting):
- * the fields share one grid cell, so the sheet is as tall as its longest field and never jumps, and only the open one
- * shows. The first field is marked open in the HTML, so the sheet looks right before hydration; the tabs then move
- * data-active and data-side. Longhands only: the build's minifier rewrites a nameless shorthand and drops its parts.
+ * The write-up after a case study's tour (src/components/case-study/write-up*). Scroll-driven only with JavaScript, motion
+ * allowed and scroll timelines supported: an accent fill tracks reading progress beside the index (a bar under the chip
+ * row on phones), and each scope item ticks itself off as it crosses the reading line. Otherwise the ticks are drawn,
+ * the items are ink and the fills stay hidden. Longhands only: the build's minifier expands an `animation: linear both`
+ * shorthand with no name into `ease` and `none`, which drops the fill mode.
  */
-.write-up-tablist {
+.write-up-rail-fill,
+.write-up-bar-fill {
   display: none;
 }
 
-.write-up-checklist > li:nth-child(2) {
-  --i: 1;
-}
-.write-up-checklist > li:nth-child(3) {
-  --i: 2;
-}
-.write-up-checklist > li:nth-child(4) {
-  --i: 3;
-}
-.write-up-checklist > li:nth-child(5) {
-  --i: 4;
-}
-.write-up-checklist > li:nth-child(6) {
-  --i: 5;
-}
-.write-up-checklist > li:nth-child(7) {
-  --i: 6;
-}
-.write-up-checklist > li:nth-child(8) {
-  --i: 7;
-}
-.write-up-checklist > li:nth-child(n + 9) {
-  --i: 8;
-}
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) and (timeline-scope: none) {
+    .write-up-block {
+      timeline-scope: --write-up-read;
+    }
 
-@media (min-width: 1080px) and (scripting: enabled) {
-  .write-up-tabbed .write-up-tablist {
-    display: flex;
+    .write-up-content {
+      view-timeline: --write-up-read block;
+    }
+
+    .write-up-rail-fill,
+    .write-up-bar-fill {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --write-up-read;
+      animation-range: entry 60% exit 40%;
+    }
+
+    .write-up-rail-fill {
+      animation-name: write-up-fill-y;
+    }
+
+    .write-up-bar-fill {
+      animation-name: write-up-fill-x;
+    }
+
+    @media (width >= 1080px) {
+      .write-up-rail-fill {
+        display: block;
+      }
+    }
+
+    @media (width < 1080px) {
+      .write-up-bar-fill {
+        display: block;
+      }
+    }
+
+    .write-up-tick,
+    .write-up-item-text {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: cover 32% cover 39%;
+    }
+
+    .write-up-tick {
+      animation-name: write-up-tick;
+    }
+
+    .write-up-item-text {
+      animation-name: write-up-item;
+    }
+
+    .write-up-tick-icon {
+      animation-name: write-up-tick-icon;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: cover 34% cover 42%;
+    }
   }
+}
 
-  .write-up-tabbed .write-up-panels {
-    display: grid;
+@keyframes write-up-fill-y {
+  from {
+    transform: scaleY(0);
   }
-
-  .write-up-tabbed .write-up-panels > .write-up-field {
-    grid-area: 1 / 1;
-    align-self: start;
-    border-top: 0;
-    padding-block: 0;
+  to {
+    transform: scaleY(1);
   }
+}
 
-  /* The open tab names the field, so its own label is for screen readers only */
-  .write-up-tabbed .write-up-field-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+@keyframes write-up-fill-x {
+  from {
+    transform: scaleX(0);
   }
+  to {
+    transform: scaleX(1);
+  }
+}
 
-  .write-up-tabbed .write-up-panels > .write-up-field:not([data-active]) {
-    visibility: hidden;
+@keyframes write-up-tick {
+  from {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-line);
+  }
+}
+
+@keyframes write-up-tick-icon {
+  from {
     opacity: 0;
+    transform: scale(0.3) rotate(-25deg);
   }
 }
 
-/* The reader's own click is the only motion: the old field slides out the way it came, the new one in from the other side */
-@media (min-width: 1080px) and (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-  .write-up-tabbed .write-up-panels > .write-up-field {
-    transition-property: opacity, translate, visibility;
-    transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
-    transition-duration: 0.42s, 0.48s, 0s;
-    transition-delay: 0.06s, 0.06s, 0s;
-  }
-
-  .write-up-tabbed .write-up-panels > .write-up-field:not([data-active]) {
-    translate: 24px 0;
-    transition-duration: 0.18s, 0.22s, 0s;
-    transition-delay: 0s, 0s, 0.22s;
-  }
-
-  .write-up-tabbed .write-up-panels > .write-up-field[data-side="before"] {
-    translate: -24px 0;
-  }
-
-  /* Opening a checklist ticks its items off one by one */
-  .write-up-tabbed .write-up-tick {
-    transition-property: scale, opacity;
-    transition-duration: 0.36s;
-    transition-timing-function: var(--ease-spring);
-    transition-delay: calc(0.16s + var(--i, 0) * 0.05s);
-  }
-
-  .write-up-tabbed .write-up-item-text {
-    transition-property: opacity, translate;
-    transition-duration: 0.36s;
-    transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
-    transition-delay: calc(0.12s + var(--i, 0) * 0.05s);
-  }
-
-  .write-up-tabbed .write-up-field:not([data-active]) .write-up-tick {
-    scale: 0.3;
-    opacity: 0;
-    transition-delay: 0s;
-  }
-
-  .write-up-tabbed .write-up-field:not([data-active]) .write-up-item-text {
-    opacity: 0;
-    translate: 8px 0;
-    transition-delay: 0s;
+@keyframes write-up-item {
+  from {
+    color: var(--color-muted);
   }
 }

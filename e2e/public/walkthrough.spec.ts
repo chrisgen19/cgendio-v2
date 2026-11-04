@@ -82,34 +82,41 @@ test('the device switch changes the frame', async ({page}, testInfo) => {
   await expect(frame(page).locator(`[data-layer="${target}"][data-state="active"]`)).toBeVisible();
 });
 
-test('the write-up shows and empty reasoning stays hidden', async ({page}, testInfo) => {
+test('the write-up shows and empty reasoning stays hidden', async ({page}) => {
   await page.goto('/work/access-hire');
   await expect(page.getByRole('heading', {level: 2, name: 'The short version'})).toBeVisible();
-  await expect(page.getByRole('heading', {level: 3, name: 'Built'})).toBeAttached();
-  // Tabs at 1080px and up; phones get every field stacked, with no tab row
-  if (testInfo.project.name === 'mobile') {
-    await expect(page.getByRole('tablist', {name: 'Write-up'})).toBeHidden();
-    await expect(page.getByRole('heading', {level: 3, name: "What's in it"})).toBeVisible();
-  } else {
-    await expect(page.getByRole('tab', {name: 'Built'})).toHaveAttribute('aria-selected', 'true');
-  }
+  await expect(page.getByRole('heading', {level: 3, name: 'Built'})).toBeVisible();
+  await expect(page.getByRole('navigation', {name: 'Write-up sections'}).getByRole('link', {name: 'Built'})).toBeVisible();
   for (const label of ['The decision', 'My part', 'The result']) {
     await expect(page.getByRole('heading', {name: label})).toHaveCount(0);
   }
 });
 
-test('a link to a write-up chapter opens its tab', async ({page}, testInfo) => {
-  test.skip(testInfo.project.name === 'mobile', 'Phones stack every chapter, so there is no tab to open');
-  await page.goto('/work/access-hire#write-up-before');
-  await expect(page.getByRole('tab', {name: 'Before'})).toHaveAttribute('aria-selected', 'true');
-  await expect(main(page).getByText('On WordPress, I connected the off-hire form')).toBeVisible();
+test.describe('on a tall desktop viewport', () => {
+  // At 1000px tall, a reading line at 30% of the viewport sat below these short chapters, so a jump link marked the next one
+  test.use({viewport: {width: 1440, height: 1000}});
 
-  // A hash change on the same page opens that chapter too
-  await page.evaluate(() => {
-    window.location.hash = 'write-up-whats-in-it';
+  test('each write-up jump link marks the chapter it jumps to', async ({page}, testInfo) => {
+    test.skip(testInfo.project.name === 'mobile', 'The desktop index; the viewport is set above');
+    for (const slug of ['access-hire', 'fresh-fruit-and-veg']) {
+      await page.goto(`/work/${slug}`);
+      const links = page.getByRole('navigation', {name: 'Write-up sections'}).getByRole('link');
+      const count = await links.count();
+      expect(count).toBeGreaterThan(1);
+      for (let index = 0; index < count; index += 1) {
+        const link = links.nth(index);
+        const id = ((await link.getAttribute('href')) ?? '').slice(1);
+        await link.click();
+        // Check once the smooth scroll has landed the chapter at its scroll margin: mid-scroll the right link can flash current
+        await page.waitForFunction((target) => {
+          const chapter = document.getElementById(target);
+          if (!chapter) return false;
+          return Math.abs(chapter.getBoundingClientRect().top - Number.parseFloat(getComputedStyle(chapter).scrollMarginTop)) < 2;
+        }, id);
+        await expect(link).toHaveAttribute('aria-current', 'true');
+      }
+    }
   });
-  await expect(page.getByRole('tab', {name: "What's in it"})).toHaveAttribute('aria-selected', 'true');
-  await expect(main(page).getByText('On WordPress, I connected the off-hire form')).toBeHidden();
 });
 
 test('the next project and contact sections follow the tour', async ({page}) => {
