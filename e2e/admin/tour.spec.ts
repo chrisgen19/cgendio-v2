@@ -76,6 +76,7 @@ test('only the filled reasoning fields show on the page', async ({page}) => {
   expect(rows[0]).toEqual({outcome: 'A result worth reading', contribution: null});
 
   await openSaved(page, (main) => main.getByRole('heading', {level: 3, name: 'The result'}));
+  await expect(page.getByRole('navigation', {name: 'Write-up sections'}).getByRole('link', {name: 'The result'})).toBeVisible();
   await expect(page.getByText('A result worth reading')).toBeVisible();
   await expect(page.getByRole('heading', {level: 3, name: 'Our part'})).toHaveCount(0);
   await expect(page.getByRole('heading', {level: 3, name: 'The decision'})).toHaveCount(0);
