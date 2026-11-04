@@ -9,7 +9,7 @@ test('a home page card opens its case study', async ({page}) => {
   await expect(page.getByRole('heading', {level: 1})).toHaveText('Access Hire Australia');
   await expect(page.getByRole('definition').filter({hasText: 'Senior Full Stack Developer, Access Group Australia'})).toBeVisible();
   await expect(page.getByRole('heading', {level: 3, name: 'Built'})).toBeVisible();
-  await expect(page.getByRole('link', {name: /Next project/})).toBeVisible();
+  await expect(page.getByRole('navigation', {name: 'Next project'}).getByRole('link')).toBeVisible();
 });
 
 test('a case study without a tour shows its cover', async ({page}) => {

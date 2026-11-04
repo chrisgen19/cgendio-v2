@@ -29,7 +29,9 @@ export default async function CaseStudyPage({params}: PageProps<'/work/[slug]'>)
   const {slug} = await params;
   const project = await getProject(slug);
   if (!project) notFound();
-  const [next, copy] = await Promise.all([getNextProject(slug), getPageCopy()]);
+  const [link, copy] = await Promise.all([getNextProject(slug), getPageCopy()]);
+  // The Next project card shows the next project's brand, summary and cover, so it needs the full record
+  const next = link ? await getProject(link.slug) : null;
   return (
     <PageShell>
       <JsonLd data={caseStudyJsonLd(project, copy)} />
