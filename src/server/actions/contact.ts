@@ -17,7 +17,7 @@ const optionalText = z.preprocess(
 );
 
 const contactSchema = z.object({
-  name: z.string().trim().min(1, {error: 'Tell us your name.'}).max(120, {error: 'Tell us your name.'}),
+  name: z.string().trim().min(1, {error: 'Tell me your name.'}).max(120, {error: 'Tell me your name.'}),
   email: z
     .string()
     .trim()

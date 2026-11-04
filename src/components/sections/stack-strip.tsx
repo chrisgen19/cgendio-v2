@@ -29,7 +29,7 @@ export async function StackStrip() {
             The <Mark>stack</Mark>, layer by layer.
           </SectionHeading>
         </div>
-        <p className="m-0 max-w-[380px] text-base leading-[1.55] text-muted">The tools we use at each level of a site, from hosting up to design.</p>
+        <p className="m-0 max-w-[380px] text-base leading-[1.55] text-muted">The tools I use at each level of a site, from hosting up to design.</p>
       </div>
       <div>
         <ol id={LIST_ID} className="stack-layers m-0 flex list-none flex-col-reverse p-0 md:pt-12 md:pb-10 max-md:gap-2.5">

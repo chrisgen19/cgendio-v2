@@ -93,7 +93,7 @@ export const projectFormSchema = z
     brandColor: optionalHex,
     brandTint: optionalHex,
     decision: optionalLongText('The decision'),
-    contribution: optionalLongText('Our part'),
+    contribution: optionalLongText('My part'),
     outcome: optionalLongText('The result'),
     tourStops: tourStopsField,
   })

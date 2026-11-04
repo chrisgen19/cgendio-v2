@@ -87,7 +87,7 @@ test('the write-up shows and empty reasoning stays hidden', async ({page}) => {
   await expect(page.getByRole('heading', {level: 2, name: 'The short version'})).toBeVisible();
   await expect(page.getByRole('heading', {level: 3, name: 'Built'})).toBeVisible();
   await expect(page.getByRole('navigation', {name: 'Write-up sections'}).getByRole('link', {name: 'Built'})).toBeVisible();
-  for (const label of ['The decision', 'Our part', 'The result']) {
+  for (const label of ['The decision', 'My part', 'The result']) {
     await expect(page.getByRole('heading', {name: label})).toHaveCount(0);
   }
 });

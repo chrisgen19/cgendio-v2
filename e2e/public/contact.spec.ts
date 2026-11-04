@@ -2,7 +2,7 @@ import {expect, test} from '@playwright/test';
 import {fillContactForm, sentEmails, uniqueToken, useOwnIp} from '../support/contact';
 import {CONTACT_EMAIL} from '../support/test-env';
 
-const thanks = (page: import('@playwright/test').Page) => page.getByRole('heading', {name: "Thanks, we've got your message."});
+const thanks = (page: import('@playwright/test').Page) => page.getByRole('heading', {name: "Thanks, I've got your message."});
 
 test.beforeEach(async ({page}, testInfo) => {
   await useOwnIp(page, testInfo);
@@ -14,7 +14,7 @@ test('shows an inline error for each invalid field', async ({page}) => {
   await page.getByLabel('Message', {exact: true}).fill('Too short');
   await page.getByRole('button', {name: 'Send message'}).click();
 
-  await expect(page.getByText('Tell us your name.')).toBeVisible();
+  await expect(page.getByText('Tell me your name.')).toBeVisible();
   await expect(page.getByText('Enter a valid email address.')).toBeVisible();
   await expect(page.getByText("Pick what it's about.")).toBeVisible();
   await expect(page.getByText('Add a few more details (at least 20 characters).')).toBeVisible();

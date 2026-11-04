@@ -47,7 +47,7 @@ const SECTIONS: ReadonlyArray<{title: string; fields: Field[]}> = [
     ],
   },
   {
-    title: 'What we build',
+    title: 'What I build',
     fields: [
       {key: 'build.eyebrow', label: 'Eyebrow'},
       {key: 'build.heading', label: 'Heading'},

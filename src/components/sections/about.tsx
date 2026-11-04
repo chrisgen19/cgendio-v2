@@ -9,7 +9,7 @@ import {AboutStage} from './about/about-stage';
 import {aboutCopy} from './about/copy';
 
 /**
- * "Inspect canvas": the studio takes brands from research and Figma to live sites, so the About shows Christian the way
+ * "Inspect canvas": Christian takes brands from research and Figma to live sites, so the About shows Christian the way
  * a designer sees a frame. The portrait is a selected frame on the dot grid with comment pins on it, and the inspect
  * panel beside it lists the facts. The panel is the content; the canvas around the photo is decoration.
  */

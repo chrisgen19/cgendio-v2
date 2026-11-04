@@ -54,7 +54,7 @@ export const Intro: React.FC = () => {
         </Headline>
         <Appear delay={30}>
           <p style={{margin: 0, maxWidth: 520, fontSize: L.lede, lineHeight: 1.55, color: theme.muted, fontFamily: fonts.body}}>
-            Here&apos;s how we take an idea from first question to a live URL — in about thirty seconds.
+            Here&apos;s how I take an idea from first question to a live URL — in about thirty seconds.
           </p>
         </Appear>
       </AbsoluteFill>

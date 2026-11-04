@@ -105,7 +105,7 @@ export const MobileLive: React.FC = () => (
     label="Live"
     titleLines={1}
     title={<MarkedTitle before="And it's " marked="live." markDelay={30} />}
-    lede="Fast, findable and ready for the next inquiry — and we stay on to look after it."
+    lede="Fast, findable and ready for the next inquiry — and I stay on to look after it."
   >
     <Confetti />
 
@@ -130,15 +130,15 @@ export const MobileLive: React.FC = () => (
           </span>
         </div>
         <div style={{padding: 16, display: 'flex', flexDirection: 'column', gap: 12}}>
-          <MonoLabel size={10}>WEB STUDIO · TAGUIG, PH</MonoLabel>
+          <MonoLabel size={10}>WEB DEVELOPER · PASIG CITY, PH</MonoLabel>
           <div style={{fontFamily: fonts.display, fontSize: 28, fontWeight: 800, lineHeight: 1, letterSpacing: '-0.045em'}}>
-            We build websites
+            I build websites
             <br />
             that <Mark delay={36}>work.</Mark>
           </div>
           <div style={{display: 'flex', gap: 8}}>
             <span style={{padding: '9px 14px', borderRadius: 99, background: theme.ink, color: theme.onInk, fontSize: 12, fontWeight: 600}}>
-              See our work
+              See my work
             </span>
             <span style={{padding: '9px 14px', borderRadius: 99, border: `1px solid ${theme.line}`, fontSize: 12, fontWeight: 600}}>
               Let&apos;s talk

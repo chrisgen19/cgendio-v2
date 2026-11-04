@@ -5,7 +5,7 @@ import {homeJsonLd} from '@/lib/structured-data';
 import {getPageCopy, getSiteSettings} from '@/server/content';
 
 export const metadata = pageMetadata({
-  title: {absolute: `${SITE_NAME} · Web design and development studio`},
+  title: {absolute: `${SITE_NAME} · Christian Diomampo, full-stack web developer`},
   description: SITE_DESCRIPTION,
   path: '/',
 });

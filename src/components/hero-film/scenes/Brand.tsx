@@ -5,7 +5,7 @@ import {Appear, Check, Mark} from '../primitives';
 import {fonts, theme} from '../theme';
 
 export type BrandProps = {
-  /** Where "See our work" goes. */
+  /** Where "See my work" goes. */
   worksHref?: string;
   /** Wired by the page player; absent when rendering an MP4. */
   onReplay?: () => void;
@@ -17,7 +17,7 @@ const services = [
   {n: '03 · EVOLVE', title: 'Migrations & redesigns', desc: 'Change platforms or refresh the look without losing rankings or content.'},
 ];
 
-const benefits = ['Research to launch, one team', 'Accessible & SEO-ready', 'Clean code you can grow', 'Care after go-live'];
+const benefits = ['Research to launch, one developer', 'Accessible & SEO-ready', 'Clean code you can grow', 'Care after go-live'];
 
 const btnBase: React.CSSProperties = {
   display: 'inline-flex',
@@ -52,7 +52,7 @@ const ReplayIcon = () => (
   </svg>
 );
 
-/** Final card: the brand, what we do, what clients get — and the two exits. */
+/** Final card: the brand, what I do, what clients get — and the two exits. */
 export const Brand: React.FC<BrandProps> = ({worksHref = '#work', onReplay}) => {
   const L = useLayout();
   // Short phones (e.g. 360×640, or a tall browser toolbar): keep the brand line, services and buttons; drop the rest.
@@ -71,18 +71,18 @@ export const Brand: React.FC<BrandProps> = ({worksHref = '#work', onReplay}) => 
       >
         <div style={{width: L.innerW, display: 'flex', flexDirection: 'column', gap: L.portrait ? 14 : 24}}>
           <Appear delay={14}>
-            <StepLabel n="cg" label="Cgdiomampo.dev · Web studio" size={L.step} />
+            <StepLabel n="cg" label="Cgdiomampo.dev · Web developer" size={L.step} />
           </Appear>
           <Appear delay={19}>
             <Headline size={titleSize} style={{maxWidth: 1100}}>
-              We design, build &amp; ship websites that <Mark delay={42}>work.</Mark>
+              I design, build &amp; ship websites that <Mark delay={42}>work.</Mark>
             </Headline>
           </Appear>
           {short ? null : (
             <Appear delay={25}>
               <p style={{margin: 0, maxWidth: 640, fontSize: L.lede, lineHeight: 1.55, color: theme.muted}}>
-                One team from first question to live URL. WordPress, WooCommerce, Next.js and React — built for the people who&apos;ll actually use
-                them.
+                One developer from first question to live URL. WordPress, WooCommerce, Next.js and React — built for the people who&apos;ll actually
+                use them.
               </p>
             </Appear>
           )}
@@ -125,7 +125,7 @@ export const Brand: React.FC<BrandProps> = ({worksHref = '#work', onReplay}) => 
 
           <Appear delay={52} style={{display: 'flex', flexWrap: 'wrap', gap: L.portrait ? 8 : 12}}>
             <a href={worksHref} style={{...btnBase, ...(L.portrait ? compact : null), background: theme.ink, color: theme.onInk}}>
-              See our work <Arrow />
+              See my work <Arrow />
             </a>
             <button
               type="button"
