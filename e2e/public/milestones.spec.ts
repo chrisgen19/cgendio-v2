@@ -1,45 +1,65 @@
 import {expect, type Page, test} from '@playwright/test';
 
 /*
- * The milestone values count up as their line scrolls into view (CSS view timelines). Each count starts at the smallest
- * number with as many digits, so a two-digit value never shows '0+' on the way.
+ * The milestones stage. With JS and motion allowed it pins while the page scrolls past and plays one milestone at a
+ * time, with a rail of jump buttons; without JS or under reduced motion the same milestones show as a static list.
+ * Both layouts are server-rendered and CSS picks one, so the section's height never changes after hydration.
  */
 
-// From the seed: the counted values and where their count starts
-const COUNTS = [
-  {to: 15, from: 10},
-  {to: 6, from: 1},
-  {to: 40, from: 10},
+// From the seed, in order
+const MILESTONES = [
+  {value: '15+', title: 'Years on the web', count: '15'},
+  {value: '6', title: 'Developers led', count: '6'},
+  {value: 'CMS', title: 'Headless CMS on Builder.io'},
+  {value: '40+', title: 'Client sites managed', count: '40'},
+  {value: 'VPS', title: 'Self-hosted infrastructure'},
 ];
 
-/** Every value each counter shows while the page scrolls through the section in 40px steps. Instant scrolls, or smooth scrolling lags behind. */
-const sampleCounts = (page: Page) =>
-  page.evaluate(async () => {
-    const ticks = [...document.querySelectorAll<HTMLElement>('#milestones .ms-tick')];
-    const seen = ticks.map(() => new Set<number>());
-    const rect = document.getElementById('milestones')?.getBoundingClientRect();
-    if (!rect) return [];
-    const start = rect.top + window.scrollY - window.innerHeight;
-    const end = rect.bottom + window.scrollY;
-    for (let y = start; y <= end; y += 40) {
-      window.scrollTo({top: y, behavior: 'instant'});
-      await new Promise(requestAnimationFrame);
-      await new Promise(requestAnimationFrame);
-      ticks.forEach((tick, i) => {
-        seen[i]?.add(Number(getComputedStyle(tick).getPropertyValue('--ms-n')));
-      });
-    }
-    return seen.map((values) => [...values].sort((a, b) => a - b));
-  });
+const activeSlide = (page: Page) => page.locator('#milestones .ms-slide[data-active]');
 
-test('each count runs from its first same-width number up to the value', async ({page}) => {
+/** Scrolls to the middle of milestone `index`'s stretch of the pinned track. Instant, or smooth scrolling lags behind. */
+const scrollToMilestone = (page: Page, index: number) =>
+  page.evaluate(
+    ({index, count}) => {
+      const track = document.querySelector<HTMLElement>('#milestones .ms-track');
+      if (!track) throw new Error('No pinned track');
+      const top = track.getBoundingClientRect().top + window.scrollY;
+      const distance = track.offsetHeight - window.innerHeight;
+      window.scrollTo({top: top + (distance * (index + 0.5)) / count, behavior: 'instant'});
+    },
+    {index, count: MILESTONES.length},
+  );
+
+test('scrolling through the stage plays each milestone in order, and numbers count up to their value', async ({page}) => {
   await page.goto('/');
-  const counts = await sampleCounts(page);
-  expect(counts).toHaveLength(COUNTS.length);
-  COUNTS.forEach(({from, to}, i) => {
-    expect(counts[i]?.[0]).toBe(from);
-    expect(counts[i]?.at(-1)).toBe(to);
-  });
+  await expect(page.locator('#milestones .ms-static')).toBeHidden();
+  for (const [index, milestone] of MILESTONES.entries()) {
+    await scrollToMilestone(page, index);
+    await expect(activeSlide(page).getByRole('heading', {level: 3})).toHaveText(milestone.title);
+    await expect(page.getByRole('button', {name: `${milestone.value} ${milestone.title}`})).toHaveAttribute('aria-current', 'step');
+    if (milestone.count) await expect(activeSlide(page).locator('.ms-count')).toHaveText(milestone.count);
+  }
+});
+
+test('the rail buttons jump to their milestone', async ({page}) => {
+  await page.goto('/');
+  await scrollToMilestone(page, 0);
+  await expect(activeSlide(page).getByRole('heading', {level: 3})).toHaveText(MILESTONES[0].title);
+  const target = MILESTONES[3];
+  await page.getByRole('button', {name: `${target.value} ${target.title}`}).click();
+  await expect(activeSlide(page).getByRole('heading', {level: 3})).toHaveText(target.title);
+});
+
+test('the section is its final height before hydration', async ({page}) => {
+  // The pinned track's height comes from server CSS, so a hash link to a later section never lands short
+  await page.route('**/*.js', (route) => route.abort());
+  await page.goto('/');
+  const before = await page.locator('#milestones').evaluate((el) => el.getBoundingClientRect().height);
+  await page.unroute('**/*.js');
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  const after = await page.locator('#milestones').evaluate((el) => el.getBoundingClientRect().height);
+  expect(after).toBeCloseTo(before, 0);
 });
 
 /*
@@ -48,39 +68,69 @@ test('each count runs from its first same-width number up to the value', async (
  */
 const LONG_VALUES = ['Nov ’25', 'Q3 2025', 'Launch', '999999999+', 'WWWWWWWW', 'WOW', 'WOOCOMMERCE'];
 
-/** How far the CMS line's value pokes past its line, and the page past the viewport (0 when it fits). */
-const overflow = (page: Page) =>
-  page.evaluate(() => {
-    const p = document.querySelector('#milestones .ms-word')?.closest('p');
-    const line = p?.closest('li');
-    if (!p || !line) return Number.POSITIVE_INFINITY;
-    const valueOver = p.getBoundingClientRect().right - line.getBoundingClientRect().right;
+/** How far a value pokes past its column, and the page past the viewport (0 when it fits). */
+const overflow = (page: Page, selector: string) =>
+  page.evaluate((selector) => {
+    const value = document.querySelector<HTMLElement>(selector);
+    const column = value?.parentElement;
+    if (!value || !column) return Number.POSITIVE_INFINITY;
+    const valueOver = value.getBoundingClientRect().right - column.getBoundingClientRect().right;
     const pageOver = document.documentElement.scrollWidth - window.innerWidth;
     return Math.max(0, valueOver, pageOver);
-  });
+  }, selector);
 
-test('long values shrink to fit their line instead of scrolling the page sideways', async ({page}) => {
+/** Puts `value` in the CMS milestone's value, with the length the server would have set; MilestoneFit refits on the size change. */
+const setValue = (page: Page, selector: string, value: string) =>
+  page.evaluate(
+    ({selector, value}) => {
+      const p = document.querySelector<HTMLElement>(selector);
+      if (!p) throw new Error(`No value at ${selector}`);
+      for (const el of p.querySelectorAll('.sr-only, [aria-hidden] > span')) el.textContent = value;
+      if (!p.querySelector('.sr-only')) p.textContent = value;
+      p.style.setProperty('--ms-chars', String(Math.max(2, [...value].length)));
+    },
+    {selector, value},
+  );
+
+test('long values shrink to fit the stage instead of scrolling the page sideways', async ({page}) => {
   await page.goto('/');
+  await scrollToMilestone(page, 2);
+  const selector = '#milestones .ms-slide:nth-child(3) .ms-stage-value';
   for (const value of LONG_VALUES) {
-    // Put the value in the CMS line, with the length the server would have set; MilestoneFit refits on the size change
-    await page.evaluate((value) => {
-      const p = document.querySelector('#milestones .ms-word')?.closest('p');
-      for (const el of p?.querySelectorAll('.ms-word, .ms-fill, .sr-only') ?? []) el.textContent = value;
-      p?.style.setProperty('--ms-chars', String([...value].length));
-    }, value);
-    await expect.poll(() => overflow(page), {message: value}).toBe(0);
+    await setValue(page, selector, value);
+    await expect.poll(() => overflow(page, selector), {message: value}).toBe(0);
   }
 });
 
 test.describe('with reduced motion', () => {
   test.use({reducedMotion: 'reduce'});
 
-  test('the final values show without counting', async ({page}) => {
+  test('the milestones show as a static list, each value once', async ({page}) => {
     await page.goto('/');
     const section = page.locator('#milestones');
-    await expect(section.locator('.ms-tick').first()).toBeHidden();
-    await expect(section.locator('.ms-final').first()).toBeVisible();
-    // Screen readers get each value once, from the visually hidden copy
-    await expect(section.locator('li .sr-only')).toHaveText(['15+', '6', 'CMS', '40+', 'VPS']);
+    await expect(section.locator('.ms-track')).toBeHidden();
+    const list = section.locator('.ms-static');
+    await expect(list.getByRole('heading', {level: 3})).toHaveText(MILESTONES.map((m) => m.title));
+    await expect(list.locator('.ms-list-value')).toHaveText(MILESTONES.map((m) => m.value));
+  });
+
+  test('long values shrink to fit the list instead of scrolling the page sideways', async ({page}) => {
+    await page.goto('/');
+    const selector = '#milestones .ms-static li:nth-child(3) .ms-list-value';
+    for (const value of LONG_VALUES) {
+      await setValue(page, selector, value);
+      await expect.poll(() => overflow(page, selector), {message: value}).toBe(0);
+    }
+  });
+});
+
+test.describe('without JavaScript', () => {
+  test.use({javaScriptEnabled: false});
+
+  test('the milestones show as a static list', async ({page}) => {
+    await page.goto('/');
+    const section = page.locator('#milestones');
+    await expect(section.locator('.ms-track')).toBeHidden();
+    await expect(section.locator('.ms-static').getByRole('heading', {level: 3})).toHaveText(MILESTONES.map((m) => m.title));
   });
 });
