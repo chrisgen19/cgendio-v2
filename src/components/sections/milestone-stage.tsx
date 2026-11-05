@@ -28,9 +28,13 @@ type StageState = {
 
 type StageRefs = {
   track: RefObject<HTMLDivElement | null>;
-  sticky: RefObject<HTMLDivElement | null>;
+  /** The sticky panel */
+  panel: RefObject<HTMLDivElement | null>;
   fill: RefObject<HTMLSpanElement | null>;
 };
+
+/** Where the sticky panel pins, from the top of the viewport (globals.css --ms-pin-top). */
+const pinTopOf = (panel: HTMLElement) => Number.parseFloat(getComputedStyle(panel).top) || 0;
 
 /**
  * Tracks how far the pinned track has scrolled (0 to 1). The rail fill is written straight to the DOM every frame;
@@ -38,7 +42,7 @@ type StageRefs = {
  * the server render on; if the stage is still below the fold once the client runs, it hides and plays its entrance
  * when the reader reaches it, and if the reader is already looking at it, it stays put without replaying.
  */
-function useStageProgress({track: trackRef, sticky: stickyRef, fill: fillRef}: StageRefs, count: number) {
+function useStageProgress({track: trackRef, panel: panelRef, fill: fillRef}: StageRefs, count: number) {
   const [state, setState] = useState<StageState>({active: 0, armed: true, animate: false});
 
   useEffect(() => {
@@ -47,13 +51,14 @@ function useStageProgress({track: trackRef, sticky: stickyRef, fill: fillRef}: S
     const update = () => {
       frame = 0;
       const track = trackRef.current;
-      const sticky = stickyRef.current;
+      const panel = panelRef.current;
       // The static list is showing instead (reduced motion or a short window): measure once the stage shows
-      if (!track || !sticky || track.offsetParent === null) return;
+      if (!track || !panel || track.offsetParent === null) return;
       const rect = track.getBoundingClientRect();
-      // The sticky wrapper is 100svh, which a phone's innerHeight passes once its toolbar hides
-      const distance = Math.max(1, rect.height - sticky.offsetHeight);
-      const progress = Math.min(1, Math.max(0, -rect.top / distance));
+      // The track is the panel plus the scroll distance; the pin starts when the track's top reaches the pin line.
+      // Both come from CSS in svh, never innerHeight, which a phone passes once its toolbar hides.
+      const distance = Math.max(1, rect.height - panel.offsetHeight);
+      const progress = Math.min(1, Math.max(0, (pinTopOf(panel) - rect.top) / distance));
       if (fillRef.current) fillRef.current.style.transform = `scaleX(${progress})`;
       const active = Math.min(count - 1, Math.floor(progress * count));
       const reached = rect.top < window.innerHeight * ARM_AT;
@@ -85,37 +90,38 @@ function useStageProgress({track: trackRef, sticky: stickyRef, fill: fillRef}: S
       window.removeEventListener('resize', schedule);
       pinnedQuery.removeEventListener('change', schedule);
     };
-  }, [trackRef, stickyRef, fillRef, count]);
+  }, [trackRef, panelRef, fillRef, count]);
 
   return state;
 }
 
 /**
- * Publishes the panel's real height to the track as --ms-panel-real, so the track's margins keep the pinned panel at
- * the section's normal gaps when long admin text makes it taller than its design height. If even the tallest panel the
- * viewport allows can't hold a slide, the slide list becomes scrollable; only then, as scrolling would clip the value's
- * highlighter bar and entrance.
+ * Fits long admin text. The panel grows with its tallest slide in CSS alone, so the section's height is the same before
+ * and after hydration. If that slide needs more room than the tallest panel the viewport allows, this sets
+ * data-overflow on the list: scroll mode (globals.css), where the panel holds that maximum height (the height CSS
+ * already gives it), only the shown slide takes up room and the list scrolls. Only then, as scrolling would clip the
+ * value's highlighter bar and entrance. The decision compares against that maximum, not the list's current height, so
+ * taking slides out of the flow can't flip it back.
  */
-function usePanelFit(
-  trackRef: RefObject<HTMLDivElement | null>,
-  panelRef: RefObject<HTMLDivElement | null>,
-  listRef: RefObject<HTMLOListElement | null>,
-) {
+function usePanelFit(panelRef: RefObject<HTMLDivElement | null>, listRef: RefObject<HTMLOListElement | null>) {
   useEffect(() => {
-    const track = trackRef.current;
     const panel = panelRef.current;
     const list = listRef.current;
-    if (!track || !panel || !list) return;
+    if (!panel || !list) return;
+    const slides = [...list.children].filter((el): el is HTMLElement => el instanceof HTMLElement);
     const observer = new ResizeObserver(() => {
-      // Zero while the static list shows instead; the CSS default stands
+      // Zero while the static list shows instead
       if (!panel.offsetHeight) return;
-      track.style.setProperty('--ms-panel-real', `${panel.offsetHeight}px`);
-      list.toggleAttribute('data-overflow', list.scrollHeight > list.clientHeight + 1);
+      // Room for a slide in the tallest panel allowed: its max-height less the header, rail, gaps and padding
+      const room = Number.parseFloat(getComputedStyle(panel).maxHeight) - (panel.offsetHeight - list.clientHeight);
+      // Slides sit at the row's end rather than stretching, so scrollHeight is each one's own content height
+      const tallest = Math.max(...slides.map((slide) => slide.scrollHeight));
+      list.toggleAttribute('data-overflow', tallest > room + 1);
     });
     observer.observe(panel);
-    for (const slide of list.children) observer.observe(slide);
+    for (const slide of slides) observer.observe(slide);
     return () => observer.disconnect();
-  }, [trackRef, panelRef, listRef]);
+  }, [panelRef, listRef]);
 }
 
 type StageSlideProps = {
@@ -132,7 +138,7 @@ function StageSlide({milestone, shown, animate}: StageSlideProps) {
       data-shown={shown || undefined}
       data-active={(shown && animate) || undefined}
       className={cn(
-        'ms-slide col-start-1 row-start-1 grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-end gap-14 transition-opacity duration-200',
+        'ms-slide col-start-1 row-start-1 grid self-end grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-end gap-14 transition-opacity duration-200',
         'max-md:flex max-md:flex-col max-md:items-stretch max-md:justify-end max-md:gap-6',
         shown ? 'opacity-100' : 'pointer-events-none opacity-0',
       )}
@@ -162,52 +168,60 @@ function StageSlide({milestone, shown, animate}: StageSlideProps) {
  */
 export function MilestoneStage({milestones}: {milestones: Milestone[]}) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
   const fillRef = useRef<HTMLSpanElement>(null);
   const count = milestones.length;
-  const {active, armed, animate} = useStageProgress({track: trackRef, sticky: stickyRef, fill: fillRef}, count);
-  usePanelFit(trackRef, panelRef, listRef);
+  const {active, armed, animate} = useStageProgress({track: trackRef, panel: panelRef, fill: fillRef}, count);
+  usePanelFit(panelRef, listRef);
   const current = milestones[active];
+
+  // In scroll mode, each milestone opens at its top rather than where the reader left the previous one
+  const lastActive = useRef(active);
+  useEffect(() => {
+    if (active === lastActive.current) return;
+    lastActive.current = active;
+    if (listRef.current) listRef.current.scrollTop = 0;
+  }, [active]);
 
   const jump = useCallback(
     (index: number) => {
       const track = trackRef.current;
-      const sticky = stickyRef.current;
-      if (!track || !sticky) return;
-      const top = track.getBoundingClientRect().top + window.scrollY;
-      const distance = track.offsetHeight - sticky.offsetHeight;
-      window.scrollTo({top: top + (distance * (index + 0.5)) / count, behavior: 'smooth'});
+      const panel = panelRef.current;
+      if (!track || !panel) return;
+      // The scroll position where the pin starts, then the middle of this milestone's stretch
+      const start = track.getBoundingClientRect().top + window.scrollY - pinTopOf(panel);
+      const distance = track.offsetHeight - panel.offsetHeight;
+      window.scrollTo({top: start + (distance * (index + 0.5)) / count, behavior: 'smooth'});
     },
     [count],
   );
 
   return (
-    <div ref={trackRef} className="ms-pinned ms-track pointer-events-none relative" style={{height: `calc(100svh + ${(count - 1) * STEP_SVH}svh)`}}>
-      <div ref={stickyRef} className="sticky top-0 flex h-svh items-center">
+    <div ref={trackRef} className="ms-pinned ms-track relative">
+      {/* The panel itself pins, at --ms-pin-top; the spacer below it is the scroll distance the pin lasts */}
+      <div
+        ref={panelRef}
+        className="ms-panel dot-grid sticky top-(--ms-pin-top) flex w-full flex-col gap-10 rounded-panel border border-line px-12 pt-10 pb-8 shadow-(--shadow-card) max-md:gap-6 max-md:px-5 max-md:pt-6 max-md:pb-4"
+      >
         <div
-          ref={panelRef}
-          className="ms-panel dot-grid pointer-events-auto flex w-full flex-col gap-10 rounded-panel border border-line px-12 pt-10 pb-8 shadow-(--shadow-card) max-md:gap-6 max-md:px-5 max-md:pt-6 max-md:pb-4"
+          aria-hidden="true"
+          className="flex items-center justify-between font-mono text-xs leading-none font-medium tracking-[0.08em] text-muted uppercase"
         >
-          <div
-            aria-hidden="true"
-            className="flex items-center justify-between font-mono text-xs leading-none font-medium tracking-[0.08em] text-muted uppercase"
-          >
-            <span>{current?.kind}</span>
-            <span className="tabular-nums">
-              <span className="text-ink">{pad(active + 1)}</span> / {pad(count)}
-            </span>
-          </div>
-          {/* Grows to the tallest slide; scrolls only if that would pass the viewport (usePanelFit sets data-overflow) */}
-          <ol ref={listRef} className="m-0 grid min-h-0 flex-1 list-none p-0 data-overflow:overflow-y-auto">
-            {milestones.map((m, i) => (
-              <StageSlide key={m.order} milestone={m} shown={armed && i === active} animate={animate} />
-            ))}
-          </ol>
-          <MilestoneStageRail milestones={milestones} active={armed ? active : -1} fillRef={fillRef} onJump={jump} />
+          <span>{current?.kind}</span>
+          <span className="tabular-nums">
+            <span className="text-ink">{pad(active + 1)}</span> / {pad(count)}
+          </span>
         </div>
+        {/* Grows to the tallest slide; scroll mode only if that would pass the viewport (usePanelFit) */}
+        <ol ref={listRef} className="ms-slides m-0 grid min-h-0 flex-1 list-none p-0">
+          {milestones.map((m, i) => (
+            <StageSlide key={m.order} milestone={m} shown={armed && i === active} animate={animate} />
+          ))}
+        </ol>
+        <MilestoneStageRail milestones={milestones} active={armed ? active : -1} fillRef={fillRef} onJump={jump} />
       </div>
+      <div aria-hidden="true" style={{height: `${(count - 1) * STEP_SVH}svh`}} />
     </div>
   );
 }

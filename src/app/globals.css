@@ -1235,19 +1235,41 @@
 }
 
 /*
- * The pinned track: its sticky wrapper is a full viewport tall with the panel centred in it. Negative block margins of
- * the empty space above and below the panel keep the panel at the section's normal gap before and after the pin.
- * --ms-panel-h is the panel's design height. Long admin text can make it taller, up to the viewport; the stage then
- * publishes the real height as --ms-panel-real so the margins follow (milestone-stage.tsx).
+ * The pinned track: the panel itself is sticky, followed by a spacer as long as the pin lasts, so everything about the
+ * track's height comes from CSS and is the same before and after hydration (no measuring). --ms-panel-h is the panel's
+ * design height, and the panel pins with its top at --ms-pin-top, which centres a design-height panel in the viewport.
+ * Long admin text grows the panel downward from that line, up to 8px short of the viewport's bottom edge.
  */
 .ms-track {
   --ms-panel-h: min(580px, calc(100svh - 80px));
-  margin-block: calc((var(--ms-panel-real, var(--ms-panel-h)) - 100svh) / 2);
+  --ms-pin-top: calc((100svh - var(--ms-panel-h)) / 2);
+  --ms-panel-max: calc(100svh - var(--ms-pin-top) - 8px);
 }
 
 .ms-panel {
   min-height: var(--ms-panel-h);
-  max-height: calc(100svh - 16px);
+  max-height: var(--ms-panel-max);
+}
+
+/*
+ * Scroll mode, for a slide too tall for the tallest panel allowed (usePanelFit sets data-overflow). The panel holds
+ * that maximum height (where CSS alone already caps it, so the section's height still doesn't change), so it never
+ * jumps between milestones; inactive slides leave the flow (still in the accessibility tree, still fading) so a short
+ * milestone isn't laid out in a long one's row; the list scrolls.
+ */
+.ms-panel:has(> .ms-slides[data-overflow]) {
+  height: var(--ms-panel-max);
+}
+
+.ms-slides[data-overflow] {
+  position: relative;
+  overflow-y: auto;
+}
+
+.ms-slides[data-overflow] > .ms-slide:not([data-shown]) {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
 }
 
 @media (width < 860px) {

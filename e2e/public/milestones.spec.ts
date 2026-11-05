@@ -18,22 +18,33 @@ const MILESTONES = [
 // The slide on show (data-active only marks one that plays its entrance)
 const activeSlide = (page: Page) => page.locator('#milestones .ms-slide[data-shown]');
 
+/**
+ * Loads the home page and waits for the stage's client code. The server renders the first milestone shown, so its
+ * title showing proves nothing; loaded at the top, the hydrated stage hides it until the reader reaches the stage. Text
+ * a test puts in the page before hydration would be thrown away by it.
+ */
+const gotoHydrated = async (page: Page) => {
+  await page.goto('/');
+  await expect(page.locator('#milestones .ms-slide[data-shown]')).toHaveCount(0);
+};
+
 /** Scrolls to the middle of milestone `index`'s stretch of the pinned track. Instant, or smooth scrolling lags behind. */
 const scrollToMilestone = (page: Page, index: number) =>
   page.evaluate(
     ({index, count}) => {
       const track = document.querySelector<HTMLElement>('#milestones .ms-track');
-      const sticky = track?.firstElementChild;
-      if (!track || !(sticky instanceof HTMLElement)) throw new Error('No pinned track');
-      const top = track.getBoundingClientRect().top + window.scrollY;
-      const distance = track.offsetHeight - sticky.offsetHeight;
-      window.scrollTo({top: top + (distance * (index + 0.5)) / count, behavior: 'instant'});
+      const panel = track?.querySelector<HTMLElement>('.ms-panel');
+      if (!track || !panel) throw new Error('No pinned track');
+      // The scroll position where the pin starts (the panel's top at its pin line), then the middle of the stretch
+      const start = track.getBoundingClientRect().top + window.scrollY - Number.parseFloat(getComputedStyle(panel).top);
+      const distance = track.offsetHeight - panel.offsetHeight;
+      window.scrollTo({top: start + (distance * (index + 0.5)) / count, behavior: 'instant'});
     },
     {index, count: MILESTONES.length},
   );
 
 test('scrolling through the stage plays each milestone in order, and numbers count up to their value', async ({page}) => {
-  await page.goto('/');
+  await gotoHydrated(page);
   await expect(page.locator('#milestones .ms-static')).toBeHidden();
   for (const [index, milestone] of MILESTONES.entries()) {
     await scrollToMilestone(page, index);
@@ -44,7 +55,7 @@ test('scrolling through the stage plays each milestone in order, and numbers cou
 });
 
 test('the rail buttons jump to their milestone', async ({page}) => {
-  await page.goto('/');
+  await gotoHydrated(page);
   await scrollToMilestone(page, 0);
   await expect(activeSlide(page).getByRole('heading', {level: 3})).toHaveText(MILESTONES[0].title);
   const target = MILESTONES[3];
@@ -93,7 +104,7 @@ const stageOverflow = (page: Page) =>
   });
 
 test('a description at the admin limit stays inside the pinned panel', async ({page}) => {
-  await page.goto('/');
+  await gotoHydrated(page);
   await scrollToMilestone(page, 0);
   await expect(activeSlide(page).getByRole('heading', {level: 3})).toHaveText(MILESTONES[0].title);
   await activeSlide(page)
@@ -102,6 +113,84 @@ test('a description at the admin limit stays inside the pinned panel', async ({p
       p.textContent = text;
     }, LONG_DESCRIPTION);
   await expect.poll(() => stageOverflow(page)).toBe(0);
+});
+
+/** Serves the home page with the seeded "Developers led" description swapped for one at the admin limit, in both the
+ * HTML and the RSC payload inside it, so the server renders the long text and hydration agrees with it. */
+const serveLongDescription = (page: Page) =>
+  page.route(
+    (url) => url.pathname === '/',
+    async (route) => {
+      const response = await route.fetch();
+      const body = (await response.text()).replaceAll('Planning and assigning work across 40+ sites at Access Group Australia.', LONG_DESCRIPTION);
+      await route.fulfill({response, body});
+    },
+  );
+
+const sectionAndPanel = (page: Page) =>
+  page.evaluate(() => {
+    const section = document.getElementById('milestones');
+    const panel = section?.querySelector<HTMLElement>('.ms-panel');
+    if (!section || !panel) throw new Error('No stage');
+    return {section: section.getBoundingClientRect().height, panel: panel.offsetHeight, design: Number.parseFloat(getComputedStyle(panel).minHeight)};
+  });
+
+// A phone width, where the description wraps enough to grow the panel past its design height
+test.describe('on a phone', () => {
+  test.use({viewport: {width: 390, height: 844}});
+
+  test('long admin text sets the section height in CSS, so it never changes after hydration', async ({page}) => {
+    await serveLongDescription(page);
+    // Before hydration: scripting is on, so CSS picks the pinned stage, but the client code never runs
+    await page.route('**/*.js', (route) => route.abort());
+    await page.goto('/');
+    const before = await sectionAndPanel(page);
+    // The long text really did make the panel taller than its design height, or this test proves nothing
+    expect(before.panel).toBeGreaterThan(before.design);
+    await page.unroute('**/*.js');
+    await page.goto('/');
+    // Hydrated: loaded at the top, the stage hides its first milestone until the reader reaches it
+    await expect(page.locator('#milestones .ms-slide[data-shown]')).toHaveCount(0);
+    const after = await sectionAndPanel(page);
+    expect(after.panel).toBeCloseTo(before.panel, 0);
+    expect(after.section).toBeCloseTo(before.section, 0);
+  });
+});
+
+test.describe('on the shortest window that still pins', () => {
+  test.use({viewport: {width: 320, height: 600}});
+
+  test('a short milestone after a long one shows in full, scrolled to its top', async ({page}) => {
+    await gotoHydrated(page);
+    await scrollToMilestone(page, 0);
+    await expect(activeSlide(page).getByRole('heading', {level: 3})).toHaveText(MILESTONES[0].title);
+    // Admin text near the limits: too tall for the tallest panel this window allows, so the list scrolls
+    await activeSlide(page).evaluate((slide, text) => {
+      const title = slide.querySelector('h3');
+      const description = slide.querySelector('h3 + p');
+      if (!title || !description) throw new Error('No slide text');
+      title.textContent = 'Headless CMS builds, WordPress and WooCommerce sites, and React apps for lead and UTM tracking for clients';
+      description.textContent = text;
+    }, LONG_DESCRIPTION);
+    const list = page.locator('#milestones .ms-panel ol');
+    await expect(list).toHaveAttribute('data-overflow');
+    // Leave the long milestone scrolled to its end, then move on
+    await list.evaluate((el) => {
+      el.scrollTop = el.scrollHeight;
+    });
+    await scrollToMilestone(page, 1);
+    await expect(activeSlide(page).getByRole('heading', {level: 3})).toHaveText(MILESTONES[1].title);
+    await expect.poll(() => list.evaluate((el) => el.scrollTop)).toBe(0);
+    const titleInView = await page.evaluate(() => {
+      const list = document.querySelector('#milestones .ms-panel ol');
+      const title = list?.querySelector('[data-shown] h3');
+      if (!list || !title) return false;
+      const l = list.getBoundingClientRect();
+      const t = title.getBoundingClientRect();
+      return t.top >= l.top && t.bottom <= l.bottom;
+    });
+    expect(titleInView).toBe(true);
+  });
 });
 
 /*
@@ -135,7 +224,7 @@ const setValue = (page: Page, selector: string, value: string) =>
   );
 
 test('long values shrink to fit the stage instead of scrolling the page sideways', async ({page}) => {
-  await page.goto('/');
+  await gotoHydrated(page);
   await scrollToMilestone(page, 2);
   const selector = '#milestones .ms-slide:nth-child(3) .ms-stage-value';
   for (const value of LONG_VALUES) {
