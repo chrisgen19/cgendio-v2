@@ -1190,101 +1190,172 @@
 }
 
 /*
- * The milestones' scroll-scrubbed values (src/components/sections/milestones.tsx). Each line is a view timeline; while
- * it travels from the bottom of the viewport towards the middle, the registered integer --ms-n runs from --ms-from (the
- * smallest number with as many digits, so never '0+') to the value, and a counter prints it over the hidden final
- * digits. Word values start as outlines and an ink copy wipes across them. Reduced motion, no JS and browsers without
- * view timelines get the plain final values.
+ * The milestones stage (src/components/sections/milestones.tsx and milestone-stage*.tsx). The server renders two
+ * layouts and CSS shows one, so the section's height is right from the first paint (a hash link to a later section
+ * never lands short): a pinned stage that plays one milestone at a time while the page scrolls past, when JS runs,
+ * motion is allowed and the window is tall enough; otherwise a static list on the same dot-grid stage.
  */
-@property --ms-n {
-  syntax: "<integer>";
-  inherits: false;
-  initial-value: 0;
+.ms-pinned {
+  display: none;
 }
 
-@keyframes ms-count {
-  from {
-    --ms-n: var(--ms-from);
-  }
-}
-
-@keyframes ms-wipe {
-  from {
-    clip-path: inset(-0.3em 100% -0.3em 0);
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) and (min-height: 600px) {
+  .ms-pinned {
+    display: block;
   }
 
-  to {
-    clip-path: inset(-0.3em);
+  .ms-static {
+    display: none;
   }
 }
 
 /*
- * The value's size: the design size, or smaller when a long value (an admin entry like "Nov ’25") wouldn't fit its
- * line. --ms-chars is the value's length; 0.66em covers the widest seeded glyphs (CMS), so seeded values keep the design
- * size. Desktop leaves room for the 360px text column and its 48px gap. Each line is the size container. The estimate
- * can't know glyph widths (W is about 0.9em), so MilestoneFit measures each value and sets --ms-fit below 1 only for
- * one that still overflows; without JS the estimate stands.
+ * Value sizes: the design size, or smaller when a long value (an admin entry like "Nov ’25") wouldn't fit its column.
+ * --ms-chars is the value's length; 0.66em covers the widest seeded glyphs (CMS). Each value's parent is the size
+ * container. The estimate can't know glyph widths (W is about 0.9em), so MilestoneFit measures each value and sets
+ * --ms-fit below 1 only for one that still overflows; without JS the estimate stands.
  */
-.ms-value {
-  /* The text column's room, which MilestoneFit reads too */
-  --ms-reserve: 408px;
-  font-size: calc(min(clamp(80px, 15vw, 220px), calc((100cqi - var(--ms-reserve)) / (var(--ms-chars) * 0.66))) * var(--ms-fit, 1));
+.ms-list-value {
+  font-size: calc(min(64px, calc(100cqi / (var(--ms-chars) * 0.66))) * var(--ms-fit, 1));
+}
+
+/* Capped by the viewport height too, so the pinned panel always fits */
+.ms-stage-value {
+  font-size: calc(min(20rem, 34svh, calc(100cqi / (var(--ms-chars) * 0.66))) * var(--ms-fit, 1));
 }
 
 @media (width < 860px) {
-  .ms-value {
-    --ms-reserve: 0px;
-    font-size: calc(min(40vw, 160px, calc(100cqi / (var(--ms-chars) * 0.66))) * var(--ms-fit, 1));
+  .ms-list-value {
+    font-size: calc(min(34px, calc(100cqi / (var(--ms-chars) * 0.66))) * var(--ms-fit, 1));
+  }
+
+  .ms-stage-value {
+    font-size: calc(min(10rem, 21svh, calc(100cqi / (var(--ms-chars) * 0.66))) * var(--ms-fit, 1));
   }
 }
 
-.ms-tick,
-.ms-fill {
-  display: none;
+/*
+ * The pinned track: the panel itself is sticky, followed by a spacer as long as the pin lasts, so everything about the
+ * track's height comes from CSS and is the same before and after hydration (no measuring). --ms-panel-h is the panel's
+ * design height, and the panel pins with its top at --ms-pin-top, which centres a design-height panel in the viewport.
+ * Long admin text grows the panel downward from that line, up to 8px short of the viewport's bottom edge.
+ */
+.ms-track {
+  --ms-panel-h: min(580px, calc(100svh - 80px));
+  --ms-pin-top: calc((100svh - var(--ms-panel-h)) / 2);
+  --ms-panel-max: calc(100svh - var(--ms-pin-top) - 8px);
 }
 
-@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-  @supports (animation-timeline: view()) {
-    .ms-row {
-      view-timeline: --ms-row block;
-    }
+.ms-panel {
+  min-height: var(--ms-panel-h);
+  max-height: var(--ms-panel-max);
+}
 
-    .ms-final {
-      visibility: hidden;
-    }
+/*
+ * Scroll mode, for a slide too tall for the tallest panel allowed (usePanelFit sets data-overflow). The panel holds
+ * that maximum height (where CSS alone already caps it, so the section's height still doesn't change), so it never
+ * jumps between milestones; inactive slides leave the flow (still in the accessibility tree, still fading) so a short
+ * milestone isn't laid out in a long one's row; the list scrolls.
+ */
+.ms-panel:has(> .ms-slides[data-overflow]) {
+  height: var(--ms-panel-max);
+}
 
-    .ms-tick,
-    .ms-fill {
-      display: block;
-      animation-timing-function: linear;
-      animation-fill-mode: both;
-      animation-timeline: --ms-row;
-      animation-range: cover 5% cover 40%;
-    }
+.ms-slides[data-overflow] {
+  position: relative;
+  overflow-y: auto;
+}
 
-    .ms-tick {
-      --ms-n: var(--ms-to);
-      counter-reset: ms var(--ms-n);
-      animation-name: ms-count;
-    }
+.ms-slides[data-overflow] > .ms-slide:not([data-shown]) {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
 
-    .ms-tick::before {
-      content: counter(ms);
-    }
+@media (width < 860px) {
+  .ms-track {
+    --ms-panel-h: min(560px, calc(100svh - 48px));
+  }
+}
 
-    /* The fill carries the same hairline stroke, so it covers the outline exactly */
-    .ms-word,
-    .ms-fill {
-      -webkit-text-stroke: 0.012em var(--color-ink);
-    }
+/* The active milestone's entrance. Longhands only: the production build rewrites a nameless shorthand to none. */
+@media (prefers-reduced-motion: no-preference) {
+  .ms-slide[data-active] .ms-char {
+    animation-name: ms-char;
+    animation-duration: 520ms;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation-fill-mode: both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
 
-    .ms-word {
-      color: transparent;
-    }
+  .ms-slide[data-active] .ms-enter {
+    animation-name: ms-enter;
+    animation-duration: 560ms;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation-fill-mode: both;
+  }
 
-    .ms-fill {
-      animation-name: ms-wipe;
-    }
+  .ms-slide[data-active] .ms-bar {
+    animation-name: ms-bar;
+    animation-duration: 640ms;
+    animation-timing-function: var(--ease-mark);
+    animation-fill-mode: both;
+    animation-delay: 260ms;
+  }
+
+  .ms-slide[data-active] .ms-rise {
+    animation-name: ms-rise;
+    animation-duration: 480ms;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation-fill-mode: both;
+    animation-delay: calc(140ms + var(--i, 0) * 80ms);
+  }
+}
+
+/* A word value wipes up one letter at a time */
+@keyframes ms-char {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(0.24em);
+  }
+
+  to {
+    clip-path: inset(0 0 -0.2em 0);
+    transform: none;
+  }
+}
+
+@keyframes ms-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.18em);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ms-bar {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes ms-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 

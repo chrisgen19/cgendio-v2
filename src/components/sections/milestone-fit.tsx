@@ -5,12 +5,14 @@ import {useEffect} from 'react';
 // Each pass closes most of the remaining gap; the cap only guards against a value that never settles
 const MAX_PASSES = 10;
 
-/** Sets `--ms-fit` on one value so it fits the room its line leaves it, or clears it when the CSS estimate already fits. */
+/** Sets `--ms-fit` on one value so it fits its column (the value's parent), or clears it when the CSS estimate already fits. */
 const fitValue = (value: HTMLElement) => {
-  const line = value.closest('li');
-  if (!line) return;
+  const column = value.parentElement;
+  if (!column) return;
   value.style.removeProperty('--ms-fit');
-  const room = line.clientWidth - Number.parseFloat(getComputedStyle(value).getPropertyValue('--ms-reserve'));
+  const room = column.clientWidth;
+  // A hidden layout (the static list while the stage is pinned, or the other way round) has nothing to fit yet
+  if (room === 0) return;
   // The display face's optical size widens its glyphs as it shrinks, so one ratio falls short: re-measure until it fits
   let fit = 1;
   for (let i = 0; i < MAX_PASSES; i++) {
@@ -24,8 +26,9 @@ const fitValue = (value: HTMLElement) => {
 
 /**
  * Corrects the milestone values' CSS size estimate, which counts characters and so runs short for wide glyphs (an admin
- * value like "WOOCOMMERCE"). Measures each value and shrinks only the ones that overflow their line, so values that fit
- * keep their size and nothing shifts. Refits when a line or value changes size: resizes, and the web font arriving.
+ * value like "WOOCOMMERCE"). Measures each value and shrinks only the ones that overflow their column, so values that
+ * fit keep their size and nothing shifts. Refits when a column or value changes size: resizes, the web font arriving,
+ * and the static list and pinned stage swapping when the window height or motion setting changes.
  */
 export function MilestoneFit({sectionId}: {sectionId: string}) {
   useEffect(() => {
@@ -38,8 +41,7 @@ export function MilestoneFit({sectionId}: {sectionId: string}) {
     });
     for (const value of values) {
       observer.observe(value);
-      const line = value.closest('li');
-      if (line) observer.observe(line);
+      if (value.parentElement) observer.observe(value.parentElement);
     }
     return () => observer.disconnect();
   }, [sectionId]);

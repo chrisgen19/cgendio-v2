@@ -4,78 +4,60 @@ import {MarkedText} from '@/components/ui-site/marked-text';
 import {Section} from '@/components/ui-site/section';
 import {SectionHeading} from '@/components/ui-site/section-heading';
 import {cn} from '@/lib/cn';
-import {parseCountedValue} from '@/lib/milestone-value';
 import {getMilestones, getPageCopy} from '@/server/content';
 import type {Milestone} from '@/server/content-schema';
 import {MilestoneFit} from './milestone-fit';
+import {MilestoneStage} from './milestone-stage';
 
 const SECTION_ID = 'milestones';
-// Stacks the final value and its animated layer in one grid cell
-const STACK = 'col-start-1 row-start-1';
 
 /**
- * The big display value. Screen readers get the real value; the layers drawn on top are aria-hidden. The ms-* rules
- * in globals.css only animate them under a view timeline with motion allowed, otherwise the final value shows as is.
+ * Every milestone at once on the dot-grid stage: what shows without JS, under reduced motion or on a short window.
+ * `pinnable` hides it where the pinned stage takes over.
  */
-function BigValue({value}: {value: string}) {
-  const counted = parseCountedValue(value);
+function StaticStage({milestones, pinnable}: {milestones: Milestone[]; pinnable: boolean}) {
   return (
-    <p
-      className="ms-value m-0 pr-[0.05em] font-display leading-[0.8] font-extrabold tracking-[-0.05em] whitespace-nowrap tabular-nums"
-      // Code points, so a curly apostrophe counts once; sizes the value to fit its line (globals.css)
-      style={{'--ms-chars': [...value].length} as CSSProperties}
+    <div
+      className={cn(pinnable && 'ms-static', 'dot-grid rounded-panel border border-line px-12 py-4 shadow-(--shadow-card) max-md:px-5 max-md:py-2')}
     >
-      <span className="sr-only">{value}</span>
-      <span aria-hidden="true" className="inline-flex items-baseline">
-        {counted ? (
-          <>
-            {/* The final digits hold the width while the counter runs, so the suffix never moves */}
-            <span className="inline-grid">
-              <span className={cn('ms-final', STACK)}>{counted.to}</span>
-              <span className={cn('ms-tick justify-self-end', STACK)} style={{'--ms-from': counted.from, '--ms-to': counted.to} as CSSProperties} />
-            </span>
-            {counted.suffix ? <span>{counted.suffix}</span> : null}
-          </>
-        ) : (
-          <span className="inline-grid">
-            <span className={cn('ms-word', STACK)}>{value}</span>
-            <span className={cn('ms-fill', STACK)}>{value}</span>
-          </span>
-        )}
-      </span>
-    </p>
-  );
-}
-
-/** One full-width line: the value on one side, the kind, title and description on the other. */
-function MilestoneLine({milestone, flip}: {milestone: Milestone; flip: boolean}) {
-  return (
-    <li
-      className={cn(
-        'ms-row @container flex items-end justify-end gap-12 border-t border-line py-12 last:border-b',
-        flip ? 'flex-row' : 'flex-row-reverse',
-        'max-md:flex-col-reverse max-md:items-start max-md:gap-6 max-md:py-9',
-      )}
-    >
-      <div className={cn('flex max-w-[360px] flex-col gap-3 pb-[0.15em]', flip && 'items-end text-right max-md:items-start max-md:text-left')}>
-        <span className="font-mono text-xs leading-none font-medium tracking-[0.08em] text-muted uppercase">{milestone.kind}</span>
-        <h3 className="m-0 font-display text-[26px] leading-[1.1] font-bold tracking-[-0.02em] text-ink max-md:text-[22px]">{milestone.title}</h3>
-        <p className="m-0 text-base leading-[1.55] text-muted">{milestone.description}</p>
-      </div>
-      <BigValue value={milestone.value} />
-    </li>
+      <ol className="m-0 list-none p-0">
+        {milestones.map((m) => (
+          <li
+            key={m.order}
+            className="grid grid-cols-[minmax(0,200px)_minmax(0,1fr)_auto] items-center gap-x-10 border-b border-line py-7 last:border-b-0 max-md:grid-cols-[88px_minmax(0,1fr)] max-md:items-start max-md:gap-x-4 max-md:py-5"
+          >
+            <div className="@container min-w-0">
+              <p
+                className="ms-value ms-list-value m-0 w-fit font-display leading-[0.9] font-extrabold tracking-[-0.05em] whitespace-nowrap text-ink"
+                // Code points, so a curly apostrophe counts once; sizes the value to fit its column (globals.css)
+                style={{'--ms-chars': Math.max(2, [...m.value].length)} as CSSProperties}
+              >
+                {m.value}
+              </p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <h3 className="m-0 font-display text-2xl leading-[1.15] font-bold tracking-[-0.02em] text-ink max-md:text-lg">{m.title}</h3>
+              <p className="m-0 max-w-[560px] text-base leading-[1.55] text-muted max-md:text-[15px]">{m.description}</p>
+            </div>
+            <span className="font-mono text-xs leading-none font-medium tracking-[0.08em] text-muted uppercase max-md:hidden">{m.kind}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }
 
 /**
- * Milestones as big type: each one is a display line with its value set huge, alternating sides between hairline rules.
- * Numbers count up as their line scrolls into view, scrubbed by scroll position rather than time (CSS view timelines,
- * no JS), and word values like CMS fill in with ink. No pinning: the page scrolls normally.
+ * Milestones on a dot-grid stage. With JS and motion allowed, the stage pins while the section scrolls past and plays
+ * one milestone at a time, with a progress rail of jump buttons; otherwise it shows them all as a static list. Both are
+ * server-rendered and CSS picks one (globals.css), so the section's height never changes after hydration.
  */
 export async function Milestones() {
   const [milestones, copy] = await Promise.all([getMilestones(), getPageCopy()]);
+  // One milestone has nothing to step through, so it keeps the static list
+  const pinnable = milestones.length > 1;
   return (
-    <Section id={SECTION_ID} innerClassName="flex flex-col gap-16 max-md:gap-10">
+    <Section id={SECTION_ID} innerClassName="flex flex-col gap-14 max-md:gap-9">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div data-reveal className="flex flex-col gap-[18px]">
           <Eyebrow>{copy['milestones.eyebrow']}</Eyebrow>
@@ -83,14 +65,12 @@ export async function Milestones() {
             <MarkedText text={copy['milestones.heading']} />
           </SectionHeading>
         </div>
-        <p className="m-0 max-w-[380px] text-base leading-[1.55] text-muted">{copy['milestones.lede']}</p>
+        <p className="m-0 max-w-[380px] text-lg leading-[1.55] text-muted max-md:text-base">{copy['milestones.lede']}</p>
       </div>
-      <ul className="m-0 list-none p-0">
-        {milestones.map((m, i) => (
-          <MilestoneLine key={m.order} milestone={m} flip={i % 2 === 1} />
-        ))}
-      </ul>
-      <MilestoneFit sectionId={SECTION_ID} />
+      <StaticStage milestones={milestones} pinnable={pinnable} />
+      {pinnable ? <MilestoneStage milestones={milestones} /> : null}
+      {/* Keyed on the list, so an in-place refresh that changes the milestones remounts it and it observes the new values */}
+      <MilestoneFit key={milestones.map((m) => `${m.order}:${m.value}`).join('|')} sectionId={SECTION_ID} />
     </Section>
   );
 }
