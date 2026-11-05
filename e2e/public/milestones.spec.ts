@@ -15,16 +15,18 @@ const MILESTONES = [
   {value: 'VPS', title: 'Self-hosted infrastructure'},
 ];
 
-const activeSlide = (page: Page) => page.locator('#milestones .ms-slide[data-active]');
+// The slide on show (data-active only marks one that plays its entrance)
+const activeSlide = (page: Page) => page.locator('#milestones .ms-slide[data-shown]');
 
 /** Scrolls to the middle of milestone `index`'s stretch of the pinned track. Instant, or smooth scrolling lags behind. */
 const scrollToMilestone = (page: Page, index: number) =>
   page.evaluate(
     ({index, count}) => {
       const track = document.querySelector<HTMLElement>('#milestones .ms-track');
-      if (!track) throw new Error('No pinned track');
+      const sticky = track?.firstElementChild;
+      if (!track || !(sticky instanceof HTMLElement)) throw new Error('No pinned track');
       const top = track.getBoundingClientRect().top + window.scrollY;
-      const distance = track.offsetHeight - window.innerHeight;
+      const distance = track.offsetHeight - sticky.offsetHeight;
       window.scrollTo({top: top + (distance * (index + 0.5)) / count, behavior: 'instant'});
     },
     {index, count: MILESTONES.length},
@@ -60,6 +62,46 @@ test('the section is its final height before hydration', async ({page}) => {
   await page.waitForLoadState('networkidle');
   const after = await page.locator('#milestones').evaluate((el) => el.getBoundingClientRect().height);
   expect(after).toBeCloseTo(before, 0);
+});
+
+test('without its JS bundle the stage still shows the first milestone', async ({page}) => {
+  // Scripting is on, so CSS picks the pinned stage, but the client code never runs
+  await page.route('**/*.js', (route) => route.abort());
+  await page.goto('/');
+  const shown = activeSlide(page);
+  await expect(shown).toHaveCount(1);
+  await expect(shown.getByRole('heading', {level: 3})).toHaveText(MILESTONES[0].title);
+  expect(await shown.evaluate((el) => getComputedStyle(el).opacity)).toBe('1');
+});
+
+// The admin's limit for a description
+const LONG_DESCRIPTION = 'Planned, built and maintained sites for clients across several industries. '.repeat(6).slice(0, 400);
+
+/** How far the shown slide's text runs past the slide list, the list into the rail, or the panel out of the viewport (0 when it all fits). */
+const stageOverflow = (page: Page) =>
+  page.evaluate(() => {
+    const panel = document.querySelector('#milestones .ms-panel');
+    const list = panel?.querySelector('ol');
+    const rail = panel?.querySelector('[aria-label="Jump to a milestone"]');
+    const description = list?.querySelector('[data-shown] h3 + p');
+    if (!panel || !list || !rail || !description) return Number.POSITIVE_INFINITY;
+    const p = panel.getBoundingClientRect();
+    const l = list.getBoundingClientRect();
+    // A list that scrolls holds its text even when the text runs past its box
+    const textOver = getComputedStyle(list).overflowY === 'auto' ? 0 : description.getBoundingClientRect().bottom - l.bottom;
+    return Math.max(0, textOver, l.bottom - rail.getBoundingClientRect().top, p.bottom - window.innerHeight, -p.top);
+  });
+
+test('a description at the admin limit stays inside the pinned panel', async ({page}) => {
+  await page.goto('/');
+  await scrollToMilestone(page, 0);
+  await expect(activeSlide(page).getByRole('heading', {level: 3})).toHaveText(MILESTONES[0].title);
+  await activeSlide(page)
+    .locator('h3 + p')
+    .evaluate((p, text) => {
+      p.textContent = text;
+    }, LONG_DESCRIPTION);
+  await expect.poll(() => stageOverflow(page)).toBe(0);
 });
 
 /*

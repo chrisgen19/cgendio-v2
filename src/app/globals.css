@@ -1237,14 +1237,17 @@
 /*
  * The pinned track: its sticky wrapper is a full viewport tall with the panel centred in it. Negative block margins of
  * the empty space above and below the panel keep the panel at the section's normal gap before and after the pin.
+ * --ms-panel-h is the panel's design height. Long admin text can make it taller, up to the viewport; the stage then
+ * publishes the real height as --ms-panel-real so the margins follow (milestone-stage.tsx).
  */
 .ms-track {
   --ms-panel-h: min(580px, calc(100svh - 80px));
-  margin-block: calc((var(--ms-panel-h) - 100svh) / 2);
+  margin-block: calc((var(--ms-panel-real, var(--ms-panel-h)) - 100svh) / 2);
 }
 
 .ms-panel {
-  height: var(--ms-panel-h);
+  min-height: var(--ms-panel-h);
+  max-height: calc(100svh - 16px);
 }
 
 @media (width < 860px) {

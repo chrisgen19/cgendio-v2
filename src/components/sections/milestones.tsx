@@ -69,7 +69,8 @@ export async function Milestones() {
       </div>
       <StaticStage milestones={milestones} pinnable={pinnable} />
       {pinnable ? <MilestoneStage milestones={milestones} /> : null}
-      <MilestoneFit sectionId={SECTION_ID} />
+      {/* Keyed on the list, so an in-place refresh that changes the milestones remounts it and it observes the new values */}
+      <MilestoneFit key={milestones.map((m) => `${m.order}:${m.value}`).join('|')} sectionId={SECTION_ID} />
     </Section>
   );
 }

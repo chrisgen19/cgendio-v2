@@ -38,7 +38,8 @@ export function MilestoneStageRail({milestones, active, fillRef, onJump}: Milest
                   i <= active ? 'border-accent bg-accent' : 'border-line bg-film group-hover:border-ink',
                 )}
               />
-              <span className="font-mono text-xs leading-none font-medium tracking-[0.04em]">{m.value}</span>
+              {/* Truncates like the title: on phones a long value ("WOOCOMMERCE") would run into the next segment */}
+              <span className="w-full truncate pr-2 font-mono text-xs leading-tight font-medium tracking-[0.04em]">{m.value}</span>
               <span className="w-full truncate pr-4 text-[13px] leading-tight max-md:hidden">{m.title}</span>
             </button>
           </li>

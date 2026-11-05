@@ -47,11 +47,14 @@ function CountedValue({from, to, suffix, active}: {from: number; to: number; suf
   );
 }
 
+/** Splits text into user-perceived characters, so an emoji sequence or a letter with a combining mark stays whole. */
+const graphemes = (text: string) => Array.from(new Intl.Segmenter(undefined, {granularity: 'grapheme'}).segment(text), ({segment}) => segment);
+
 /** A word value like 'CMS': each letter wipes up in turn. Spaces keep their width. */
 function WordValue({value}: {value: string}) {
   return (
     <span>
-      {[...value].map((char, i) => (
+      {graphemes(value).map((char, i) => (
         <span
           // biome-ignore lint/suspicious/noArrayIndexKey: the letters of one value never reorder
           key={i}
