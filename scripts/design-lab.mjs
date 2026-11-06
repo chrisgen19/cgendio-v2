@@ -34,6 +34,7 @@ const LABS = {
       {port: 3003, slug: 'pull-request', title: 'Pull request'},
       {port: 3004, slug: 'departures', title: 'Departures'},
       {port: 3005, slug: 'in-register', title: 'In register'},
+      {port: 3006, slug: 'redline-journey', title: 'Redline journey'},
     ],
   },
 };

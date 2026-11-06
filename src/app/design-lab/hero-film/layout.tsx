@@ -4,7 +4,7 @@ import {PreviewToolbar} from '@/components/design-lab/hero-film/preview-toolbar'
 
 export const metadata: Metadata = {
   title: {default: 'Hero film lab', template: '%s · Hero film lab'},
-  description: 'Five directions for the home page hero film.',
+  description: 'Six directions for the home page hero film.',
   robots: {index: false, follow: false},
 };
 

@@ -15,9 +15,19 @@ export type LabFilmProps = {
   onReplay: () => void;
 };
 
+export type FilmChapter = {
+  label: string;
+  /** First frame of the chapter; it runs until the next chapter starts (or the film's rest frame). */
+  startFrame: number;
+};
+
 export type FilmCut = {
   component: React.ComponentType<LabFilmProps>;
   durationInFrames: number;
+  /** Optional chapter navigation (chips on desktop, segments on phones) plus a Skip button. */
+  chapters?: FilmChapter[];
+  /** Where Skip jumps to and where the last chapter ends: the first frame of the final rest scene. */
+  restFrame?: number;
 };
 
 type Size = {width: number; height: number};
@@ -124,6 +134,19 @@ export function FilmPlayer({desktop, mobile, label, description, worksHref = '#w
     if (!wasPlaying) player.play(e);
   }, []);
 
+  /**
+   * Seek, then make sure the film plays. If it was already playing, seekTo() resumes it by itself; calling play()
+   * as well would leave the Player's "resume after seek" flag set (see HeroPlayer.tsx).
+   */
+  const seekAndPlay = useCallback((frame: number, e?: React.SyntheticEvent) => {
+    const player = playerRef.current;
+    if (!player) return;
+    userPaused.current = false;
+    const wasPlaying = player.isPlaying();
+    player.seekTo(frame);
+    if (!wasPlaying) player.play(e);
+  }, []);
+
   const inputProps: LabFilmProps = useMemo(() => ({worksHref, onReplay: () => replay()}), [worksHref, replay]);
   const ready = size !== null && variant !== null && flags !== null;
 
@@ -158,37 +181,77 @@ export function FilmPlayer({desktop, mobile, label, description, worksHref = '#w
           />
         ) : null}
       </div>
-      {ready ? <FilmHud key={variant} playerRef={playerRef} lastFrame={lastFrame} userPaused={userPaused} onReplay={replay} /> : null}
+      {ready ? (
+        <FilmHud
+          key={variant}
+          variant={variant}
+          playerRef={playerRef}
+          lastFrame={lastFrame}
+          chapters={cut.chapters}
+          restFrame={cut.restFrame ?? lastFrame}
+          userPaused={userPaused}
+          onReplay={replay}
+          onJump={seekAndPlay}
+        />
+      ) : null}
     </section>
   );
 }
 
 type FilmHudProps = {
+  variant: Variant;
   playerRef: React.RefObject<PlayerRef | null>;
   lastFrame: number;
+  chapters?: FilmChapter[];
+  restFrame: number;
   userPaused: React.RefObject<boolean>;
   onReplay: (e?: React.SyntheticEvent) => void;
+  onJump: (frame: number, e?: React.SyntheticEvent) => void;
 };
 
-/** Play/pause/replay plus a thin progress line. Only this component re-renders on play state changes. */
-function FilmHud({playerRef, lastFrame, userPaused, onReplay}: FilmHudProps) {
+/** Index of the chapter playing at `frame`; -1 before the first one, chapters.length once the rest scene starts. */
+const chapterAt = (chapters: FilmChapter[], restFrame: number, frame: number) => {
+  if (frame >= restFrame) return chapters.length;
+  let index = -1;
+  for (let i = 0; i < chapters.length; i++) if (frame >= chapters[i].startFrame) index = i;
+  return index;
+};
+
+/**
+ * Play/pause/replay, a thin progress line and, when the cut has chapters, chapter navigation and Skip.
+ * Only this component re-renders, and only when the play state or the current chapter changes.
+ */
+function FilmHud({variant, playerRef, lastFrame, chapters, restFrame, userPaused, onReplay, onJump}: FilmHudProps) {
   const barRef = useRef<HTMLSpanElement>(null);
+  const segmentRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const [playing, setPlaying] = useState(false);
   const [ended, setEnded] = useState(false);
+  const [chapter, setChapter] = useState(-1);
 
   useEffect(() => {
     const player = playerRef.current;
     if (!player) return;
     const paint = (frame: number) => {
       if (barRef.current) barRef.current.style.transform = `scaleX(${Math.min(1, frame / lastFrame)})`;
+      chapters?.forEach((c, i) => {
+        const end = chapters[i + 1]?.startFrame ?? restFrame;
+        const fill = Math.max(0, Math.min(1, (frame - c.startFrame) / (end - c.startFrame)));
+        const el = segmentRefs.current[i];
+        if (el) el.style.transform = `scaleX(${fill})`;
+      });
     };
     paint(player.getCurrentFrame());
     setPlaying(player.isPlaying());
+    if (chapters) setChapter(chapterAt(chapters, restFrame, player.getCurrentFrame()));
     // The Player fires frameupdate from an effect; deferring the state update avoids nested-update warnings
     const onFrame = (e: {detail: {frame: number}}) => {
       const frame = e.detail.frame;
       paint(frame);
-      queueMicrotask(() => setEnded(frame >= lastFrame));
+      queueMicrotask(() => {
+        setEnded(frame >= lastFrame);
+        if (chapters) setChapter(chapterAt(chapters, restFrame, frame));
+      });
     };
     const onPlay = () => setPlaying(true);
     const onPause = () => setPlaying(false);
@@ -208,7 +271,7 @@ function FilmHud({playerRef, lastFrame, userPaused, onReplay}: FilmHudProps) {
       player.removeEventListener('pause', onPause);
       player.removeEventListener('ended', onEnded);
     };
-  }, [playerRef, lastFrame]);
+  }, [playerRef, lastFrame, chapters, restFrame]);
 
   const toggle = (e: React.SyntheticEvent) => {
     const player = playerRef.current;
@@ -225,9 +288,20 @@ function FilmHud({playerRef, lastFrame, userPaused, onReplay}: FilmHudProps) {
 
   const labelText = ended ? 'Replay film' : playing ? 'Pause film' : 'Play film';
 
+  const atRest = chapters ? chapter >= chapters.length : true;
+  const skip = (e: React.SyntheticEvent) => {
+    onJump(restFrame, e);
+    // Skip removes itself, so keep focus on the play state button instead of dropping it to <body>
+    toggleRef.current?.focus();
+  };
+
   return (
     <>
+      {chapters ? (
+        <ChapterNav variant={variant} chapters={chapters} current={chapter} atRest={atRest} segmentRefs={segmentRefs} onJump={onJump} onSkip={skip} />
+      ) : null}
       <button
+        ref={toggleRef}
         type="button"
         onClick={toggle}
         aria-label={labelText}
@@ -262,6 +336,98 @@ function PlayStateIcon({ended, playing}: {ended: boolean; playing: boolean}) {
   return (
     <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor" aria-hidden="true">
       <path d="M7 4.5v15l13-7.5z" />
+    </svg>
+  );
+}
+
+type ChapterNavProps = {
+  variant: Variant;
+  chapters: FilmChapter[];
+  current: number;
+  atRest: boolean;
+  segmentRefs: React.RefObject<(HTMLSpanElement | null)[]>;
+  onJump: (frame: number, e?: React.SyntheticEvent) => void;
+  onSkip: (e: React.SyntheticEvent) => void;
+};
+
+const hudButton =
+  'inline-flex h-11 items-center gap-2 rounded-full border border-(--hud-line) bg-(--hud-bg) px-4 text-[13px] font-medium text-(--hud-fg) hover:border-(--hud-fg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--hud-accent)';
+
+/** Desktop: numbered chapter chips and Skip. Phones: one tappable segment per chapter, the chapter name and Skip. */
+function ChapterNav({variant, chapters, current, atRest, segmentRefs, onJump, onSkip}: ChapterNavProps) {
+  const skipButton = atRest ? null : (
+    <button type="button" onClick={onSkip} className={hudButton}>
+      Skip <SkipIcon />
+    </button>
+  );
+
+  if (variant === 'mobile') {
+    const label = atRest ? 'cgdiomampo.dev' : current >= 0 ? `${String(current + 1).padStart(2, '0')} ${chapters[current].label}` : 'Intro';
+    return (
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 pr-[72px] pb-3 pl-4">
+        <div className="flex items-center justify-between gap-3">
+          <span aria-live="polite" className="font-mono text-[12px] tracking-[0.08em] text-(--hud-fg) uppercase opacity-70">
+            {label}
+          </span>
+          <div className="pointer-events-auto">{skipButton}</div>
+        </div>
+        {/* biome-ignore lint/a11y/useSemanticElements: a group of playback buttons, not a form; fieldset would imply form semantics (same as HeroPlayer) */}
+        <div role="group" aria-label="Film chapters" className="pointer-events-auto flex gap-1.5">
+          {chapters.map((c, i) => (
+            <button
+              key={c.label}
+              type="button"
+              onClick={(e) => onJump(c.startFrame, e)}
+              aria-label={`Jump to ${c.label}`}
+              aria-current={i === current ? 'step' : undefined}
+              className="flex h-8 flex-1 items-center focus-visible:outline-2 focus-visible:outline-(--hud-accent)"
+            >
+              <span className="relative block h-1 w-full overflow-hidden rounded-full bg-(--hud-track)">
+                <span
+                  ref={(el) => {
+                    segmentRefs.current[i] = el;
+                  }}
+                  className="absolute inset-0 origin-left rounded-full bg-(--hud-accent)"
+                  style={{transform: 'scaleX(0)'}}
+                />
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-between gap-4 pr-[96px] pb-6 pl-8 xl:pl-14">
+      {/* biome-ignore lint/a11y/useSemanticElements: a group of playback buttons, not a form; fieldset would imply form semantics (same as HeroPlayer) */}
+      <div role="group" aria-label="Film chapters" className="pointer-events-auto flex flex-wrap gap-1.5">
+        {chapters.map((c, i) => {
+          const active = i === current;
+          const done = i < current;
+          return (
+            <button
+              key={c.label}
+              type="button"
+              aria-current={active ? 'step' : undefined}
+              onClick={(e) => onJump(c.startFrame, e)}
+              className={`${hudButton} ${active ? 'border-(--hud-fg) bg-(--hud-fg) text-(--hud-bg)' : done ? '' : 'opacity-80'}`}
+            >
+              <span className="font-mono text-[11px] tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+              {c.label}
+            </button>
+          );
+        })}
+      </div>
+      <div className="pointer-events-auto">{skipButton}</div>
+    </div>
+  );
+}
+
+function SkipIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true">
+      <path d="M5 5l8 7-8 7M17 5v14" />
     </svg>
   );
 }

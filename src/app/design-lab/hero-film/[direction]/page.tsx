@@ -23,6 +23,10 @@ const renderers: Record<DirectionSlug, () => Promise<ReactNode>> = {
     const {Departures} = await import('@/components/design-lab/hero-film/departures/departures');
     return <Departures />;
   },
+  'redline-journey': async () => {
+    const {RedlineJourney} = await import('@/components/design-lab/hero-film/redline-journey/redline-journey');
+    return <RedlineJourney />;
+  },
   'in-register': async () => {
     const {InRegister} = await import('@/components/design-lab/hero-film/in-register/in-register');
     return <InRegister />;

@@ -6,7 +6,7 @@ export default function HeroFilmLab() {
   return (
     <main id="main" className="mx-auto max-w-site px-5 pt-24 pb-20 md:px-14">
       <h1 className="max-w-[16ch] font-display text-[clamp(40px,5vw,72px)] leading-[0.98] font-bold tracking-[-0.04em]">
-        Five ways to open the home page
+        Six ways to open the home page
       </h1>
       <p className="mt-5 max-w-[60ch] text-lg leading-[1.55] text-muted max-md:text-base">
         Each direction tells the story differently and moves differently. Every one runs on its own port, so you can keep them open side by side.

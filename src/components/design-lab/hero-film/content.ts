@@ -45,6 +45,15 @@ export const directions = [
     format: 'Scroll-driven CSS',
     description: 'A site proof printed in four misaligned ink layers that slide into register as you scroll.',
   },
+  {
+    slug: 'redline-journey',
+    number: '06',
+    port: 3006,
+    title: 'Redline: the full journey',
+    brand: 'On-brand',
+    format: 'Remotion film',
+    description: "Redline's look and card-led motion, told as the full journey: research, design, Figma to web, QA, deploy and live, with chapters.",
+  },
 ] as const;
 
 export type Direction = (typeof directions)[number];
