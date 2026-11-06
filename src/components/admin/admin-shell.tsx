@@ -32,7 +32,7 @@ export function AdminShell({user, children}: AdminShellProps) {
 
   const signOut = async () => {
     await authClient.signOut();
-    router.push('/admin/sign-in');
+    router.push('/sign-in');
   };
 
   return (

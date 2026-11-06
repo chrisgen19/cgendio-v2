@@ -27,10 +27,10 @@ export function proxy(request: NextRequest) {
     return valid ? NextResponse.next() : new NextResponse('Not found', {status: 404, headers: {'X-Robots-Tag': 'noindex, nofollow'}});
   }
 
-  if (!getSessionCookie(request)) return NextResponse.redirect(new URL('/admin/sign-in', request.url));
+  if (!getSessionCookie(request)) return NextResponse.redirect(new URL('/sign-in', request.url));
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin', '/admin/((?!sign-in).*)', '/preview/:path*'],
+  matcher: ['/admin', '/admin/:path*', '/preview/:path*'],
 };
