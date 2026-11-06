@@ -26,7 +26,10 @@ for (const path of LIVE_URLS) {
   });
 }
 
-test('pages link the RSS feed at /feed.xml', async ({page}) => {
-  await page.goto('/writing');
-  await expect(page.locator('link[rel="alternate"][type="application/rss+xml"]')).toHaveAttribute('href', /\/feed\.xml$/);
-});
+// One page per pageMetadata caller shape: the home page's absolute title, the blog index, a case study
+for (const path of ['/', '/writing', '/projects/access-hire']) {
+  test(`${path} links the RSS feed at /feed.xml`, async ({page}) => {
+    await page.goto(path);
+    await expect(page.locator('link[rel="alternate"][type="application/rss+xml"]')).toHaveAttribute('href', /\/feed\.xml$/);
+  });
+}
