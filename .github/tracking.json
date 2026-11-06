@@ -88,5 +88,64 @@
       "pr": null,
       "status": "Not started"
     }
+  },
+  "switch": {
+    "issue": 81,
+    "title": "Switch cgdiomampo.dev from v1 to v2: URL continuity, SEO parity and content migration",
+    "milestone": "v1 launch",
+    "status": "In progress",
+    "phases": {
+      "A": {
+        "title": "Decisions",
+        "branch": null,
+        "pr": null,
+        "status": "In progress"
+      },
+      "B": {
+        "title": "Adopt the live URL scheme",
+        "branch": "feature/live-url-scheme",
+        "pr": 82,
+        "status": "Done"
+      },
+      "B.1": {
+        "title": "Remaining live URLs: tag, side-project, .md and sign-in redirects",
+        "branch": "feature/phase-b-remaining-urls",
+        "pr": 83,
+        "status": "Done"
+      },
+      "C": {
+        "title": "SEO parity",
+        "branch": null,
+        "pr": null,
+        "status": "Not started"
+      },
+      "D": {
+        "title": "Content migration",
+        "branch": null,
+        "pr": null,
+        "status": "Not started"
+      },
+      "E": {
+        "title": "Deploy readiness (overlaps #10)",
+        "branch": null,
+        "pr": null,
+        "status": "Not started"
+      },
+      "F": {
+        "title": "Cutover and monitoring",
+        "branch": null,
+        "pr": null,
+        "status": "Not started"
+      }
+    },
+    "related": {
+      "85": {
+        "issue": 85,
+        "title": "Home and writing index content parity with the live site",
+        "branch": null,
+        "pr": null,
+        "status": "Not started"
+      }
+    }
   }
 }
