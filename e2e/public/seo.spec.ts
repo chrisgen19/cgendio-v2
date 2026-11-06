@@ -58,9 +58,14 @@ test('robots.txt gives the AI crawlers their own group with the same rules', asy
   ]) {
     expect(ai).toContain(`User-Agent: ${agent}`);
   }
-  // Same access as everyone else: listing them is about being citable, not about giving them more of the site
-  for (const path of ['/admin', '/preview', '/api']) expect(ai).toContain(`Disallow: ${path}`);
-  expect(ai).toContain('Allow: /');
+  // Same access as everyone else: listing them is about being citable, not about giving them more of the site. The
+  // wildcard group is checked too, so this cannot pass by the AI group alone while the wildcard loses its rules.
+  const wildcard = groups.find((group) => group.includes('User-Agent: *'));
+  expect(wildcard, 'no wildcard group').toBeDefined();
+  for (const group of [wildcard, ai]) {
+    for (const path of ['/admin', '/preview', '/api']) expect(group).toContain(`Disallow: ${path}`);
+    expect(group).toContain('Allow: /');
+  }
   expect(body).toMatch(/Sitemap: https?:\/\/[^\s]+\/sitemap\.xml/);
 });
 

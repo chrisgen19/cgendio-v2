@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {isUniqueViolation, readMinutesFor} from './action-helpers';
+import {isUniqueViolation, readMinutesFor, resolvePublishedAt} from './action-helpers';
 
 const words = (count: number) => Array.from({length: count}, (_, i) => `word${i}`).join(' ');
 
@@ -28,5 +28,43 @@ describe('isUniqueViolation', () => {
     expect(isUniqueViolation(new Error('P2002'))).toBe(false);
     expect(isUniqueViolation(null)).toBe(false);
     expect(isUniqueViolation('P2002')).toBe(false);
+  });
+});
+
+describe('resolvePublishedAt', () => {
+  const stored = new Date('2026-10-05T14:30:00.000Z');
+
+  /*
+   * The form's date input holds a day and no time, and it is pre-filled from the stored timestamp. Re-saving an
+   * unrelated field must not push the post back to midnight: that would change its RSS pubDate and reorder it against
+   * other posts from the same day.
+   */
+  it('keeps the stored time when the submitted day is the day it already has', () => {
+    expect(resolvePublishedAt({day: '2026-10-05', stored, isPublished: true})).toBe(stored);
+  });
+
+  it('takes a different day as a real change and starts it at midnight UTC', () => {
+    expect(resolvePublishedAt({day: '2026-10-06', stored, isPublished: true})?.toISOString()).toBe('2026-10-06T00:00:00.000Z');
+  });
+
+  it('starts at midnight UTC when there is nothing stored yet', () => {
+    expect(resolvePublishedAt({day: '2026-10-05', stored: null, isPublished: true})?.toISOString()).toBe('2026-10-05T00:00:00.000Z');
+  });
+
+  it('stamps now when a post is published for the first time with no day given', () => {
+    const now = new Date('2026-11-06T09:15:00.000Z');
+    expect(resolvePublishedAt({day: null, stored: null, isPublished: true, now})).toBe(now);
+  });
+
+  it('leaves a published post alone when no day is given', () => {
+    expect(resolvePublishedAt({day: null, stored, isPublished: true})).toBe(stored);
+  });
+
+  it('leaves a draft unpublished when no day is given', () => {
+    expect(resolvePublishedAt({day: null, stored: null, isPublished: false})).toBeNull();
+  });
+
+  it('keeps a draft its old date rather than stamping it', () => {
+    expect(resolvePublishedAt({day: null, stored, isPublished: false})).toBe(stored);
   });
 });

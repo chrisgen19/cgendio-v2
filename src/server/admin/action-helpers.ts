@@ -17,3 +17,21 @@ export const isUniqueViolation = (error: unknown) =>
 
 /** Reading time at about 200 words a minute, at least one minute. */
 export const readMinutesFor = (markdown: string) => Math.max(1, Math.ceil(markdown.trim().split(/\s+/).filter(Boolean).length / 200));
+
+/**
+ * The timestamp to store for a post, given the day its form submitted.
+ *
+ * The date input carries a day and no time, and it is pre-filled from the stored timestamp, so re-saving an unrelated
+ * field would otherwise push a post published at 14:30 back to midnight. That moves it in the RSS feed and reorders it
+ * against other posts from the same day. So a submitted day that matches the stored one keeps the stored time, and only
+ * a genuinely different day starts at midnight UTC.
+ *
+ * With no day submitted: a post being published for the first time is stamped now, and anything else keeps what it has.
+ */
+type PublishedAtInput = {day: string | null; stored: Date | null; isPublished: boolean; now?: Date};
+
+export const resolvePublishedAt = ({day, stored, isPublished, now = new Date()}: PublishedAtInput) => {
+  if (!day) return isPublished ? (stored ?? now) : stored;
+  if (stored && stored.toISOString().slice(0, 10) === day) return stored;
+  return new Date(`${day}T00:00:00Z`);
+};

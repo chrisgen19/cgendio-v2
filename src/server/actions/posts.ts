@@ -2,7 +2,7 @@
 
 import {updateTag} from 'next/cache';
 import {redirect} from 'next/navigation';
-import {type ActionResult, fieldErrorsFrom, isUniqueViolation, readMinutesFor} from '../admin/action-helpers';
+import {type ActionResult, fieldErrorsFrom, isUniqueViolation, readMinutesFor, resolvePublishedAt} from '../admin/action-helpers';
 import {postFormSchema} from '../admin/form-schemas';
 import {requireAdmin} from '../admin-session';
 import {CACHE_TAGS} from '../content';
@@ -17,11 +17,7 @@ export async function savePost(_previous: ActionResult | null, formData: FormDat
 
   const {publishedAt, ...fields} = input.data;
   const existing = id ? await db.post.findUnique({where: {id}, select: {publishedAt: true}}) : null;
-  const date = publishedAt
-    ? new Date(`${publishedAt}T00:00:00Z`)
-    : fields.status === 'PUBLISHED'
-      ? (existing?.publishedAt ?? new Date())
-      : (existing?.publishedAt ?? null);
+  const date = resolvePublishedAt({day: publishedAt, stored: existing?.publishedAt ?? null, isPublished: fields.status === 'PUBLISHED'});
   const data = {...fields, readMinutes: readMinutesFor(fields.body), publishedAt: date};
 
   let savedId = id;
