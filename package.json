@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:design-lab": "node scripts/design-lab.mjs",
+    "dev:hero-lab": "node scripts/design-lab.mjs hero-film",
     "build": "next build",
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit",
@@ -35,7 +36,9 @@
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
+    "@remotion/effects": "4.0.537",
     "@remotion/google-fonts": "4.0.537",
+    "@remotion/motion-blur": "4.0.537",
     "@remotion/player": "4.0.537",
     "@remotion/transitions": "4.0.537",
     "@shikijs/rehype": "4.5.0",
