@@ -22,6 +22,7 @@ const post = {
   title: 'A post',
   tag: 'MIGRATION',
   date: '2026-10-01',
+  publishedAt: '2026-10-01T05:00:00.000Z',
   readMinutes: 9,
   excerpt: '[Excerpt]',
 };
@@ -57,6 +58,9 @@ describe('postSchema', () => {
   it('needs an ISO date and a positive whole read time', () => {
     expect(postSchema.safeParse({...post, date: '01/10/2026'}).success).toBe(false);
     expect(postSchema.safeParse({...post, date: undefined}).success).toBe(false);
+    // publishedAt carries the time too, so a bare day is not enough for it
+    expect(postSchema.safeParse({...post, publishedAt: '2026-10-01'}).success).toBe(false);
+    expect(postSchema.safeParse({...post, publishedAt: undefined}).success).toBe(false);
     expect(postSchema.safeParse({...post, readMinutes: 0}).success).toBe(false);
     expect(postSchema.safeParse({...post, readMinutes: 1.5}).success).toBe(false);
   });

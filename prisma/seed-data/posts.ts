@@ -5,7 +5,8 @@ import type {Post} from '../../src/server/content-schema';
  * posts are ported from the v1 site; the canvas posts stay drafts until they're written, with no date, so publishing
  * one in the admin stamps the real date.
  */
-export type SeedPost = Omit<Post, 'readMinutes' | 'date'> & ({status: 'PUBLISHED'; date: string} | {status: 'DRAFT'});
+// `publishedAt` is omitted with `date`: the seed stores the day and the database timestamp is derived from it
+export type SeedPost = Omit<Post, 'readMinutes' | 'date' | 'publishedAt'> & ({status: 'PUBLISHED'; date: string} | {status: 'DRAFT'});
 
 export const posts: SeedPost[] = [
   {

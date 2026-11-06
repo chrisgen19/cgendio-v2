@@ -4,17 +4,19 @@ import {Suspense} from 'react';
 import {Pagination} from '@/components/blog/pagination';
 import {PostRow} from '@/components/blog/post-row';
 import {TagFilter} from '@/components/blog/tag-filter';
+import {JsonLd} from '@/components/site/json-ld';
 import {PageShell} from '@/components/site/page-shell';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {MarkedText} from '@/components/ui-site/marked-text';
 import {Section} from '@/components/ui-site/section';
 import {SectionHeading} from '@/components/ui-site/section-heading';
-import {pageMetadata} from '@/lib/metadata';
-import {BLOG_PAGE_SIZE, getBlogIndex, getPageCopy, getPostTags} from '@/server/content';
+import {BLOG_TITLE, pageMetadata} from '@/lib/metadata';
+import {blogJsonLd} from '@/lib/structured-data';
+import {BLOG_PAGE_SIZE, getBlogIndex, getPageCopy, getPosts, getPostTags} from '@/server/content';
 
 // Every tag and page variant points at /writing as its canonical URL (reading searchParams here would make it dynamic)
 export const metadata: Metadata = pageMetadata({
-  title: 'Blog',
+  title: BLOG_TITLE,
   description: 'Field notes on migrations, Next.js, WordPress and AI-assisted development.',
   path: '/writing',
 });
@@ -24,9 +26,11 @@ export const metadata: Metadata = pageMetadata({
  * the request, and its data comes from a cached getter keyed by a known tag and an in-range page.
  */
 export default async function BlogPage({searchParams}: PageProps<'/writing'>) {
-  const copy = await getPageCopy();
+  // The Blog node lists the newest posts regardless of the ?tag= filter, so it stays the same for every variant
+  const [copy, posts] = await Promise.all([getPageCopy(), getPosts({limit: 20})]);
   return (
     <PageShell>
+      <JsonLd data={blogJsonLd(copy, posts)} />
       <Section padding="cta" innerClassName="flex flex-col gap-[18px] pt-10 max-md:pt-4">
         <Eyebrow>{copy['blog.eyebrow']}</Eyebrow>
         <SectionHeading level={1}>

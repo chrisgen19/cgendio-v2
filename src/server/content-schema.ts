@@ -58,6 +58,8 @@ export const postSchema = z.object({
   title: z.string().min(1),
   tag: z.string().min(1),
   date: z.iso.date(),
+  /** The full stored timestamp. Pages show `date`; the RSS feed and article metadata need the time too. */
+  publishedAt: z.iso.datetime(),
   readMinutes: z.int().positive(),
   excerpt: z.string().min(1),
 });

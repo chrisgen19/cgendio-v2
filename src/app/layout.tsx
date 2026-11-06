@@ -1,9 +1,15 @@
 import type {Metadata, Viewport} from 'next';
 import {siteEnv} from '@/lib/env';
-import {SITE_DESCRIPTION, SITE_NAME} from '@/lib/metadata';
+import {OG_LOCALE, SITE_DESCRIPTION, SITE_NAME} from '@/lib/metadata';
 import {THEME_COLORS, THEME_SCRIPT} from '@/lib/theme';
 import {body, display, mono} from './fonts';
 import './globals.css';
+
+/**
+ * The Search Console property for cgdiomampo.dev, carried over from the previous site (#81) so the domain stays verified
+ * through the cutover. The token is public: it ships in the HTML of every page.
+ */
+const GOOGLE_SITE_VERIFICATION = 'uRp-UbI0NWG6cjziZS9a40Y0BNqg2dFX-oVehIhyOUY';
 
 /** Defaults for routes without their own metadata (pageMetadata() in src/lib/metadata.ts sets the rest per route). */
 export const metadata: Metadata = {
@@ -11,8 +17,12 @@ export const metadata: Metadata = {
   title: {default: SITE_NAME, template: `%s · ${SITE_NAME}`},
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
-  openGraph: {siteName: SITE_NAME, locale: 'en', type: 'website'},
+  openGraph: {siteName: SITE_NAME, locale: OG_LOCALE, type: 'website'},
   twitter: {card: 'summary_large_image'},
+  // Lets Google show a large image and an untruncated snippet. Indexing stays at its default; the admin, sign-in and
+  // preview routes set their own noindex, which replaces this whole object rather than merging with it.
+  robots: {'max-video-preview': -1, 'max-image-preview': 'large', 'max-snippet': -1},
+  verification: {google: GOOGLE_SITE_VERIFICATION},
 };
 
 // The no-JS fallback (light is the default theme). THEME_SCRIPT adds a theme-color for the chosen theme in front of it.
