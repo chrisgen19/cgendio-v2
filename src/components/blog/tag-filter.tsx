@@ -7,7 +7,7 @@ const PILL = 'inline-flex min-h-11 items-center rounded-pill border px-[18px] te
 const ACTIVE = 'border-ink bg-ink text-white hover:text-white';
 const IDLE = 'border-line bg-white text-ink hover:border-ink hover:text-ink';
 
-/** Tag pills for /blog, styled like the Work filter. They're plain links, so filtering works without JavaScript. */
+/** Tag pills for /writing, styled like the Work filter. They're plain links, so filtering works without JavaScript. */
 export function TagFilter({tags, active}: {tags: PostTag[]; active: string | null}) {
   return (
     <nav aria-label="Filter posts by tag" className="flex flex-wrap gap-2">

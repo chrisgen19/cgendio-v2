@@ -74,7 +74,7 @@ export function NextProject({project}: {project: ProjectDetail | null}) {
             <div className="flex flex-col gap-6 max-md:gap-4">
               {/* The title is the link, stretched over the whole card: its name is the title, and the rest stays readable text */}
               <Link
-                href={`/work/${project.slug}`}
+                href={`/projects/${project.slug}`}
                 className="max-w-[14ch] font-display text-[clamp(40px,5.4vw,80px)] leading-[0.96] font-bold tracking-[-0.045em] text-balance text-inherit no-underline after:absolute after:inset-0 after:z-2 after:content-[''] hover:text-inherit focus-visible:outline-none"
               >
                 {project.title}

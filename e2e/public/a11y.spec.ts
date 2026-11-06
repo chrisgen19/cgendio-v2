@@ -4,10 +4,10 @@ import {E2E_BASE_URL, NO_TOUR_SLUG} from '../support/test-env';
 
 const PAGES = [
   {name: 'home', path: '/'},
-  {name: 'blog', path: '/blog'},
-  {name: 'post', path: '/blog/redirect-maps-wordpress-to-nextjs'},
-  {name: 'case study with a tour', path: '/work/access-hire'},
-  {name: 'case study without a tour', path: `/work/${NO_TOUR_SLUG}`},
+  {name: 'blog', path: '/writing'},
+  {name: 'post', path: '/writing/redirect-maps-wordpress-to-nextjs'},
+  {name: 'case study with a tour', path: '/projects/access-hire'},
+  {name: 'case study without a tour', path: `/projects/${NO_TOUR_SLUG}`},
   {name: 'contact', path: '/contact'},
 ];
 

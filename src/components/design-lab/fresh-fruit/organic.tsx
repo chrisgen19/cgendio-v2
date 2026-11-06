@@ -174,7 +174,7 @@ export function Organic() {
           </a>
           <div className={styles.footerBottom}>
             <a href="/#work">Back to selected work</a>
-            <a href="/work/access-hire">
+            <a href="/projects/access-hire">
               Next / Access Hire Australia <ArrowRight size={17} aria-hidden="true" />
             </a>
           </div>

@@ -12,18 +12,18 @@ import {SectionHeading} from '@/components/ui-site/section-heading';
 import {pageMetadata} from '@/lib/metadata';
 import {BLOG_PAGE_SIZE, getBlogIndex, getPageCopy, getPostTags} from '@/server/content';
 
-// Every tag and page variant points at /blog as its canonical URL (reading searchParams here would make it dynamic)
+// Every tag and page variant points at /writing as its canonical URL (reading searchParams here would make it dynamic)
 export const metadata: Metadata = pageMetadata({
   title: 'Blog',
   description: 'Field notes on migrations, Next.js, WordPress and AI-assisted development.',
-  path: '/blog',
+  path: '/writing',
 });
 
 /**
  * The blog index. The header is static; the list reads ?tag= and ?page= inside Suspense, so only that part waits for
  * the request, and its data comes from a cached getter keyed by a known tag and an in-range page.
  */
-export default async function BlogPage({searchParams}: PageProps<'/blog'>) {
+export default async function BlogPage({searchParams}: PageProps<'/writing'>) {
   const copy = await getPageCopy();
   return (
     <PageShell>
@@ -45,7 +45,7 @@ export default async function BlogPage({searchParams}: PageProps<'/blog'>) {
 
 const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
-async function BlogList({searchParams}: Pick<PageProps<'/blog'>, 'searchParams'>) {
+async function BlogList({searchParams}: Pick<PageProps<'/writing'>, 'searchParams'>) {
   const params = await searchParams;
   const tags = await getPostTags();
   const tagParam = first(params.tag) ?? null;
@@ -63,7 +63,7 @@ async function BlogList({searchParams}: Pick<PageProps<'/blog'>, 'searchParams'>
         <TagFilter tags={tags} active={tag?.slug ?? null} />
         <div className="flex flex-col items-start gap-3 border-t border-line pt-10">
           <p className="m-0 font-display text-[26px] leading-[1.15] font-[650] tracking-[-0.025em]">No posts here yet.</p>
-          <Link href="/blog" className="inline-flex min-h-11 items-center text-[15px] font-semibold">
+          <Link href="/writing" className="inline-flex min-h-11 items-center text-[15px] font-semibold">
             See all posts
           </Link>
         </div>

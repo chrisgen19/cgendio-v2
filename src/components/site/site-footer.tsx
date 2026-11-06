@@ -11,7 +11,7 @@ export async function SiteFooter() {
   const {socials} = await getSiteSettings();
   const links = [
     {href: '/#work', label: 'Work'},
-    {href: '/blog', label: 'Blog'},
+    {href: '/writing', label: 'Blog'},
     ...PROFILES.flatMap(({key, label}) => (socials[key] ? [{href: socials[key], label}] : [])),
   ];
   return (

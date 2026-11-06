@@ -32,7 +32,7 @@ export const homeJsonLd = (copy: PageCopy, settings: SiteSettings) => ({
 });
 
 export const postJsonLd = (post: PostDetail, copy: PageCopy) => {
-  const url = `${origin()}/blog/${post.slug}`;
+  const url = `${origin()}/writing/${post.slug}`;
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -49,7 +49,7 @@ export const postJsonLd = (post: PostDetail, copy: PageCopy) => {
 };
 
 export const caseStudyJsonLd = (project: ProjectDetail, copy: PageCopy) => {
-  const url = `${origin()}/work/${project.slug}`;
+  const url = `${origin()}/projects/${project.slug}`;
   return {
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',

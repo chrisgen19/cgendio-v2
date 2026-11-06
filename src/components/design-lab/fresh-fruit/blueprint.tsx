@@ -277,7 +277,7 @@ export function Blueprint() {
           </a>
           <div className={styles.footerBottom}>
             <a href="/#work">Back to selected work</a>
-            <a href="/work/access-hire">
+            <a href="/projects/access-hire">
               Next project / Access Hire Australia <ArrowRight size={18} aria-hidden="true" />
             </a>
           </div>

@@ -41,7 +41,7 @@ test.describe('on short screens', () => {
     // How far each link's bottom sits past its card's bottom; a missing link counts as clipped
     const overflow = await cards(page).evaluateAll((els) =>
       els.map((el) => {
-        const link = el.querySelector('a[href^="/work/"]');
+        const link = el.querySelector('a[href^="/projects/"]');
         return link ? link.getBoundingClientRect().bottom - el.getBoundingClientRect().bottom : Number.POSITIVE_INFINITY;
       }),
     );

@@ -193,7 +193,7 @@ export const getPost = async (slug: string): Promise<PostDetail | null> => {
 export const BLOG_PAGE_SIZE = 10;
 
 /**
- * Tags in use by published posts, most used first, with the slug used in /blog?tag=. Labels that share a slug ("C#" and
+ * Tags in use by published posts, most used first, with the slug used in /writing?tag=. Labels that share a slug ("C#" and
  * "C++") are one filter: it shows the most used label and counts every post that matches, as getBlogIndex does.
  */
 export const getPostTags = async (): Promise<PostTag[]> => {
