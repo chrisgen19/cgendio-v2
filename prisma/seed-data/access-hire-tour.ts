@@ -1,8 +1,9 @@
 import type {TourStop} from '../../src/server/content-schema';
 
 /**
- * The Access Hire case study tour. Captures of the live site from 2026-11-02, in the cgendio-media bucket, cleaned of
- * staff and customer details first. Positions are in each capture's pixels. Note text is the write-up, word for word.
+ * The Access Hire case study tour. Captures of the live site from 2026-11-02 (the services page from 2026-11-06), in the
+ * cgendio-media bucket, cleaned of staff and customer details first. Positions are in each capture's pixels. Note text is
+ * the write-up, word for word.
  * The 20261102120000_project_walkthrough migration backfills the same value, so change both.
  */
 const FOLDER = 'https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/access-hire-tour';
@@ -14,6 +15,7 @@ const SIZES = {
   used: {desktop: [1600, 1047], mobile: [390, 1756]},
   branches: {desktop: [1600, 1942], mobile: [390, 844]},
   credit: {desktop: [1600, 1644], mobile: [390, 2550]},
+  services: {desktop: [1600, 1558], mobile: [390, 3924]},
 } as const;
 
 const capture = (page: keyof typeof SIZES, device: 'desktop' | 'mobile') => {
@@ -29,6 +31,7 @@ const ALTS = {
   used: 'The used equipment page: a short intro above the site footer',
   branches: 'The branch finder: a map of Australia with a pin for each branch',
   credit: 'The credit application page: what you need to apply, an Apply Now button and the site footer',
+  services: 'The services page: cards for equipment servicing, equipment transport, equipment training and site inspections',
 } as const;
 
 const USED_BRANCHES_CREDIT = 'Used equipment, a branch finder and a credit application';
@@ -146,14 +149,14 @@ export const accessHireTour: TourStop[] = [
     heading: 'Services',
     note: 'Servicing, transport, training and site inspection pages',
     emphasis: null,
-    selected: 'Services',
-    onScreen: 'Linked from the site footer: Equipment Servicing, Equipment Transport, Equipment Training, Site Inspections',
-    path: '/credit-application',
-    alt: ALTS.credit,
-    captures: captures('credit'),
+    selected: 'Service cards',
+    onScreen: 'Four services: Equipment Servicing, Equipment Transport, Equipment Training and Site Inspections',
+    path: '/what-we-do/services',
+    alt: ALTS.services,
+    captures: captures('services'),
     positions: {
-      desktop: {y: 900, box: {x: 452, y: 1266, w: 190, h: 190}},
-      mobile: {y: 1785, box: {x: 14, y: 1825, w: 280, h: 172}},
+      desktop: {y: 92, box: {x: 144, y: 432, w: 1312, h: 496}},
+      mobile: {y: 800, box: {x: 24, y: 836, w: 342, h: 210}},
     },
   },
 ];
