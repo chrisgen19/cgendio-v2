@@ -4,6 +4,8 @@ export const SITE_NAME = 'Cgdiomampo.dev';
 /** The RSS feed, at the same path as the previous site so existing subscribers keep working. */
 export const FEED_PATH = '/feed.xml';
 export const SITE_DESCRIPTION = 'I take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.';
+/** Open Graph wants a language_TERRITORY code, not a bare language, and the previous site published en_US (#81). */
+export const OG_LOCALE = 'en_US';
 
 type PageMetadataInput = {
   /** A plain title goes through the root template ("Blog · Cgdiomampo.dev"); `{absolute}` skips it. */
@@ -22,7 +24,7 @@ type PageMetadataInput = {
  */
 export const pageMetadata = ({title, description, path, article}: PageMetadataInput): Metadata => {
   const cardTitle = typeof title === 'string' ? title : title.absolute;
-  const shared = {siteName: SITE_NAME, locale: 'en', url: path, title: cardTitle, description};
+  const shared = {siteName: SITE_NAME, locale: OG_LOCALE, url: path, title: cardTitle, description};
   return {
     title,
     description,
