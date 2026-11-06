@@ -21,7 +21,14 @@ export async function generateStaticParams() {
 export async function generateMetadata({params}: PageProps<'/writing/[slug]'>): Promise<Metadata> {
   const post = await getPost((await params).slug);
   if (!post) notFound();
-  return pageMetadata({title: post.title, description: post.excerpt, path: `/writing/${post.slug}`, article: {publishedTime: post.date}});
+  const copy = await getPageCopy();
+  return pageMetadata({
+    title: post.title,
+    description: post.excerpt,
+    path: `/writing/${post.slug}`,
+    // One tag per post is all the content model holds, so this is the whole set rather than a sample
+    article: {publishedTime: post.publishedAt, modifiedTime: post.updatedAt, authors: [copy['about.name']], tags: [post.tag]},
+  });
 }
 
 /**
