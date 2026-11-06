@@ -23,6 +23,6 @@ export const getAdminSession = cache(async () => {
  */
 export const requireAdmin = async () => {
   const session = await getAdminSession();
-  if (!session) redirect('/admin/sign-in');
+  if (!session) redirect('/sign-in');
   return session;
 };

@@ -16,7 +16,7 @@ export function SignInCard({error}: SignInCardProps) {
 
   const signIn = async () => {
     setPending(true);
-    await authClient.signIn.social({provider: 'github', callbackURL: '/admin', errorCallbackURL: '/admin/sign-in'});
+    await authClient.signIn.social({provider: 'github', callbackURL: '/admin', errorCallbackURL: '/sign-in'});
   };
 
   return (

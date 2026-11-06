@@ -6,7 +6,7 @@ import {getAdminSession} from '@/server/admin-session';
 
 export const metadata: Metadata = {title: 'Sign in'};
 
-export default function SignInPage({searchParams}: PageProps<'/admin/sign-in'>) {
+export default function SignInPage({searchParams}: PageProps<'/sign-in'>) {
   return (
     <div className="grid min-h-svh place-items-center bg-secondary p-4">
       <Suspense>
@@ -16,7 +16,7 @@ export default function SignInPage({searchParams}: PageProps<'/admin/sign-in'>) 
   );
 }
 
-async function SignIn({searchParams}: Pick<PageProps<'/admin/sign-in'>, 'searchParams'>) {
+async function SignIn({searchParams}: Pick<PageProps<'/sign-in'>, 'searchParams'>) {
   if (await getAdminSession()) redirect('/admin');
   const {error} = await searchParams;
   return <SignInCard error={typeof error === 'string' ? error : null} />;

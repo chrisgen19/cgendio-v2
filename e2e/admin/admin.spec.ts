@@ -18,7 +18,7 @@ test.describe('signed out', () => {
   for (const path of ['/admin', '/admin/projects', '/admin/inbox']) {
     test(`${path} redirects to sign-in`, async ({page}) => {
       await page.goto(path);
-      await expect(page).toHaveURL(/\/admin\/sign-in$/);
+      await expect(page).toHaveURL(`${E2E_BASE_URL}/sign-in`);
     });
   }
 });
