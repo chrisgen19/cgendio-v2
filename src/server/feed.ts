@@ -1,10 +1,14 @@
 import 'server-only';
 import {cacheLife, cacheTag} from 'next/cache';
 import {siteEnv} from '@/lib/env';
-import {CACHE_TAGS, getPageCopy, getPosts} from './content';
+import {CACHE_TAGS, getPageCopy, getPost, getPosts} from './content';
+import {renderFeedHtml} from './feed-markdown';
 
 const escapeXml = (value: string) =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+
+/** Wraps HTML for an XML element. The only sequence that can end a CDATA section is split across two of them. */
+const cdata = (value: string) => `<![CDATA[${value.replaceAll(']]>', ']]]]><![CDATA[>')}]]>`;
 
 /** RFC 822 date for RSS, from the stored UTC timestamp. */
 const rssDate = (iso: string) => new Date(iso).toUTCString();
@@ -12,11 +16,9 @@ const rssDate = (iso: string) => new Date(iso).toUTCString();
 const RSS_DOCS = 'https://validator.w3.org/feed/docs/rss2.html';
 
 /**
- * The RSS 2.0 feed for /feed.xml: the 20 newest published posts. Cached under the posts tag, so publishing in the
- * admin refreshes it. lastBuildDate is the newest post's timestamp rather than the current time, which keeps it
- * cacheable.
- *
- * TODO(#81): add <content:encoded> with each post's full body, which needs an HTML serialiser (see the PR).
+ * The RSS 2.0 feed for /feed.xml: the 20 newest published posts, each with its full body in content:encoded so the
+ * feed can be read without visiting the site. Cached under the posts tag, so publishing in the admin refreshes it.
+ * lastBuildDate is the newest post's timestamp rather than the current time, which keeps it cacheable.
  */
 export const getFeedXml = async (): Promise<string> => {
   'use cache';
@@ -26,9 +28,18 @@ export const getFeedXml = async (): Promise<string> => {
   const site = siteEnv().NEXT_PUBLIC_SITE_URL;
   const author = copy['about.name'];
 
+  // getPost is cached per slug and renderFeedHtml by body, so a feed rebuild re-converts nothing that has not changed
+  const bodies = await Promise.all(
+    posts.map(async (post) => {
+      const detail = await getPost(post.slug);
+      return detail ? await renderFeedHtml(detail.body) : '';
+    }),
+  );
+
   const items = posts
-    .map((post) => {
+    .map((post, index) => {
       const url = `${site}/writing/${post.slug}`;
+      const body = bodies[index];
       return [
         '    <item>',
         `      <title>${escapeXml(post.title)}</title>`,
@@ -39,6 +50,7 @@ export const getFeedXml = async (): Promise<string> => {
         `      <dc:creator>${escapeXml(author)}</dc:creator>`,
         `      <category>${escapeXml(post.tag)}</category>`,
         `      <description>${escapeXml(post.excerpt)}</description>`,
+        ...(body ? [`      <content:encoded>${cdata(body)}</content:encoded>`] : []),
         '    </item>',
       ].join('\n');
     })
@@ -48,7 +60,7 @@ export const getFeedXml = async (): Promise<string> => {
   const year = new Date().getUTCFullYear();
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom">',
+    '<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">',
     '  <channel>',
     '    <title>Cgdiomampo.dev blog</title>',
     `    <link>${escapeXml(`${site}/writing`)}</link>`,

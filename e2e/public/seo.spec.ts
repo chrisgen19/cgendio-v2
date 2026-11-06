@@ -125,3 +125,26 @@ test('the feed declares dc, and carries a copyright, docs and stable guids', asy
   // pubDate comes from the stored timestamp, so a post published at a real time keeps it
   expect(body).toMatch(/<pubDate>[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT<\/pubDate>/);
 });
+
+test('every feed item carries its full body as HTML in a CDATA section', async ({request}) => {
+  const body = await (await request.get('/feed.xml')).text();
+  expect(body).toContain('xmlns:content="http://purl.org/rss/1.0/modules/content/"');
+
+  const encoded = [...body.matchAll(/<content:encoded><!\[CDATA\[([\s\S]*?)\]\]><\/content:encoded>/g)].map((match) => match[1]);
+  const items = body.match(/<item>/g)?.length ?? 0;
+  expect(items).toBeGreaterThan(0);
+  expect(encoded).toHaveLength(items);
+
+  for (const html of encoded) {
+    // The whole post, not the excerpt: the longest excerpt in the seed is a few hundred characters
+    expect(html.length).toBeGreaterThan(2000);
+    expect(html).toContain('<p>');
+    // Semantic markup only. The site renderer's Tailwind classes and Shiki colours would bloat every item and are
+    // stripped by readers anyway, so the feed uses its own pipeline (src/server/feed-markdown.ts)
+    expect(html).not.toContain('<script');
+    expect(html).not.toMatch(/style="/);
+    for (const className of [...html.matchAll(/class="([^"]*)"/g)].map((match) => match[1])) {
+      expect(className, 'only code-fence language classes belong in the feed').toMatch(/^language-/);
+    }
+  }
+});
