@@ -11,7 +11,7 @@ export const pageCopy: PageCopy = {
   'about.heading': "Hi, I'm [[Christian.]]",
   'about.intro':
     "I'm a senior full-stack developer in Pasig City, Philippines. I take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.",
-  'about.name': 'Christian Diomampo',
+  'about.name': 'Chris Diomampo',
   'about.frameLabel': 'Christian / Pasig City',
   'about.role.label': 'Role',
   'about.role.value': 'Senior full-stack developer',

@@ -39,6 +39,8 @@ const website = () => ({
   '@id': WEBSITE_ID(),
   url: `${origin()}/`,
   name: SITE_NAME,
+  // The brand is the name now, so the domain lives here instead: people search for both (#81 Phase A)
+  alternateName: 'cgdiomampo.dev',
   description: SITE_DESCRIPTION,
   inLanguage: 'en',
   publisher: ref(PERSON_ID()),

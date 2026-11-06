@@ -1,6 +1,7 @@
 import 'server-only';
 import {cacheLife, cacheTag} from 'next/cache';
 import {siteEnv} from '@/lib/env';
+import {BLOG_TITLE, SITE_NAME} from '@/lib/metadata';
 import {CACHE_TAGS, getPageCopy, getPost, getPosts} from './content';
 import {renderFeedHtml} from './feed-markdown';
 
@@ -62,7 +63,7 @@ export const getFeedXml = async (): Promise<string> => {
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">',
     '  <channel>',
-    '    <title>Cgdiomampo.dev blog</title>',
+    `    <title>${escapeXml(`${SITE_NAME} · ${BLOG_TITLE}`)}</title>`,
     `    <link>${escapeXml(`${site}/writing`)}</link>`,
     `    <description>${escapeXml(copy['blog.lede'])}</description>`,
     '    <language>en</language>',

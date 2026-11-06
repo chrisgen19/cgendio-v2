@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import {SITE_NAME} from '@/lib/metadata';
 
 export function Logo() {
   return (
@@ -9,7 +10,7 @@ export function Logo() {
       <b className="inline-grid size-9 place-items-center rounded-logo bg-badge font-display text-base leading-none font-extrabold tracking-[-0.04em] text-badge-ink">
         cg
       </b>
-      cgdiomampo.dev
+      {SITE_NAME}
     </Link>
   );
 }

@@ -1,8 +1,9 @@
 import {OG_SIZE, ogCard} from '@/app/_og/og-card';
 import {stripMarkers} from '@/lib/marked-copy';
+import {SITE_NAME} from '@/lib/metadata';
 import {getPageCopy} from '@/server/content';
 
-export const alt = 'Cgdiomampo.dev writing';
+export const alt = `${SITE_NAME} writing`;
 export const size = OG_SIZE;
 export const contentType = 'image/png';
 
