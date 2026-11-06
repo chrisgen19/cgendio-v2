@@ -3,17 +3,24 @@ import {ReplayBoundary} from './replay-boundary';
 
 /**
  * A direction's hero, at the production hero's size (src/components/sections/hero.tsx), followed by a stand-in for
- * the next section so the hand-off below the fold is visible. `stageClassName` sets the hero's background.
+ * the next section so the hand-off below the fold is visible.
+ * - `stageClassName` sets the hero's background.
+ * - `heightClassName` replaces the production hero height, for a scroll-driven direction that needs a taller track.
  */
-export function DirectionStage({children, stageClassName = 'bg-film'}: {children: ReactNode; stageClassName?: string}) {
+export function DirectionStage({
+  children,
+  stageClassName = 'bg-film',
+  heightClassName = 'h-[min(100svh,980px)] min-h-[640px] max-md:h-svh max-md:min-h-[600px] portrait:h-svh portrait:min-h-[600px]',
+}: {
+  children: ReactNode;
+  stageClassName?: string;
+  heightClassName?: string;
+}) {
   return (
     <ReplayBoundary>
       <main id="main">
         <h1 className="sr-only">Christian Diomampo, web developer</h1>
-        <div
-          id="top"
-          className={`@container relative h-[min(100svh,980px)] min-h-[640px] max-md:h-svh max-md:min-h-[600px] portrait:h-svh portrait:min-h-[600px] ${stageClassName}`}
-        >
+        <div id="top" className={`@container relative ${heightClassName} ${stageClassName}`}>
           {children}
         </div>
         <section id="work" aria-label="Next section (placeholder)" className="border-t border-line bg-ground px-5 py-18 md:px-14 md:py-28">
