@@ -350,13 +350,15 @@ type ChapterNavProps = {
   onSkip: (e: React.SyntheticEvent) => void;
 };
 
+/** Shape and focus only; colours come from HUD_IDLE or the active chip's classes, so they never compete. */
 const hudButton =
-  'inline-flex h-11 items-center gap-2 rounded-full border border-(--hud-line) bg-(--hud-bg) px-4 text-[13px] font-medium text-(--hud-fg) hover:border-(--hud-fg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--hud-accent)';
+  'inline-flex h-11 items-center gap-2 rounded-full border px-4 text-[13px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--hud-accent)';
+const HUD_IDLE = 'border-(--hud-line) bg-(--hud-bg) text-(--hud-fg) hover:border-(--hud-fg)';
 
 /** Desktop: numbered chapter chips and Skip. Phones: one tappable segment per chapter, the chapter name and Skip. */
 function ChapterNav({variant, chapters, current, atRest, segmentRefs, onJump, onSkip}: ChapterNavProps) {
   const skipButton = atRest ? null : (
-    <button type="button" onClick={onSkip} className={hudButton}>
+    <button type="button" onClick={onSkip} className={`${hudButton} ${HUD_IDLE}`}>
       Skip <SkipIcon />
     </button>
   );
@@ -411,7 +413,7 @@ function ChapterNav({variant, chapters, current, atRest, segmentRefs, onJump, on
               type="button"
               aria-current={active ? 'step' : undefined}
               onClick={(e) => onJump(c.startFrame, e)}
-              className={`${hudButton} ${active ? 'border-(--hud-fg) bg-(--hud-fg) text-(--hud-bg)' : done ? '' : 'opacity-80'}`}
+              className={`${hudButton} ${active ? 'border-(--hud-fg) bg-(--hud-fg) text-(--hud-bg)' : `${HUD_IDLE}${done ? '' : ' opacity-80'}`}`}
             >
               <span className="font-mono text-[11px] tabular-nums">{String(i + 1).padStart(2, '0')}</span>
               {c.label}

@@ -1,10 +1,11 @@
 import {DirectionStage} from '../direction-stage';
+import {JourneyFilm} from './journey-film';
 
-/** Placeholder: the redline-journey direction is built here. */
+/** Direction 06: Redline's card and match cuts, told as the full journey from research to a live URL, with chapters. */
 export function RedlineJourney() {
   return (
     <DirectionStage>
-      <div className="grid h-full place-items-center font-mono text-[13px] text-muted">redline-journey: in progress</div>
+      <JourneyFilm />
     </DirectionStage>
   );
 }
