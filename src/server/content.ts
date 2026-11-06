@@ -96,6 +96,7 @@ const postFields = (row: PostRow, date: Date | null = row.publishedAt) => ({
   tag: row.tag,
   // Pages show the day or month and year; the date part of the UTC timestamp is enough
   date: date?.toISOString().slice(0, 10),
+  publishedAt: date?.toISOString(),
   readMinutes: row.readMinutes,
   excerpt: row.excerpt,
 });

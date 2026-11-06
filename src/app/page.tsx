@@ -1,20 +1,21 @@
 import {HomePage} from '@/components/sections/home-page';
 import {JsonLd} from '@/components/site/json-ld';
-import {pageMetadata, SITE_DESCRIPTION, SITE_NAME} from '@/lib/metadata';
+import {HOME_TITLE, pageMetadata, SITE_DESCRIPTION} from '@/lib/metadata';
 import {homeJsonLd} from '@/lib/structured-data';
-import {getPageCopy, getSiteSettings} from '@/server/content';
+import {getPageCopy, getSiteSettings, getStack} from '@/server/content';
 
 export const metadata = pageMetadata({
-  title: {absolute: `${SITE_NAME} · Christian Diomampo, full-stack web developer`},
+  title: {absolute: HOME_TITLE},
   description: SITE_DESCRIPTION,
   path: '/',
 });
 
 export default async function Home() {
-  const [copy, settings] = await Promise.all([getPageCopy(), getSiteSettings()]);
+  // The stack strip doubles as the Person's knowsAbout, so the structured data never names a tool the site doesn't show
+  const [copy, settings, stack] = await Promise.all([getPageCopy(), getSiteSettings(), getStack()]);
   return (
     <>
-      <JsonLd data={homeJsonLd(copy, settings)} />
+      <JsonLd data={homeJsonLd(copy, settings, stack, HOME_TITLE)} />
       <HomePage />
     </>
   );
