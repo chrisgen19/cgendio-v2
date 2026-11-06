@@ -18,8 +18,8 @@ type PageMetadataInput = {
   description: string;
   /** Path from the site root; metadataBase in the root layout makes it absolute. */
   path: string;
-  /** Posts are articles, with the day they were published. */
-  article?: {publishedTime: string};
+  /** Posts are articles: full ISO timestamps, the author's name and the post's tags. */
+  article?: {publishedTime: string; modifiedTime: string; authors: string[]; tags: string[]};
 };
 
 /**
@@ -35,7 +35,7 @@ export const pageMetadata = ({title, description, path, article}: PageMetadataIn
     description,
     // The feed link sits here, not in the root layout: a route's `alternates` replaces the parent's instead of merging
     alternates: {canonical: path, types: {'application/rss+xml': [{url: FEED_PATH, title: `${SITE_NAME} writing`}]}},
-    openGraph: article ? {...shared, type: 'article', publishedTime: article.publishedTime} : {...shared, type: 'website'},
+    openGraph: article ? {...shared, type: 'article', ...article} : {...shared, type: 'website'},
     twitter: {card: 'summary_large_image', title: cardTitle, description},
   };
 };

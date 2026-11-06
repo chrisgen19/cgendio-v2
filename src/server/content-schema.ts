@@ -68,6 +68,8 @@ export const postSchema = z.object({
 export const postDetailSchema = postSchema.extend({
   body: z.string(),
   coverImageUrl: z.url().nullable(),
+  /** Last save, for the article's modified time. Only the page needs it, so it is not on the list shape. */
+  updatedAt: z.iso.datetime(),
 });
 
 /** A previous/next link between posts or projects. */

@@ -66,8 +66,11 @@ describe('postSchema', () => {
   });
 
   it('allows a post page without a cover, but not a cover that is not a URL', () => {
-    expect(postDetailSchema.safeParse({...post, body: '# Hi', coverImageUrl: null}).success).toBe(true);
-    expect(postDetailSchema.safeParse({...post, body: '# Hi', coverImageUrl: 'cover.png'}).success).toBe(false);
+    const page = {...post, body: '# Hi', updatedAt: '2026-10-06T09:15:00.000Z'};
+    expect(postDetailSchema.safeParse({...page, coverImageUrl: null}).success).toBe(true);
+    expect(postDetailSchema.safeParse({...page, coverImageUrl: 'cover.png'}).success).toBe(false);
+    // The page carries the last save, for the article's modified time
+    expect(postDetailSchema.safeParse({...page, coverImageUrl: null, updatedAt: undefined}).success).toBe(false);
   });
 });
 

@@ -118,7 +118,7 @@ export const toProjectDetail = (row: ProjectRow): ProjectDetail =>
 
 /** A post row as its article page shape; used by getPost and the draft preview. */
 export const toPostDetail = (row: PostRow, date: Date | null = row.publishedAt): PostDetail =>
-  postDetailSchema.parse({...postFields(row, date), body: row.body, coverImageUrl: row.coverImageUrl});
+  postDetailSchema.parse({...postFields(row, date), body: row.body, coverImageUrl: row.coverImageUrl, updatedAt: row.updatedAt.toISOString()});
 
 export const getStack = async (): Promise<StackItem[]> => {
   'use cache';

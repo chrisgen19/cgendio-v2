@@ -153,3 +153,30 @@ test('every feed item carries its full body as HTML in a CDATA section', async (
     }
   }
 });
+
+test('a post publishes full ISO article times, its author and its tags', async ({page}) => {
+  const html = (await (await page.goto('/writing/wordpress-news-october-2026'))?.text()) ?? '';
+
+  // A bare day ("2026-10-05") is what this used to send; the time matters for ordering in search and in readers
+  const published = content(html, 'property="article:published_time"');
+  expect(published).toMatch(/content="\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z"/);
+
+  const modified = content(html, 'property="article:modified_time"');
+  expect(modified).toMatch(/content="\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z"/);
+
+  expect(content(html, 'property="article:author"')).toContain('Christian Diomampo');
+  // One tag per post is the whole content model, so this is every tag rather than the first of several
+  expect(html.match(/<meta property="article:tag"[^>]*>/g)).toHaveLength(1);
+});
+
+test('the writing index has its own share card', async ({page, request}) => {
+  const html = (await (await page.goto('/writing'))?.text()) ?? '';
+  const src = content(html, 'property="og:image"').match(/content="([^"]+)"/)?.[1];
+  expect(src, 'no og:image on /writing').toBeDefined();
+
+  const image = await request.get(src ?? '');
+  expect(image.status()).toBe(200);
+  expect(image.headers()['content-type']).toContain('image/png');
+  expect(content(html, 'property="og:image:width"')).toContain('1200');
+  expect(content(html, 'property="og:image:height"')).toContain('630');
+});
