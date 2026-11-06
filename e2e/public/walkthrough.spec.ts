@@ -121,7 +121,7 @@ test.describe('on a tall desktop viewport', () => {
 
 test('the next project and contact sections follow the tour', async ({page}) => {
   await page.goto('/projects/access-hire');
-  await expect(page.getByRole('navigation', {name: 'Next project'}).getByRole('link')).toHaveAttribute('href', /^\/work\/[a-z0-9-]+$/);
+  await expect(page.getByRole('navigation', {name: 'Next project'}).getByRole('link')).toHaveAttribute('href', /^\/projects\/[a-z0-9-]+$/);
   await expect(main(page).locator('#contact')).toBeVisible();
 });
 
