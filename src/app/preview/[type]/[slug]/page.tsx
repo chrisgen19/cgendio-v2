@@ -36,7 +36,10 @@ async function Preview({params, searchParams}: Pick<PageProps<'/preview/[type]/[
       <p data-theme="light" className="m-0 bg-lime px-4 py-2 text-center font-mono text-xs text-ink">
         {content.status === 'DRAFT' ? 'Draft preview' : 'Preview'} · link valid for an hour
       </p>
-      <PageShell>{content.type === 'post' ? <PostArticle post={content.post} /> : <CaseStudyBody project={content.project} />}</PageShell>
+      {/* tracked={false}: a draft preview is an admin view behind the session check, not a public page */}
+      <PageShell tracked={false}>
+        {content.type === 'post' ? <PostArticle post={content.post} /> : <CaseStudyBody project={content.project} />}
+      </PageShell>
     </>
   );
 }
