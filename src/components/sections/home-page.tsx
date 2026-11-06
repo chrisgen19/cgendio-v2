@@ -2,6 +2,7 @@ import {SiteFooter} from '@/components/site/site-footer';
 import {SiteHeader} from '@/components/site/site-header';
 import {SkipLink} from '@/components/site/skip-link';
 import {ScrollReveal} from '@/components/ui-site/scroll-reveal';
+import {HOME_TITLE} from '@/lib/metadata';
 import {About} from './about';
 import {BlogTeaser} from './blog-teaser';
 import {ContactCta} from './contact-cta';
@@ -20,7 +21,7 @@ export function HomePage() {
       <SiteHeader overlay />
       <main id="main" tabIndex={-1} className="focus-visible:outline-none">
         {/* Inside <main> so every piece of content sits in a landmark */}
-        <h1 className="sr-only">Cgdiomampo.dev: Christian Diomampo, full-stack web developer</h1>
+        <h1 className="sr-only">{HOME_TITLE}</h1>
         <Hero />
         <StackStrip />
         <About />

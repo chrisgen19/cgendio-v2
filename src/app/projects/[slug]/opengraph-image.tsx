@@ -1,8 +1,9 @@
 import {notFound} from 'next/navigation';
 import {OG_SIZE, ogCard} from '@/app/_og/og-card';
+import {SITE_NAME} from '@/lib/metadata';
 import {getProject, getProjectSlugs} from '@/server/content';
 
-export const alt = 'Cgdiomampo.dev case study';
+export const alt = `${SITE_NAME} case study`;
 export const size = OG_SIZE;
 export const contentType = 'image/png';
 

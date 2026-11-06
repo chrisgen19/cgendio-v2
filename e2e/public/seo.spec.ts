@@ -7,6 +7,12 @@ import {expect, test} from '@playwright/test';
 
 const PAGES = ['/', '/writing', '/writing/wordpress-news-october-2026', '/projects/access-hire'];
 
+/*
+ * The brand is the person's name, not the domain (#81 Phase A). People search for a name, and the previous site ranks
+ * on one, so every place that names the site or its author has to agree.
+ */
+const BRAND = 'Chris Diomampo';
+
 const content = (html: string, selector: string) => html.match(new RegExp(`<meta[^>]*${selector}[^>]*>`))?.[0] ?? '';
 
 for (const path of PAGES) {
@@ -78,13 +84,14 @@ const graph = async (html: string) => {
 
 const node = (nodes: Record<string, unknown>[], type: string) => nodes.find((n) => n['@type'] === type);
 
-test('the home page describes the site, the profile and Christian in one graph', async ({page}) => {
+test('the home page describes the site, the profile and the person in one graph', async ({page}) => {
   const nodes = await graph((await (await page.goto('/'))?.text()) ?? '');
   expect(nodes.map((n) => n['@type'])).toEqual(['WebSite', 'ProfilePage', 'Person']);
 
   const person = node(nodes, 'Person');
-  expect(person?.name).toBe('Christian Diomampo');
-  expect(person?.alternateName).toBe('Chris Diomampo');
+  // The brand name leads and the fuller form is the alternate, so a search for either finds the same person
+  expect(person?.name).toBe('Chris Diomampo');
+  expect(person?.alternateName).toBe('Christian Diomampo');
   // knowsAbout is the stack strip, so the graph never claims a tool the site doesn't show
   expect(person?.knowsAbout).toEqual(expect.arrayContaining(['Next.js', 'WordPress', 'PostgreSQL']));
 
@@ -121,9 +128,9 @@ test('a post and a case study each carry a breadcrumb trail ending on themselves
 test('the feed declares dc, and carries a copyright, docs and stable guids', async ({request}) => {
   const body = await (await request.get('/feed.xml')).text();
   expect(body).toContain('xmlns:dc="http://purl.org/dc/elements/1.1/"');
-  expect(body).toMatch(/<copyright>© \d{4} Christian Diomampo<\/copyright>/);
+  expect(body).toMatch(new RegExp(`<copyright>© \\d{4} ${BRAND}</copyright>`));
   expect(body).toContain('<docs>https://validator.w3.org/feed/docs/rss2.html</docs>');
-  expect(body).toContain('<dc:creator>Christian Diomampo</dc:creator>');
+  expect(body).toContain(`<dc:creator>${BRAND}</dc:creator>`);
   // A guid is an identity, not an address: isPermaLink stays false so a moved post is not re-delivered
   expect(body).toContain('<guid isPermaLink="false">');
   expect(body).not.toContain('isPermaLink="true"');
@@ -164,7 +171,7 @@ test('a post publishes full ISO article times, its author and its tags', async (
   const modified = content(html, 'property="article:modified_time"');
   expect(modified).toMatch(/content="\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z"/);
 
-  expect(content(html, 'property="article:author"')).toContain('Christian Diomampo');
+  expect(content(html, 'property="article:author"')).toContain(BRAND);
   // One tag per post is the whole content model, so this is every tag rather than the first of several
   expect(html.match(/<meta property="article:tag"[^>]*>/g)).toHaveLength(1);
 });
@@ -180,12 +187,6 @@ test('the writing index has its own share card', async ({page, request}) => {
   expect(content(html, 'property="og:image:width"')).toContain('1200');
   expect(content(html, 'property="og:image:height"')).toContain('630');
 });
-
-/*
- * The brand is the person's name, not the domain (#81 Phase A). People search for a name, and the previous site ranks
- * on one, so these places have to agree.
- */
-const BRAND = 'Chris Diomampo';
 
 test('the brand is the name in the head, not the domain', async ({page}) => {
   const html = (await (await page.goto('/'))?.text()) ?? '';
@@ -215,4 +216,29 @@ test('the feed channel and the WebSite node carry the name, with the domain kept
   expect(site?.name).toBe(BRAND);
   // The domain stops being the brand, so it stays discoverable here instead
   expect(site?.alternateName).toBe('cgdiomampo.dev');
+});
+
+test('the displayed name, the author lines and the hidden h1 all use the brand name', async ({page, request}) => {
+  const html = (await (await page.goto('/'))?.text()) ?? '';
+  // The one h1 on the home page, visually hidden, matching the title
+  expect(html).toContain(`<h1 class="sr-only">Chris Diomampo · Senior full-stack developer, Next.js and WordPress</h1>`);
+  await expect(page.getByRole('heading', {level: 1})).toHaveText('Chris Diomampo · Senior full-stack developer, Next.js and WordPress');
+
+  // about.name drives the contact card, the About panel, the RSS author and the article author
+  await expect(page.locator('#contact')).toContainText(BRAND);
+  expect(await (await request.get('/feed.xml')).text()).toContain(`<dc:creator>${BRAND}</dc:creator>`);
+
+  const post = (await (await page.goto('/writing/wordpress-news-october-2026'))?.text()) ?? '';
+  expect(content(post, 'property="article:author"')).toContain(`content="${BRAND}"`);
+});
+
+test('the share card alt texts use the brand name', async ({page}) => {
+  for (const [path, suffix] of [
+    ['/writing', 'writing'],
+    ['/writing/wordpress-news-october-2026', 'blog post'],
+    ['/projects/access-hire', 'case study'],
+  ]) {
+    const html = (await (await page.goto(path ?? '/'))?.text()) ?? '';
+    expect(content(html, 'property="og:image:alt"'), path).toContain(`${BRAND} ${suffix}`);
+  }
 });

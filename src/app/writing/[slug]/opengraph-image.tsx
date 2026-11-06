@@ -1,8 +1,9 @@
 import {notFound} from 'next/navigation';
 import {OG_SIZE, ogCard} from '@/app/_og/og-card';
+import {SITE_NAME} from '@/lib/metadata';
 import {getPost, getPostSlugs} from '@/server/content';
 
-export const alt = 'Cgdiomampo.dev blog post';
+export const alt = `${SITE_NAME} blog post`;
 export const size = OG_SIZE;
 export const contentType = 'image/png';
 

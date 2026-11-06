@@ -11,8 +11,8 @@ export const FEED_PATH = '/feed.xml';
 export const SITE_DESCRIPTION = 'I take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.';
 /** Open Graph wants a language_TERRITORY code, not a bare language, and the previous site published en_US (#81). */
 export const OG_LOCALE = 'en_US';
-/** The name the previous site published under, kept as the Person's alternateName so searches for it still land (#81). */
-export const PERSON_ALTERNATE_NAME = 'Chris Diomampo';
+/** The fuller form of the name. The brand is the short one, so this is the Person schema's alternateName (#81). */
+export const PERSON_ALTERNATE_NAME = 'Christian Diomampo';
 /** One word for the writing section, used by its title, its Blog node and its breadcrumb. "Blog" or "Writing" is #85. */
 export const BLOG_TITLE = 'Blog';
 /** Word for word the title the previous site ranks on, "Senior" included. */
