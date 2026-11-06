@@ -1,6 +1,7 @@
 'use client';
 
 import {ErrorPanel} from '@/components/site/error-panel';
+import {SITE_NAME} from '@/lib/metadata';
 import {body, display, mono} from './fonts';
 import './globals.css';
 
@@ -9,7 +10,7 @@ export default function GlobalError({retry}: {error: unknown; retry: () => void}
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
-        <title>Something went wrong · Cgdiomampo.dev</title>
+        <title>{`Something went wrong · ${SITE_NAME}`}</title>
         <ErrorPanel onRetry={retry} />
       </body>
     </html>

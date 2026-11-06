@@ -176,17 +176,26 @@ test('a post publishes full ISO article times, its author and its tags', async (
   expect(html.match(/<meta property="article:tag"[^>]*>/g)).toHaveLength(1);
 });
 
-test('the writing index has its own share card', async ({page, request}) => {
-  const html = (await (await page.goto('/writing'))?.text()) ?? '';
-  const src = content(html, 'property="og:image"').match(/content="([^"]+)"/)?.[1];
-  expect(src, 'no og:image on /writing').toBeDefined();
+/*
+ * Every page that uses the generated card (src/app/_og/og-card.tsx), rather than the home page's static poster. The
+ * card is a PNG, so this checks that each one renders at the right size; the wordmark drawn on it is guarded in
+ * src/app/_og/og-card.test.ts, which an image fetch cannot see.
+ */
+const CARD_PAGES = ['/writing', '/writing/wordpress-news-october-2026', '/projects/access-hire'];
 
-  const image = await request.get(src ?? '');
-  expect(image.status()).toBe(200);
-  expect(image.headers()['content-type']).toContain('image/png');
-  expect(content(html, 'property="og:image:width"')).toContain('1200');
-  expect(content(html, 'property="og:image:height"')).toContain('630');
-});
+for (const path of CARD_PAGES) {
+  test(`${path} has a share card of its own`, async ({page, request}) => {
+    const html = (await (await page.goto(path))?.text()) ?? '';
+    const src = content(html, 'property="og:image"').match(/content="([^"]+)"/)?.[1];
+    expect(src, `no og:image on ${path}`).toBeDefined();
+
+    const image = await request.get(src ?? '');
+    expect(image.status()).toBe(200);
+    expect(image.headers()['content-type']).toContain('image/png');
+    expect(content(html, 'property="og:image:width"')).toContain('1200');
+    expect(content(html, 'property="og:image:height"')).toContain('630');
+  });
+}
 
 test('the brand is the name in the head, not the domain', async ({page}) => {
   const html = (await (await page.goto('/'))?.text()) ?? '';

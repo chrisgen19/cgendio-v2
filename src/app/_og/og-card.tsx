@@ -1,4 +1,5 @@
 import {ImageResponse} from 'next/og';
+import {SITE_NAME} from '@/lib/metadata';
 import {OG_FONTS} from './fonts';
 
 /*
@@ -86,7 +87,7 @@ export const ogCard = ({eyebrow, title}: OgCardProps) => {
         >
           cg
         </div>
-        <div style={{display: 'flex', fontFamily: 'Geist', fontSize: 30}}>cgdiomampo.dev</div>
+        <div style={{display: 'flex', fontFamily: 'Geist', fontSize: 30}}>{SITE_NAME}</div>
       </div>
     </div>,
     {
