@@ -44,8 +44,11 @@ const mailEnvSchema = z.object({
 });
 
 /**
- * Google Analytics. Its own schema, so a malformed id can only turn analytics off rather than take a page down, and
- * unset simply means no tag. The id goes into an inline script, so only the G-XXXXXXXXXX shape is accepted (#81).
+ * Google Analytics. The id goes into an inline script, so only the G-XXXXXXXXXX shape is accepted (#81).
+ *
+ * Unlike the other schemas this one never throws, because `GoogleAnalytics` reads it while rendering every public
+ * page: a typo in an optional setting must not be able to take the site down. A malformed id turns analytics off and
+ * is logged once per process instead. (The previous site threw here, but it only read the value at build time.)
  */
 const analyticsEnvSchema = z.object({
   GA_MEASUREMENT_ID: z.preprocess(
@@ -88,4 +91,12 @@ export const authEnv = lazy((): AuthEnv => authEnvSchema.parse(process.env));
 export const r2Env = lazy((): R2Env => r2EnvSchema.parse(process.env));
 export const mailEnv = lazy((): MailEnv => mailEnvSchema.parse(process.env));
 export const siteEnv = lazy((): SiteEnv => siteEnvSchema.parse(process.env));
-export const analyticsEnv = lazy((): AnalyticsEnv => analyticsEnvSchema.parse(process.env));
+/** Exported for its test: `analyticsEnv` caches, so the fallback cannot be exercised through the accessor. */
+export const parseAnalyticsEnv = (env: Record<string, string | undefined>): AnalyticsEnv => {
+  const parsed = analyticsEnvSchema.safeParse(env);
+  if (parsed.success) return parsed.data;
+  console.warn(`Ignoring GA_MEASUREMENT_ID: ${JSON.stringify(env.GA_MEASUREMENT_ID)} is not a G-XXXXXXXXXX id. Analytics is off.`);
+  return {GA_MEASUREMENT_ID: undefined};
+};
+
+export const analyticsEnv = lazy((): AnalyticsEnv => parseAnalyticsEnv(process.env));
