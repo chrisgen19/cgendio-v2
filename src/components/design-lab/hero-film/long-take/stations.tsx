@@ -55,6 +55,7 @@ export const Section: React.FC<SectionProps> = ({rect, n, label, heading, compac
           lineHeight: 1.02,
           letterSpacing: '-0.035em',
           color: theme.ink,
+          textWrap: 'balance',
         }}
       >
         {heading}
@@ -65,9 +66,9 @@ export const Section: React.FC<SectionProps> = ({rect, n, label, heading, compac
 );
 
 const PERSONAS = [
-  {name: 'Recruiter', need: 'Wants proof of skill, fast.', bg: theme.lime, fg: theme.onLime, rot: -1.4},
-  {name: 'Client', need: 'Wants it live, on brand and on budget.', bg: theme.tint, fg: theme.ink, rot: 1.1},
-  {name: 'Visitor', need: 'Wants it to load and make sense.', bg: theme.surface, fg: theme.ink, rot: -0.7},
+  {name: 'Recruiter', need: 'Wants proof of skill, fast.', bg: theme.lime, fg: theme.onLime, rot: -1},
+  {name: 'Client', need: 'Wants it live, on brand and on budget.', bg: theme.tint, fg: theme.ink, rot: 0.8},
+  {name: 'Visitor', need: 'Wants it to load and make sense.', bg: theme.surface, fg: theme.ink, rot: -0.6},
 ];
 const RESEARCH_TAGS = ['Goals', 'Audiences', 'Competitors', 'Analytics'];
 
@@ -81,15 +82,25 @@ export const ResearchBody: React.FC<{cut: CutSpec}> = ({cut}) => {
           <div key={p.name} style={{position: 'relative', height: h}}>
             <Fade at={cut.t.s1 + i * 5} style={{position: 'absolute', inset: 0, borderRadius: 8, border: `2px dashed ${theme.line}`}} />
             <Arrive at={cut.t.s1 + i * 5} y={18} style={{position: 'absolute', inset: 0}}>
+              {/* Only the paper is tilted: rotated text renders with uneven baselines at every camera scale */}
               <div
+                aria-hidden
                 style={{
-                  height: '100%',
-                  boxSizing: 'border-box',
+                  position: 'absolute',
+                  inset: 0,
                   rotate: `${p.rot}deg`,
                   borderRadius: 8,
                   background: p.bg,
-                  color: p.fg,
                   border: p.bg === theme.surface ? `2px solid ${theme.line}` : 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+              <div
+                style={{
+                  position: 'relative',
+                  height: '100%',
+                  boxSizing: 'border-box',
+                  color: p.fg,
                   padding: cut.compact ? '12px 20px' : '14px 22px',
                   display: 'flex',
                   flexDirection: 'column',

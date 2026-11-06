@@ -15,7 +15,7 @@ export function LongTakeFilm() {
       desktop={{component: Desktop, durationInFrames: DESKTOP.duration}}
       mobile={{component: Phone, durationInFrames: PHONE.duration}}
       label="Hero film: the long take"
-      description="One continuous camera move across a working board. It opens on my name and the line: I design, build and ship websites that work. The camera visits research notes on who the site is for (recruiters, clients and visitors), a wireframe that fills into a styled page, and the same page live in a browser after a Vercel deploy with launch checks passing. It ends on the whole board with a link to see my work."
+      description="One continuous camera move across a working board. It opens on my name and the line: I design, build and ship websites that work. The camera visits research notes on who the site is for (recruiters, clients and visitors), a wireframe that fills into a styled page, and the same page live in a browser after a Vercel deploy with launch checks passing. It ends back on my name and that line, beside a link to see my work."
     />
   );
 }

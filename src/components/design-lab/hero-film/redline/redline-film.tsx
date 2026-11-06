@@ -73,7 +73,7 @@ const Film: React.FC<LabFilmProps & {T: Timing}> = ({worksHref, onReplay, T}) =>
       <ShipLayer L={L} T={T} />
       <CodeLayer L={L} T={T} />
       <CardTrack L={L} T={T}>
-        <ProjectCard geo={L.card} href={worksHref} />
+        <ProjectCard geo={L.card} href={worksHref} liveAt={T.finalIn} />
       </CardTrack>
       <DesignLayer L={L} T={T} />
       <ClaimColumn L={L} T={T} />

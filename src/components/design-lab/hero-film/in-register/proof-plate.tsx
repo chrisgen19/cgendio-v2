@@ -3,8 +3,6 @@ import styles from './in-register.module.css';
 /** The four process inks. Key (black) is the registration reference: it never moves, the other three slide onto it. */
 export type Ink = 'c' | 'm' | 'y' | 'k';
 
-const SERVICES = ['WordPress', 'WooCommerce', 'Next.js', 'React'];
-
 /** The three work cards: each block is an overprint of two inks, so misregistration shows as colour fringes. */
 const CARDS = [
   {label: 'WordPress', inks: 'cm', art: 'article'},
@@ -78,29 +76,25 @@ function CardArt({kind, on}: {kind: (typeof CARDS)[number]['art']; on: boolean})
  * each element only takes ink on the plates listed for it. The key plate holds the real, readable DOM text and link;
  * the others are hidden from assistive tech and inert.
  */
-export function ProofPlate({ink}: {ink: Ink}) {
+export function ProofPlate({ink, worksHref}: {ink: Ink; worksHref: string}) {
   const isKey = ink === 'k';
   const on = (inks: string) => inks.includes(ink);
   const text = (inks: string) => (on(inks) ? styles.ink : styles.blank);
 
   return (
     <div className={styles.plate} data-ink={ink} aria-hidden={isKey ? undefined : true} inert={isKey ? undefined : true}>
-      <Marks ink={ink} />
-      <p className={`${styles.slug} ${text('k')}`}>
-        <span>Christian Diomampo</span>
-        <span>Home page, hero</span>
-        <span>Press proof</span>
-      </p>
+      <span className={styles.marks}>
+        <Marks ink={ink} />
+        <span className={`${styles.slug} ${text('k')}`}>
+          <span>Christian Diomampo</span>
+          <span>Home page, hero</span>
+          <span>Press proof</span>
+        </span>
+      </span>
 
       <div className={styles.trim}>
-        <div className={styles.nav}>
-          <span className={`${styles.name} ${text('k')}`}>Christian Diomampo</span>
-          <span className={`${styles.services} ${text('k')}`}>
-            {SERVICES.map((service) => (
-              <span key={service}>{service}</span>
-            ))}
-          </span>
-        </div>
+        {/* A printed job label, not a navigation: the real site header sits above the hero */}
+        <p className={`${styles.label} ${text('k')}`}>Christian Diomampo</p>
 
         {/* Rich black: printed on all four plates, so a misregistered plate shows as a coloured fringe */}
         <p className={`${styles.headline} ${text('cmyk')}`}>I design, build &amp; ship websites that work.</p>
@@ -111,7 +105,7 @@ export function ProofPlate({ink}: {ink: Ink}) {
             them.
           </p>
           {isKey ? (
-            <a href="#work" className={styles.cta}>
+            <a href={worksHref} className={styles.cta}>
               See my work
             </a>
           ) : (

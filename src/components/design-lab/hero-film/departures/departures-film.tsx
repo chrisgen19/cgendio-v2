@@ -18,7 +18,7 @@ export function DeparturesFilm() {
       desktop={{component: DeparturesDesktop, durationInFrames: DESKTOP_DURATION}}
       mobile={{component: DeparturesMobile, durationInFrames: MOBILE_DURATION}}
       label="Hero film: departures board"
-      description="A split-flap departures board. It flaps in my name, Christian Diomampo, then lists what I build: a WooCommerce store, a Next.js web app, a WordPress theme and a landing page. Each status rolls from idea to design, build and live. The board then re-flaps into: I design, build and ship websites that work. See my work."
+      description="A split-flap departures board. It flaps in my name, Christian Diomampo, and the line: I design, build and ship websites that work. Beneath it, what I build rolls in: a WooCommerce store, a Next.js web app, a WordPress theme and a landing page, each moving from idea to design, build and live. A last row reads See my work, boarding."
       hudStyle={HUD}
       stageBackground="var(--dep-stage)"
     />

@@ -111,108 +111,118 @@ export type Column = {label: string; start: number; width: number};
 
 export type CutScript = {
   durationInFrames: number;
+  /** Columns of the build grid */
   cols: number;
-  rows: number;
   nameCols: number;
+  claimCols: number;
+  /** Header rows: my name, then the claim on the larger flaps, both settled in the first ~2s */
   name: Track[][];
+  claim: Track[][];
+  /** The builds rolling through the pipeline, then the call to the gate on the last row */
   board: Track[][];
   columns: Column[];
-  /** Frames for the painted (non-flap) parts. */
-  cues: {domainIn: number; headsIn: number; headsOut: number; ctaRow: number; ctaAt: number; ledeIn: number; footerIn: number};
+  /** Frames for the painted (non-flap) parts, and where the call to the gate sits. */
+  cues: {domainIn: number; headsIn: number; ctaRow: number; ctaAt: number; ctaCols: number; ledeIn: number; footerIn: number};
 };
 
 const STATUSES = ['IDEA', 'DESIGN', 'BUILD', 'LIVE'] as const;
+const CTA = 'See my work';
 
 const desktopScript = (): CutScript => {
-  const cols = 31;
   const route = {start: 0, width: 18};
   const status = {start: 19, width: 8};
-  const gate = {start: 28, width: 3};
-  const builds = [
-    ['WooCommerce store', 'A1'],
-    ['Next.js web app', 'A2'],
-    ['WordPress theme', 'B1'],
-    ['Landing page', 'B2'],
-  ] as const;
+  const cols = status.start + status.width;
+  const builds = ['WooCommerce store', 'Next.js web app', 'WordPress theme', 'Landing page'];
 
   const name = new BoardWriter(1, 18);
-  name.write(0, 0, 'Christian Diomampo', 6);
+  name.write(0, 0, 'Christian Diomampo', 4);
 
-  const board = new BoardWriter(4, cols);
-  builds.forEach(([what, g], r) => {
-    const at = 46 + r * 8;
+  // The claim is the headline: two rows of larger flaps, readable by ~2s
+  const claimCols = 22;
+  const claim = new BoardWriter(2, claimCols);
+  claim.write(0, 0, 'I design, build & ship', 12, {width: claimCols});
+  claim.write(1, 0, 'websites that work.', 18, {width: claimCols});
+
+  const ctaRow = builds.length;
+  const board = new BoardWriter(builds.length + 1, cols);
+  builds.forEach((what, r) => {
+    const at = 62 + r * 7;
     board.write(r, route.start, what, at, {width: route.width});
     board.write(r, status.start, STATUSES[0], at + 19, {width: status.width});
-    board.write(r, gate.start, g, at + 28, {width: gate.width});
   });
   // Every build moves through the pipeline, one row after another
   STATUSES.slice(1).forEach((s, step) => {
     for (let r = 0; r < builds.length; r++) {
-      board.write(r, status.start, s, 118 + step * 34 + r * 5, {width: status.width, tone: s === 'LIVE' ? 'live' : 'plain', spin: 2});
+      board.write(r, status.start, s, 120 + step * 30 + r * 5, {width: status.width, tone: s === 'LIVE' ? 'live' : 'plain', spin: 2});
     }
   });
-  // The whole board re-flaps into the claim and the call to the gate
-  const finale = 258;
-  board.write(0, 0, 'I design, build & ship', finale, {width: cols});
-  board.write(1, 0, 'websites that work.', finale + 6, {width: cols});
-  board.write(2, 0, '', finale + 12, {width: cols});
-  board.write(3, 0, `${'See my work'.padEnd(route.width + 1)}${'Boarding'.padEnd(status.width + 1)}`, finale + 18, {width: cols, tone: 'cta'});
-
-  return {
-    durationInFrames: 392,
-    cols,
-    rows: 4,
-    nameCols: 18,
-    name: name.compile(),
-    board: board.compile(),
-    columns: [
-      {label: 'What I build', ...route},
-      {label: 'Status', ...status},
-      {label: 'Gate', ...gate},
-    ],
-    cues: {domainIn: 34, headsIn: 40, headsOut: finale - 10, ctaRow: 3, ctaAt: finale + 18, ledeIn: 124, footerIn: finale + 72},
-  };
-};
-
-const mobileScript = (): CutScript => {
-  const cols = 19;
-  const route = {start: 0, width: 12};
-  const status = {start: 13, width: 6};
-  const builds = ['WooCommerce', 'Next.js app', 'WordPress', 'Landing page'];
-
-  const name = new BoardWriter(2, 9);
-  name.write(0, 0, 'Christian', 6, {width: 9});
-  name.write(1, 0, 'Diomampo', 14, {width: 9});
-
-  const board = new BoardWriter(4, cols);
-  builds.forEach((what, r) => {
-    const at = 40 + r * 7;
-    board.write(r, route.start, what, at, {width: route.width});
-    board.write(r, status.start, STATUSES[0], at + 12, {width: status.width});
-  });
-  STATUSES.slice(1).forEach((s, step) => {
-    for (let r = 0; r < builds.length; r++) {
-      board.write(r, status.start, s, 100 + step * 28 + r * 5, {width: status.width, tone: s === 'LIVE' ? 'live' : 'plain', spin: 2});
-    }
-  });
-  const finale = 222;
-  board.write(0, 0, 'I design, build', finale, {width: cols});
-  board.write(1, 0, '& ship websites', finale + 5, {width: cols});
-  board.write(2, 0, 'that work.', finale + 10, {width: cols});
-  board.write(3, 0, 'See my work', finale + 15, {width: cols, tone: 'cta'});
+  // The call to the gate: only the label and one blank flap either side turn yellow
+  const ctaAt = 224;
+  const ctaCols = CTA.length + 2;
+  board.write(ctaRow, 0, ` ${CTA} `, ctaAt, {width: ctaCols, tone: 'cta'});
+  board.write(ctaRow, status.start, 'Boarding', ctaAt + 12, {width: status.width});
 
   return {
     durationInFrames: 330,
     cols,
-    rows: 4,
-    nameCols: 9,
+    nameCols: 18,
+    claimCols,
     name: name.compile(),
+    claim: claim.compile(),
     board: board.compile(),
     columns: [
       {label: 'What I build', ...route},
       {label: 'Status', ...status},
     ],
-    cues: {domainIn: 30, headsIn: 36, headsOut: finale - 10, ctaRow: 3, ctaAt: finale + 15, ledeIn: 104, footerIn: finale + 60},
+    cues: {domainIn: 30, headsIn: 54, ctaRow, ctaAt, ctaCols, ledeIn: 78, footerIn: ctaAt + 30},
+  };
+};
+
+const mobileScript = (): CutScript => {
+  const route = {start: 0, width: 9};
+  const status = {start: 10, width: 6};
+  const cols = status.start + status.width;
+  const builds = ['Woo store', 'Next app', 'WP theme', 'One-pager'];
+
+  const name = new BoardWriter(2, 9);
+  name.write(0, 0, 'Christian', 4, {width: 9});
+  name.write(1, 0, 'Diomampo', 10, {width: 9});
+
+  const claimCols = 15;
+  const claim = new BoardWriter(3, claimCols);
+  claim.write(0, 0, 'I design, build', 10, {width: claimCols});
+  claim.write(1, 0, '& ship websites', 15, {width: claimCols});
+  claim.write(2, 0, 'that work.', 20, {width: claimCols});
+
+  const ctaRow = builds.length;
+  const board = new BoardWriter(builds.length + 1, cols);
+  builds.forEach((what, r) => {
+    const at = 58 + r * 6;
+    board.write(r, route.start, what, at, {width: route.width});
+    board.write(r, status.start, STATUSES[0], at + 10, {width: status.width});
+  });
+  STATUSES.slice(1).forEach((s, step) => {
+    for (let r = 0; r < builds.length; r++) {
+      board.write(r, status.start, s, 100 + step * 26 + r * 4, {width: status.width, tone: s === 'LIVE' ? 'live' : 'plain', spin: 2});
+    }
+  });
+  const ctaAt = 192;
+  const ctaCols = CTA.length + 2;
+  board.write(ctaRow, 0, ` ${CTA} `, ctaAt, {width: ctaCols, tone: 'cta'});
+
+  return {
+    durationInFrames: 300,
+    cols,
+    nameCols: 9,
+    claimCols,
+    name: name.compile(),
+    claim: claim.compile(),
+    board: board.compile(),
+    columns: [
+      {label: 'What I build', ...route},
+      {label: 'Status', ...status},
+    ],
+    cues: {domainIn: 28, headsIn: 50, ctaRow, ctaAt, ctaCols, ledeIn: 76, footerIn: ctaAt + 28},
   };
 };
 

@@ -15,8 +15,8 @@ export type Sizes = {
   row: number;
 };
 
-export const DESKTOP_SIZES: Sizes = {title: 46, body: 15, small: 14, mono: 13, claim: 26, diff: 14, diffLine: 23, row: 28};
-export const MOBILE_SIZES: Sizes = {title: 30, body: 14, small: 13, mono: 11.5, claim: 21, diff: 11.5, diffLine: 20, row: 30};
+export const DESKTOP_SIZES: Sizes = {title: 28, body: 15, small: 14, mono: 13, claim: 46, diff: 14, diffLine: 21, row: 26};
+export const MOBILE_SIZES: Sizes = {title: 20, body: 14, small: 13, mono: 11.5, claim: 30, diff: 11.5, diffLine: 20, row: 30};
 
 export type Cut = {t: CutTiming; g: Geometry; sz: Sizes};
 

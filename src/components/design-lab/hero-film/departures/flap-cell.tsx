@@ -3,16 +3,29 @@ import {memo} from 'react';
 import {ARRIVE, LEAVE} from '../shared/motion';
 import type {Tone} from './board-script';
 
-/** Gap between the two flap halves, where the hinge sits. */
-const HINGE = 1;
+/**
+ * The call to the gate reads its colours through `--dep-cta-now` / `--dep-cta-ink-now` when the board sets them, so
+ * hovering or focusing the link can swap the tiles without re-rendering the film.
+ */
+const CTA_FACE = 'var(--dep-cta-now, var(--dep-cta))';
+const CTA_INK = 'var(--dep-cta-ink-now, var(--dep-cta-ink))';
 
-const FACE: Record<Tone, string> = {plain: 'var(--dep-face)', live: 'var(--dep-live)', cta: 'var(--dep-cta)'};
-const INK: Record<Tone, string> = {plain: 'var(--dep-ink)', live: 'var(--dep-live-ink)', cta: 'var(--dep-cta-ink)'};
+const FACE: Record<Tone, string> = {plain: 'var(--dep-face)', live: 'var(--dep-live)', cta: CTA_FACE};
+const INK: Record<Tone, string> = {plain: 'var(--dep-ink)', live: 'var(--dep-live-ink)', cta: CTA_INK};
 /** The lower flap sits slightly in shadow, as on a real unit. */
 const LOW: Record<Tone, string> = {
   plain: 'color-mix(in srgb, var(--dep-face) 93%, var(--dep-shade))',
   live: 'color-mix(in srgb, var(--dep-live) 90%, var(--dep-shade))',
-  cta: 'color-mix(in srgb, var(--dep-cta) 90%, var(--dep-shade))',
+  cta: `color-mix(in srgb, ${CTA_FACE} 90%, var(--dep-shade))`,
+};
+/**
+ * The hinge: a 1px low-contrast line painted on the face behind the glyph (not a gap to the housing), so the strokes
+ * stay whole and small phone flaps never read as struck through.
+ */
+const HINGE: Record<Tone, string> = {
+  plain: 'color-mix(in srgb, var(--dep-face) 78%, var(--dep-shade))',
+  live: 'color-mix(in srgb, var(--dep-live) 78%, var(--dep-shade))',
+  cta: `color-mix(in srgb, ${CTA_FACE} 78%, var(--dep-shade))`,
 };
 
 type HalfProps = {
@@ -29,7 +42,8 @@ type HalfProps = {
 };
 
 const Half: React.FC<HalfProps> = ({ch, tone, part, w, h, fontSize, angle = 0, shade = 0}) => {
-  const half = (h - HINGE) / 2;
+  // Whole pixels, so the halves meet without a sub-pixel seam showing the housing through
+  const split = Math.floor(h / 2);
   const top = part === 'top';
   const radius = Math.max(2, Math.round(w * 0.08));
   return (
@@ -37,11 +51,11 @@ const Half: React.FC<HalfProps> = ({ch, tone, part, w, h, fontSize, angle = 0, s
       style={{
         position: 'absolute',
         left: 0,
-        top: top ? 0 : half + HINGE,
+        top: top ? 0 : split,
         width: w,
-        height: half,
+        height: top ? split : h - split,
         overflow: 'hidden',
-        background: top ? FACE[tone] : LOW[tone],
+        background: top ? `linear-gradient(to top, ${HINGE[tone]} 1px, ${FACE[tone]} 1px)` : LOW[tone],
         borderRadius: top ? `${radius}px ${radius}px 0 0` : `0 0 ${radius}px ${radius}px`,
         transformOrigin: top ? '50% 100%' : '50% 0%',
         rotate: angle === 0 ? undefined : `x ${angle}deg`,
@@ -53,7 +67,7 @@ const Half: React.FC<HalfProps> = ({ch, tone, part, w, h, fontSize, angle = 0, s
           position: 'absolute',
           left: 0,
           // Barlow's caps sit a little low in the em box: lift them so the hinge cuts them through the middle
-          top: (top ? 0 : -(half + HINGE)) - Math.round(h * 0.04),
+          top: (top ? 0 : -split) - Math.round(h * 0.04),
           width: w,
           height: h,
           lineHeight: `${h}px`,

@@ -1,5 +1,3 @@
-'use client';
-
 import type React from 'react';
 import {useCurrentFrame} from 'remotion';
 import {theme} from '@/components/hero-film/theme';
@@ -38,7 +36,7 @@ const DesktopPage: React.FC = () => {
   const {thumb} = g;
   return (
     <DesignBox>
-      <div style={{position: 'absolute', left: DESK.padX, right: DESK.padX, top: 30}}>
+      <div style={{position: 'absolute', left: DESK.padX, right: DESK.padX, top: 28}}>
         <PrHeader />
       </div>
       <Enter
@@ -99,7 +97,7 @@ const PhonePage: React.FC = () => {
         <div style={{position: 'absolute', left: PHONE.padX, right: PHONE.padX, top: 26}}>
           <PrHeader />
         </div>
-        <div style={{position: 'absolute', left: PHONE.padX, right: PHONE.padX, top: 196, display: 'flex', flexDirection: 'column', gap: 12}}>
+        <div style={{position: 'absolute', left: PHONE.padX, right: PHONE.padX, top: 180, display: 'flex', flexDirection: 'column', gap: 12}}>
           <Description />
           <Diff />
         </div>

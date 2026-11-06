@@ -22,7 +22,9 @@ export type CardGeo = {
 export type CardPart = 'card' | 'thumb' | 'meta' | 'title' | 'tags' | 'button';
 
 export type Measure = {from: Point; to: Point; label: string; marked?: boolean};
-export type Chip = {label: string; swatch?: string; at: Point; side: 'left' | 'right'; anchor: Point};
+/** A colour chip names its token only; the swatch is resolved from the theme, so it follows dark mode. */
+export type ChipToken = 'lime' | 'accent' | 'ink';
+export type Chip = {label: string; swatch?: ChipToken; at: Point; side: 'left' | 'right'; anchor: Point};
 
 export type RedlineLayout = {
   portrait: boolean;
@@ -76,6 +78,18 @@ export const rectAt = (pose: Pose, card: CardGeo, r: Rect = {x: 0, y: 0, w: card
 
 export const partRect = (card: CardGeo, part: CardPart): Rect => (part === 'card' ? {x: 0, y: 0, w: card.w, h: card.h} : card[part]);
 
+/** The centre of the lime highlighter bar inside the thumbnail (see Thumb in project-card.tsx). */
+const thumbLime = (card: CardGeo): Point => {
+  const u = card.thumb.h / 196;
+  return {x: card.thumb.x + 60 * u + card.thumb.w * 0.095, y: card.thumb.y + 95.5 * u};
+};
+
+/** The padding redline runs through the gap between the title and the tags, so its ticks never touch a glyph. */
+const padY = (card: CardGeo) => (card.title.y + card.title.h + card.tags.y) / 2;
+
+/** Just past the end of 'Selected work' (Bricolage 700 at 28px is about 186px wide). */
+const titleEnd = (card: CardGeo) => card.pad + 204;
+
 const desktopLayout = (width: number, height: number): RedlineLayout => {
   const padX = width < 1200 ? 40 : 56;
   const padTop = 104;
@@ -96,22 +110,16 @@ const desktopLayout = (width: number, height: number): RedlineLayout => {
   const leftX = dRect.x - 40;
   const rightX = dRect.x + dRect.w + 52;
   const measures: Measure[] = [
-    {from: d(0, card.title.y + 14), to: d(card.pad, card.title.y + 14), label: String(card.pad), marked: true},
+    {from: d(0, padY(card)), to: d(card.pad, padY(card)), label: String(card.pad), marked: true},
     {from: d(card.w - 70, card.thumb.y + card.thumb.h), to: d(card.w - 70, card.meta.y), label: '20'},
     {from: d(card.w + 16, card.button.y), to: d(card.w + 16, card.button.y + card.button.h), label: String(card.button.h)},
   ];
   const chips: Chip[] = [
-    {label: 'lime #D7FF3D', swatch: '#D7FF3D', side: 'left', at: {x: leftX, y: d(0, 70).y}, anchor: d(card.thumb.x + card.thumb.w * 0.2, 70)},
-    {label: 'accent #3B2BFF', swatch: '#3B2BFF', side: 'left', at: {x: leftX, y: d(0, 170).y}, anchor: d(card.pad - 5, card.meta.y + 7)},
-    {
-      label: 'ink #0D0E12',
-      swatch: '#0D0E12',
-      side: 'left',
-      at: {x: leftX, y: d(0, card.button.y + 26).y},
-      anchor: d(card.pad + 60, card.button.y + 26),
-    },
+    {label: 'lime', swatch: 'lime', side: 'left', at: {x: leftX, y: d(0, 70).y}, anchor: d(thumbLime(card).x, thumbLime(card).y)},
+    {label: 'accent', swatch: 'accent', side: 'left', at: {x: leftX, y: d(0, 170).y}, anchor: d(card.pad - 5, card.meta.y + 7)},
+    {label: 'ink', swatch: 'ink', side: 'left', at: {x: leftX, y: d(0, card.button.y + 26).y}, anchor: d(card.pad + 60, card.button.y + 26)},
     {label: 'radius 22px', side: 'right', at: {x: rightX, y: d(0, 30).y}, anchor: d(card.w - 7, 7)},
-    {label: 'Bricolage 700 / 28', side: 'right', at: {x: rightX, y: d(0, card.title.y + 14).y}, anchor: d(card.pad + 180, card.title.y + 14)},
+    {label: 'Bricolage 700 / 28', side: 'right', at: {x: rightX, y: d(0, card.title.y + 14).y}, anchor: d(titleEnd(card), card.title.y + 14)},
     {label: 'Geist Mono 11', side: 'right', at: {x: rightX, y: d(0, card.tags.y + 13).y}, anchor: d(card.w - 38, card.tags.y + 13)},
   ];
 
@@ -197,14 +205,15 @@ const phoneLayout = (width: number, height: number): RedlineLayout => {
   const above = dRect.y - 50;
   const below = dRect.y + dRect.h + 50;
   const measures: Measure[] = [
-    {from: d(0, card.title.y + 14), to: d(card.pad, card.title.y + 14), label: String(card.pad), marked: true},
+    {from: d(0, padY(card)), to: d(card.pad, padY(card)), label: String(card.pad), marked: true},
     {from: d(card.w + 14, card.button.y), to: d(card.w + 14, card.button.y + card.button.h), label: String(card.button.h)},
   ];
   const chips: Chip[] = [
-    {label: 'lime #D7FF3D', swatch: '#D7FF3D', side: 'left', at: {x: sx - 6, y: above}, anchor: d(card.thumb.x + card.thumb.w * 0.2, 70)},
+    {label: 'lime', swatch: 'lime', side: 'left', at: {x: sx - 6, y: above}, anchor: d(thumbLime(card).x, thumbLime(card).y)},
     {label: 'radius 22px', side: 'right', at: {x: sx + 6, y: above}, anchor: d(card.w - 7, 7)},
-    {label: 'ink #0D0E12', swatch: '#0D0E12', side: 'left', at: {x: sx - 6, y: below}, anchor: d(card.pad + 60, card.button.y + card.button.h - 4)},
-    {label: 'Bricolage 700', side: 'right', at: {x: sx + 6, y: below}, anchor: d(card.w - 80, card.button.y + card.button.h - 4)},
+    {label: 'ink', swatch: 'ink', side: 'left', at: {x: sx - 6, y: below}, anchor: d(card.pad + 60, card.button.y + card.button.h - 4)},
+    // The button label is Geist 600; the leader stays on the button's lower edge, clear of the text
+    {label: 'Geist 600 / 16', side: 'right', at: {x: sx + 6, y: below}, anchor: d(card.w - 80, card.button.y + card.button.h - 4)},
   ];
 
   // Beat 2: the card small, the code below it, the pair centred on the stage (9 lines at 10px plus chrome and padding)

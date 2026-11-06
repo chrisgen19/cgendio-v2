@@ -1,5 +1,3 @@
-'use client';
-
 import type React from 'react';
 import {useCurrentFrame} from 'remotion';
 import {fonts, theme} from '@/components/hero-film/theme';

@@ -9,6 +9,9 @@ import {LiveBody, ResearchBody, Section, WireframeBody} from './stations';
 
 const BRAND_INK = '#0D0E12';
 
+/** The CTA heading's line height, shared by the panel and the overlay that places the buttons under it. */
+const CTA_LEADING = 0.98;
+
 /** The board's title block: who I am and what I do, readable from the first second. */
 const Title: React.FC<{cut: CutSpec}> = ({cut}) => {
   const {title, t} = cut;
@@ -82,6 +85,7 @@ const Title: React.FC<{cut: CutSpec}> = ({cut}) => {
 /** The end of the route: a lime panel that holds "See my work" once the camera has pulled back. */
 const CtaCell: React.FC<{cut: CutSpec}> = ({cut}) => {
   const c = cut.cells.cta;
+  const {size, pad} = cut.ctaHead;
   return (
     <>
       <div
@@ -104,11 +108,11 @@ const CtaCell: React.FC<{cut: CutSpec}> = ({cut}) => {
             boxSizing: 'border-box',
             borderRadius: 28,
             background: theme.lime,
-            padding: cut.compact ? 34 : 40,
+            padding: pad,
             fontFamily: fonts.display,
             fontWeight: 700,
-            fontSize: cut.compact ? 54 : 52,
-            lineHeight: 0.98,
+            fontSize: size,
+            lineHeight: CTA_LEADING,
             letterSpacing: '-0.04em',
             color: theme.onLime,
           }}
@@ -145,7 +149,8 @@ const Board: React.FC<{cut: CutSpec}> = ({cut}) => {
         <ResearchBody cut={cut} />
       </Section>
       <Section rect={cells.s2} n="02" label="Wireframe" heading="Wireframes that grow up." compact={compact}>
-        <WireframeBody cut={cut} w={inner(cells.s2.w)} h={bodyH - (compact ? 98 : 104)} />
+        {/* Desktop headings fit on one line; phone headings take two */}
+        <WireframeBody cut={cut} w={inner(cells.s2.w)} h={bodyH - (compact ? 98 : 62)} />
       </Section>
       <Section rect={cells.s3} n="03" label="Live" heading="Push. Build. Ship." compact={compact}>
         <LiveBody cut={cut} w={inner(cells.s3.w)} browserH={compact ? 236 : 270} />
@@ -167,15 +172,18 @@ const Camera: React.FC<{cut: CutSpec; children: React.ReactNode}> = ({cut, child
   );
 };
 
-/** Real, full-size buttons laid over the lime panel once the camera rests on the board. */
+/** Real, full-size buttons laid over the lime panel, just under its heading, once the camera rests on the end pose. */
 const CtaOverlay: React.FC<{cut: CutSpec} & LabFilmProps> = ({cut, worksHref, onReplay}) => {
   const frame = useCurrentFrame();
   const {width, height} = useVideoConfig();
-  const view = viewOf(posesFor(cut, width, height).board, cut, width, height);
+  const view = viewOf(posesFor(cut, width, height).end, cut, width, height);
   const c = cut.cells.cta;
   const at = cut.t.ctaButtons;
   const shown = frame >= at;
-  const pad = cut.compact ? 12 : 22;
+  const {size, pad} = cut.ctaHead;
+  const side = pad * view.s;
+  // The two heading lines end here on screen; the buttons follow at a fixed gap, so no dead lime sits between them
+  const top = (pad + size * CTA_LEADING * 2) * view.s + (cut.compact ? 16 : 22);
   const arrive = (delay: number): React.CSSProperties => ({
     opacity: interpolate(frame, [at + delay, at + delay + 14], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: ARRIVE}),
     translate: `0 ${interpolate(frame, [at + delay, at + delay + 14], [12, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: ARRIVE})}px`,
@@ -190,12 +198,14 @@ const CtaOverlay: React.FC<{cut: CutSpec} & LabFilmProps> = ({cut, worksHref, on
         width: c.w * view.s,
         height: c.h * view.s,
         boxSizing: 'border-box',
-        padding: pad,
+        padding: `${top}px ${side}px ${side}px`,
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-        alignItems: cut.compact ? 'stretch' : 'flex-start',
-        gap: cut.compact ? 8 : 10,
+        flexDirection: cut.compact ? 'row' : 'column',
+        flexWrap: 'wrap',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        alignContent: 'flex-start',
+        gap: 10,
         visibility: shown ? 'visible' : 'hidden',
       }}
     >
@@ -208,7 +218,7 @@ const CtaOverlay: React.FC<{cut: CutSpec} & LabFilmProps> = ({cut, worksHref, on
           alignItems: 'center',
           justifyContent: 'center',
           height: cut.compact ? 44 : 52,
-          padding: cut.compact ? '0 12px' : '0 26px',
+          padding: cut.compact ? '0 20px' : '0 26px',
           borderRadius: 999,
           background: BRAND_INK,
           color: '#FFFFFF',
@@ -232,7 +242,7 @@ const CtaOverlay: React.FC<{cut: CutSpec} & LabFilmProps> = ({cut, worksHref, on
           justifyContent: 'center',
           gap: 8,
           height: 44,
-          padding: cut.compact ? '0 12px' : '0 18px',
+          padding: '0 18px',
           borderRadius: 999,
           border: `1.5px solid ${BRAND_INK}`,
           background: 'transparent',

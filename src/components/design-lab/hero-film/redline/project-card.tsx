@@ -1,4 +1,5 @@
 import type React from 'react';
+import {useCurrentFrame} from 'remotion';
 import {fonts, theme} from '@/components/hero-film/theme';
 import type {CardGeo, Rect} from './geometry';
 
@@ -49,10 +50,32 @@ type ProjectCardProps = {
   geo: CardGeo;
   /** With an href the button is the real "See my work" link; without it the card is decorative. */
   href?: string;
+  /** The frame the link goes live. Before it the card is still moving or shrunk below a 44px target, so the button is decorative. */
+  liveAt?: number;
+};
+
+const buttonClass =
+  'bg-(--btn-bg) text-(--btn-fg) hover:bg-(--btn-hover-bg) hover:text-(--btn-hover-fg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+
+/** The card's button: a decorative pill until `liveAt`, then the real link (a leaf, so only it re-renders per frame). */
+const CardButton: React.FC<{style: React.CSSProperties; href?: string; liveAt: number}> = ({style, href, liveAt}) => {
+  const frame = useCurrentFrame();
+  if (href && frame >= liveAt) {
+    return (
+      <a href={href} className={buttonClass} style={style}>
+        See my work
+      </a>
+    );
+  }
+  return (
+    <span aria-hidden className="bg-(--btn-bg) text-(--btn-fg)" style={style}>
+      See my work
+    </span>
+  );
 };
 
 /** The one object of the film: a project card, authored once at its base size and posed by scale and translate. */
-export const ProjectCard: React.FC<ProjectCardProps> = ({geo, href}) => {
+export const ProjectCard: React.FC<ProjectCardProps> = ({geo, href, liveAt = 0}) => {
   const buttonStyle = {
     ...abs(geo.button),
     display: 'flex',
@@ -69,9 +92,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({geo, href}) => {
     '--btn-hover-bg': theme.accent,
     '--btn-hover-fg': theme.onAccent,
   } as React.CSSProperties;
-  const buttonClass =
-    'bg-(--btn-bg) text-(--btn-fg) hover:bg-(--btn-hover-bg) hover:text-(--btn-hover-fg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
-
   return (
     <div
       style={{
@@ -123,15 +143,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({geo, href}) => {
           </span>
         ))}
       </div>
-      {href ? (
-        <a href={href} className={buttonClass} style={buttonStyle}>
-          See my work
-        </a>
-      ) : (
-        <span aria-hidden className="bg-(--btn-bg) text-(--btn-fg)" style={buttonStyle}>
-          See my work
-        </span>
-      )}
+      <CardButton style={buttonStyle} href={href} liveAt={liveAt} />
     </div>
   );
 };

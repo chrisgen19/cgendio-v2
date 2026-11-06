@@ -4,7 +4,7 @@ import {fonts, theme} from '@/components/hero-film/theme';
 import {ARRIVE, progress} from '../shared/motion';
 import {Appear} from './anim';
 import type {RedlineLayout} from './geometry';
-import type {Timing} from './timing';
+import {EXIT, type Timing} from './timing';
 
 /** The lime highlighter under one word, drawn from the left. */
 const Mark: React.FC<{at: number; children: React.ReactNode}> = ({at, children}) => {
@@ -30,15 +30,34 @@ const Mark: React.FC<{at: number; children: React.ReactNode}> = ({at, children})
   );
 };
 
-type Step = {n: string; label: string; line: string; at: (t: Timing) => number};
+type Line = {text: string; at: (t: Timing) => number};
+type Step = {n: string; label: string; lines: Line[]; at: (t: Timing) => number; out: (t: Timing) => number};
 
-/** What each beat is called, in order; each caption leaves as the next one arrives. */
+/**
+ * What each beat is called, in order. A caption leaves with its beat's context, before the card glides, and the next
+ * one arrives once the glide has settled, so only one thing moves at a time. A step with two lines keeps its eyebrow
+ * and swaps only the line.
+ */
 const STEPS: Step[] = [
-  {n: '01', label: 'Design', line: 'Wireframes that grow up.', at: (t) => t.cardIn + 14},
-  {n: '02', label: 'Build', line: 'Pixel to production.', at: (t) => t.codeIn},
-  {n: '03', label: 'Test', line: "Tested like it's launch day.", at: (t) => t.windowIn},
-  {n: '04', label: 'Ship', line: 'Push. Build. Ship.', at: (t) => t.testOut + 2},
-  {n: '04', label: 'Ship', line: "And it's live.", at: (t) => t.live},
+  {
+    n: '01',
+    label: 'Design',
+    lines: [{text: 'Wireframes that grow up.', at: (t) => t.cardIn + 14}],
+    at: (t) => t.cardIn + 14,
+    out: (t) => t.designOut,
+  },
+  {n: '02', label: 'Build', lines: [{text: 'Pixel to production.', at: (t) => t.codeIn}], at: (t) => t.codeIn, out: (t) => t.codeOut},
+  {n: '03', label: 'Test', lines: [{text: "Tested like it's launch day.", at: (t) => t.windowIn}], at: (t) => t.windowIn, out: (t) => t.testOut - 8},
+  {
+    n: '04',
+    label: 'Ship',
+    lines: [
+      {text: 'Push. Build. Ship.', at: (t) => t.testOut + 2},
+      {text: "And it's live.", at: (t) => t.live},
+    ],
+    at: (t) => t.testOut + 2,
+    out: (t) => t.collapse,
+  },
 ];
 
 const LEDE =
@@ -94,37 +113,44 @@ export const ClaimColumn: React.FC<{L: RedlineLayout; T: Timing}> = ({L, T}) => 
         </p>
       </Appear>
       <div style={{position: 'relative', height: L.slotHeight, marginTop: L.portrait ? 4 : 8}}>
-        {STEPS.map((step, i) => {
-          const next = STEPS[i + 1];
-          return (
-            <Appear
-              key={step.line}
-              at={step.at(T)}
-              exit={(next ? next.at(T) : T.finalIn) - 10}
-              from={{y: 10}}
-              to={{y: -8}}
-              style={{position: 'absolute', inset: 0}}
-            >
-              <p style={{margin: 0, display: 'flex', gap: 10, fontFamily: fonts.mono, fontWeight: 500, fontSize: 13, letterSpacing: '0.08em'}}>
-                <span style={{color: theme.accent}}>{step.n}</span>
-                <span style={{color: theme.muted, textTransform: 'uppercase'}}>{step.label}</span>
-              </p>
-              <p
-                style={{
-                  margin: '10px 0 0',
-                  fontFamily: fonts.display,
-                  fontWeight: 600,
-                  fontSize: lineSize,
-                  lineHeight: 1.15,
-                  letterSpacing: '-0.02em',
-                  color: theme.ink,
-                }}
-              >
-                {step.line}
-              </p>
-            </Appear>
-          );
-        })}
+        {STEPS.map((step) => (
+          <Appear key={step.label} at={step.at(T)} exit={step.out(T)} from={{y: 10}} to={{y: -8}} style={{position: 'absolute', inset: 0}}>
+            <p style={{margin: 0, display: 'flex', gap: 10, fontFamily: fonts.mono, fontWeight: 500, fontSize: 13, letterSpacing: '0.08em'}}>
+              <span style={{color: theme.accent}}>{step.n}</span>
+              <span style={{color: theme.muted, textTransform: 'uppercase'}}>{step.label}</span>
+            </p>
+            <div style={{display: 'grid', marginTop: 10}}>
+              {step.lines.map((line, j) => {
+                const next = step.lines[j + 1];
+                return (
+                  <Appear
+                    key={line.text}
+                    at={line.at(T)}
+                    dur={j === 0 ? 1 : 12}
+                    exit={next ? next.at(T) - EXIT : undefined}
+                    from={{y: j === 0 ? 0 : 10}}
+                    to={{y: -8}}
+                    style={{gridArea: '1 / 1'}}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        fontFamily: fonts.display,
+                        fontWeight: 600,
+                        fontSize: lineSize,
+                        lineHeight: 1.15,
+                        letterSpacing: '-0.02em',
+                        color: theme.ink,
+                      }}
+                    >
+                      {line.text}
+                    </p>
+                  </Appear>
+                );
+              })}
+            </div>
+          </Appear>
+        ))}
         <Appear at={T.finalIn} dur={14} from={{y: 10}} style={{position: 'absolute', inset: 0}}>
           <p style={{margin: 0, maxWidth: 520, fontFamily: fonts.body, fontSize: L.ledeSize, lineHeight: 1.55, color: theme.muted}}>{LEDE}</p>
         </Appear>

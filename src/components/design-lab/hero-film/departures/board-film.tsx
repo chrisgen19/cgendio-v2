@@ -10,18 +10,17 @@ const FLAP_FONT = 'var(--font-dep-flap), "Arial Narrow", sans-serif';
 const PLATE_FONT = 'var(--font-dep-plate), Arial, sans-serif';
 
 type Geometry = {
-  phone: boolean;
-  /** Board cells */
+  /** Build grid and name cells */
   cellW: number;
   cellH: number;
   gap: number;
   rowGap: number;
   font: number;
-  /** Name cells */
-  nameW: number;
-  nameH: number;
-  nameGap: number;
-  nameFont: number;
+  /** Claim cells: the same grid width split into fewer, larger flaps */
+  claimW: number;
+  claimH: number;
+  claimGap: number;
+  claimFont: number;
   /** Housing padding and the width of the cell grid inside it */
   pad: number;
   gridW: number;
@@ -35,33 +34,35 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
  * height. Phone: the housing runs edge to edge, so the cells get every pixel of the 390px width.
  */
 const measure = (width: number, height: number, script: CutScript, phone: boolean): Geometry => {
+  const {cols, claimCols} = script;
   const gutter = phone ? 0 : clamp(width * 0.04, 24, 72);
   const gap = phone ? 2 : 4;
-  const rowGap = phone ? 5 : 6;
-  const nameGap = phone ? 3 : 5;
+  const minClaimGap = phone ? 2 : 5;
   const ratio = phone ? 1.75 : 1.5;
+  const claimRatio = phone ? 1.85 : 1.5;
   const inner = width - gutter * 2 - (phone ? 20 : 48);
-  let cellW = Math.floor((inner - (script.cols - 1) * gap) / script.cols);
+  let cellW = Math.floor((inner - (cols - 1) * gap) / cols);
   if (!phone) {
-    // Name cells are 1.5x board cells; leave room above and below for the footer
-    const perCell = 1.5 * 1.45 + script.rows * ratio;
-    cellW = Math.min(cellW, 46, Math.floor((height - 330) / perCell));
+    // Name and build rows at the board size, claim rows at ~cols/claimCols of it; leave room for the lede below
+    const perCell = ratio * (script.name.length + script.board.length) + (claimRatio * script.claim.length * cols) / claimCols;
+    cellW = Math.min(cellW, 46, Math.floor((height - 390) / perCell));
   }
-  const gridW = script.cols * cellW + (script.cols - 1) * gap;
-  const nameW = phone ? Math.min(48, Math.floor((gridW - (script.nameCols - 1) * nameGap) / script.nameCols)) : Math.round(cellW * 1.5);
+  const gridW = cols * cellW + (cols - 1) * gap;
   const cellH = Math.round(cellW * ratio);
-  const nameH = Math.round(nameW * 1.45);
+  const claimW = Math.floor((gridW - (claimCols - 1) * minClaimGap) / claimCols);
+  // Spread the rounding remainder over the gaps, so the claim rows end flush with the grid
+  const claimGap = (gridW - claimCols * claimW) / (claimCols - 1);
+  const claimH = Math.round(claimW * claimRatio);
   return {
-    phone,
     cellW,
     cellH,
     gap,
-    rowGap,
+    rowGap: phone ? 5 : 6,
     font: Math.round(cellH * 0.72),
-    nameW,
-    nameH,
-    nameGap,
-    nameFont: Math.round(nameH * 0.76),
+    claimW,
+    claimH,
+    claimGap,
+    claimFont: Math.round(claimH * 0.72),
     pad: phone ? Math.floor((width - gridW) / 2) : 24,
     gridW,
     label: phone ? 14 : 15,
@@ -105,20 +106,28 @@ const Reveal: React.FC<RevealProps> = ({from, until, children, style, rise = 6})
   );
 };
 
-/** The call to the gate: a real link laid over the CTA row once it has flapped in. */
+/**
+ * The call to the gate: a real link laid over the yellow cells only, once they have flapped in. Hover and focus also
+ * swap the tiles to ink with yellow type (through the board's `--dep-cta-now` vars), so it reads as a button.
+ */
 const GateLink: React.FC<{href: string; at: number; top: number; width: number; height: number}> = ({href, at, top, width, height}) => {
   const frame = useCurrentFrame();
   if (frame < at) return null;
   return (
     <a
       href={href}
-      className="absolute rounded-[3px] outline-offset-2 hover:outline-2 hover:outline-(--dep-face) focus-visible:outline-2 focus-visible:outline-(--dep-focus-housing)"
+      data-gate=""
+      className="absolute rounded-[4px] outline-offset-3 hover:outline-2 hover:outline-(--dep-cta) focus-visible:outline-2 focus-visible:outline-(--dep-focus-housing)"
       style={{left: 0, top, width, height}}
     >
       <span className="sr-only">See my work</span>
     </a>
   );
 };
+
+/** While the gate link is hovered or focused, the CTA flaps invert: ink tiles, yellow type. */
+const GATE_HOVER =
+  'has-[a[data-gate]:hover]:[--dep-cta-now:var(--dep-cta-ink)] has-[a[data-gate]:hover]:[--dep-cta-ink-now:var(--dep-cta)] has-[a[data-gate]:focus-visible]:[--dep-cta-now:var(--dep-cta-ink)] has-[a[data-gate]:focus-visible]:[--dep-cta-ink-now:var(--dep-cta)]';
 
 const ReplayButton: React.FC<{onReplay: () => void; phone: boolean}> = ({onReplay, phone}) => (
   <button
@@ -169,30 +178,29 @@ const BoardFilm: React.FC<BoardFilmProps> = ({script, phone, worksHref, onReplay
             fontWeight: 600,
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: phone ? 'column' : 'row',
-              alignItems: phone ? 'flex-start' : 'flex-end',
-              justifyContent: 'space-between',
-              gap: phone ? 10 : 24,
-            }}
-          >
-            <div style={{display: 'flex', flexDirection: 'column', gap: g.rowGap + 2}}>
+          <div style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16}}>
+            <div style={{display: 'flex', flexDirection: 'column', gap: g.rowGap}}>
               {script.name.map((tracks, r) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: name lines are fixed
-                <FlapRow key={r} tracks={tracks} w={g.nameW} h={g.nameH} gap={g.nameGap} fontSize={g.nameFont} />
+                <FlapRow key={r} tracks={tracks} w={g.cellW} h={g.cellH} gap={g.gap} fontSize={g.font} />
               ))}
             </div>
-            <div style={{paddingBottom: phone ? 0 : 4}}>{domain}</div>
+            <div style={{paddingBottom: phone ? 2 : 4}}>{domain}</div>
           </div>
 
-          <div aria-hidden style={{position: 'relative', height: g.label + 18, marginTop: phone ? 16 : 26}}>
+          {/* The claim: the larger flaps, settled within the first ~2s while the builds roll in beneath it */}
+          <div style={{display: 'flex', flexDirection: 'column', gap: g.rowGap, marginTop: phone ? 14 : 20}}>
+            {script.claim.map((tracks, r) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: claim lines are fixed
+              <FlapRow key={r} tracks={tracks} w={g.claimW} h={g.claimH} gap={g.claimGap} fontSize={g.claimFont} />
+            ))}
+          </div>
+
+          <div aria-hidden style={{position: 'relative', height: g.label + 14, marginTop: phone ? 16 : 24}}>
             {script.columns.map((col) => (
               <Reveal
                 key={col.label}
                 from={cues.headsIn}
-                until={cues.headsOut}
                 style={{
                   position: 'absolute',
                   left: col.start * (g.cellW + g.gap),
@@ -208,7 +216,7 @@ const BoardFilm: React.FC<BoardFilmProps> = ({script, phone, worksHref, onReplay
             ))}
           </div>
 
-          <div style={{position: 'relative', display: 'flex', flexDirection: 'column', gap: g.rowGap}}>
+          <div className={GATE_HOVER} style={{position: 'relative', display: 'flex', flexDirection: 'column', gap: g.rowGap}}>
             {script.board.map((tracks, r) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: board rows are fixed
               <FlapRow key={r} tracks={tracks} w={g.cellW} h={g.cellH} gap={g.gap} fontSize={g.font} />
@@ -218,7 +226,7 @@ const BoardFilm: React.FC<BoardFilmProps> = ({script, phone, worksHref, onReplay
               href={worksHref}
               at={cues.ctaAt}
               top={cues.ctaRow * pitch - Math.max(0, (44 - g.cellH) / 2)}
-              width={g.gridW}
+              width={cues.ctaCols * (g.cellW + g.gap) - g.gap}
               height={Math.max(44, g.cellH)}
             />
           </div>

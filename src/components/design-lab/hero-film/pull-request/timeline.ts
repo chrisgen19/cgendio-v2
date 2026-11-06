@@ -47,21 +47,22 @@ export const DESKTOP_TIMING: CutTiming = {
 };
 
 export const MOBILE_TIMING: CutTiming = {
-  duration: 340,
+  duration: 334,
   title: 0,
   description: 10,
   diff: 28,
   diffStep: 5,
-  scroll: [112, 138],
-  preview: 74,
-  build: [84, 106],
-  checks: 154,
+  // The camera starts moving before the preview card fades in, so the card never sits low on the page under the HUD
+  scroll: [78, 104],
+  preview: 88,
+  build: [98, 120],
+  checks: 148,
   checkStep: 13,
   checkRun: 15,
-  merge: 232,
-  merged: 239,
-  zoom: [254, 280],
-  mark: 290,
+  merge: 226,
+  merged: 233,
+  zoom: [248, 274],
+  mark: 284,
 };
 
 export const CHECKS = ['Lint', 'Types', 'Accessibility (WCAG 2.2 AA)', 'Core Web Vitals', 'Cross-browser'] as const;
@@ -113,7 +114,7 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 /** Desktop design box layout (design px). */
 export const DESK = {
   padX: 96,
-  colTop: 170,
+  colTop: 152,
   leftW: 720,
   rightX: 856,
   rightW: 488,
@@ -144,7 +145,7 @@ export const desktopGeometry = (width: number, height: number): Geometry => {
 /** Phone design box layout (design px). */
 export const PHONE = {
   padX: 20,
-  previewTop: 566,
+  previewTop: 578,
   cardPad: 12,
   thumbW: 124,
   /** Where the preview card sits once the camera has scrolled. */

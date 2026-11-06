@@ -1,5 +1,3 @@
-'use client';
-
 import type React from 'react';
 import {useCurrentFrame} from 'remotion';
 import {fonts, theme} from '@/components/hero-film/theme';
@@ -119,6 +117,34 @@ const Branch: React.FC<{name: string; size: number}> = ({name, size}) => (
 
 /* Header ---------------------------------------------------------------------------------------------------------- */
 
+/**
+ * "wants to merge into main" until the merge, then "merged into main", alongside the status pill. The two lines have
+ * different widths, so the old one leaves before the new one arrives instead of overlapping mid-crossfade.
+ */
+const MergeLine: React.FC = () => {
+  const frame = useCurrentFrame();
+  const {t, sz, g} = useCut();
+  const out = progress(frame, t.merged - 2, t.merged + 4, LEAVE);
+  const m = progress(frame, t.merged + 4, t.merged + 12);
+  const line = (verb: string, opacity: number): React.ReactNode => (
+    <span style={{gridArea: '1 / 1', opacity}}>
+      <b style={{color: theme.ink, fontWeight: 600}}>Christian Diomampo</b> {verb} into <Branch name="main" size={sz.mono} />
+      {g.portrait ? null : (
+        <>
+          {' '}
+          from <Branch name="feat/launch" size={sz.mono} />
+        </>
+      )}
+    </span>
+  );
+  return (
+    <span style={{display: 'inline-grid', fontSize: sz.body, color: theme.muted, lineHeight: 1.45}}>
+      {line('wants to merge', 1 - out)}
+      {line('merged', m)}
+    </span>
+  );
+};
+
 export const PrHeader: React.FC = () => {
   const {t, sz, g} = useCut();
   return (
@@ -133,8 +159,8 @@ export const PrHeader: React.FC = () => {
             fontFamily: fonts.display,
             fontWeight: 700,
             fontSize: sz.title,
-            lineHeight: 1.02,
-            letterSpacing: '-0.035em',
+            lineHeight: 1.1,
+            letterSpacing: '-0.025em',
             color: theme.ink,
           }}
         >
@@ -143,15 +169,7 @@ export const PrHeader: React.FC = () => {
       </Enter>
       <Enter at={t.title + 6} style={{display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: g.portrait ? 8 : 12, marginTop: 4}}>
         <StatusPill size={sz.small} />
-        <span style={{fontSize: sz.body, color: theme.muted, lineHeight: 1.45}}>
-          <b style={{color: theme.ink, fontWeight: 600}}>Christian Diomampo</b> wants to merge into <Branch name="main" size={sz.mono} />
-          {g.portrait ? null : (
-            <>
-              {' '}
-              from <Branch name="feat/launch" size={sz.mono} />
-            </>
-          )}
-        </span>
+        <MergeLine />
       </Enter>
     </div>
   );
@@ -176,9 +194,10 @@ export const Description: React.FC = () => {
           fontFamily: fonts.display,
           fontWeight: 700,
           fontSize: sz.claim,
-          lineHeight: 1.1,
-          letterSpacing: '-0.03em',
+          lineHeight: 1,
+          letterSpacing: '-0.04em',
           color: theme.ink,
+          textWrap: 'balance',
         }}
       >
         I design, build &amp; ship websites that work.

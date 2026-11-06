@@ -8,7 +8,7 @@ import {MOVE} from '../shared/motion';
  */
 
 export type Rect = {x: number; y: number; w: number; h: number};
-export type PoseId = 'board' | 's1' | 's2' | 's3';
+export type PoseId = 'end' | 's1' | 's2' | 's3';
 type Move = {from: number; to: number; pose: PoseId};
 type Pose = {cx: number; cy: number; s: number};
 
@@ -43,6 +43,13 @@ export type CutSpec = {
     ledeW: number;
   };
   cells: {s1: Rect; s2: Rect; s3: Rect; cta: Rect};
+  /** The CTA panel heading, in board units: its size and the panel's padding. */
+  ctaHead: {size: number; pad: number};
+  /**
+   * What the opening and final frame show (also the reduced-motion still). Desktop frames the whole board; the phone
+   * frames only the title block and the CTA panel, so nothing on the rest frame shrinks to thumbnail text.
+   */
+  end: Rect;
   /** Screen-space margins the camera keeps clear: the site header on top, the film HUD at the bottom. */
   safe: {top: number; bottom: number; side: number};
   maxZoom: number;
@@ -55,7 +62,7 @@ export type CutSpec = {
 
 export const DESKTOP: CutSpec = {
   compact: false,
-  board: {w: 2400, h: 1470},
+  board: {w: 2400, h: 1420},
   title: {
     x: 100,
     nameY: 92,
@@ -68,11 +75,13 @@ export const DESKTOP: CutSpec = {
     ledeW: 1380,
   },
   cells: {
-    s1: {x: 100, y: 850, w: 505, h: 560},
-    s2: {x: 665, y: 850, w: 505, h: 560},
-    s3: {x: 1230, y: 850, w: 505, h: 560},
-    cta: {x: 1795, y: 850, w: 505, h: 560},
+    s1: {x: 100, y: 850, w: 700, h: 510},
+    s2: {x: 850, y: 850, w: 700, h: 510},
+    s3: {x: 1600, y: 850, w: 700, h: 510},
+    cta: {x: 1800, y: 150, w: 500, h: 520},
   },
+  ctaHead: {size: 64, pad: 40},
+  end: {x: 0, y: 0, w: 2400, h: 1420},
   safe: {top: 96, bottom: 96, side: 56},
   maxZoom: 1.3,
   anchor: 'center',
@@ -80,7 +89,7 @@ export const DESKTOP: CutSpec = {
     {from: 54, to: 84, pose: 's1'},
     {from: 148, to: 174, pose: 's2'},
     {from: 234, to: 260, pose: 's3'},
-    {from: 336, to: 366, pose: 'board'},
+    {from: 336, to: 366, pose: 'end'},
   ],
   t: {
     name: 0,
@@ -102,32 +111,34 @@ export const DESKTOP: CutSpec = {
 
 export const PHONE: CutSpec = {
   compact: true,
-  board: {w: 960, h: 1920},
+  board: {w: 960, h: 2930},
   title: {
     x: 40,
     nameY: 40,
-    nameSize: 26,
-    headY: 88,
-    headSize: 92,
+    nameSize: 34,
+    headY: 104,
+    headSize: 128,
     lines: ['I design, build', '& ship websites', 'that work.'],
-    ledeY: 384,
+    ledeY: 510,
     ledeSize: 44,
     ledeW: 880,
   },
   cells: {
-    s1: {x: 40, y: 780, w: 420, h: 520},
-    s2: {x: 500, y: 780, w: 420, h: 520},
-    s3: {x: 40, y: 1360, w: 420, h: 520},
-    cta: {x: 500, y: 1360, w: 420, h: 520},
+    s1: {x: 40, y: 1790, w: 420, h: 520},
+    s2: {x: 500, y: 1790, w: 420, h: 520},
+    s3: {x: 270, y: 2370, w: 420, h: 520},
+    cta: {x: 40, y: 830, w: 880, h: 400},
   },
+  ctaHead: {size: 76, pad: 40},
+  end: {x: 20, y: 0, w: 920, h: 1250},
   safe: {top: 84, bottom: 96, side: 16},
   maxZoom: 1.2,
   anchor: 'top',
   moves: [
-    {from: 44, to: 70, pose: 's1'},
+    {from: 42, to: 72, pose: 's1'},
     {from: 120, to: 144, pose: 's2'},
     {from: 192, to: 218, pose: 's3'},
-    {from: 278, to: 306, pose: 'board'},
+    {from: 276, to: 306, pose: 'end'},
   ],
   t: {
     name: 0,
@@ -158,7 +169,7 @@ export const posesFor = (cut: CutSpec, width: number, height: number): Record<Po
     return {s, cx: r.x + r.w / 2, cy: anchor === 'top' ? r.y + safeH / 2 / s : r.y + r.h / 2};
   };
   return {
-    board: fit({x: 0, y: 0, ...cut.board}, 4, 'center'),
+    end: fit(cut.end, 4, 'center'),
     s1: fit(around(cut.cells.s1), cut.maxZoom, cut.anchor),
     s2: fit(around(cut.cells.s2), cut.maxZoom, cut.anchor),
     s3: fit(around(cut.cells.s3), cut.maxZoom, cut.anchor),
@@ -174,13 +185,13 @@ export const viewOf = (pose: Pose, cut: CutSpec, width: number, height: number):
   ty: cut.safe.top + (height - cut.safe.top - cut.safe.bottom) / 2 - pose.cy * pose.s,
 });
 
-/** Station-to-station moves pull back slightly mid-way, like a hand-held glide; zooms in and out go straight. */
+/** Station-to-station moves pull back slightly mid-way, like a hand-held glide; moves to and from the end pose go straight. */
 const DIP = 0.12;
 
-/** The camera at a frame: holds between moves, glides with MOVE during them. */
+/** The camera at a frame: opens and rests on the end pose, holds between moves, glides with MOVE during them. */
 export const cameraAt = (frame: number, cut: CutSpec, width: number, height: number): View => {
   const poses = posesFor(cut, width, height);
-  let current: PoseId = 'board';
+  let current: PoseId = 'end';
   for (const move of cut.moves) {
     if (frame < move.from) break;
     if (frame >= move.to) {
@@ -192,7 +203,7 @@ export const cameraAt = (frame: number, cut: CutSpec, width: number, height: num
     const range = [move.from, move.to];
     const opts = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: MOVE} as const;
     const t = interpolate(frame, range, [0, 1], opts);
-    const dip = current !== 'board' && move.pose !== 'board' ? 1 - DIP * Math.sin(Math.PI * t) : 1;
+    const dip = current !== 'end' && move.pose !== 'end' ? 1 - DIP * Math.sin(Math.PI * t) : 1;
     const pose: Pose = {
       cx: interpolate(frame, range, [a.cx, b.cx], opts),
       cy: interpolate(frame, range, [a.cy, b.cy], opts),

@@ -139,7 +139,7 @@ const TokenChip: React.FC<{c: Chip; at: number; exit: number; toward: {x: number
         }}
       >
         {c.swatch ? (
-          <span style={{width: 12, height: 12, borderRadius: 4, background: c.swatch, boxShadow: `inset 0 0 0 1px ${theme.muted}`}} />
+          <span style={{width: 12, height: 12, borderRadius: 4, background: theme[c.swatch], boxShadow: `inset 0 0 0 1px ${theme.muted}`}} />
         ) : null}
         {c.label}
       </div>
