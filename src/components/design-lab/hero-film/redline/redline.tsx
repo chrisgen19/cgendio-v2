@@ -1,10 +1,11 @@
 import {DirectionStage} from '../direction-stage';
+import {RedlineFilm} from './redline-film';
 
-/** Placeholder: the redline direction is built here. */
+/** Direction 02: one project card carries every cut, from redlines to a live URL. */
 export function Redline() {
   return (
     <DirectionStage>
-      <div className="grid h-full place-items-center font-mono text-[13px] text-muted">redline: in progress</div>
+      <RedlineFilm />
     </DirectionStage>
   );
 }

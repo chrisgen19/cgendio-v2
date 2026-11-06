@@ -1,26 +1,21 @@
 'use client';
 
-import {AbsoluteFill, useCurrentFrame} from 'remotion';
+import type React from 'react';
 import {FilmPlayer, type LabFilmProps} from '../shared/film-player';
-import {tween} from '../shared/motion';
+import {LongTakeCut} from './board';
+import {DESKTOP, PHONE} from './layout';
 
-/** Smoke test for the shared player; replaced by the real direction. */
-function Probe(_props: LabFilmProps) {
-  const frame = useCurrentFrame();
-  return (
-    <AbsoluteFill style={{display: 'grid', placeItems: 'center', fontFamily: 'var(--font-geist-mono)', color: 'var(--film-ink, #0D0E12)'}}>
-      <div style={{translate: `${tween(frame, [0, 60], [-200, 0])}px 0`}}>frame {frame}</div>
-    </AbsoluteFill>
-  );
-}
+const Desktop: React.FC<LabFilmProps> = (props) => <LongTakeCut {...props} cut={DESKTOP} />;
+const Phone: React.FC<LabFilmProps> = (props) => <LongTakeCut {...props} cut={PHONE} />;
 
+/** Direction 01: one board, one continuous camera move, no cuts. */
 export function LongTakeFilm() {
   return (
     <FilmPlayer
-      desktop={{component: Probe, durationInFrames: 120}}
-      mobile={{component: Probe, durationInFrames: 120}}
+      desktop={{component: Desktop, durationInFrames: DESKTOP.duration}}
+      mobile={{component: Phone, durationInFrames: PHONE.duration}}
       label="Hero film: the long take"
-      description="Placeholder film."
+      description="One continuous camera move across a working board. It opens on my name and the line: I design, build and ship websites that work. The camera visits research notes on who the site is for (recruiters, clients and visitors), a wireframe that fills into a styled page, and the same page live in a browser after a Vercel deploy with launch checks passing. It ends on the whole board with a link to see my work."
     />
   );
 }

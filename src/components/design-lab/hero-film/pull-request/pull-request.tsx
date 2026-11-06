@@ -1,10 +1,11 @@
 import {DirectionStage} from '../direction-stage';
+import {PullRequestFilm} from './pull-request-film';
 
-/** Placeholder: the pull-request direction is built here. */
+/** Direction 03: the build told as a pull request, from diff to merged, then the preview zooms up into the live site. */
 export function PullRequest() {
   return (
     <DirectionStage>
-      <div className="grid h-full place-items-center font-mono text-[13px] text-muted">pull-request: in progress</div>
+      <PullRequestFilm />
     </DirectionStage>
   );
 }
