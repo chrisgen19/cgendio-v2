@@ -41,16 +41,26 @@ test('the address bar follows the note on the reading line', async ({page}) => {
   await expect(frame(page)).toContainText('/category/scissor-lift');
 });
 
-test('stops that share a page stay on one layer of the frame', async ({page}) => {
+// The Services stop used to reuse the credit application capture, so it labelled itself with that page and linked there.
+test('the Services stop points at the services page, not the credit application', async ({page}) => {
   await page.goto('/projects/access-hire');
   await page.getByRole('heading', {level: 3, name: 'Services'}).evaluate((heading) => {
     window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
   });
-  await expect(frame(page)).toContainText('/credit-application');
+  await expect(frame(page)).toContainText('/what-we-do/services');
+  await expect(frame(page)).not.toContainText('/credit-application');
+});
+
+// The opening stop and the Home page stop are both on '/', so the frame must hold one layer carrying both their boxes.
+test('stops that share a page stay on one layer of the frame', async ({page}) => {
+  await page.goto('/projects/access-hire');
+  await page.getByRole('heading', {level: 3, name: 'Home page'}).evaluate((heading) => {
+    window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
+  });
   const active = frame(page).locator('[data-state="active"]:visible');
   await expect(active).toHaveCount(1);
-  await expect(active.locator('[data-on]').getByText('Services', {exact: true})).toBeAttached();
-  await expect(active.getByText("What you'll need", {exact: true})).toBeAttached();
+  await expect(active.locator('[data-on]').getByText('Equipment categories', {exact: true})).toBeAttached();
+  await expect(active.getByText('Brand banner', {exact: true})).toBeAttached();
 });
 
 test('the address bar link meets the 44px touch target', async ({page}) => {
