@@ -180,3 +180,39 @@ test('the writing index has its own share card', async ({page, request}) => {
   expect(content(html, 'property="og:image:width"')).toContain('1200');
   expect(content(html, 'property="og:image:height"')).toContain('630');
 });
+
+/*
+ * The brand is the person's name, not the domain (#81 Phase A). People search for a name, and the previous site ranks
+ * on one, so these places have to agree.
+ */
+const BRAND = 'Chris Diomampo';
+
+test('the brand is the name in the head, not the domain', async ({page}) => {
+  const html = (await (await page.goto('/'))?.text()) ?? '';
+  // Word for word the title the previous site ranks on, "Senior" included
+  expect(html).toContain('<title>Chris Diomampo · Senior full-stack developer, Next.js and WordPress</title>');
+  expect(content(html, 'property="og:site_name"')).toContain(`content="${BRAND}"`);
+  expect(content(html, 'name="application-name"')).toContain(`content="${BRAND}"`);
+});
+
+test('the title suffix on an inner page is the name', async ({page}) => {
+  const html = (await (await page.goto('/writing'))?.text()) ?? '';
+  expect(html).toContain(`<title>Blog · ${BRAND}</title>`);
+});
+
+test('the header and footer carry the name', async ({page}) => {
+  await page.goto('/');
+  await expect(page.getByRole('banner').getByRole('link', {name: BRAND})).toBeVisible();
+  await expect(page.getByRole('contentinfo')).toContainText(`© 2026 ${BRAND} · Built with Next.js · Deployed on Coolify`);
+});
+
+test('the feed channel and the WebSite node carry the name, with the domain kept as an alternate', async ({page, request}) => {
+  const feed = await (await request.get('/feed.xml')).text();
+  expect(feed).toContain(`<title>${BRAND} · Blog</title>`);
+
+  const nodes = await graph((await (await page.goto('/'))?.text()) ?? '');
+  const site = node(nodes, 'WebSite');
+  expect(site?.name).toBe(BRAND);
+  // The domain stops being the brand, so it stays discoverable here instead
+  expect(site?.alternateName).toBe('cgdiomampo.dev');
+});

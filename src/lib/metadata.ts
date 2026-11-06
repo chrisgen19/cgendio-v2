@@ -1,6 +1,11 @@
 import type {Metadata} from 'next';
 
-export const SITE_NAME = 'Cgdiomampo.dev';
+/**
+ * The brand, used for og:site_name, the title suffix, applicationName, the header logo, the footer and the RSS channel.
+ * The name, not the domain: people search for a person (#81 Phase A). The domain stays discoverable as the WebSite
+ * node's alternateName in src/lib/structured-data.ts.
+ */
+export const SITE_NAME = 'Chris Diomampo';
 /** The RSS feed, at the same path as the previous site so existing subscribers keep working. */
 export const FEED_PATH = '/feed.xml';
 export const SITE_DESCRIPTION = 'I take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.';
@@ -10,10 +15,11 @@ export const OG_LOCALE = 'en_US';
 export const PERSON_ALTERNATE_NAME = 'Chris Diomampo';
 /** One word for the writing section, used by its title, its Blog node and its breadcrumb. "Blog" or "Writing" is #85. */
 export const BLOG_TITLE = 'Blog';
-export const HOME_TITLE = `${SITE_NAME} · Christian Diomampo, full-stack web developer`;
+/** Word for word the title the previous site ranks on, "Senior" included. */
+export const HOME_TITLE = `${SITE_NAME} · Senior full-stack developer, Next.js and WordPress`;
 
 type PageMetadataInput = {
-  /** A plain title goes through the root template ("Blog · Cgdiomampo.dev"); `{absolute}` skips it. */
+  /** A plain title goes through the root template ("Blog · Chris Diomampo"); `{absolute}` skips it. */
   title: string | {absolute: string};
   description: string;
   /** Path from the site root; metadataBase in the root layout makes it absolute. */

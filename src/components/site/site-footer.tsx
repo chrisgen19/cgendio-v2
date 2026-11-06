@@ -1,4 +1,5 @@
 import {Logo} from '@/components/ui-site/logo';
+import {SITE_NAME} from '@/lib/metadata';
 import {getSiteSettings} from '@/server/content';
 
 /** Profiles from admin Settings (socials); each link is hidden until its URL is set. */
@@ -27,7 +28,7 @@ export async function SiteFooter() {
             </li>
           ))}
         </ul>
-        <span className="font-mono text-xs text-muted">© 2026 Cgdiomampo.dev · Built with Next.js · Deployed on Coolify</span>
+        <span className="font-mono text-xs text-muted">© 2026 {SITE_NAME} · Built with Next.js · Deployed on Coolify</span>
       </div>
     </footer>
   );
