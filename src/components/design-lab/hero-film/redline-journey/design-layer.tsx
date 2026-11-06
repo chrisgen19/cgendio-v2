@@ -164,6 +164,9 @@ const Cursor: React.FC<{path: {from: Point; via: Point; to: Point}; at: number; 
   const y = interpolate(frame, keys, [path.from.y, path.via.y, path.to.y], opts);
   const press = progress(frame, click - 2, click + 1, ARRIVE) * (1 - progress(frame, click + 2, click + 8, ARRIVE));
   const o = progress(frame, at, at + 8, ARRIVE) * (1 - progress(frame, Math.min(click + 10, exit), Math.min(gone, exit + EXIT), LEAVE));
+  // On phones there's no room beside the card, so the name pill would sit on the tags: it names the cursor on the way
+  // in and is gone before the arrow lands. On desktop it hangs left of the arrow, off the card, and stays.
+  const nameOpacity = flip ? 1 : 1 - progress(frame, click - 14, click - 6, LEAVE);
   return (
     <div style={{position: 'absolute', left: 0, top: 0, translate: `${x}px ${y}px`, opacity: o, zIndex: 3}}>
       <div style={{position: 'relative', scale: `${1 - press * 0.12}`, transformOrigin: '3px 2px'}}>
@@ -184,6 +187,7 @@ const Cursor: React.FC<{path: {from: Point; via: Point; to: Point}; at: number; 
             fontWeight: 600,
             fontSize: 12,
             whiteSpace: 'nowrap',
+            opacity: nameOpacity,
           }}
         >
           Christian

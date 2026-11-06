@@ -92,8 +92,8 @@ const LEDE =
 
 export const SERVICES = ['WordPress & WooCommerce', 'Next.js & React', 'Migrations & redesigns'];
 
-/** The services from the brand card, as site tags; `trailing` (the phone's Replay) wraps in line after them. */
-export const ServiceTags: React.FC<{size: number; trailing?: React.ReactNode}> = ({size, trailing}) => (
+/** The services from the brand card, as site tags. */
+export const ServiceTags: React.FC<{size: number}> = ({size}) => (
   <ul style={{display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, margin: 0, padding: 0, listStyle: 'none'}}>
     {SERVICES.map((s) => (
       <li
@@ -116,7 +116,6 @@ export const ServiceTags: React.FC<{size: number; trailing?: React.ReactNode}> =
         {s}
       </li>
     ))}
-    {trailing ? <li style={{display: 'inline-flex'}}>{trailing}</li> : null}
   </ul>
 );
 
@@ -230,19 +229,3 @@ export const ClaimColumn: React.FC<{L: JourneyLayout; T: Timing}> = ({L, T}) => 
     </div>
   );
 };
-
-/** Restarts the film. */
-export const ReplayButton: React.FC<{onReplay: () => void}> = ({onReplay}) => (
-  <button
-    type="button"
-    onClick={onReplay}
-    className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border border-(--rl-line) bg-(--rl-surface) px-4 font-body text-[14px] font-semibold text-(--rl-ink) hover:border-(--rl-ink) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-    style={{'--rl-line': theme.line, '--rl-surface': theme.surface, '--rl-ink': theme.ink} as React.CSSProperties}
-  >
-    <svg viewBox="0 0 24 24" width={16} height={16} fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true">
-      <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
-      <path d="M3 3v5h5" />
-    </svg>
-    Replay
-  </button>
-);

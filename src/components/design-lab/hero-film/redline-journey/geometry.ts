@@ -59,7 +59,7 @@ export type JourneyLayout = {
   };
   deploy: {terminal: Rect; font: number; status: Rect; note: Rect};
   live: {window: Rect; chrome: number; toasts: Rect};
-  final: {services: Rect | null; replay: Point};
+  final: {services: Rect | null};
 };
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
@@ -238,7 +238,7 @@ const desktopLayout = (width: number, height: number): JourneyLayout => {
       note: {x: depRect.x - 10, y: depRect.y + depRect.h + 18, w: depRect.w + 20, h: 60},
     },
     live: {window: liveWin, chrome: liveChrome, toasts: {x: toastX, y: liveWin.y + liveChrome + 28, w: liveWin.x + liveWin.w - 28 - toastX, h: 0}},
-    final: {services: null, replay: {x: stage.x + 20, y: stage.y + stage.h - 20 - 44}},
+    final: {services: null},
   };
 };
 
@@ -379,7 +379,7 @@ const phoneLayout = (width: number, height: number): JourneyLayout => {
       note: {x: statusX, y: pTop + 94, w: right - 14 - statusX, h: card.h * depS - 94},
     },
     live: {window: liveWin, chrome: liveChrome, toasts: {x: stage.x + 22, y: lTop + liveH + 26, w: stage.w - 44, h: 58}},
-    final: {services: {x: stage.x + 10, y: finalTop + card.h * finalS + 14, w: stage.w - 20, h: 0}, replay: {x: 0, y: 0}},
+    final: {services: {x: stage.x + 10, y: finalTop + card.h * finalS + 14, w: stage.w - 20, h: 0}},
   };
 };
 

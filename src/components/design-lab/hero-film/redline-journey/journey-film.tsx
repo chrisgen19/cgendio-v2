@@ -8,7 +8,7 @@ import {isPortrait} from '@/components/hero-film/timeline';
 import {FilmPlayer, type LabFilmProps} from '../shared/film-player';
 import {ARRIVE, MOVE, progress} from '../shared/motion';
 import {Appear} from './anim';
-import {ClaimColumn, ReplayButton, ServiceTags} from './claim';
+import {ClaimColumn, ServiceTags} from './claim';
 import {CodeLayer} from './code-layer';
 import {DeployLayer} from './deploy-layer';
 import {DesignLayer} from './design-layer';
@@ -68,6 +68,12 @@ const CardTrack: React.FC<{L: JourneyLayout; T: Timing; children: React.ReactNod
   );
 };
 
+/**
+ * Dot colour for the stage. The shared --film-dot token is nearly the dark canvas colour, so the grid vanished in dark
+ * mode; mixing from the themed ink keeps it close to #E1E4EA in light mode and visible in dark mode.
+ */
+const STAGE_DOT = `color-mix(in srgb, ${theme.ink} 11%, transparent)`;
+
 /** The dot-grid stage the card lives on, from the first frame to the last. */
 const StagePanel: React.FC<{L: JourneyLayout}> = ({L}) => (
   <div
@@ -79,45 +85,41 @@ const StagePanel: React.FC<{L: JourneyLayout}> = ({L}) => (
       width: L.stage.w,
       height: L.stage.h,
       borderRadius: 28,
-      background: `radial-gradient(circle, ${theme.dot} 1px, transparent 1.3px) 0 0 / 26px 26px, ${theme.canvas}`,
+      background: `radial-gradient(circle, ${STAGE_DOT} 1px, transparent 1.3px) 0 0 / 26px 26px, ${theme.canvas}`,
       boxShadow: `inset 0 0 0 1px ${theme.line}`,
     }}
   />
 );
 
-/** The rest: Replay in the stage corner on desktop; on phones the services and Replay sit under the card. */
-const RestLayer: React.FC<{L: JourneyLayout; T: Timing; onReplay: () => void}> = ({L, T, onReplay}) => {
-  const at = T.final.start;
+/**
+ * The rest on phones: the services under the card (desktop shows them in the claim column). Replay is the HUD's play
+ * button, which turns into Replay once the film ends, so the film has no second one.
+ */
+const RestLayer: React.FC<{L: JourneyLayout; T: Timing}> = ({L, T}) => {
   const services = L.final.services;
-  if (services) {
-    return (
-      <Appear
-        at={at + 4}
-        dur={14}
-        from={{y: 8}}
-        style={{
-          position: 'absolute',
-          left: services.x,
-          top: services.y,
-          width: services.w,
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          gap: 8,
-        }}
-      >
-        <ServiceTags size={11} trailing={<ReplayButton onReplay={onReplay} />} />
-      </Appear>
-    );
-  }
+  if (!services) return null;
   return (
-    <Appear at={at + 8} dur={12} from={{y: 6}} style={{position: 'absolute', left: L.final.replay.x, top: L.final.replay.y}}>
-      <ReplayButton onReplay={onReplay} />
+    <Appear
+      at={T.final.start + 4}
+      dur={14}
+      from={{y: 8}}
+      style={{
+        position: 'absolute',
+        left: services.x,
+        top: services.y,
+        width: services.w,
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: 8,
+      }}
+    >
+      <ServiceTags size={11} />
     </Appear>
   );
 };
 
-const Film: React.FC<LabFilmProps & {T: Timing}> = ({worksHref, onReplay, T}) => {
+const Film: React.FC<LabFilmProps & {T: Timing}> = ({worksHref, T}) => {
   const {width, height} = useVideoConfig();
   const L = useMemo(() => computeLayout(width, height, isPortrait(width, height)), [width, height]);
   return (
@@ -136,7 +138,7 @@ const Film: React.FC<LabFilmProps & {T: Timing}> = ({worksHref, onReplay, T}) =>
       <CodeLayer L={L} T={T} />
       <LiveToasts L={L} T={T} />
       <ClaimColumn L={L} T={T} />
-      <RestLayer L={L} T={T} onReplay={onReplay} />
+      <RestLayer L={L} T={T} />
     </AbsoluteFill>
   );
 };

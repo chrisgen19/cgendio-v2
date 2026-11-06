@@ -367,8 +367,9 @@ function ChapterNav({variant, chapters, current, atRest, segmentRefs, onJump, on
     const label = atRest ? 'cgdiomampo.dev' : current >= 0 ? `${String(current + 1).padStart(2, '0')} ${chapters[current].label}` : 'Intro';
     return (
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 pr-[72px] pb-3 pl-4">
-        <div className="flex items-center justify-between gap-3">
-          <span aria-live="polite" className="font-mono text-[12px] tracking-[0.08em] text-(--hud-fg) uppercase opacity-70">
+        {/* The film shows its own step label, so the chapter name is only announced, not drawn a second time */}
+        <div className="flex items-center justify-end gap-3">
+          <span aria-live="polite" className="sr-only">
             {label}
           </span>
           <div className="pointer-events-auto">{skipButton}</div>
