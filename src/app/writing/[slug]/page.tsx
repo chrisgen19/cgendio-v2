@@ -18,17 +18,17 @@ export async function generateStaticParams() {
   return slugs.length > 0 ? slugs.map((slug) => ({slug})) : [{slug: 'no-posts'}];
 }
 
-export async function generateMetadata({params}: PageProps<'/blog/[slug]'>): Promise<Metadata> {
+export async function generateMetadata({params}: PageProps<'/writing/[slug]'>): Promise<Metadata> {
   const post = await getPost((await params).slug);
   if (!post) notFound();
-  return pageMetadata({title: post.title, description: post.excerpt, path: `/blog/${post.slug}`, article: {publishedTime: post.date}});
+  return pageMetadata({title: post.title, description: post.excerpt, path: `/writing/${post.slug}`, article: {publishedTime: post.date}});
 }
 
 /**
  * A post. Drafts and unknown slugs get a real 404: the lookup and notFound() happen before anything streams, so the
  * status code is still 404 rather than a 200 with a not-found page.
  */
-export default async function PostPage({params}: PageProps<'/blog/[slug]'>) {
+export default async function PostPage({params}: PageProps<'/writing/[slug]'>) {
   const {slug} = await params;
   const post = await getPost(slug);
   if (!post) notFound();

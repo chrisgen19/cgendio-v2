@@ -3,10 +3,10 @@ import {expect, test} from '@playwright/test';
 /* Seeded published posts, newest first: "WordPress news, October 2026…", "Redirect maps…". The four canvas posts are drafts. */
 
 test('blog list, then a post, then the next post', async ({page}) => {
-  await page.goto('/blog');
+  await page.goto('/writing');
   await page.getByRole('link', {name: /Redirect maps for a WordPress/}).click();
 
-  await expect(page).toHaveURL(/\/blog\/redirect-maps-wordpress-to-nextjs$/);
+  await expect(page).toHaveURL(/\/writing\/redirect-maps-wordpress-to-nextjs$/);
   await expect(page.getByRole('heading', {level: 1})).toHaveText('Redirect maps for a WordPress to Next.js migration');
 
   // "Next article" is the newer post
@@ -14,12 +14,12 @@ test('blog list, then a post, then the next post', async ({page}) => {
     .getByRole('navigation', {name: 'Previous and next articles'})
     .getByRole('link', {name: /Next article.*WordPress news, October 2026/})
     .click();
-  await expect(page).toHaveURL(/\/blog\/wordpress-news-october-2026$/);
+  await expect(page).toHaveURL(/\/writing\/wordpress-news-october-2026$/);
   await expect(page.getByRole('heading', {level: 1})).toHaveText("WordPress news, October 2026: what to patch and what's coming in 7.2");
 });
 
 test('the RSS feed is valid XML with every published post', async ({page, request}) => {
-  const response = await request.get('/blog/rss.xml');
+  const response = await request.get('/feed.xml');
   expect(response.ok()).toBe(true);
   expect(response.headers()['content-type']).toMatch(/xml/);
 
@@ -36,5 +36,5 @@ test('the RSS feed is valid XML with every published post', async ({page, reques
   expect(feed.error).toBeNull();
   expect(feed.title).toBeTruthy();
   expect(feed.links).toHaveLength(2);
-  expect(feed.links[0]).toBe('http://localhost:3100/blog/wordpress-news-october-2026');
+  expect(feed.links[0]).toBe('http://localhost:3100/writing/wordpress-news-october-2026');
 });

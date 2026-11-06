@@ -16,7 +16,7 @@ export async function BlogTeaser() {
           <MarkedText text={copy['blog.heading']} />
         </SectionHeading>
         <p className="m-0 max-w-[360px] text-base leading-[1.55] text-muted">{copy['blog.lede']}</p>
-        <Button href="/blog" size="sm" className="mt-2 self-start">
+        <Button href="/writing" size="sm" className="mt-2 self-start">
           {copy['blog.allLabel']}
         </Button>
       </div>

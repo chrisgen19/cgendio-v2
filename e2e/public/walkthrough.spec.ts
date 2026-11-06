@@ -20,7 +20,7 @@ test.beforeEach(async ({page}) => {
 });
 
 test('Access Hire opens on the frame with its facts in view', async ({page}) => {
-  await page.goto('/work/access-hire');
+  await page.goto('/projects/access-hire');
   await expect(page.getByRole('heading', {level: 1})).toHaveText('Access Hire Australia');
   await expect(frame(page)).toBeVisible();
   await expect(main(page).getByRole('definition').filter({hasText: 'Senior Full Stack Developer'})).toBeVisible();
@@ -28,13 +28,13 @@ test('Access Hire opens on the frame with its facts in view', async ({page}) => 
 });
 
 test('the opening stop shows in the frame but has no note of its own', async ({page}) => {
-  await page.goto('/work/access-hire');
+  await page.goto('/projects/access-hire');
   await expect(main(page).locator('[data-stop]')).toHaveCount(7);
   await expect(frame(page).getByText('Brand banner').first()).toBeAttached();
 });
 
 test('the address bar follows the note on the reading line', async ({page}) => {
-  await page.goto('/work/access-hire');
+  await page.goto('/projects/access-hire');
   await page.getByRole('heading', {level: 3, name: 'Category page'}).evaluate((heading) => {
     window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
   });
@@ -42,7 +42,7 @@ test('the address bar follows the note on the reading line', async ({page}) => {
 });
 
 test('stops that share a page stay on one layer of the frame', async ({page}) => {
-  await page.goto('/work/access-hire');
+  await page.goto('/projects/access-hire');
   await page.getByRole('heading', {level: 3, name: 'Services'}).evaluate((heading) => {
     window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
   });
@@ -54,7 +54,7 @@ test('stops that share a page stay on one layer of the frame', async ({page}) =>
 });
 
 test('the address bar link meets the 44px touch target', async ({page}) => {
-  await page.goto('/work/access-hire');
+  await page.goto('/projects/access-hire');
   const box = await frame(page)
     .getByRole('link', {name: /on the live site/})
     .boundingBox();
@@ -66,14 +66,14 @@ test('only the visible device downloads its first capture', async ({page}, testI
   const shown = testInfo.project.name === 'mobile' ? 'home-mobile' : 'home-desktop';
   const requested: string[] = [];
   page.on('request', (request) => requested.push(decodeURIComponent(request.url())));
-  await page.goto('/work/access-hire');
+  await page.goto('/projects/access-hire');
   await expect.poll(() => requested.some((url) => url.includes(shown))).toBe(true);
   await page.waitForLoadState('networkidle');
   expect(requested.filter((url) => url.includes(hidden))).toEqual([]);
 });
 
 test('the device switch changes the frame', async ({page}, testInfo) => {
-  await page.goto('/work/access-hire');
+  await page.goto('/projects/access-hire');
   const target = testInfo.project.name === 'mobile' ? 'desktop' : 'mobile';
   await frame(page)
     .getByRole('button', {name: target === 'mobile' ? 'Mobile' : 'Desktop'})
@@ -83,7 +83,7 @@ test('the device switch changes the frame', async ({page}, testInfo) => {
 });
 
 test('the write-up shows and empty reasoning stays hidden', async ({page}) => {
-  await page.goto('/work/access-hire');
+  await page.goto('/projects/access-hire');
   await expect(page.getByRole('heading', {level: 2, name: 'The short version'})).toBeVisible();
   await expect(page.getByRole('heading', {level: 3, name: 'Built'})).toBeVisible();
   await expect(page.getByRole('navigation', {name: 'Write-up sections'}).getByRole('link', {name: 'Built'})).toBeVisible();
@@ -99,7 +99,7 @@ test.describe('on a tall desktop viewport', () => {
   test('each write-up jump link marks the chapter it jumps to', async ({page}, testInfo) => {
     test.skip(testInfo.project.name === 'mobile', 'The desktop index; the viewport is set above');
     for (const slug of ['access-hire', 'fresh-fruit-and-veg']) {
-      await page.goto(`/work/${slug}`);
+      await page.goto(`/projects/${slug}`);
       const links = page.getByRole('navigation', {name: 'Write-up sections'}).getByRole('link');
       const count = await links.count();
       expect(count).toBeGreaterThan(1);
@@ -120,8 +120,8 @@ test.describe('on a tall desktop viewport', () => {
 });
 
 test('the next project and contact sections follow the tour', async ({page}) => {
-  await page.goto('/work/access-hire');
-  await expect(page.getByRole('navigation', {name: 'Next project'}).getByRole('link')).toHaveAttribute('href', /^\/work\/[a-z0-9-]+$/);
+  await page.goto('/projects/access-hire');
+  await expect(page.getByRole('navigation', {name: 'Next project'}).getByRole('link')).toHaveAttribute('href', /^\/projects\/[a-z0-9-]+$/);
   await expect(main(page).locator('#contact')).toBeVisible();
 });
 
@@ -129,7 +129,7 @@ test.describe('reduced motion', () => {
   test.use({reducedMotion: 'reduce'});
 
   test('each note shows its own capture instead of the pinned frame', async ({page}) => {
-    await page.goto('/work/access-hire');
+    await page.goto('/projects/access-hire');
     await expect(frame(page)).toBeHidden();
     await expect(page.getByRole('img', {name: /scissor lift category page/}).first()).toBeVisible();
   });
@@ -139,7 +139,7 @@ test.describe('without JavaScript', () => {
   test.use({javaScriptEnabled: false});
 
   test('each note shows its own capture and the switch is gone', async ({page}) => {
-    await page.goto('/work/access-hire');
+    await page.goto('/projects/access-hire');
     await expect(page.getByRole('heading', {level: 3, name: 'Branch finder'})).toBeVisible();
     await expect(page.getByRole('img', {name: /branch finder/}).first()).toBeVisible();
     await expect(page.getByRole('button', {name: 'Mobile'})).toBeHidden();
@@ -147,14 +147,14 @@ test.describe('without JavaScript', () => {
 });
 
 test('a project without a tour keeps the current layout', async ({page}) => {
-  await page.goto(`/work/${NO_TOUR_SLUG}`);
+  await page.goto(`/projects/${NO_TOUR_SLUG}`);
   await expect(frame(page)).toHaveCount(0);
   await expect(main(page).getByRole('term').filter({hasText: 'Client'})).toBeVisible();
   await expect(main(page).locator('article img[src^="data:image/png"]')).toBeVisible();
 });
 
 test('a stop on a subdomain shows and links to its own address', async ({page}) => {
-  await page.goto('/work/myimprov');
+  await page.goto('/projects/myimprov');
   await page.getByRole('heading', {level: 3, name: 'Student login'}).evaluate((heading) => {
     window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
   });
@@ -168,28 +168,28 @@ test('a stop on a subdomain shows and links to its own address', async ({page}) 
 });
 
 test('MyImprov shows a note for each stop after its opening, including two states', async ({page}) => {
-  await page.goto('/work/myimprov');
+  await page.goto('/projects/myimprov');
   await expect(main(page).locator('[data-stop]')).toHaveCount(6);
   await expect(page.getByRole('heading', {level: 3, name: 'California'})).toBeVisible();
   await expect(page.getByRole('heading', {level: 3, name: 'Texas'})).toBeVisible();
 });
 
 test('Merthyr Village shows a note for each stop after its opening', async ({page}) => {
-  await page.goto('/work/merthyr-village');
+  await page.goto('/projects/merthyr-village');
   await expect(frame(page)).toBeVisible();
   await expect(main(page).locator('[data-stop]')).toHaveCount(4);
   await expect(page.getByRole('heading', {level: 3, name: 'Tenant page'})).toBeVisible();
 });
 
 test('Experience Sunnybank shows a note for each stop after its opening', async ({page}) => {
-  await page.goto('/work/experience-sunnybank');
+  await page.goto('/projects/experience-sunnybank');
   await expect(frame(page)).toBeVisible();
   await expect(main(page).locator('[data-stop]')).toHaveCount(5);
   await expect(page.getByRole('heading', {level: 3, name: 'Specialty stores'})).toBeVisible();
 });
 
 test('Fresh Fruit and Veg Shop shows a note for each stop after its opening', async ({page}) => {
-  await page.goto('/work/fresh-fruit-and-veg');
+  await page.goto('/projects/fresh-fruit-and-veg');
   await expect(frame(page)).toBeVisible();
   await expect(main(page).locator('[data-stop]')).toHaveCount(3);
   await expect(page.getByRole('heading', {level: 3, name: 'Office boxes'})).toBeVisible();

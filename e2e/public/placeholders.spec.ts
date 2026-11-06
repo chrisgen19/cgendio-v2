@@ -25,7 +25,7 @@ const placeholdersOn = async (page: Page, path: string) => {
   return [...new Set(text.match(PLACEHOLDER) ?? [])];
 };
 
-for (const path of ['/', '/blog']) {
+for (const path of ['/', '/writing']) {
   test(`${path} has no placeholder text`, async ({page}) => {
     expect(await placeholdersOn(page, path)).toEqual([]);
   });
@@ -34,8 +34,8 @@ for (const path of ['/', '/blog']) {
 // The sitemap lists every published post and case study (the RSS feed stops at 20), so a new one is covered without
 // touching this test
 for (const [kind, prefix] of [
-  ['post', '/blog/'],
-  ['case study', '/work/'],
+  ['post', '/writing/'],
+  ['case study', '/projects/'],
 ]) {
   test(`every published ${kind} has no placeholder text`, async ({page, request}) => {
     const xml = await (await request.get('/sitemap.xml')).text();

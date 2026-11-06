@@ -1,6 +1,8 @@
 import type {Metadata} from 'next';
 
 export const SITE_NAME = 'Cgdiomampo.dev';
+/** The RSS feed, at the same path as the previous site so existing subscribers keep working. */
+export const FEED_PATH = '/feed.xml';
 export const SITE_DESCRIPTION = 'I take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.';
 
 type PageMetadataInput = {
@@ -24,7 +26,8 @@ export const pageMetadata = ({title, description, path, article}: PageMetadataIn
   return {
     title,
     description,
-    alternates: {canonical: path},
+    // The feed link sits here, not in the root layout: a route's `alternates` replaces the parent's instead of merging
+    alternates: {canonical: path, types: {'application/rss+xml': [{url: FEED_PATH, title: `${SITE_NAME} writing`}]}},
     openGraph: article ? {...shared, type: 'article', publishedTime: article.publishedTime} : {...shared, type: 'website'},
     twitter: {card: 'summary_large_image', title: cardTitle, description},
   };

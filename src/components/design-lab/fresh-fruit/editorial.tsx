@@ -196,7 +196,7 @@ export function Editorial() {
         </a>
         <div className={styles.footerBottom}>
           <a href="/#work">Back to all work</a>
-          <a href="/work/access-hire">
+          <a href="/projects/access-hire">
             Next: Access Hire Australia <ArrowRight size={18} aria-hidden="true" />
           </a>
         </div>

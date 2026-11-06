@@ -39,7 +39,7 @@ const save = async (page: Page) => {
  */
 const openSaved = async (page: Page, saved: (main: Locator) => Locator) => {
   await expect(async () => {
-    await page.goto('/work/access-hire');
+    await page.goto('/projects/access-hire');
     await expect(saved(page.getByRole('main'))).toBeVisible({timeout: 1000});
   }).toPass({timeout: 15_000});
 };

@@ -16,7 +16,7 @@ export async function PostArticle({post}: {post: PostDetail}) {
     <article>
       <Section padding="cta" innerClassName="flex flex-col gap-6 pt-6 max-md:pt-0">
         <Link
-          href="/blog"
+          href="/writing"
           className="inline-flex min-h-11 items-center gap-2 self-start text-[15px] font-semibold text-ink no-underline hover:text-accent"
         >
           <svg

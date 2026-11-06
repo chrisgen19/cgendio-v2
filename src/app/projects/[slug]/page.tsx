@@ -18,14 +18,14 @@ export async function generateStaticParams() {
   return slugs.length > 0 ? slugs.map((slug) => ({slug})) : [{slug: 'no-projects'}];
 }
 
-export async function generateMetadata({params}: PageProps<'/work/[slug]'>): Promise<Metadata> {
+export async function generateMetadata({params}: PageProps<'/projects/[slug]'>): Promise<Metadata> {
   const project = await getProject((await params).slug);
   if (!project) notFound();
-  return pageMetadata({title: project.title, description: project.summary, path: `/work/${project.slug}`});
+  return pageMetadata({title: project.title, description: project.summary, path: `/projects/${project.slug}`});
 }
 
 /** A case study. Drafts and unknown slugs 404 before anything streams (see the post page for why that matters). */
-export default async function CaseStudyPage({params}: PageProps<'/work/[slug]'>) {
+export default async function CaseStudyPage({params}: PageProps<'/projects/[slug]'>) {
   const {slug} = await params;
   const project = await getProject(slug);
   if (!project) notFound();

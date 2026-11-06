@@ -20,13 +20,13 @@ export function PostNav({previous, next}: PostNavProps) {
     <Section padding="cta" className="pt-14">
       <nav aria-label="Previous and next articles" className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
         {previous ? (
-          <Link href={`/blog/${previous.slug}`} className={CARD}>
+          <Link href={`/writing/${previous.slug}`} className={CARD}>
             <span className="font-mono text-xs tracking-[0.06em] text-muted uppercase">Previous article</span>
             <span className="font-display text-[22px] leading-[1.2] font-[650] tracking-[-0.02em]">{previous.title}</span>
           </Link>
         ) : null}
         {next ? (
-          <Link href={`/blog/${next.slug}`} className={cn(CARD, 'col-start-2 text-right max-md:col-start-1 max-md:text-left')}>
+          <Link href={`/writing/${next.slug}`} className={cn(CARD, 'col-start-2 text-right max-md:col-start-1 max-md:text-left')}>
             <span className="font-mono text-xs tracking-[0.06em] text-muted uppercase">Next article</span>
             <span className="font-display text-[22px] leading-[1.2] font-[650] tracking-[-0.02em]">{next.title}</span>
           </Link>

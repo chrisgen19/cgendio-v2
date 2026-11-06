@@ -27,7 +27,7 @@ export default function FreshFruitDesignLab() {
         <Link href="/" className={styles.wordmark}>
           cgdiomampo.dev
         </Link>
-        <Link href="/work/fresh-fruit-and-veg">
+        <Link href="/projects/fresh-fruit-and-veg">
           <ArrowLeft size={16} aria-hidden="true" /> Current case study
         </Link>
       </header>

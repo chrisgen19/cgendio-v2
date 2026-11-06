@@ -209,7 +209,7 @@ export function Kinetic() {
           <Link href="/#work">
             Back to all work <ArrowRight size={18} aria-hidden="true" />
           </Link>
-          <Link href="/work/access-hire">
+          <Link href="/projects/access-hire">
             Next: Access Hire Australia <ArrowUpRight size={18} aria-hidden="true" />
           </Link>
         </div>

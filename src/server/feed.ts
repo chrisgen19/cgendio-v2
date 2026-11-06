@@ -10,7 +10,7 @@ const escapeXml = (value: string) =>
 const rssDate = (isoDate: string) => new Date(`${isoDate}T00:00:00Z`).toUTCString();
 
 /**
- * The RSS 2.0 feed for /blog/rss.xml: the 20 newest published posts. Cached under the posts tag, so publishing in the
+ * The RSS 2.0 feed for /feed.xml: the 20 newest published posts. Cached under the posts tag, so publishing in the
  * admin refreshes it. lastBuildDate is the newest post's date rather than the current time, which keeps it cacheable.
  */
 export const getFeedXml = async (): Promise<string> => {
@@ -21,7 +21,7 @@ export const getFeedXml = async (): Promise<string> => {
   const site = siteEnv().NEXT_PUBLIC_SITE_URL;
   const items = posts
     .map((post) => {
-      const url = `${site}/blog/${post.slug}`;
+      const url = `${site}/writing/${post.slug}`;
       return [
         '    <item>',
         `      <title>${escapeXml(post.title)}</title>`,
@@ -39,10 +39,10 @@ export const getFeedXml = async (): Promise<string> => {
     '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
     '  <channel>',
     '    <title>Cgdiomampo.dev blog</title>',
-    `    <link>${escapeXml(`${site}/blog`)}</link>`,
+    `    <link>${escapeXml(`${site}/writing`)}</link>`,
     `    <description>${escapeXml(copy['blog.lede'])}</description>`,
     '    <language>en</language>',
-    `    <atom:link href="${escapeXml(`${site}/blog/rss.xml`)}" rel="self" type="application/rss+xml"/>`,
+    `    <atom:link href="${escapeXml(`${site}/feed.xml`)}" rel="self" type="application/rss+xml"/>`,
     ...(posts[0] ? [`    <lastBuildDate>${rssDate(posts[0].date)}</lastBuildDate>`] : []),
     items,
     '  </channel>',

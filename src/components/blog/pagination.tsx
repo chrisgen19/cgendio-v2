@@ -8,7 +8,7 @@ type PaginationProps = {
   tag: string | null;
 };
 
-/** "Newer posts" / "Older posts" for /blog. Hidden when everything fits on one page. */
+/** "Newer posts" / "Older posts" for /writing. Hidden when everything fits on one page. */
 export function Pagination({page, pageCount, tag}: PaginationProps) {
   if (pageCount <= 1) return null;
   return (

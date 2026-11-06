@@ -4,7 +4,7 @@ import {consumeStartupToken, STARTUP_REVALIDATE_HEADER} from '@/server/startup-r
 
 /**
  * Marks every content tag stale once after a server start (src/server/startup-revalidation.ts). A 404 for anyone else.
- * `max`, not `{expire: 0}`: expiring the tags made the blocking re-render of /blog/[slug] and /work/[slug] fail with
+ * `max`, not `{expire: 0}`: expiring the tags made the blocking re-render of /writing/[slug] and /projects/[slug] fail with
  * "uncached or runtime data during prerendering" (Next 16.4.2), while stale-while-revalidate renders them in the
  * background like an admin save does. So the first visit to a page after a restart
  * can still get its build-time copy, and the next visit gets the fresh one.

@@ -231,7 +231,7 @@ export function Swiss() {
         </a>
         <div className={styles.footerNav}>
           <a href="/#work">All selected work</a>
-          <a href="/work/access-hire">
+          <a href="/projects/access-hire">
             Next / Access Hire Australia <ArrowRight size={20} aria-hidden="true" />
           </a>
         </div>

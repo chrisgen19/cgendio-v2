@@ -79,7 +79,7 @@ export function ProjectCard({project, place}: ProjectCardProps) {
               ))}
             </div>
             <Link
-              href={`/work/${project.slug}`}
+              href={`/projects/${project.slug}`}
               className={cn(
                 'mt-2 inline-flex min-h-11 items-center gap-2.5 self-start rounded-pill px-[18px] text-sm leading-none font-semibold no-underline transition-[background-color,color,translate] duration-200 hover:-translate-y-px motion-reduce:transition-none motion-reduce:hover:translate-y-0 max-md:mt-1',
                 brand ? BRAND_LINK : LINK_THEMES[project.theme],
