@@ -6,12 +6,12 @@ import {z} from 'zod';
  * the auth or R2 secrets.
  */
 
-const serverEnvSchema = z.object({
+export const serverEnvSchema = z.object({
   DATABASE_URL: z.url({protocol: /^postgres(ql)?$/, error: 'DATABASE_URL must be a postgres:// or postgresql:// URL'}),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });
 
-const authEnvSchema = z.object({
+export const authEnvSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32, {error: 'BETTER_AUTH_SECRET must be at least 32 characters (openssl rand -base64 32)'}),
   BETTER_AUTH_URL: z.url(),
   GITHUB_CLIENT_ID: z.string().min(1),
@@ -29,7 +29,7 @@ const authEnvSchema = z.object({
     .pipe(z.array(z.email()).min(1)),
 });
 
-const r2EnvSchema = z.object({
+export const r2EnvSchema = z.object({
   R2_ACCOUNT_ID: z.string().min(1),
   R2_ACCESS_KEY_ID: z.string().min(1),
   R2_SECRET_ACCESS_KEY: z.string().min(1),
@@ -38,7 +38,7 @@ const r2EnvSchema = z.object({
 });
 
 /** Contact form email. Without a key the message is still stored, and only the notification is skipped. */
-const mailEnvSchema = z.object({
+export const mailEnvSchema = z.object({
   RESEND_API_KEY: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
   MAIL_FROM: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(3).default('Chris Diomampo <onboarding@resend.dev>')),
 });
@@ -50,7 +50,7 @@ const mailEnvSchema = z.object({
  * page: a typo in an optional setting must not be able to take the site down. A malformed id turns analytics off and
  * is logged once per process instead. (The previous site threw here, but it only read the value at build time.)
  */
-const analyticsEnvSchema = z.object({
+export const analyticsEnvSchema = z.object({
   GA_MEASUREMENT_ID: z.preprocess(
     (value) => (value === '' ? undefined : value),
     z
@@ -65,7 +65,7 @@ const analyticsEnvSchema = z.object({
  * the site owner. Public by design. Like analytics it never throws: a malformed key turns IndexNow off with a warning,
  * so a typo can't fail an admin save or the key route (#81).
  */
-const indexNowEnvSchema = z.object({
+export const indexNowEnvSchema = z.object({
   INDEXNOW_KEY: z.preprocess(
     (value) => (value === '' ? undefined : value),
     z
