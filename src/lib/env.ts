@@ -40,7 +40,7 @@ const r2EnvSchema = z.object({
 /** Contact form email. Without a key the message is still stored, and only the notification is skipped. */
 const mailEnvSchema = z.object({
   RESEND_API_KEY: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
-  MAIL_FROM: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(3).default('Cgdiomampo.dev <onboarding@resend.dev>')),
+  MAIL_FROM: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(3).default('Chris Diomampo <onboarding@resend.dev>')),
 });
 
 /** The public origin, for absolute URLs (the RSS feed now, canonical URLs and OG images in Phase 7). No trailing slash. */
