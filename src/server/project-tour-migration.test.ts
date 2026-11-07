@@ -237,15 +237,16 @@ describe('project fresh fruit summary migration', () => {
     expect(freshFruit?.summary).toBe('Weekly fruit and veg boxes for homes and offices in Glasgow, sold as WooCommerce subscriptions.');
   });
 
-  it('sets the seed summary, only while the office summary is still there', () => {
-    expect(sql).toContain(
-      `UPDATE "projects" SET "summary" = ${quoted(freshFruit?.summary ?? '')} WHERE "slug" = 'fresh-fruit-and-veg' AND "summary" = ${quoted(OFFICE_SUMMARY)};`,
+  // The whole migration, comments aside, is this one guarded statement: an extra update (indented or not) fails here
+  it('sets the seed summary and the save time, only while the office summary is still there, and nothing else', () => {
+    const statements = sql
+      .split('\n')
+      .filter((line) => !line.trimStart().startsWith('--'))
+      .join('\n')
+      .trim();
+    expect(statements).toBe(
+      `UPDATE "projects" SET "summary" = ${quoted(freshFruit?.summary ?? '')}, "updated_at" = CURRENT_TIMESTAMP WHERE "slug" = 'fresh-fruit-and-veg' AND "summary" = ${quoted(OFFICE_SUMMARY)};`,
     );
-  });
-
-  it('changes only the summary', () => {
-    expect(sql.match(/^UPDATE /gm)).toHaveLength(1);
-    expect(sql).not.toMatch(/SET "(kind_label|tags|case_study)"/);
   });
 });
 
