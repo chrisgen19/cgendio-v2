@@ -531,6 +531,8 @@ All three fonts are free Google Fonts (SIL Open Font License).
 
 Display headlines use tight tracking (about −0.04em) and a line-height just under 1.
 
+Since #92 the same three fonts are self-hosted with `next/font/local` (`src/app/fonts.ts`, files in `src/app/_fonts`); the CSS variables and tokens below are unchanged. The original setup:
+
 ```tsx
 // src/app/fonts.ts
 import {Bricolage_Grotesque, Geist, Geist_Mono} from 'next/font/google';
