@@ -1,4 +1,5 @@
-import {expect, test} from '@playwright/test';
+import {expect, type Page, test} from '@playwright/test';
+import {GA_TEST_ID} from '../support/test-env';
 
 /*
  * The SEO surface the previous site published, which this one has to keep through the cutover (#81 Phase C). These are
@@ -250,4 +251,33 @@ test('the share card alt texts use the brand name', async ({page}) => {
     const html = (await (await page.goto(path ?? '/'))?.text()) ?? '';
     expect(content(html, 'property="og:image:alt"'), path).toContain(`${BRAND} ${suffix}`);
   }
+});
+
+/*
+ * Analytics (#81 Phase A: keep the previous site's GA4 property). The public pages carry the tag; the admin, sign-in
+ * and draft previews must not, which is why it is mounted by the public chrome rather than the root layout.
+ *
+ * These check the browser, not the HTML. next/script injects an afterInteractive script after hydration, so it is
+ * never in the server response, and the response for an untracked page can still mention gtag inside the RSC payload
+ * of a route it prefetches. What matters is whether the tag actually runs.
+ */
+const gaLoader = (page: Page) => page.locator(`script[src*="googletagmanager.com/gtag/js?id=${GA_TEST_ID}"]`);
+const dataLayerType = (page: Page) => page.evaluate(() => typeof (window as unknown as {dataLayer?: unknown[]}).dataLayer);
+
+for (const path of ['/', '/writing', '/writing/wordpress-news-october-2026', '/projects/access-hire', '/contact']) {
+  test(`${path} loads the analytics tag`, async ({page}) => {
+    await page.goto(path);
+    await expect(gaLoader(page)).toHaveCount(1);
+    await expect(page.locator('script#ga-config')).toHaveCount(1);
+    await expect.poll(() => dataLayerType(page)).toBe('object');
+  });
+}
+
+test('the sign-in page is not tracked', async ({page}) => {
+  await page.goto('/sign-in');
+  // Wait for the page to be up before asserting an absence, so this cannot pass by racing next/script's injection
+  await expect(page.getByRole('heading', {level: 1})).toBeVisible();
+  await expect(page.locator('script#ga-config')).toHaveCount(0);
+  await expect(gaLoader(page)).toHaveCount(0);
+  expect(await dataLayerType(page)).toBe('undefined');
 });

@@ -1,3 +1,4 @@
+import {GoogleAnalytics} from '@/components/site/google-analytics';
 import {SiteFooter} from '@/components/site/site-footer';
 import {SiteHeader} from '@/components/site/site-header';
 import {SkipLink} from '@/components/site/skip-link';
@@ -18,6 +19,7 @@ export function HomePage() {
   return (
     <>
       <SkipLink />
+      <GoogleAnalytics />
       <SiteHeader overlay />
       <main id="main" tabIndex={-1} className="focus-visible:outline-none">
         {/* Inside <main> so every piece of content sits in a landmark */}
