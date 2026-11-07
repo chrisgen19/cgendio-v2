@@ -181,7 +181,8 @@ function Note({note, number, liveUrl, host, optimizedUrls}: NoteProps) {
                   <a
                     href={href}
                     rel="noreferrer"
-                    className="-my-3 inline-flex min-h-11 scroll-mt-[46svh] scroll-mb-24 items-center gap-1.5 font-mono text-xs break-all lg:scroll-mt-24"
+                    // min-w-11 so a short path ("/") still gives a 44px-wide target
+                    className="-my-3 inline-flex min-h-11 min-w-11 scroll-mt-[46svh] scroll-mb-24 items-center gap-1.5 font-mono text-xs break-all lg:scroll-mt-24"
                   >
                     {page}
                     <span className="sr-only">: open {note.heading} on the live site</span>

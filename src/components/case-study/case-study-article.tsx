@@ -42,7 +42,7 @@ export async function CaseStudyArticle({project}: {project: ProjectDetail}) {
   const brand = brandPanelStyle(project.brandColor, project.brandTint);
   return (
     <article>
-      <Section padding="cta" innerClassName="flex flex-col gap-6 pt-6 max-md:pt-0">
+      <Section padding="head" innerClassName="flex flex-col gap-6 pt-6 max-md:pt-0">
         <Link
           href="/#work"
           className="inline-flex min-h-11 items-center gap-2 self-start text-[15px] font-semibold text-ink no-underline hover:text-accent"
@@ -85,7 +85,7 @@ export async function CaseStudyArticle({project}: {project: ProjectDetail}) {
         </h1>
         <p className="m-0 max-w-[640px] text-lg leading-[1.55] text-muted max-md:text-base">{project.summary}</p>
       </Section>
-      <Section tone="white" innerClassName="flex flex-col gap-12">
+      <Section tone="white" padding="under-head" innerClassName="flex flex-col gap-12">
         <dl className="m-0 grid grid-cols-4 gap-6 border-y border-line py-7 max-lg:grid-cols-2 max-md:grid-cols-1">
           <Fact label="Client">{client}</Fact>
           <Fact label="Role">{project.role ?? '[Role]'}</Fact>

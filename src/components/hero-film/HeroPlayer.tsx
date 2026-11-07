@@ -430,7 +430,8 @@ function MobileHud({chapters, current, frame, atBrand, ended, playing, onJump, o
               onClick={(e) => onJump(c.startFrame, e)}
               aria-label={`Jump to ${c.label}`}
               aria-current={active ? 'step' : undefined}
-              className="group flex h-8 flex-1 items-center"
+              // The bar stays 32px tall; the ::after reaches down through the HUD's own bottom padding for a 44px target
+              className="group relative flex h-8 flex-1 items-center after:absolute after:inset-x-0 after:top-0 after:-bottom-3 after:content-['']"
             >
               <span className="relative block h-1 w-full overflow-hidden rounded-full bg-line">
                 <span
