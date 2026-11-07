@@ -94,7 +94,18 @@ So an https value served over plain http makes the browser upgrade the page's ow
 - **Redeploy the previous image or commit** in Coolify. That is the whole procedure for anything that does not involve a migration.
 - **Migrations only go forward.** Redeploying an older commit does not undo one; `prisma migrate deploy` reports no pending migrations. This is exactly why migrations have to be additive: an older release has to keep working on the newer schema.
 - **To genuinely undo a migration**, write a *forward* migration that reverses it, and keep that additive too (drop in a later deploy than the one that stopped using the column).
-- **Running anything by hand** means a checkout with `DATABASE_URL` pointed at production, for example through an SSH tunnel. The image has no Prisma CLI. Generate the SQL with `prisma migrate diff --from-schema <schema from main> --to-schema prisma/schema.prisma --script` and apply it with `pnpm db:deploy`, then restart the container so `revalidateContentOnStart()` runs.
+- **Running anything by hand** means a checkout with `DATABASE_URL` pointed at production, for example through an SSH tunnel. The image has no Prisma CLI. `prisma migrate dev` will not run non-interactively, so write the migration yourself: `--script` prints to stdout, and `prisma migrate deploy` only applies folders under `prisma/migrations`, so SQL that is not saved into one is never applied - and the deploy still reports no pending migrations, which reads as success.
+
+  ```bash
+  dir=prisma/migrations/$(date -u +%Y%m%d%H%M%S)_revert_<name>
+  mkdir -p "$dir"
+  pnpm exec prisma migrate diff \
+    --from-schema <schema.prisma from main> --to-schema prisma/schema.prisma --script > "$dir/migration.sql"
+  # read the SQL before applying it
+  pnpm db:deploy
+  ```
+
+  Keep it a folder rather than running the SQL with `prisma db execute`: the folder records a row in `_prisma_migrations`, so the repo's history and the database stay in step and the next image build's `migrate deploy` knows the change has been applied. Restart the container afterwards so `revalidateContentOnStart()` runs.
 - **The real rollback is v1.** Keep the `cgendio-v1` app stopped but not deleted, with its own database untouched, until v2 has been stable for a while (#81 Phase F).
 
 ## Operations
