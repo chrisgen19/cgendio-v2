@@ -279,6 +279,31 @@ test('posts and case studies advertise their Markdown version; other pages do no
   }
 });
 
+/** The previous site's sitemap lastmod for each case study (#81 Phase D): the seed carries them over instead of its own time. */
+const LIVE_PROJECT_LASTMOD = {
+  'access-hire': '2026-10-04T03:27:38.395Z',
+  myimprov: '2026-10-04T03:27:38.410Z',
+  'merthyr-village': '2026-10-04T03:27:38.416Z',
+  'experience-sunnybank': '2026-10-04T03:27:38.426Z',
+  'premium-mobile-car-valeting': '2026-10-04T03:27:38.436Z',
+  'fresh-fruit-and-veg': '2026-10-04T03:27:38.448Z',
+};
+
+test("the sitemap keeps the previous site's last-modified date for each case study", async ({request}) => {
+  const xml = await (await request.get('/sitemap.xml')).text();
+  for (const [slug, lastmod] of Object.entries(LIVE_PROJECT_LASTMOD)) {
+    expect(xml, slug).toMatch(new RegExp(`/projects/${slug}</loc>\\s*<lastmod>${lastmod.replaceAll('.', '\\.')}</lastmod>`));
+  }
+});
+
+test("the home page describes itself with the previous site's keyword-led description", async ({page}) => {
+  const html = (await (await page.goto('/'))?.text()) ?? '';
+  const description =
+    'Chris Diomampo is a senior full-stack developer in Metro Manila, Philippines. Next.js, TypeScript and PostgreSQL, with 15+ years of WordPress, Shopify and PHP behind it.';
+  expect(content(html, 'name="description"')).toContain(`content="${description}"`);
+  expect(content(html, 'property="og:description"')).toContain(`content="${description}"`);
+});
+
 test('the sitemap gives the home page a last-modified date, like the pages under it', async ({request}) => {
   const xml = await (await request.get('/sitemap.xml')).text();
   const home = xml.match(/<url>\s*<loc>[^<]*\/<\/loc>\s*(<lastmod>[^<]+<\/lastmod>)?/);

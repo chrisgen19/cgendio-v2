@@ -70,6 +70,8 @@ const seed = async () => {
           client: p.client,
           role: p.role,
           tourStops: p.tourStops ?? [],
+          // The live site's last save, not the seed time (#81 Phase D); later admin saves move it on as usual
+          updatedAt: new Date(p.updatedAt),
         }),
       ),
       skipDuplicates: true,

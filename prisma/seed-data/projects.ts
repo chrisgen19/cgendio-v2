@@ -14,7 +14,13 @@ import {premiumMobileCarValetingTour} from './premium-mobile-car-valeting-tour.t
  */
 export type SeedProject = Project &
   Pick<ProjectDetail, 'coverImageUrl' | 'liveUrl' | 'repoUrl' | 'client' | 'role'> &
-  Partial<Pick<ProjectDetail, 'tourStops'>>;
+  Partial<Pick<ProjectDetail, 'tourStops'>> & {
+    /**
+     * The v1 site's last save, copied from its sitemap lastmod (https://cgdiomampo.dev/sitemap.xml, 2026-11-07), so a
+     * fresh production seed doesn't claim every case study changed on cutover day (#81 Phase D).
+     */
+    updatedAt: string;
+  };
 
 const COVERS = 'https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026';
 const ACCESS_GROUP_ROLE = 'Senior Full Stack Developer, Access Group Australia';
@@ -22,6 +28,7 @@ const ACCESS_GROUP_ROLE = 'Senior Full Stack Developer, Access Group Australia';
 export const projects: SeedProject[] = [
   {
     slug: 'access-hire',
+    updatedAt: '2026-10-04T03:27:38.395Z',
     title: 'Access Hire Australia',
     summary: "Hire and sales site for Access Hire's Australia-wide equipment fleet, rebuilt on Next.js and Builder.io.",
     kindLabel: 'CLIENT · EQUIPMENT HIRE',
@@ -42,6 +49,7 @@ export const projects: SeedProject[] = [
   },
   {
     slug: 'myimprov',
+    updatedAt: '2026-10-04T03:27:38.410Z',
     title: 'MyImprov Online Traffic School',
     summary: 'State-approved defensive driving courses, run across WordPress, a Laravel LMS and Shopify.',
     kindLabel: 'CLIENT · EDTECH',
@@ -62,6 +70,7 @@ export const projects: SeedProject[] = [
   },
   {
     slug: 'merthyr-village',
+    updatedAt: '2026-10-04T03:27:38.416Z',
     title: 'Merthyr Village Community Portal',
     summary: 'The website for the Merthyr Village shopping centre: a store directory, news and events.',
     kindLabel: 'CLIENT · SHOPPING CENTRE',
@@ -82,6 +91,7 @@ export const projects: SeedProject[] = [
   },
   {
     slug: 'experience-sunnybank',
+    updatedAt: '2026-10-04T03:27:38.426Z',
     title: 'Experience Sunnybank Community Hub',
     summary: 'A guide to dining, shopping and culture in Sunnybank, built on WordPress.',
     kindLabel: 'CLIENT · COMMUNITY GUIDE',
@@ -102,6 +112,7 @@ export const projects: SeedProject[] = [
   },
   {
     slug: 'premium-mobile-car-valeting',
+    updatedAt: '2026-10-04T03:27:38.436Z',
     title: 'Premium Mobile Car Valeting Glasgow',
     summary: 'Booking and payment for a mobile car valeting service in Glasgow.',
     kindLabel: 'CLIENT · BOOKINGS',
@@ -122,8 +133,9 @@ export const projects: SeedProject[] = [
   },
   {
     slug: 'fresh-fruit-and-veg',
+    updatedAt: '2026-10-04T03:27:38.448Z',
     title: 'Fresh Fruit and Veg Shop',
-    summary: 'Office fruit deliveries for workplaces in Glasgow, on a WordPress and WooCommerce site.',
+    summary: 'Weekly fruit and veg boxes for homes and offices in Glasgow, sold as WooCommerce subscriptions.',
     kindLabel: 'CLIENT · OFFICE DELIVERIES',
     group: 'client',
     glyph: 'Veg box',
