@@ -1,6 +1,7 @@
 'use server';
 
 import {updateTag} from 'next/cache';
+import {after} from 'next/server';
 import {z} from 'zod';
 import type {Prisma} from '@/generated/prisma/client';
 import type {ActionResult} from '../admin/action-helpers';
@@ -8,6 +9,7 @@ import {type Collection, collectionSchema} from '../admin/form-schemas';
 import {requireAdmin} from '../admin-session';
 import {CACHE_TAGS} from '../content';
 import {db} from '../db';
+import {pingIndexNow, postPaths, projectPaths} from '../indexnow';
 
 const TAG: Record<Collection, string> = {
   projects: CACHE_TAGS.projects,
@@ -15,6 +17,20 @@ const TAG: Record<Collection, string> = {
   milestones: CACHE_TAGS.milestones,
   timeline: CACHE_TAGS.timeline,
   stack: CACHE_TAGS.stack,
+};
+
+/** The public pages a published post or project is on, or null for drafts and the other collections. */
+const publishedPaths = async (collection: Collection, id: string) => {
+  const where = {id, status: 'PUBLISHED' as const};
+  if (collection === 'posts') {
+    const post = await db.post.findFirst({where, select: {slug: true}});
+    return post ? postPaths(post.slug) : null;
+  }
+  if (collection === 'projects') {
+    const project = await db.project.findFirst({where, select: {slug: true}});
+    return project ? projectPaths(project.slug) : null;
+  }
+  return null;
 };
 
 const deleteInput = z.object({collection: collectionSchema, id: z.string().min(1)});
@@ -27,6 +43,8 @@ export async function deleteItem(collection: Collection, id: string): Promise<Ac
   // deleteMany reports a count instead of throwing P2025 when the item was already deleted (say, in another tab), which
   // inside the list's async transition would otherwise replace the admin page with the error page
   const where = {id: input.data.id};
+  // Read before deleting: a published post or project tells search engines its URL is gone
+  const goneFrom = await publishedPaths(input.data.collection, input.data.id);
   const remove = {
     projects: () => db.project.deleteMany({where}),
     posts: () => db.post.deleteMany({where}),
@@ -37,6 +55,7 @@ export async function deleteItem(collection: Collection, id: string): Promise<Ac
   const {count} = await remove();
   if (count === 0) return {ok: false, error: 'That item no longer exists.'};
   updateTag(TAG[input.data.collection]);
+  if (goneFrom) after(() => pingIndexNow(goneFrom));
   return {ok: true, message: 'Deleted.'};
 }
 

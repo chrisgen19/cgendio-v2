@@ -60,6 +60,21 @@ const analyticsEnvSchema = z.object({
   ),
 });
 
+/**
+ * IndexNow (https://www.indexnow.org): the key search engines fetch from /indexnow-key.txt to check that pings come from
+ * the site owner. Public by design. Like analytics it never throws: a malformed key turns IndexNow off with a warning,
+ * so a typo can't fail an admin save or the key route (#81).
+ */
+const indexNowEnvSchema = z.object({
+  INDEXNOW_KEY: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z
+      .string()
+      .regex(/^[A-Za-z0-9-]{8,128}$/)
+      .optional(),
+  ),
+});
+
 /** The public origin, for absolute URLs (the RSS feed now, canonical URLs and OG images in Phase 7). No trailing slash. */
 const siteEnvSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.preprocess(
@@ -77,6 +92,7 @@ export type R2Env = z.infer<typeof r2EnvSchema>;
 export type MailEnv = z.infer<typeof mailEnvSchema>;
 export type SiteEnv = z.infer<typeof siteEnvSchema>;
 export type AnalyticsEnv = z.infer<typeof analyticsEnvSchema>;
+export type IndexNowEnv = z.infer<typeof indexNowEnvSchema>;
 
 const lazy = <T>(parse: () => T) => {
   let cached: T | undefined;
@@ -100,3 +116,13 @@ export const parseAnalyticsEnv = (env: Record<string, string | undefined>): Anal
 };
 
 export const analyticsEnv = lazy((): AnalyticsEnv => parseAnalyticsEnv(process.env));
+
+/** Exported for its test, as parseAnalyticsEnv is. */
+export const parseIndexNowEnv = (env: Record<string, string | undefined>): IndexNowEnv => {
+  const parsed = indexNowEnvSchema.safeParse(env);
+  if (parsed.success) return parsed.data;
+  console.warn('Ignoring INDEXNOW_KEY: it must be 8 to 128 letters, digits or hyphens. IndexNow is off.');
+  return {INDEXNOW_KEY: undefined};
+};
+
+export const indexNowEnv = lazy((): IndexNowEnv => parseIndexNowEnv(process.env));

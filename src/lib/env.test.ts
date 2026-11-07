@@ -1,5 +1,5 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {parseAnalyticsEnv} from './env';
+import {parseAnalyticsEnv, parseIndexNowEnv} from './env';
 
 /*
  * GoogleAnalytics reads this while rendering every public page, so a malformed id has to disable the tag rather than
@@ -38,5 +38,25 @@ describe('parseAnalyticsEnv', () => {
     parseAnalyticsEnv({GA_MEASUREMENT_ID: 'nope'});
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn.mock.calls[0]?.[0]).toContain('GA_MEASUREMENT_ID');
+  });
+});
+
+/* The IndexNow key is read by admin saves and /indexnow-key.txt, so a malformed one turns IndexNow off instead of throwing. */
+describe('parseIndexNowEnv', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('reads a well-formed key', () => {
+    expect(parseIndexNowEnv({INDEXNOW_KEY: 'a1b2c3d4-e5f6'}).INDEXNOW_KEY).toBe('a1b2c3d4-e5f6');
+  });
+
+  it('treats unset and empty as no IndexNow', () => {
+    expect(parseIndexNowEnv({}).INDEXNOW_KEY).toBeUndefined();
+    expect(parseIndexNowEnv({INDEXNOW_KEY: ''}).INDEXNOW_KEY).toBeUndefined();
+  });
+
+  it.each(['short', 'has spaces in it', 'under_score_key', `${'a'.repeat(129)}`])('turns IndexNow off rather than throwing for %j', (key) => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(parseIndexNowEnv({INDEXNOW_KEY: key}).INDEXNOW_KEY).toBeUndefined();
+    expect(warn).toHaveBeenCalledTimes(1);
   });
 });

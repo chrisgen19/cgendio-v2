@@ -22,6 +22,9 @@ export const NO_TOUR_SLUG = 'premium-mobile-car-valeting';
 /** Not a real property: it only has to match the G-XXXXXXXXXX shape the app accepts. */
 export const GA_TEST_ID = 'G-E2ETEST000';
 
+/** Served at /indexnow-key.txt. No ping is ever sent: the e2e site is localhost, which buildIndexNowPayload skips. */
+export const INDEXNOW_TEST_KEY = 'e2e-indexnow-key-0000';
+
 export const testEnv = {
   // The prepare script drops and recreates this database, so it refuses any name that doesn't end in _test
   DATABASE_URL: 'postgresql://cgendio:cgendio@localhost:5437/cgendio_test',
@@ -37,6 +40,7 @@ export const testEnv = {
   // A real-shaped id so the analytics tag renders and e2e can check where it does and does not appear. gtag.js is
   // never actually fetched: the specs assert the tags in the HTML, and nothing in e2e reaches googletagmanager.com.
   GA_MEASUREMENT_ID: GA_TEST_ID,
+  INDEXNOW_KEY: INDEXNOW_TEST_KEY,
   // No uploads in e2e; empty keeps the image config the same as CI's
   R2_PUBLIC_URL: '',
 } satisfies Record<string, string>;

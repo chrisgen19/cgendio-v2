@@ -1,7 +1,7 @@
 import type {MetadataRoute} from 'next';
 import {siteEnv} from '@/lib/env';
 
-const DISALLOW = ['/admin', '/preview', '/api', '/design-lab'];
+const DISALLOW = ['/admin', '/preview', '/api', '/design-lab', '/md'];
 
 /**
  * The assistants and AI search engines that read the site, listed so their answers can cite it. Several of them ignore a

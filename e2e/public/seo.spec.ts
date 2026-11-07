@@ -70,7 +70,7 @@ test('robots.txt gives the AI crawlers their own group with the same rules', asy
   const wildcard = groups.find((group) => group.includes('User-Agent: *'));
   expect(wildcard, 'no wildcard group').toBeDefined();
   for (const group of [wildcard, ai]) {
-    for (const path of ['/admin', '/preview', '/api', '/design-lab']) expect(group).toContain(`Disallow: ${path}`);
+    for (const path of ['/admin', '/preview', '/api', '/design-lab', '/md']) expect(group).toContain(`Disallow: ${path}`);
     expect(group).toContain('Allow: /');
   }
   expect(body).toMatch(/Sitemap: https?:\/\/[^\s]+\/sitemap\.xml/);

@@ -25,15 +25,34 @@ const nextConfig: NextConfig = {
     {source: '/writing/tag/nextjs', destination: '/writing?tag=next-js', permanent: true},
     // v1 had a page per tag; here a tag is a filter on the index. Tags this site doesn't use land on its empty state.
     {source: '/writing/tag/:tag', destination: '/writing?tag=:tag', permanent: true},
-    // Side projects with a v1 page but none here (their Markdown versions too, in one hop)
+    // Side projects with a v1 page but none here (their Markdown versions too, in one hop). Redirects run before the
+    // Markdown rewrites below, so these win for the three slugs.
     {source: '/projects/:slug(budget-tracker|ph-job-board-scraper|self-hosted-platform)', destination: '/#work', permanent: true},
     {source: '/projects/:slug(budget-tracker|ph-job-board-scraper|self-hosted-platform).md', destination: '/#work', permanent: true},
-    // v1 served a Markdown version of each post and project at <page>.md (linked from its llms.txt); send them to the page
-    {source: '/writing/:slug([a-z0-9-]+).md', destination: '/writing/:slug', permanent: true},
-    {source: '/projects/:slug([a-z0-9-]+).md', destination: '/projects/:slug', permanent: true},
     // Sign-in moved to v1's /sign-in; the old path here keeps working for bookmarks
     {source: '/admin/sign-in', destination: '/sign-in', permanent: true},
   ],
+  // Markdown for AI agents (src/app/md, #81): at <page>.md, and at the page URL itself for requests that ask for it
+  // (`Accept: text/markdown`, sent by tools like Claude Code and Cursor). In beforeFiles: plain-array rewrites run after
+  // the filesystem check, where the prerendered pages would answer first. Next anchors these header patterns (^...$).
+  rewrites: async () => {
+    const acceptsMarkdown = [{type: 'header' as const, key: 'accept', value: '(.*)text/markdown(.*)'}];
+    // An explicit refusal (`text/markdown;q=0`, with or without other parameters) keeps the HTML. Other q-values aren't
+    // ranked: a client that lists text/markdown at all gets it.
+    const refusesMarkdown = [
+      {type: 'header' as const, key: 'accept', value: '(?:.*,)?\\s*text/markdown\\s*(?:;[^,]*)?;\\s*q=0(?:\\.0{1,3})?\\s*(?:,.*)?'},
+    ];
+    return {
+      beforeFiles: [
+        {source: '/writing/:slug([a-z0-9-]+).md', destination: '/md/writing/:slug'},
+        {source: '/projects/:slug([a-z0-9-]+).md', destination: '/md/projects/:slug'},
+        {source: '/writing/:slug([a-z0-9-]+)', has: acceptsMarkdown, missing: refusesMarkdown, destination: '/md/writing/:slug'},
+        {source: '/projects/:slug([a-z0-9-]+)', has: acceptsMarkdown, missing: refusesMarkdown, destination: '/md/projects/:slug'},
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
   turbopack: {
     rules: {
       '*.css': {
