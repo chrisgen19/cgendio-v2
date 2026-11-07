@@ -32,7 +32,7 @@ export const testEnv = {
   ADMIN_EMAILS: ADMIN_EMAIL,
   RESEND_API_KEY: 're_e2e_mock',
   RESEND_BASE_URL: MOCK_RESEND_URL,
-  MAIL_FROM: 'Cgdiomampo.dev <e2e@example.test>',
+  MAIL_FROM: 'Chris Diomampo <e2e@example.test>',
   NEXT_PUBLIC_SITE_URL: E2E_BASE_URL,
   // A real-shaped id so the analytics tag renders and e2e can check where it does and does not appear. gtag.js is
   // never actually fetched: the specs assert the tags in the HTML, and nothing in e2e reaches googletagmanager.com.

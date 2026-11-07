@@ -60,6 +60,14 @@ test('a v1 tag URL ends on the filtered index', async ({page}) => {
   await expect(page.getByRole('link', {name: /WordPress news, October 2026/})).toBeVisible();
 });
 
+// The labs only run under `next dev`; the e2e suite runs a production build, like the deployed site
+for (const path of ['/design-lab/fresh-fruit', '/design-lab/fresh-fruit/editorial']) {
+  test(`${path} is not served in production`, async ({request}) => {
+    const response = await request.get(path, {maxRedirects: 0});
+    expect(response.status()).toBe(404);
+  });
+}
+
 test('/sign-in shows the admin sign-in, kept out of search results', async ({page}) => {
   const response = await page.goto('/sign-in');
   expect(response?.status()).toBe(200);
