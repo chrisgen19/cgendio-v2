@@ -28,6 +28,7 @@ export async function generateMetadata({params}: PageProps<'/writing/[slug]'>): 
     path: `/writing/${post.slug}`,
     // One tag per post is all the content model holds, so this is the whole set rather than a sample
     article: {publishedTime: post.publishedAt, modifiedTime: post.updatedAt, authors: [copy['about.name']], tags: [post.tag]},
+    markdown: true,
   });
 }
 

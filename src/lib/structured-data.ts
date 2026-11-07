@@ -1,7 +1,7 @@
 import type {PageCopy, Post, PostDetail, ProjectDetail, SiteSettings, StackItem} from '@/server/content';
 import {isEmail} from './email';
 import {siteEnv} from './env';
-import {BLOG_TITLE, PERSON_ALTERNATE_NAME, SITE_DESCRIPTION, SITE_NAME} from './metadata';
+import {BLOG_TITLE, ogCardPath, PERSON_ALTERNATE_NAME, SITE_DESCRIPTION, SITE_NAME} from './metadata';
 
 /*
  * Schema.org JSON-LD built only from real content: no invented address, ratings or prices. Rendered with <JsonLd>.
@@ -120,7 +120,7 @@ export const postJsonLd = (post: PostDetail, copy: PageCopy) => {
         description: post.excerpt,
         url,
         mainEntityOfPage: url,
-        image: `${url}/opengraph-image`,
+        image: `${origin()}${ogCardPath(`/writing/${post.slug}`)}`,
         datePublished: post.date,
         inLanguage: 'en',
         articleSection: post.tag,
@@ -145,7 +145,7 @@ export const caseStudyJsonLd = (project: ProjectDetail, copy: PageCopy) => {
         name: project.title,
         description: project.summary,
         url,
-        image: `${url}/opengraph-image`,
+        image: `${origin()}${ogCardPath(`/projects/${project.slug}`)}`,
         genre: project.kindLabel,
         keywords: project.tags,
         inLanguage: 'en',

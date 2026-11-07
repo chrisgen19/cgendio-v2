@@ -242,15 +242,47 @@ test('the displayed name, the author lines and the hidden h1 all use the brand n
   expect(content(post, 'property="article:author"')).toContain(`content="${BRAND}"`);
 });
 
-test('the share card alt texts use the brand name', async ({page}) => {
-  for (const [path, suffix] of [
-    ['/writing', 'writing'],
-    ['/writing/wordpress-news-october-2026', 'blog post'],
-    ['/projects/access-hire', 'case study'],
+test('each share card is described by its page title', async ({page}) => {
+  for (const [path, alt] of [
+    ['/writing', `Blog · ${BRAND}`],
+    ['/writing/wordpress-news-october-2026', "WordPress news, October 2026: what to patch and what's coming in 7.2"],
+    ['/projects/access-hire', 'Access Hire Australia'],
   ]) {
     const html = (await (await page.goto(path ?? '/'))?.text()) ?? '';
-    expect(content(html, 'property="og:image:alt"'), path).toContain(`${BRAND} ${suffix}`);
+    // Next escapes the apostrophe in the attribute
+    expect(content(html, 'property="og:image:alt"').replaceAll('&#x27;', "'"), path).toContain(`content="${alt}"`);
+    expect(content(html, 'name="twitter:image:alt"').replaceAll('&#x27;', "'"), path).toContain(`content="${alt}"`);
   }
+});
+
+test('the JSON-LD image of a post and a case study is their share card', async ({page, request}) => {
+  for (const [path, type] of [
+    ['/writing/wordpress-news-october-2026', 'BlogPosting'],
+    ['/projects/access-hire', 'CreativeWork'],
+  ] as const) {
+    const image = node(await graph((await (await page.goto(path))?.text()) ?? ''), type)?.image;
+    expect(typeof image, path).toBe('string');
+    const response = await request.get(String(image));
+    expect(response.status(), path).toBe(200);
+    expect(response.headers()['content-type']).toContain('image/png');
+  }
+});
+
+test('posts and case studies advertise their Markdown version; other pages do not', async ({page}) => {
+  for (const path of ['/writing/wordpress-news-october-2026', '/projects/access-hire']) {
+    await page.goto(path);
+    await expect(page.locator('link[rel="alternate"][type="text/markdown"]'), path).toHaveAttribute('href', new RegExp(`${path}\\.md$`));
+  }
+  for (const path of ['/', '/writing']) {
+    await page.goto(path);
+    await expect(page.locator('link[rel="alternate"][type="text/markdown"]'), path).toHaveCount(0);
+  }
+});
+
+test('the sitemap gives the home page a last-modified date, like the pages under it', async ({request}) => {
+  const xml = await (await request.get('/sitemap.xml')).text();
+  const home = xml.match(/<url>\s*<loc>[^<]*\/<\/loc>\s*(<lastmod>[^<]+<\/lastmod>)?/);
+  expect(home?.[1], 'no lastmod on /').toMatch(/<lastmod>\d{4}-\d{2}-\d{2}T/);
 });
 
 /*

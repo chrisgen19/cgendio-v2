@@ -291,6 +291,28 @@ export const getSitemapEntries = async (): Promise<{posts: SitemapEntry[]; proje
   return {posts: toEntries(posts), projects: toEntries(projects)};
 };
 
+/**
+ * When the home page last changed, for its sitemap lastmod: the newest save of anything it shows (published posts and
+ * projects, milestones, the timeline, the stack, the page copy and the settings). Null on an empty database.
+ */
+export const getHomeLastModified = async (): Promise<string | null> => {
+  'use cache';
+  cacheTag(CACHE_TAGS.posts, CACHE_TAGS.projects, CACHE_TAGS.milestones, CACHE_TAGS.timeline, CACHE_TAGS.stack, CACHE_TAGS.copy, CACHE_TAGS.settings);
+  cacheLife('max');
+  const latest = {_max: {updatedAt: true}} as const;
+  const results = await Promise.all([
+    db.post.aggregate({...latest, where: {status: 'PUBLISHED', publishedAt: {not: null}}}),
+    db.project.aggregate({...latest, where: {status: 'PUBLISHED'}}),
+    db.milestone.aggregate(latest),
+    db.timelineEntry.aggregate(latest),
+    db.stackItem.aggregate(latest),
+    db.pageCopy.aggregate(latest),
+    db.siteSettings.aggregate(latest),
+  ]);
+  const times = results.flatMap(({_max}) => (_max.updatedAt ? [_max.updatedAt.getTime()] : []));
+  return times.length > 0 ? new Date(Math.max(...times)).toISOString() : null;
+};
+
 /** The single settings row: the header status, contact details, CV link, About photo and social profiles. */
 export const getSiteSettings = async (): Promise<SiteSettings> => {
   'use cache';
