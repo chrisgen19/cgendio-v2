@@ -1,11 +1,13 @@
 'use server';
 
 import {updateTag} from 'next/cache';
+import {after} from 'next/server';
 import {type ActionResult, fieldErrorsFrom} from '../admin/action-helpers';
 import {pageCopyFormSchema, settingsFormSchema} from '../admin/form-schemas';
 import {requireAdmin} from '../admin-session';
 import {CACHE_TAGS} from '../content';
 import {db} from '../db';
+import {pingIndexNow} from '../indexnow';
 
 /** Contact email, the "Open to projects" status, the CV link, the About photo and the LinkedIn profile (kept in socials). */
 export async function saveSettings(_previous: ActionResult | null, formData: FormData): Promise<ActionResult> {
@@ -18,6 +20,8 @@ export async function saveSettings(_previous: ActionResult | null, formData: For
   const socials = {...(current.socials as Record<string, string | null>), linkedin: linkedinUrl};
   await db.siteSettings.update({where: {id: 'site'}, data: {...fields, socials}});
   updateTag(CACHE_TAGS.settings);
+  // The contact details and profile links show on the home page
+  after(() => pingIndexNow(['/']));
   return {ok: true, message: 'Settings saved.'};
 }
 
@@ -34,5 +38,6 @@ export async function savePageCopy(_previous: ActionResult | null, formData: For
 
   await db.$transaction(changed.map(([key, value]) => db.pageCopy.upsert({where: {key}, create: {key, value}, update: {value}})));
   updateTag(CACHE_TAGS.copy);
+  after(() => pingIndexNow(['/']));
   return {ok: true, message: `Saved ${changed.length} change${changed.length === 1 ? '' : 's'}.`};
 }

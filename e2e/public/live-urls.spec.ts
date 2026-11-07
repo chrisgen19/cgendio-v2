@@ -1,4 +1,5 @@
 import {expect, test} from '@playwright/test';
+import {INDEXNOW_TEST_KEY} from '../support/test-env';
 
 /*
  * The URLs the previous site (cgendio-v1) has indexed at cgdiomampo.dev, which this site keeps instead of redirecting
@@ -34,16 +35,55 @@ const REDIRECTS: [string, string][] = [
   ['/projects/ph-job-board-scraper', '/#work'],
   ['/projects/self-hosted-platform', '/#work'],
   ['/admin/sign-in', '/sign-in'],
-  ['/writing/redirect-maps-wordpress-to-nextjs.md', '/writing/redirect-maps-wordpress-to-nextjs'],
-  ['/projects/access-hire.md', '/projects/access-hire'],
   ['/projects/budget-tracker.md', '/#work'],
 ];
 
-test('a v1 Markdown URL ends on the HTML page', async ({page}) => {
-  const response = await page.goto('/projects/access-hire.md');
-  expect(response?.status()).toBe(200);
-  await expect(page).toHaveURL(/\/projects\/access-hire$/);
-  await expect(page.getByRole('heading', {level: 1})).toHaveText('Access Hire Australia');
+/** v1's Markdown versions (linked from its llms.txt), served here too: URL, its HTML page, and the first line. */
+const MARKDOWN_PAGES: [string, string, string][] = [
+  [
+    '/writing/redirect-maps-wordpress-to-nextjs.md',
+    '/writing/redirect-maps-wordpress-to-nextjs',
+    '# Redirect maps for a WordPress to Next.js migration',
+  ],
+  ['/projects/access-hire.md', '/projects/access-hire', '# Access Hire Australia'],
+];
+
+for (const [path, page, heading] of MARKDOWN_PAGES) {
+  test(`${path} answers with the page as Markdown`, async ({request}) => {
+    const response = await request.get(path, {maxRedirects: 0});
+    expect(response.status()).toBe(200);
+    expect(response.headers()['content-type']).toBe('text/markdown; charset=utf-8');
+    expect(response.headers().link).toMatch(new RegExp(`^<https?://[^>]+${page}>; rel="canonical"$`));
+    expect(response.headers()['x-robots-tag']).toBe('noindex');
+    expect((await response.text()).split('\n')[0]).toBe(heading);
+  });
+
+  test(`${page} answers with Markdown for Accept: text/markdown, and HTML for a browser`, async ({request}) => {
+    const markdown = await request.get(page, {headers: {Accept: 'text/markdown, text/html;q=0.9'}});
+    expect(markdown.headers()['content-type']).toBe('text/markdown; charset=utf-8');
+    expect((await markdown.text()).split('\n')[0]).toBe(heading);
+    const html = await request.get(page, {headers: {Accept: 'text/html,application/xhtml+xml,*/*;q=0.8'}});
+    expect(html.headers()['content-type']).toContain('text/html');
+  });
+}
+
+test('an unknown slug has no Markdown version', async ({request}) => {
+  expect((await request.get('/writing/no-such-post.md')).status()).toBe(404);
+});
+
+test('/llms.txt links every published post and case study at its Markdown URL', async ({request}) => {
+  const response = await request.get('/llms.txt');
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toBe('text/plain; charset=utf-8');
+  const body = await response.text();
+  expect(body.split('\n')[0]).toBe('# Chris Diomampo');
+  for (const path of LIVE_URLS.filter((url) => /^\/(writing|projects)\/./.test(url))) expect(body).toContain(`${path}.md)`);
+});
+
+test('/indexnow-key.txt serves the IndexNow key', async ({request}) => {
+  const response = await request.get('/indexnow-key.txt');
+  expect(response.status()).toBe(200);
+  expect(await response.text()).toBe(INDEXNOW_TEST_KEY);
 });
 
 for (const [from, to] of REDIRECTS) {
