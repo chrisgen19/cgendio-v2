@@ -84,9 +84,9 @@
     "9": {
       "issue": 10,
       "title": "Deploy to Coolify and go live",
-      "branch": null,
+      "branch": "feature/phase-9-deploy-launch",
       "pr": null,
-      "status": "Not started"
+      "status": "In progress"
     }
   },
   "switch": {

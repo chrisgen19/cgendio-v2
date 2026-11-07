@@ -3,6 +3,9 @@
  * key, so a second run changes nothing, and rows edited in the admin later are never overwritten.
  *
  * Run with `pnpm db:seed` (prisma.config.ts runs it with Node's built-in TypeScript support).
+ *
+ * The Docker image build runs it with SEED_ONLY_IF_EMPTY=1, so only the first deploy seeds. Inserting every missing row
+ * on every deploy would bring back seeded content deleted in the admin, since a deleted row is missing too.
  */
 import {existsSync, readFileSync} from 'node:fs';
 import {PrismaPg} from '@prisma/adapter-pg';
@@ -129,8 +132,15 @@ const seed = async () => {
   for (const [i, result] of results.entries()) console.info(`${names[i]}: ${result.count} inserted`);
 };
 
+/** A database the site has run against: the settings row is created by the first seed and never deleted. */
+const hasContent = async () => (await db.siteSettings.count()) > 0;
+
 try {
-  await seed();
+  if (process.env.SEED_ONLY_IF_EMPTY === '1' && (await hasContent())) {
+    console.info('Content already exists (SEED_ONLY_IF_EMPTY=1), so the seed inserted nothing.');
+  } else {
+    await seed();
+  }
 } finally {
   await db.$disconnect();
 }

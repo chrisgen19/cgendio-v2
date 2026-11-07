@@ -1,0 +1,24 @@
+# Build context for the Dockerfile: only what `pnpm install`, `prisma` (migrate and seed) and `next build` need.
+# Keep prisma/seed-data/**: the seed reads the post bodies and case study write-ups from its .md files.
+.git
+.github
+node_modules
+.next
+src/generated
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets and local state
+.env
+.env.*
+!.env.example
+
+# Tests, tooling output and docs the image doesn't use. playwright.config.ts goes too: it imports e2e/, and `next build`
+# type-checks every .ts file in tsconfig's include list, so it would fail the build without e2e/ beside it.
+e2e
+playwright.config.ts
+test-results
+playwright-report
+blob-report
+scripts
+docs
