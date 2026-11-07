@@ -41,6 +41,13 @@ export const testEnv = {
   // never actually fetched: the specs assert the tags in the HTML, and nothing in e2e reaches googletagmanager.com.
   GA_MEASUREMENT_ID: GA_TEST_ID,
   INDEXNOW_KEY: INDEXNOW_TEST_KEY,
-  // No uploads in e2e; empty keeps the image config the same as CI's
+  // No test uploads, but the startup check (src/server/startup-env-check.ts) won't start the server without the R2
+  // credentials, so these are placeholders. They never reach Cloudflare: nothing in e2e calls the upload action.
+  R2_ACCOUNT_ID: 'e2e-r2-account-id',
+  R2_ACCESS_KEY_ID: 'e2e-r2-access-key-id',
+  R2_SECRET_ACCESS_KEY: 'e2e-r2-secret-access-key',
+  R2_BUCKET: 'cgendio-e2e',
+  // No uploads in e2e; empty keeps the image config the same as CI's. The startup check skips it on purpose: it's a
+  // build variable, guarded in the Dockerfile, and setting one here would change images.remotePatterns.
   R2_PUBLIC_URL: '',
 } satisfies Record<string, string>;
