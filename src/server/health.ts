@@ -7,8 +7,9 @@ const DATABASE_CHECK_MS = 1500;
 export type DatabaseState = 'ok' | 'unreachable';
 
 /**
- * "ok" if Postgres answers within DATABASE_CHECK_MS. A database that hangs (overloaded, or the pool is busy) has no
- * timeout of its own, so without this race the whole health check would hang. Ported from the previous site.
+ * "ok" if Postgres answers within DATABASE_CHECK_MS. The race answers the probe quickly; the query it leaves behind is
+ * ended by the pool's own timeouts (src/server/db.ts), so probes during an outage don't pile up. Ported from the
+ * previous site.
  */
 export const getDatabaseState = async (): Promise<DatabaseState> => {
   let timer: ReturnType<typeof setTimeout> | undefined;

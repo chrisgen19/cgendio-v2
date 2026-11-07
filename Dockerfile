@@ -5,6 +5,12 @@
 # pre-deployment command can't do the migration instead: it runs in the old container, before the new image is built, so
 # it never sees new migration files, and it's skipped on the first deploy. Only the builder stage sees DATABASE_URL; the
 # final image has neither it nor the Prisma CLI.
+#
+# Migrations therefore reach the database before the new container replaces the old one, and stay applied if the seed or
+# `next build` fails afterwards. Keep every migration additive (new tables, nullable or defaulted columns), so the old
+# release keeps working on the new schema. To remove or rename something, ship code that stops using it first and drop
+# it in a later deploy. Moving the migration to container start isn't an option: `next build` prerenders from the
+# database, so the schema has to be current before the build.
 
 FROM node:24-slim AS base
 ENV PNPM_HOME=/pnpm \
