@@ -294,6 +294,11 @@ export const getSitemapEntries = async (): Promise<{posts: SitemapEntry[]; proje
 /**
  * When the home page last changed, for its sitemap lastmod: the newest save of anything it shows (published posts and
  * projects, milestones, the timeline, the stack, the page copy and the settings). Null on an empty database.
+ *
+ * Known limit: it reads only the rows that still exist, so deleting or unpublishing the newest item moves it back in
+ * time (the /writing lastmod in sitemap.ts works the same way, as the previous site did). A stale lastmod only delays a
+ * recrawl, and deleting or unpublishing a post or project already pings "/" through IndexNow. A stored "content changed
+ * at" timestamp set on every save and delete would fix it, if that ever matters (#96 review).
  */
 export const getHomeLastModified = async (): Promise<string | null> => {
   'use cache';
