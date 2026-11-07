@@ -17,7 +17,7 @@ const CSP_DIRECTIVES = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://*.googletagmanager.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.r2.dev https://*.google-analytics.com https://*.googletagmanager.com",
+  "img-src 'self' data: blob: https:",
   "font-src 'self'",
   "media-src 'self' data:",
   "connect-src 'self' https://*.r2.cloudflarestorage.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
@@ -97,6 +97,37 @@ for (const [path, ready] of PAGES) {
     await expectNoCspViolations(page, path);
   });
 }
+
+/*
+ * The policy is compiled at build time, but the admin accepts a cover URL or a Markdown image on any host
+ * (src/server/admin/form-schemas.ts, src/components/prose/markdown.tsx), and no seeded post has one. These two add the
+ * image to a rendered post instead, so a policy that narrowed img-src back to known hosts would fail here. The second
+ * one is also the sweep's own self-test: if the recorder ever stopped working, every "no violation" test would pass
+ * for the wrong reason.
+ */
+const addImage = (page: Page, src: string) =>
+  page.evaluate((url) => {
+    const image = document.createElement('img');
+    image.src = url;
+    document.querySelector('main')?.append(image);
+    return new Promise((resolve) => {
+      image.addEventListener('load', resolve, {once: true});
+      image.addEventListener('error', resolve, {once: true});
+    });
+  }, src);
+
+test('a Markdown image on a host outside R2 is not blocked', async ({page}) => {
+  await page.route('https://images.example.com/**', (route) => route.fulfill({body: FIXTURE, contentType: 'image/png'}));
+  await page.goto('/writing/wordpress-news-october-2026');
+  await addImage(page, 'https://images.example.com/diagram.png');
+  await expectNoCspViolations(page, 'an https image outside R2');
+});
+
+test('a plain http image is blocked, and the sweep sees it', async ({page}) => {
+  await page.goto('/writing/wordpress-news-october-2026');
+  await addImage(page, 'http://images.example.com/diagram.png');
+  await expect(page.evaluate(() => window.__cspViolations ?? [])).resolves.toMatchObject([{directive: 'img-src'}]);
+});
 
 test('a case study and its walkthrough run with no CSP violation', async ({page}) => {
   await page.goto('/projects/access-hire');

@@ -6,7 +6,7 @@ import {contentSecurityPolicy, HSTS} from './security-headers';
  * browser does: one directive per name, with its source list.
  */
 
-const PRODUCTION = {isDev: false, siteUrl: 'https://cgdiomampo.dev', r2PublicUrl: 'https://media.cgdiomampo.dev'};
+const PRODUCTION = {isDev: false, siteUrl: 'https://cgdiomampo.dev'};
 
 /** `name source source` pairs, keyed by directive name. A valueless directive maps to an empty list. */
 const parse = (policy: string) =>
@@ -63,38 +63,13 @@ describe('contentSecurityPolicy', () => {
     expect(parse(contentSecurityPolicy(PRODUCTION))['media-src']).toEqual(["'self'", 'data:']);
   });
 
-  it('allows images from the site, the R2 public origin, the bucket default domain and GA', () => {
-    expect(parse(contentSecurityPolicy(PRODUCTION))['img-src']).toEqual([
-      "'self'",
-      'data:',
-      'blob:',
-      'https://media.cgdiomampo.dev',
-      'https://*.r2.dev',
-      'https://*.google-analytics.com',
-      'https://*.googletagmanager.com',
-    ]);
+  // An editor may paste a cover URL or a Markdown image on any host, so the host can't be known when this is compiled
+  it('allows images from any https host, plus data: and blob:', () => {
+    expect(parse(contentSecurityPolicy(PRODUCTION))['img-src']).toEqual(["'self'", 'data:', 'blob:', 'https:']);
   });
 
-  it('strips the R2 public URL to its origin', () => {
-    expect(parse(contentSecurityPolicy({...PRODUCTION, r2PublicUrl: 'https://media.cgdiomampo.dev/covers/'}))['img-src']).toContain(
-      'https://media.cgdiomampo.dev',
-    );
-  });
-
-  it('lists the R2 origin once when it is already on the bucket default domain', () => {
-    const sources = parse(contentSecurityPolicy({...PRODUCTION, r2PublicUrl: 'https://*.r2.dev'}))['img-src'];
-    expect(sources.filter((source) => source === 'https://*.r2.dev')).toHaveLength(1);
-  });
-
-  it.each([undefined, '', 'not a url'])('leaves the R2 origin out when R2_PUBLIC_URL is %p', (r2PublicUrl) => {
-    expect(parse(contentSecurityPolicy({...PRODUCTION, r2PublicUrl}))['img-src']).toEqual([
-      "'self'",
-      'data:',
-      'blob:',
-      'https://*.r2.dev',
-      'https://*.google-analytics.com',
-      'https://*.googletagmanager.com',
-    ]);
+  it('still blocks plain http images, which would be mixed content anyway', () => {
+    expect(parse(contentSecurityPolicy(PRODUCTION))['img-src']).not.toContain('http:');
   });
 
   it('allows the browser-side R2 upload and the GA beacons to connect', () => {

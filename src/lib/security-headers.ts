@@ -15,48 +15,42 @@ export const HSTS = 'max-age=63072000; includeSubDomains';
 
 /** GA4's own CSP guidance: the tag comes from googletagmanager, the beacons go to the analytics hosts. */
 const GA_SCRIPT = ['https://*.googletagmanager.com'];
-const GA_IMG = ['https://*.google-analytics.com', 'https://*.googletagmanager.com'];
 const GA_CONNECT = ['https://*.google-analytics.com', 'https://*.analytics.google.com', 'https://*.googletagmanager.com'];
 
 /** Admin uploads PUT straight to the bucket from the browser (src/components/admin/upload-field.tsx). The account id is
  * only known at runtime, while this header is compiled at build time, so the host stays a wildcard. */
 const R2_UPLOAD = 'https://*.r2.cloudflarestorage.com';
 
-/** Covers still served from the bucket's default domain, until #81 moves them to a custom one. */
-const R2_DEFAULT_PUBLIC = 'https://*.r2.dev';
-
-/** The origin of a URL, or nothing when it is unset or unparseable. A source expression needs the origin, not the path. */
-const originOf = (url: string | undefined) => {
-  if (!url) return undefined;
+/** Whether a URL is served over https, which is all the policy needs from NEXT_PUBLIC_SITE_URL. */
+const isHttps = (url: string | undefined) => {
+  if (!url) return false;
   try {
-    return new URL(url).origin;
+    return new URL(url).protocol === 'https:';
   } catch {
-    return undefined;
+    return false;
   }
 };
-
-const isHttps = (url: string | undefined) => originOf(url)?.startsWith('https://') ?? false;
 
 type PolicyOptions = {
   /** `next dev`: React evaluates code to rebuild server stacks in the browser, so it needs 'unsafe-eval'. */
   isDev: boolean;
   /** NEXT_PUBLIC_SITE_URL. Only its scheme matters here. */
   siteUrl?: string;
-  /** R2_PUBLIC_URL: where next/image falls back to loading a cover straight from the host. */
-  r2PublicUrl?: string;
 };
 
 /** One Content-Security-Policy header value for every response. */
-export const contentSecurityPolicy = ({isDev, siteUrl, r2PublicUrl}: PolicyOptions) => {
-  const r2Origin = originOf(r2PublicUrl);
+export const contentSecurityPolicy = ({isDev, siteUrl}: PolicyOptions) => {
   const directives: Array<[string, string[]]> = [
     ['default-src', ["'self'"]],
     // Inline: the theme script in the root layout and GA's config snippet, plus Next's own flight data scripts
     ['script-src', ["'self'", "'unsafe-inline'", ...(isDev ? ["'unsafe-eval'"] : []), ...GA_SCRIPT]],
     // React and the Remotion player write style attributes, which count as inline styles
     ['style-src', ["'self'", "'unsafe-inline'"]],
-    // data: for the e2e and seed fixtures, blob: for the admin's upload preview
-    ['img-src', ["'self'", 'data:', 'blob:', ...(r2Origin ? [r2Origin] : []), R2_DEFAULT_PUBLIC, ...GA_IMG]],
+    // Any https host, because an editor may paste a cover URL or a Markdown image on one: the admin accepts any http(s)
+    // URL (src/server/admin/form-schemas.ts), CoverImage renders a non-R2 cover unoptimized, and the Markdown renderer
+    // allows images from any host (src/components/prose/markdown.tsx). This also covers R2 and the GA beacons. data: is
+    // for the seed and e2e fixtures, blob: for the admin's upload preview. Plain http stays blocked.
+    ['img-src', ["'self'", 'data:', 'blob:', 'https:']],
     // Self-hosted through next/font/local (#94): nothing is fetched from Google
     ['font-src', ["'self'"]],
     // The film is silent, but the Remotion player still preallocates <audio> tags on a base64 data URL

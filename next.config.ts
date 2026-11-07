@@ -4,12 +4,11 @@ import {contentSecurityPolicy, HSTS} from './src/lib/security-headers';
 // Covers uploaded to R2 go through the image optimizer. Read at build time, so R2_PUBLIC_URL must be a build variable too.
 const r2PublicUrl = process.env.R2_PUBLIC_URL?.replace(/\/+$/, '');
 
-// Compiled once, at build time: both variables are build variables in the Dockerfile, and the guard there fails the
-// build when they're empty.
+// Compiled once, at build time. Only the scheme of NEXT_PUBLIC_SITE_URL matters, and it must be the scheme the site is
+// actually served on, as the canonical URLs, the sitemap, the share cards and the auth redirects already require.
 const csp = contentSecurityPolicy({
   isDev: process.env.NODE_ENV === 'development',
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
-  r2PublicUrl,
 });
 
 const nextConfig: NextConfig = {
