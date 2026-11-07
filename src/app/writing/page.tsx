@@ -31,14 +31,14 @@ export default async function BlogPage({searchParams}: PageProps<'/writing'>) {
   return (
     <PageShell>
       <JsonLd data={blogJsonLd(copy, posts)} />
-      <Section padding="cta" innerClassName="flex flex-col gap-[18px] pt-10 max-md:pt-4">
+      <Section padding="head" innerClassName="flex flex-col gap-[18px] pt-10 max-md:pt-4">
         <Eyebrow>{copy['blog.eyebrow']}</Eyebrow>
         <SectionHeading level={1}>
           <MarkedText text={copy['blog.heading']} />
         </SectionHeading>
         <p className="m-0 max-w-[560px] text-lg leading-[1.55] text-muted max-md:text-base">{copy['blog.lede']}</p>
       </Section>
-      <Section tone="white">
+      <Section tone="white" padding="under-head">
         <Suspense fallback={<BlogListFallback />}>
           <BlogList searchParams={searchParams} />
         </Suspense>
