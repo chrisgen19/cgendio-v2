@@ -26,7 +26,8 @@ export function PostNav({previous, next}: PostNavProps) {
           </Link>
         ) : null}
         {next ? (
-          <Link href={`/writing/${next.slug}`} className={cn(CARD, 'col-start-2 text-right max-md:col-start-1 max-md:text-left')}>
+          // Only pair it off to the right when there is a previous card beside it; alone it sits in column 1, as a lone previous card does
+          <Link href={`/writing/${next.slug}`} className={cn(CARD, previous && 'col-start-2 text-right max-md:col-start-1 max-md:text-left')}>
             <span className="font-mono text-xs tracking-[0.06em] text-muted uppercase">Next article</span>
             <span className="font-display text-[22px] leading-[1.2] font-[650] tracking-[-0.02em]">{next.title}</span>
           </Link>

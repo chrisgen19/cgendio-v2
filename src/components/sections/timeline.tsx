@@ -49,7 +49,9 @@ export async function Timeline() {
               <li
                 key={entry.order}
                 data-tl-active={i === 0 || undefined}
-                className="tl-entry border-t border-line pt-8 pb-30 last:pb-20 max-md:pt-7 max-md:pb-16 max-md:last:pb-0"
+                // Even spacing each side of the hairline. The last entry keeps a deeper tail so it can still reach the
+                // reading line while the counter is stuck, which is what rolls the odometer to the final year.
+                className="tl-entry border-t border-line pt-12 pb-12 last:pb-20 max-md:pt-7 max-md:pb-16 max-md:last:pb-0"
               >
                 <div className="flex flex-col gap-3.5">
                   {year ? (
