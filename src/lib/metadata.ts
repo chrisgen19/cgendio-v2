@@ -8,7 +8,9 @@ import type {Metadata} from 'next';
 export const SITE_NAME = 'Chris Diomampo';
 /** The RSS feed, at the same path as the previous site so existing subscribers keep working. */
 export const FEED_PATH = '/feed.xml';
-export const SITE_DESCRIPTION = 'I take brands from research and Figma to fast WordPress and Next.js sites, then keep them running.';
+/** Word for word the previous site's keyword-led description, which it ranks on (#81 Phase A). */
+export const SITE_DESCRIPTION =
+  'Chris Diomampo is a senior full-stack developer in Metro Manila, Philippines. Next.js, TypeScript and PostgreSQL, with 15+ years of WordPress, Shopify and PHP behind it.';
 /** Open Graph wants a language_TERRITORY code, not a bare language, and the previous site published en_US (#81). */
 export const OG_LOCALE = 'en_US';
 /** The fuller form of the name. The brand is the short one, so this is the Person schema's alternateName (#81). */

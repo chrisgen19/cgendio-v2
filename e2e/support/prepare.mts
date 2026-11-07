@@ -73,9 +73,11 @@ const fixture = `data:image/png;base64,${readFileSync(new URL('./fixtures/about-
 const db = new PrismaClient({adapter: new PrismaPg({connectionString: testEnv.DATABASE_URL})});
 try {
   await db.siteSettings.update({where: {id: 'site'}, data: {contactEmail: CONTACT_EMAIL, photoUrl: fixture}});
-  await db.project.updateMany({where: {coverImageUrl: {not: null}}, data: {coverImageUrl: fixture}});
+  // Raw SQL, not the client: Prisma would stamp updated_at with now, and the sitemap spec checks that each case study
+  // keeps the previous site's last-modified date from the seed (#81 Phase D)
+  await db.$executeRaw`UPDATE "projects" SET "cover_image_url" = ${fixture} WHERE "cover_image_url" IS NOT NULL`;
   // Every seeded project has a tour, so the specs for the layout without one use this project with its tour cleared
-  await db.project.update({where: {slug: NO_TOUR_SLUG}, data: {tourStops: []}});
+  await db.$executeRaw`UPDATE "projects" SET "tour_stops" = '[]'::jsonb WHERE "slug" = ${NO_TOUR_SLUG}`;
   await signInAdmin(db);
 } finally {
   await db.$disconnect();

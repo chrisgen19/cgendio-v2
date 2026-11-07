@@ -187,16 +187,18 @@ describe('project fresh fruit tour migration', () => {
   });
 });
 
+const OFFICE_SUMMARY = 'Office fruit deliveries for workplaces in Glasgow, on a WordPress and WooCommerce site.';
+
 describe('project fresh fruit copy migration', () => {
   const sql = readFileSync(new URL('../../prisma/migrations/20261102170000_project_fresh_fruit_copy/migration.sql', import.meta.url), 'utf8');
   const writeUp = readFileSync(new URL('../../prisma/seed-data/projects/fresh-fruit-and-veg.md', import.meta.url), 'utf8');
   const freshFruit = projects.find((project) => project.slug === 'fresh-fruit-and-veg');
   const quoted = (value: string) => `'${value.replaceAll("'", "''")}'`;
 
-  it('describes the office deliveries site in the summary, label and tags', () => {
-    expect(freshFruit?.summary).toMatch(/office/i);
+  // The summary went back to the previous site's in 20261107120000_project_fresh_fruit_summary (#81 Phase A)
+  it('describes the office deliveries site in the label and tags', () => {
     expect(freshFruit?.kindLabel).toBe('CLIENT · OFFICE DELIVERIES');
-    expect(`${freshFruit?.summary} ${freshFruit?.kindLabel} ${freshFruit?.tags.join(' ')}`).not.toMatch(/subscription/i);
+    expect(`${freshFruit?.kindLabel} ${freshFruit?.tags.join(' ')}`).not.toMatch(/subscription/i);
   });
 
   it('keeps the technical story and says the site has moved', () => {
@@ -207,7 +209,8 @@ describe('project fresh fruit copy migration', () => {
   });
 
   it.each([
-    ['summary', () => quoted(freshFruit?.summary ?? '')],
+    // This migration is history: it set the office summary, which the next one replaces
+    ['summary', () => quoted(OFFICE_SUMMARY)],
     ['kind_label', () => quoted(freshFruit?.kindLabel ?? '')],
     ['case_study', () => quoted(writeUp)],
   ])('backfills %s with the seed value, only while it still has the old one', (column, value) => {
@@ -222,6 +225,28 @@ describe('project fresh fruit copy migration', () => {
 
   it('points the boxes stop at the office site', () => {
     expect(freshFruit?.tourStops?.find(({key}) => key === 'boxes')?.note).toBe('Office delivery boxes');
+  });
+});
+
+describe('project fresh fruit summary migration', () => {
+  const sql = readFileSync(new URL('../../prisma/migrations/20261107120000_project_fresh_fruit_summary/migration.sql', import.meta.url), 'utf8');
+  const freshFruit = projects.find((project) => project.slug === 'fresh-fruit-and-veg');
+  const quoted = (value: string) => `'${value.replaceAll("'", "''")}'`;
+
+  it("puts back the previous site's summary in the seed", () => {
+    expect(freshFruit?.summary).toBe('Weekly fruit and veg boxes for homes and offices in Glasgow, sold as WooCommerce subscriptions.');
+  });
+
+  // The whole migration, comments aside, is this one guarded statement: an extra update (indented or not) fails here
+  it('sets the seed summary and the save time, only while the office summary is still there, and nothing else', () => {
+    const statements = sql
+      .split('\n')
+      .filter((line) => !line.trimStart().startsWith('--'))
+      .join('\n')
+      .trim();
+    expect(statements).toBe(
+      `UPDATE "projects" SET "summary" = ${quoted(freshFruit?.summary ?? '')}, "updated_at" = CURRENT_TIMESTAMP WHERE "slug" = 'fresh-fruit-and-veg' AND "summary" = ${quoted(OFFICE_SUMMARY)};`,
+    );
   });
 });
 
