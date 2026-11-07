@@ -55,7 +55,7 @@ Define these in `src/app/globals.css` with `@theme` and use the Tailwind utiliti
 
 ## Fonts
 
-All three are Google Fonts, loaded with `next/font/google` (see the plan's Appendix).
+All three are Google Fonts, self-hosted with `next/font/local` from `src/app/_fonts` (the latin variable files Google serves, with their OFL licences), so the build never fetches from Google (#92). The plan's Appendix shows the original `next/font/google` setup.
 
 | Font | Role | Weights | next/font variable | Tailwind token |
 | --- | --- | --- | --- | --- |
