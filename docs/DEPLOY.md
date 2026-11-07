@@ -38,22 +38,24 @@ Two things specific to this site:
 
 **Build** means the Coolify **Build Variable** box is checked, so the value reaches `next build`. Four variables are needed in *both* places, which is the easy thing to get wrong.
 
-| Variable | Build | Runtime | Value and what breaks without it |
-|---|---|---|---|
-| `DATABASE_URL` | yes | yes | The Postgres resource's internal URL. The build fails without it (guarded). |
-| `NEXT_PUBLIC_SITE_URL` | yes | yes | `https://<domain>`, no trailing slash. Inlined into the client bundle. The build fails without it (guarded). See the scheme rule below. |
-| `R2_PUBLIC_URL` | yes | yes | The bucket's public base URL, no trailing slash. Fixes the allowed image host for the optimizer (`next.config.ts:24`), so a wrong value breaks every optimized image. The build fails without it (guarded). |
-| `GA_MEASUREMENT_ID` | yes | yes | `G-XXXXXXXXXX`. Build variable because the public pages are prerendered with the tag. Not guarded: unset means no tag at all, and a malformed value is ignored with a logged warning rather than taking a page down. |
-| `BETTER_AUTH_SECRET` | | yes | A new value, `openssl rand -base64 32`. Do not reuse the local one. At least 32 characters. |
-| `BETTER_AUTH_URL` | | yes | Same as `NEXT_PUBLIC_SITE_URL`. |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | | yes | From the **production** OAuth app (section 5). Without them `/sign-in` logs a `ZodError` and admin sign-in is unavailable; the public site is unaffected. |
-| `ADMIN_EMAILS` | | yes | Comma-separated. Only these GitHub emails can sign in to `/admin`. |
-| `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` | | yes | Uploads only. Missing values break admin uploads, not the public site. |
-| `RESEND_API_KEY` | | yes | Optional, but without it the contact form **stores the message and silently skips the email**, and the form is the site's main call to action. |
-| `MAIL_FROM` | | yes | A sender on a Resend-verified domain. `onboarding@resend.dev` only delivers to your own Resend account address. |
-| `INDEXNOW_KEY` | | yes | Runtime only; the key route reads it per request. Use v1's existing value so `/indexnow-key.txt` serves the same key through the cutover. Unset means no pings and a 404 key file. |
+**Startup** means the server refuses to start without it (`src/server/startup-env-check.ts`, #105): `instrumentation.ts` checks these before the server takes requests, so a missing one fails the deploy instead of a page. Everything else either has a safe default or only disables the feature it belongs to, and is reported as a warning in the same log.
 
-The build only needs the four build variables. Everything else is validated on first use, split by concern (`src/lib/env.ts`), so a build never needs the auth, R2 or mail secrets.
+| Variable | Build | Runtime | Startup | Value and what breaks without it |
+|---|---|---|---|---|
+| `DATABASE_URL` | yes | yes | **fatal** | The Postgres resource's internal URL. The build fails without it (guarded). |
+| `NEXT_PUBLIC_SITE_URL` | yes | yes | | `https://<domain>`, no trailing slash. Inlined into the client bundle. The build fails without it (guarded). See the scheme rule below. |
+| `R2_PUBLIC_URL` | yes | yes | **fatal** | The bucket's public base URL, no trailing slash. Fixes the allowed image host for the optimizer (`next.config.ts:24`), so a wrong value breaks every optimized image. The build fails without it (guarded), and the server refuses to start without it: `r2Env()` parses the whole R2 schema at runtime, so a value that reaches the build and not the container would only fail on the first admin upload. |
+| `GA_MEASUREMENT_ID` | yes | yes | warns | `G-XXXXXXXXXX`. Build variable because the public pages are prerendered with the tag. Not guarded: unset means no tag at all, and a malformed value is ignored with a logged warning rather than taking a page down. |
+| `BETTER_AUTH_SECRET` | | yes | **fatal** | A new value, `openssl rand -base64 32`. Do not reuse the local one. At least 32 characters. |
+| `BETTER_AUTH_URL` | | yes | **fatal** | Same as `NEXT_PUBLIC_SITE_URL`. |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | | yes | **fatal** | From the **production** OAuth app (section 5). The server refuses to start without them. |
+| `ADMIN_EMAILS` | | yes | **fatal** | Comma-separated. Only these GitHub emails can sign in to `/admin`. |
+| `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` | | yes | **fatal** | Uploads only, but fatal at startup: the alternative is a deploy that looks healthy until the first admin upload. |
+| `RESEND_API_KEY` | | yes | warns | Optional, but without it the contact form **stores the message and silently skips the email**, and the form is the site's main call to action. |
+| `MAIL_FROM` | | yes | | A sender on a Resend-verified domain. `onboarding@resend.dev` only delivers to your own Resend account address. |
+| `INDEXNOW_KEY` | | yes | warns | Runtime only; the key route reads it per request. Use v1's existing value so `/indexnow-key.txt` serves the same key through the cutover. Unset means no pings and a 404 key file. |
+
+The build only needs the four build variables: the schemas in `src/lib/env.ts` are split by concern and parsed on first use, so a build never needs the auth, R2 or mail secrets. The running server is stricter - it checks the fatal ones above before it serves anything.
 
 **Renamed from v1's Coolify keys, so do not copy them across blindly:** `SITE_URL` is now `NEXT_PUBLIC_SITE_URL`, and `ADMIN_EMAIL` is now `ADMIN_EMAILS`. New in v2: `RESEND_API_KEY`, `MAIL_FROM` and the four `R2_*` upload keys.
 
@@ -87,6 +89,8 @@ So an https value served over plain http makes the browser upgrade the page's ow
 8. **Domain, www redirect and DNS.** `cgdiomampo.dev` and `www.cgdiomampo.dev` both point at the VPS already. Both domains stay on the Coolify app, and the permanent redirects live in a Traefik dynamic config file on the server, because Coolify's own non-www setting does not reach the container labels and its HTTP→HTTPS redirect is a 302. v1 ships a copy in `cgendio-v1/docs/traefik/`; moving the domains to the v2 app means pointing that same file at it. Check with `curl -I https://www.cgdiomampo.dev/` and `curl -I http://cgdiomampo.dev/`: both should answer 301.
 9. **VPS firewall.** Only 22, 80 and 443 open; Postgres not publicly reachable.
 10. **First deploy.** The build log should show `Applying migration ...`, then the seed output, then the route table. Later deploys show `No pending migrations to apply.` and `Content already exists (SEED_ONLY_IF_EMPTY=1), so the seed inserted nothing.`
+
+    **If a fatal variable is missing or invalid, the container will not start.** It logs every offending variable by name, as `VARIABLE: message` under "Missing or invalid environment variables, so the server will not start", then exits non-zero - so the deploy fails rather than a page. Check the container log for that list first when a deploy will not come up. The warnings in the same log (no `RESEND_API_KEY`, analytics or IndexNow off) are expected when those are unset and do not stop anything.
 11. **Smoke test** (#10 step 11), against the live URL: the home page with both hero cuts, the film playing once and holding on the brand card, a post, a case study, a contact submit that actually arrives, admin sign-in, and `/api/health` returning `{"status":"ok","database":"ok"}` with Coolify showing the container healthy.
 
 ## Rollback
