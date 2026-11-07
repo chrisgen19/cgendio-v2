@@ -1,4 +1,5 @@
 import 'server-only';
+import {writeSync} from 'node:fs';
 import type {ZodError, ZodType} from 'zod';
 import {analyticsEnvSchema, authEnvSchema, indexNowEnvSchema, mailEnvSchema, r2EnvSchema, serverEnvSchema} from '@/lib/env';
 
@@ -31,23 +32,21 @@ const problems = (schema: ZodType, env: Env) => {
   return parsed.success ? [] : issuesOf(parsed.error);
 };
 
-/**
- * The R2 credentials only. R2_PUBLIC_URL is a build variable, already guarded in the Dockerfile (`Dockerfile:46`), and
- * it is the one R2 value a running server can do without: it fixes the allowed image host at build time. Checking it
- * here as well would add nothing and would force e2e to set one, which changes `images.remotePatterns`.
- */
-const R2_CREDENTIALS = r2EnvSchema.omit({R2_PUBLIC_URL: true});
-
 export type EnvCheck = {errors: string[]; warnings: string[]};
 
 /**
  * Every problem at once, so one failed deploy shows everything that needs fixing instead of one variable per attempt.
  *
  * Fatal: the database, the auth secrets (BETTER_AUTH_SECRET also keys the contact form's IP hash and the draft preview
- * signatures, not just sign-in) and the R2 credentials. Warnings: anything the site keeps working without.
+ * signatures, not just sign-in) and the whole R2 schema. Warnings: anything the site keeps working without.
+ *
+ * R2_PUBLIC_URL is in the R2 schema and so is fatal here as well, even though the Dockerfile already guards it as a
+ * build variable: `r2Env()` parses the whole schema at runtime (src/server/r2.ts:33), so a value that reaches the build
+ * but not the running container would pass startup and then fail the first admin upload - the exact failure this check
+ * exists to prevent. The build guard stays as the earlier, cheaper one.
  */
 export const checkServerSecrets = (env: Env): EnvCheck => {
-  const errors = [...problems(serverEnvSchema, env), ...problems(authEnvSchema, env), ...problems(R2_CREDENTIALS, env)];
+  const errors = [...problems(serverEnvSchema, env), ...problems(authEnvSchema, env), ...problems(r2EnvSchema, env)];
   const warnings = [...problems(mailEnvSchema, env)];
 
   // Optional by design, but its absence is otherwise silent and the contact form is the site's main call to action
@@ -83,7 +82,9 @@ export const assertServerSecretsOrExit = (env: Env = process.env) => {
   try {
     assertServerSecrets(env);
   } catch (error) {
-    console.error(error instanceof Error ? error.message : error);
+    // writeSync, not console.error: Node writes to a pipe asynchronously, and stderr is a pipe under Docker, so
+    // process.exit() can cut the message off and leave an operator with a container that exits saying nothing.
+    writeSync(2, `${error instanceof Error ? error.message : String(error)}\n`);
     process.exit(1);
   }
 };

@@ -47,7 +47,7 @@ export const testEnv = {
   R2_ACCESS_KEY_ID: 'e2e-r2-access-key-id',
   R2_SECRET_ACCESS_KEY: 'e2e-r2-secret-access-key',
   R2_BUCKET: 'cgendio-e2e',
-  // No uploads in e2e; empty keeps the image config the same as CI's. The startup check skips it on purpose: it's a
-  // build variable, guarded in the Dockerfile, and setting one here would change images.remotePatterns.
-  R2_PUBLIC_URL: '',
+  // A host nothing serves from: the startup check requires it, but no e2e image is on it. prepare.mts rewrites every
+  // seeded cover to a data: URL, so none of them is optimizable either way; this only adds an unused remotePattern.
+  R2_PUBLIC_URL: 'https://e2e-media.example.test',
 } satisfies Record<string, string>;

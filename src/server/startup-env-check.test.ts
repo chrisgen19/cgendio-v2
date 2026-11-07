@@ -48,13 +48,17 @@ describe('checkServerSecrets', () => {
     expect(errorsFor(variable, {...COMPLETE, [variable]: undefined})).toHaveLength(1);
   });
 
-  it.each(['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET'])('fails when %s is missing', (variable) => {
+  it.each(['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET', 'R2_PUBLIC_URL'])('fails when %s is missing', (variable) => {
     expect(errorsFor(variable, {...COMPLETE, [variable]: undefined})).toHaveLength(1);
   });
 
-  // It's a build variable, guarded in the Dockerfile, and e2e deliberately runs without one
-  it('ignores R2_PUBLIC_URL, which the build guards instead', () => {
-    expect(checkServerSecrets({...COMPLETE, R2_PUBLIC_URL: ''}).errors).toEqual([]);
+  /*
+   * The Dockerfile guards R2_PUBLIC_URL as a build variable, but r2Env() parses the whole schema at runtime
+   * (src/server/r2.ts:33), so a value that reaches the build and not the container would pass startup and fail the
+   * first admin upload instead. Raised by CodeRabbit on #105.
+   */
+  it('fails an empty R2_PUBLIC_URL, which would only surface on the first upload', () => {
+    expect(errorsFor('R2_PUBLIC_URL', {...COMPLETE, R2_PUBLIC_URL: ''})).toHaveLength(1);
   });
 
   it('reports every missing variable at once, not just the first', () => {
