@@ -14,7 +14,7 @@ export async function PostArticle({post}: {post: PostDetail}) {
   const hasToc = toc.length >= 3;
   return (
     <article>
-      <Section padding="cta" innerClassName="flex flex-col gap-6 pt-6 max-md:pt-0">
+      <Section padding="head" innerClassName="flex flex-col gap-6 pt-6 max-md:pt-0">
         <Link
           href="/writing"
           className="inline-flex min-h-11 items-center gap-2 self-start text-[15px] font-semibold text-ink no-underline hover:text-accent"
@@ -46,7 +46,7 @@ export async function PostArticle({post}: {post: PostDetail}) {
         <p className="m-0 max-w-[640px] text-lg leading-[1.55] text-muted max-md:text-base">{post.excerpt}</p>
         {post.coverImageUrl ? <CoverImage src={post.coverImageUrl} className="mt-4" aboveTheFold /> : null}
       </Section>
-      <Section tone="white">
+      <Section tone="white" padding="under-head">
         <div className={hasToc ? 'grid grid-cols-[minmax(0,68ch)_240px] justify-between gap-16 max-lg:grid-cols-1 max-lg:gap-10' : undefined}>
           {hasToc ? (
             <div className="lg:sticky lg:top-8 lg:order-2 lg:self-start">
