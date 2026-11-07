@@ -3,7 +3,7 @@ import {z} from 'zod';
 /*
  * Server environment, validated on first use rather than at import, so modules that merely import this file don't
  * fail. Split by concern: `next build` needs only the database (it prerenders from it), so a build doesn't require
- * the auth or R2 secrets. Phase 9 adds analytics.
+ * the auth or R2 secrets.
  */
 
 const serverEnvSchema = z.object({
@@ -43,6 +43,23 @@ const mailEnvSchema = z.object({
   MAIL_FROM: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(3).default('Cgdiomampo.dev <onboarding@resend.dev>')),
 });
 
+/**
+ * Google Analytics. The id goes into an inline script, so only the G-XXXXXXXXXX shape is accepted (#81).
+ *
+ * Unlike the other schemas this one never throws, because `GoogleAnalytics` reads it while rendering every public
+ * page: a typo in an optional setting must not be able to take the site down. A malformed id turns analytics off and
+ * is logged once per process instead. (The previous site threw here, but it only read the value at build time.)
+ */
+const analyticsEnvSchema = z.object({
+  GA_MEASUREMENT_ID: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z
+      .string()
+      .regex(/^G-[A-Z0-9]+$/)
+      .optional(),
+  ),
+});
+
 /** The public origin, for absolute URLs (the RSS feed now, canonical URLs and OG images in Phase 7). No trailing slash. */
 const siteEnvSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.preprocess(
@@ -59,6 +76,7 @@ export type AuthEnv = z.infer<typeof authEnvSchema>;
 export type R2Env = z.infer<typeof r2EnvSchema>;
 export type MailEnv = z.infer<typeof mailEnvSchema>;
 export type SiteEnv = z.infer<typeof siteEnvSchema>;
+export type AnalyticsEnv = z.infer<typeof analyticsEnvSchema>;
 
 const lazy = <T>(parse: () => T) => {
   let cached: T | undefined;
@@ -73,3 +91,12 @@ export const authEnv = lazy((): AuthEnv => authEnvSchema.parse(process.env));
 export const r2Env = lazy((): R2Env => r2EnvSchema.parse(process.env));
 export const mailEnv = lazy((): MailEnv => mailEnvSchema.parse(process.env));
 export const siteEnv = lazy((): SiteEnv => siteEnvSchema.parse(process.env));
+/** Exported for its test: `analyticsEnv` caches, so the fallback cannot be exercised through the accessor. */
+export const parseAnalyticsEnv = (env: Record<string, string | undefined>): AnalyticsEnv => {
+  const parsed = analyticsEnvSchema.safeParse(env);
+  if (parsed.success) return parsed.data;
+  console.warn(`Ignoring GA_MEASUREMENT_ID: ${JSON.stringify(env.GA_MEASUREMENT_ID)} is not a G-XXXXXXXXXX id. Analytics is off.`);
+  return {GA_MEASUREMENT_ID: undefined};
+};
+
+export const analyticsEnv = lazy((): AnalyticsEnv => parseAnalyticsEnv(process.env));
