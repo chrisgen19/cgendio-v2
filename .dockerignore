@@ -13,8 +13,10 @@ next-env.d.ts
 .env.*
 !.env.example
 
-# Tests, tooling output and docs the image doesn't use
+# Tests, tooling output and docs the image doesn't use. playwright.config.ts goes too: it imports e2e/, and `next build`
+# type-checks every .ts file in tsconfig's include list, so it would fail the build without e2e/ beside it.
 e2e
+playwright.config.ts
 test-results
 playwright-report
 blob-report
