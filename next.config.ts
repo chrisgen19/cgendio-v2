@@ -5,14 +5,30 @@ const r2PublicUrl = process.env.R2_PUBLIC_URL?.replace(/\/+$/, '');
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // Docker on Coolify (Dockerfile): server.js plus only the node_modules it uses
+  output: 'standalone',
+  // The share cards and the icon read their TTFs from src/app/_og/fonts at runtime (process.cwd(), which the tracer can't
+  // follow), and post and case study cards render on first request. Copied once into the standalone output.
+  outputFileTracingIncludes: {'/*': ['./src/app/_og/fonts/**/*']},
   images: {
     // AVIF first for browsers that accept it (about 25% smaller on the photo-heavy tour captures), WebP otherwise
     formats: ['image/avif', 'image/webp'],
     remotePatterns: r2PublicUrl ? [new URL(`${r2PublicUrl}/**`)] : [],
   },
   partialPrefetching: true,
-  // Admin, sign-in and draft previews never go in search results (also set as robots metadata on those pages)
   headers: async () => [
+    {
+      source: '/:path*',
+      headers: [
+        {key: 'X-Content-Type-Options', value: 'nosniff'},
+        // No referrer to other sites: a visitor who follows a link to a client's site (or GitHub, LinkedIn, a link in a
+        // post) shows up there as direct traffic. Links within the site keep it. Doesn't affect search engines (it isn't
+        // nofollow). The same policies the previous site sent (#81).
+        {key: 'Referrer-Policy', value: 'same-origin'},
+        {key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()'},
+      ],
+    },
+    // Admin, sign-in and draft previews never go in search results (also set as robots metadata on those pages)
     {source: '/admin/:path*', headers: [{key: 'X-Robots-Tag', value: 'noindex, nofollow'}]},
     {source: '/admin', headers: [{key: 'X-Robots-Tag', value: 'noindex, nofollow'}]},
     {source: '/sign-in', headers: [{key: 'X-Robots-Tag', value: 'noindex, nofollow'}]},

@@ -1,0 +1,22 @@
+# Build context for the Dockerfile: only what `pnpm install`, `prisma` (migrate and seed) and `next build` need.
+# Keep prisma/seed-data/**: the seed reads the post bodies and case study write-ups from its .md files.
+.git
+.github
+node_modules
+.next
+src/generated
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets and local state
+.env
+.env.*
+!.env.example
+
+# Tests, tooling output and docs the image doesn't use
+e2e
+test-results
+playwright-report
+blob-report
+scripts
+docs
