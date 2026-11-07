@@ -1,7 +1,15 @@
 import type {NextConfig} from 'next';
+import {contentSecurityPolicy, HSTS} from './src/lib/security-headers';
 
 // Covers uploaded to R2 go through the image optimizer. Read at build time, so R2_PUBLIC_URL must be a build variable too.
 const r2PublicUrl = process.env.R2_PUBLIC_URL?.replace(/\/+$/, '');
+
+// Compiled once, at build time. Only the scheme of NEXT_PUBLIC_SITE_URL matters, and it must be the scheme the site is
+// actually served on, as the canonical URLs, the sitemap, the share cards and the auth redirects already require.
+const csp = contentSecurityPolicy({
+  isDev: process.env.NODE_ENV === 'development',
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+});
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -26,6 +34,9 @@ const nextConfig: NextConfig = {
         // nofollow). The same policies the previous site sent (#81).
         {key: 'Referrer-Policy', value: 'same-origin'},
         {key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()'},
+        {key: 'Content-Security-Policy', value: csp},
+        // Browsers ignore HSTS over plain http, so it costs nothing to send it everywhere (#99)
+        {key: 'Strict-Transport-Security', value: HSTS},
       ],
     },
     // Admin, sign-in and draft previews never go in search results (also set as robots metadata on those pages)
