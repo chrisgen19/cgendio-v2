@@ -18,6 +18,15 @@ export const BLOG_TITLE = 'Blog';
 /** Word for word the title the previous site ranks on, "Senior" included. */
 export const HOME_TITLE = `${SITE_NAME} · Senior full-stack developer, Next.js and WordPress`;
 
+/**
+ * The id of the one share card a post or case study generates (generateImageMetadata in their opengraph-image files),
+ * which is how each card gets its page title as alt text. It adds a segment to the image URL.
+ */
+export const OG_CARD_ID = 'card';
+
+/** The share card image of a post or case study page, e.g. `/writing/<slug>/opengraph-image/card`. */
+export const ogCardPath = (pagePath: string) => `${pagePath}/opengraph-image/${OG_CARD_ID}`;
+
 type PageMetadataInput = {
   /** A plain title goes through the root template ("Blog · Chris Diomampo"); `{absolute}` skips it. */
   title: string | {absolute: string};
@@ -26,6 +35,8 @@ type PageMetadataInput = {
   path: string;
   /** Posts are articles: full ISO timestamps, the author's name and the post's tags. */
   article?: {publishedTime: string; modifiedTime: string; authors: string[]; tags: string[]};
+  /** Posts and case studies have a Markdown version at `<path>.md` (#81), advertised to agents as an alternate. */
+  markdown?: boolean;
 };
 
 /**
@@ -33,14 +44,20 @@ type PageMetadataInput = {
  * `openGraph` and `twitter` instead of merging them, so every route passes complete objects. The images come from
  * the opengraph-image files next to the routes.
  */
-export const pageMetadata = ({title, description, path, article}: PageMetadataInput): Metadata => {
+export const pageMetadata = ({title, description, path, article, markdown}: PageMetadataInput): Metadata => {
   const cardTitle = typeof title === 'string' ? title : title.absolute;
   const shared = {siteName: SITE_NAME, locale: OG_LOCALE, url: path, title: cardTitle, description};
   return {
     title,
     description,
     // The feed link sits here, not in the root layout: a route's `alternates` replaces the parent's instead of merging
-    alternates: {canonical: path, types: {'application/rss+xml': [{url: FEED_PATH, title: `${SITE_NAME} writing`}]}},
+    alternates: {
+      canonical: path,
+      types: {
+        'application/rss+xml': [{url: FEED_PATH, title: `${SITE_NAME} writing`}],
+        ...(markdown ? {'text/markdown': `${path}.md`} : {}),
+      },
+    },
     openGraph: article ? {...shared, type: 'article', ...article} : {...shared, type: 'website'},
     twitter: {card: 'summary_large_image', title: cardTitle, description},
   };
