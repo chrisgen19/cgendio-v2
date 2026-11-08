@@ -166,10 +166,19 @@
   color-scheme: light;
   /*
    * The sticky header's height. Everything that pins near the top of the viewport offsets by this, so the header
-   * never covers it. Keep in step with HEADER_HEIGHT in src/components/site/site-header.tsx, which uses the same
-   * number as the IntersectionObserver offset that decides the header has left the hero.
+   * never covers it. Keep the 72px in step with HEADER_HEIGHT in src/components/site/site-header.tsx.
+   *
+   * The viewport is `viewport-fit: cover` (#112), so on a notched phone the top of the viewport is under the status
+   * bar. The inset is part of the header's height rather than a separate offset, so everything pinning below it
+   * (--t0, --ms-pin-min) clears the status bar too without each one having to know about the inset. The header pads
+   * itself by the same amount, so its own content still centres in the 72px bar.
+   *
+   * HEADER_HEIGHT stays 72: it is only the IntersectionObserver offset that decides the header has left the hero, so
+   * on a notched phone that background fades in one inset earlier. That is a threshold, not a layout offset.
    */
-  --header-h: 72px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --header-h: calc(72px + var(--safe-top));
 }
 
 :root[data-theme="dark"]:not(:has(.admin-theme)) {

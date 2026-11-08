@@ -25,9 +25,17 @@ export const metadata: Metadata = {
   verification: {google: GOOGLE_SITE_VERIFICATION},
 };
 
-// The no-JS fallback (light is the default theme). THEME_SCRIPT adds a theme-color for the chosen theme in front of it.
+/*
+ * The no-JS fallback (light is the default theme). THEME_SCRIPT adds a theme-color for the chosen theme in front of it.
+ *
+ * `viewportFit: 'cover'` lets the full-bleed hero fill a notched phone edge to edge, as the previous site did (#112).
+ * It only means anything paired with safe-area insets, or the layout runs under the status bar and the home indicator:
+ * --header-h in globals.css carries env(safe-area-inset-top), Container carries the left and right insets, and the
+ * footer and skip link carry the bottom and top ones.
+ */
 export const viewport: Viewport = {
   themeColor: THEME_COLORS.light,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({children}: LayoutProps<'/'>) {

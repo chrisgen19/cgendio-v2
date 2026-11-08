@@ -16,7 +16,12 @@ export async function SiteFooter() {
     ...PROFILES.flatMap(({key, label}) => (socials[key] ? [{href: socials[key], label}] : [])),
   ];
   return (
-    <footer className="px-14 pt-10 pb-12 max-md:px-5">
+    /*
+     * The last thing on the page, so it carries the bottom inset: `viewport-fit: cover` (#112) puts the home
+     * indicator over the final 34px, which would otherwise sit on top of the footer links. The side padding matches
+     * Container's, insets included, since the footer sets its own rather than using one.
+     */
+    <footer className="pt-10 pb-[calc(3rem+var(--safe-bottom))] pl-[max(3.5rem,env(safe-area-inset-left,0px))] pr-[max(3.5rem,env(safe-area-inset-right,0px))] max-md:pl-[max(1.25rem,env(safe-area-inset-left,0px))] max-md:pr-[max(1.25rem,env(safe-area-inset-right,0px))]">
       <div className="mx-auto flex max-w-site flex-wrap items-center justify-between gap-5 border-t border-line pt-8">
         <Logo />
         <ul className="m-0 flex list-none flex-wrap gap-1 p-0">
