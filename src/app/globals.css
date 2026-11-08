@@ -1303,9 +1303,16 @@
  * Long admin text grows the panel downward from that line, up to 8px short of the viewport's bottom edge.
  */
 .ms-track {
-  --ms-panel-h: min(580px, calc(100svh - 80px));
+  /* The highest the panel may pin: clear of the sticky header, with a gap */
+  --ms-pin-min: calc(var(--header-h) + 8px);
+  /*
+   * The design height, capped by the room actually left between the header and the bottom edge. Taking the header out
+   * here and not only in --ms-pin-top is what keeps a short screen honest: min-height wins over max-height, so a panel
+   * sized for the whole viewport would hang off the bottom however the clamp below moved it.
+   */
+  --ms-panel-h: min(580px, calc(100svh - var(--ms-pin-min) - 8px));
   /* Centred in the viewport, but never so high that the header covers the panel on a short screen */
-  --ms-pin-top: max(calc(var(--header-h) + 8px), calc((100svh - var(--ms-panel-h)) / 2));
+  --ms-pin-top: max(var(--ms-pin-min), calc((100svh - var(--ms-panel-h)) / 2));
   --ms-panel-max: calc(100svh - var(--ms-pin-top) - 8px);
 }
 
@@ -1337,7 +1344,7 @@
 
 @media (width < 860px) {
   .ms-track {
-    --ms-panel-h: min(560px, calc(100svh - 48px));
+    --ms-panel-h: min(560px, calc(100svh - var(--ms-pin-min) - 8px));
   }
 }
 
