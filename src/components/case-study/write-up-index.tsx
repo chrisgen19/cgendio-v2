@@ -51,12 +51,12 @@ export function WriteUpIndex({items}: {items: WriteUpIndexItem[]}) {
   return (
     <nav
       aria-label="Write-up sections"
-      className="max-lg:sticky max-lg:top-(--header-h) max-lg:z-10 max-lg:border-b max-lg:border-line max-lg:bg-white/92 max-lg:backdrop-blur-[10px] max-md:-mx-5 md:max-lg:-mx-14"
+      className="max-lg:sticky max-lg:top-(--header-h) max-lg:z-10 max-lg:border-b max-lg:border-line max-lg:bg-white/92 max-lg:backdrop-blur-[10px] max-lg:-ml-(--pad-l) max-lg:-mr-(--pad-r)"
     >
       <div className="relative">
         <ol
           ref={listRef}
-          className="relative m-0 flex list-none gap-2 overflow-x-auto p-0 [scrollbar-width:none] max-md:px-5 max-lg:py-2.5 md:max-lg:px-14 lg:flex-col lg:gap-0 lg:overflow-visible lg:border-l-2 lg:border-line"
+          className="relative m-0 flex list-none gap-2 overflow-x-auto p-0 [scrollbar-width:none] max-lg:py-2.5 max-lg:pl-(--pad-l) max-lg:pr-(--pad-r) lg:flex-col lg:gap-0 lg:overflow-visible lg:border-l-2 lg:border-line"
         >
           {items.map(({id, label, group}, index) => (
             <li key={id} className={cn('shrink-0', group === 'reasoning' && items[index - 1]?.group === 'write-up' && 'lg:mt-6')}>

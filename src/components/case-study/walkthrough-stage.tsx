@@ -197,7 +197,7 @@ export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, not
       <div className="walkthrough-tour-only dot-grid max-lg:contents lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:border-l lg:border-line">
         <figure
           aria-label="The live site, in a browser"
-          className="walkthrough-stage z-20 m-0 flex flex-col gap-2 max-lg:border-b max-lg:border-line max-lg:bg-ground max-lg:px-5 max-lg:py-2"
+          className="walkthrough-stage z-20 m-0 flex flex-col gap-2 max-lg:border-b max-lg:border-line max-lg:bg-ground max-lg:py-2 max-lg:pl-(--pad-l) max-lg:pr-(--pad-r)"
         >
           <div className="walkthrough-frame flex min-h-0 flex-col overflow-hidden border border-line bg-white shadow-(--shadow-deep)">
             <div className="relative flex min-h-13 shrink-0 items-center gap-3 border-b border-line pr-1.5 pl-3">
@@ -240,7 +240,7 @@ export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, not
       </div>
 
       <div className="motion-js:lg:col-start-1 motion-js:lg:row-start-2">
-        <div className="walkthrough-static-only walkthrough-script-only px-5 pt-6 md:px-(--gutter)">
+        <div className="walkthrough-static-only walkthrough-script-only pt-6 pl-(--pad-l) pr-(--pad-r) md:px-(--gutter)">
           <DeviceSwitch device={device} onChange={choose} className="w-fit" />
         </div>
         {notes}

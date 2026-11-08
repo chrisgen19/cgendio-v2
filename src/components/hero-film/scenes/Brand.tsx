@@ -64,12 +64,14 @@ export const Brand: React.FC<BrandProps> = ({worksHref = '#work', onReplay}) => 
     <SceneShell number=".dev" numberSize={Math.round(L.height * 0.5)} sweep={false}>
       <AbsoluteFill
         style={{
-          padding: `${L.padTop - 8}px ${L.padX}px ${L.padBottom - 8}px`,
+          paddingBlock: `${L.padTop - 8}px ${L.padBottom - 8}px`,
+          paddingLeft: L.padL,
+          paddingRight: L.padR,
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <div style={{width: L.innerW, display: 'flex', flexDirection: 'column', gap: L.portrait ? 14 : 24}}>
+        <div style={{width: `min(${L.innerW}px, 100%)`, display: 'flex', flexDirection: 'column', gap: L.portrait ? 14 : 24}}>
           <Appear delay={14}>
             {/* The name, not the domain: #81 Phase A retired the domain brand and the film was missed (#112) */}
             <StepLabel n="cg" label="Chris Diomampo · Web developer" size={L.step} />

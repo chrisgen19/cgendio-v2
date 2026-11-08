@@ -37,7 +37,8 @@ export const Intro: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
-          padding: `0 ${L.padX}px`,
+          paddingLeft: L.padL,
+          paddingRight: L.padR,
           gap: L.portrait ? 18 : 26,
         }}
       >

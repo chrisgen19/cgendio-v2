@@ -21,8 +21,11 @@ const THEME_COLOR_META_ID = 'theme-color';
 /**
  * Sets data-theme on <html> and the theme-color meta. Plain ES5 so it runs anywhere; keep it in step with readTheme()
  * and applyTheme() below.
+ *
+ * /admin and /sign-in always resolve light, whatever the cookie says: they render in the shadcn theme (.admin-theme)
+ * and have no dark variant, so a dark cookie would otherwise paint the browser chrome dark around a light page.
  */
-export const THEME_SCRIPT = `(function(){try{var d=/(?:^|; )${THEME_COOKIE}=dark(?:;|$)/.test(document.cookie);document.documentElement.setAttribute("data-theme",d?"dark":"light");var t=document.getElementById("${THEME_COLOR_META_ID}");if(!t){t=document.createElement("meta");t.id="${THEME_COLOR_META_ID}";t.name="theme-color";document.head.prepend(t)}t.content=d?"${THEME_COLORS.dark}":"${THEME_COLORS.light}"}catch(e){}})()`;
+export const THEME_SCRIPT = `(function(){try{var d=/(?:^|; )${THEME_COOKIE}=dark(?:;|$)/.test(document.cookie)&&!/^\\/(admin|sign-in)(\\/|$)/.test(location.pathname);document.documentElement.setAttribute("data-theme",d?"dark":"light");var t=document.getElementById("${THEME_COLOR_META_ID}");if(!t){t=document.createElement("meta");t.id="${THEME_COLOR_META_ID}";t.name="theme-color";document.head.prepend(t)}t.content=d?"${THEME_COLORS.dark}":"${THEME_COLORS.light}"}catch(e){}})()`;
 
 /** The stored theme in the browser (light when there's no valid cookie). */
 export const readTheme = (): Theme => (document.cookie.match(new RegExp(`(?:^|; )${THEME_COOKIE}=([^;]*)`))?.[1] === 'dark' ? 'dark' : 'light');
