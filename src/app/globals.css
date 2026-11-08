@@ -59,6 +59,12 @@
   --color-code-dim: #7c818e;
   /* Form errors (the canvas has no form; same red as the admin's destructive colour) */
   --color-danger: #b91c1c;
+  /*
+   * A form control's own boundary. `line` is a hairline for dividers and reads at 1.17:1 against the field, but an
+   * input's edge is the only thing showing where to type, so WCAG 1.4.11 wants 3:1 against both the field fill and
+   * the panel behind it. Not for dividers: those are decoration and keep `line`.
+   */
+  --color-field: #8d8e91;
   /* The highlighter bar under a heading's key word, and the marked word's colour (lime text on a translucent bar in dark mode) */
   --color-highlight: #d7ff3d;
   --color-highlight-ink: currentColor;
@@ -175,6 +181,8 @@
   --color-code-bg: #0f1116;
   --color-code-chrome: #1a1d24;
   --color-danger: #f87171;
+  /* 3.31:1 on the dark field fill, 3.04:1 on the panel behind it */
+  --color-field: #61646b;
   --color-on-accent: #0d0e12;
   --color-highlight: rgba(215, 255, 61, 0.22);
   --color-highlight-ink: #d7ff3d;
