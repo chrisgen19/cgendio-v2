@@ -175,6 +175,8 @@ test('a post publishes full ISO article times, its author and its tags', async (
   expect(content(html, 'property="article:author"')).toContain(BRAND);
   // One tag per post is the whole content model, so this is every tag rather than the first of several
   expect(html.match(/<meta property="article:tag"[^>]*>/g)).toHaveLength(1);
+  // Stored in its real casing: the uppercase chips are a CSS utility, so the metadata doesn't shout (#112)
+  expect(content(html, 'property="article:tag"')).toContain('WordPress');
 });
 
 /*

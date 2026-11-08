@@ -20,7 +20,7 @@ const project = {
 const post = {
   slug: 'a-post',
   title: 'A post',
-  tag: 'MIGRATION',
+  tag: 'Migration',
   date: '2026-10-01',
   publishedAt: '2026-10-01T05:00:00.000Z',
   readMinutes: 9,

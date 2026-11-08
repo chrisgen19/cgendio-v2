@@ -12,7 +12,8 @@ export function PostRow({post}: {post: Post}) {
       >
         <span className="font-mono text-[13px] text-muted max-md:hidden">{formatMonthYear(post.date)}</span>
         <span className="flex flex-col gap-2.5">
-          <span className="font-mono text-[11px] tracking-[0.06em] text-accent">{post.tag}</span>
+          {/* Uppercase is styling, not data: the tag is stored in its real casing ("WordPress") so metadata reads properly (#112) */}
+          <span className="font-mono text-[11px] tracking-[0.06em] text-accent uppercase">{post.tag}</span>
           <span className="font-display text-[26px] leading-[1.15] font-[650] tracking-[-0.025em] transition-colors duration-200 group-hover:text-accent">
             {post.title}
           </span>

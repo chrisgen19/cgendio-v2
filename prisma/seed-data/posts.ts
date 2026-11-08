@@ -12,7 +12,7 @@ export const posts: SeedPost[] = [
   {
     slug: 'wordpress-news-october-2026',
     title: "WordPress news, October 2026: what to patch and what's coming in 7.2",
-    tag: 'WORDPRESS',
+    tag: 'WordPress',
     status: 'PUBLISHED',
     date: '2026-10-05',
     excerpt:
@@ -21,7 +21,7 @@ export const posts: SeedPost[] = [
   {
     slug: 'redirect-maps-wordpress-to-nextjs',
     title: 'Redirect maps for a WordPress to Next.js migration',
-    tag: 'MIGRATION',
+    tag: 'Migration',
     status: 'PUBLISHED',
     date: '2026-10-01',
     excerpt:
@@ -30,28 +30,28 @@ export const posts: SeedPost[] = [
   {
     slug: 'migrating-20-wordpress-sites-to-nextjs-without-losing-seo',
     title: 'Migrating 20+ WordPress sites to Next.js without losing SEO',
-    tag: 'MIGRATION',
+    tag: 'Migration',
     status: 'DRAFT',
     excerpt: '[Excerpt]',
   },
   {
     slug: 'bulk-redirects-at-the-edge-with-cloudflare-and-vercel',
     title: 'Bulk redirects at the edge with Cloudflare and Vercel',
-    tag: 'INFRASTRUCTURE',
+    tag: 'Infrastructure',
     status: 'DRAFT',
     excerpt: '[Excerpt]',
   },
   {
     slug: 'my-claude-code-setup-subagents-skills-and-mcp',
     title: 'My Claude Code setup: subagents, skills and MCP',
-    tag: 'AI WORKFLOW',
+    tag: 'AI workflow',
     status: 'DRAFT',
     excerpt: '[Excerpt]',
   },
   {
     slug: 'two-reviewers-one-pr-claude-code-and-codex-reviews',
     title: 'Two reviewers, one PR: Claude Code and Codex reviews',
-    tag: 'AI WORKFLOW',
+    tag: 'AI workflow',
     status: 'DRAFT',
     excerpt: '[Excerpt]',
   },

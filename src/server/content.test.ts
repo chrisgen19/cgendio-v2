@@ -46,7 +46,7 @@ const projectRow = (slug: string, overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const postRow = (slug: string, publishedAt: string, tag = 'MIGRATION') => ({
+const postRow = (slug: string, publishedAt: string, tag = 'Migration') => ({
   id: `id-${slug}`,
   slug,
   title: `Post ${slug}`,
@@ -150,17 +150,17 @@ describe('posts', () => {
 
   it('groups tags by slug, most used first', async () => {
     db.post.findMany.mockResolvedValue([
-      postRow('a', '2026-10-01T00:00:00Z', 'AI WORKFLOW'),
-      postRow('b', '2026-09-01T00:00:00Z', 'AI WORKFLOW'),
+      postRow('a', '2026-10-01T00:00:00Z', 'AI workflow'),
+      postRow('b', '2026-09-01T00:00:00Z', 'AI workflow'),
       postRow('c', '2026-08-01T00:00:00Z', 'C#'),
       postRow('d', '2026-07-01T00:00:00Z', 'C++'),
       postRow('e', '2026-06-01T00:00:00Z', 'C#'),
-      postRow('f', '2026-05-01T00:00:00Z', 'MIGRATION'),
+      postRow('f', '2026-05-01T00:00:00Z', 'Migration'),
     ]);
     expect(await getPostTags()).toEqual([
       {label: 'C#', slug: 'c', count: 3},
-      {label: 'AI WORKFLOW', slug: 'ai-workflow', count: 2},
-      {label: 'MIGRATION', slug: 'migration', count: 1},
+      {label: 'AI workflow', slug: 'ai-workflow', count: 2},
+      {label: 'Migration', slug: 'migration', count: 1},
     ]);
   });
 
