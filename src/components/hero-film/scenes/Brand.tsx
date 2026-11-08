@@ -71,7 +71,8 @@ export const Brand: React.FC<BrandProps> = ({worksHref = '#work', onReplay}) => 
       >
         <div style={{width: L.innerW, display: 'flex', flexDirection: 'column', gap: L.portrait ? 14 : 24}}>
           <Appear delay={14}>
-            <StepLabel n="cg" label="Cgdiomampo.dev · Web developer" size={L.step} />
+            {/* The name, not the domain: #81 Phase A retired the domain brand and the film was missed (#112) */}
+            <StepLabel n="cg" label="Chris Diomampo · Web developer" size={L.step} />
           </Appear>
           <Appear delay={19}>
             <Headline size={titleSize} style={{maxWidth: 1100}}>
