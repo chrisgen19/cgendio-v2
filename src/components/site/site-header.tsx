@@ -151,10 +151,14 @@ type SiteHeaderProps = {
  * `docs/design/nav-directions.md`.
  */
 export function SiteHeader({overlay = false}: SiteHeaderProps) {
-  const {stuck, active} = useHeaderState(HEADER_HEIGHT);
+  const {stuck, scrolled, active} = useHeaderState(HEADER_HEIGHT);
   // Sections only exist on the home page; elsewhere the rail has nothing to point at.
   const marked = overlay && stuck ? active : null;
-  const surface = !overlay || stuck;
+  /*
+   * The overlay header is only bare while the film is still: the moment the page moves, the hero's headline and
+   * mock-ups travel up through the logo and the rail, so the surface has to be there to read either of them.
+   */
+  const surface = !overlay || scrolled;
 
   return (
     <header
