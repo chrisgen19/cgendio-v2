@@ -160,7 +160,9 @@ export function SiteHeader({overlay = false}: SiteHeaderProps) {
     <header
       data-surface={surface || undefined}
       style={overlay ? {marginBottom: 'calc(var(--header-h) * -1)'} : undefined}
-      className="sticky top-0 z-40 h-(--header-h) transition-colors duration-300 data-surface:bg-header data-surface:backdrop-blur-[10px] motion-reduce:transition-none"
+      /* pt-(--safe-top): --header-h includes the status bar inset, so the bar's surface covers it while the padding
+         keeps the logo and rail centred in the 72px below it (#112) */
+      className="sticky top-0 z-40 h-(--header-h) pt-(--safe-top) transition-colors duration-300 data-surface:bg-header data-surface:backdrop-blur-[10px] motion-reduce:transition-none"
     >
       <Container className="h-full">
         <div className="relative flex h-full items-center gap-6 max-md:gap-3">

@@ -22,7 +22,7 @@ export async function WhatWeBuild() {
 
   return (
     <section id="what-we-build" aria-labelledby="what-we-build-heading" className="bg-ground p-3 max-md:p-2">
-      <div data-ink-stage className="rounded-cta bg-ink-stage px-14 py-24 max-md:rounded-panel max-md:px-5 max-md:py-14">
+      <div data-ink-stage className="rounded-cta bg-ink-stage py-24 pl-(--pad-l) pr-(--pad-r) max-md:rounded-panel max-md:py-14">
         <div className="mx-auto flex max-w-site flex-col gap-20 max-md:gap-12">
           <div className="flex flex-col gap-[18px]">
             <Eyebrow>{build.eyebrow}</Eyebrow>

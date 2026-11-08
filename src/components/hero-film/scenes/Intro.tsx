@@ -37,13 +37,14 @@ export const Intro: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
-          padding: `0 ${L.padX}px`,
+          paddingLeft: L.padL,
+          paddingRight: L.padR,
           gap: L.portrait ? 18 : 26,
         }}
       >
         <Appear delay={6}>
           <MonoLabel size={L.step} style={{letterSpacing: '0.14em', textTransform: 'uppercase'}}>
-            Cgdiomampo.dev presents
+            Chris Diomampo presents
           </MonoLabel>
         </Appear>
         <Headline size={size} style={{maxWidth: 1100}}>

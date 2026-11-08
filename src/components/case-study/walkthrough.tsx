@@ -70,7 +70,7 @@ type HeroProps = {
 
 function Hero({project, opening, host, optimizedUrls}: HeroProps) {
   return (
-    <header className="walkthrough-static-row pt-2 pr-5 pb-8 pl-5 md:px-14 lg:pr-10 lg:pb-20 lg:pl-(--gutter)">
+    <header className="walkthrough-static-row pt-2 pb-8 pl-(--pad-l) pr-(--pad-r) lg:pr-10 lg:pb-20 lg:pl-(--gutter)">
       <div className="flex flex-col gap-5 max-lg:gap-3">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <Link href="/#work" className="inline-flex min-h-11 items-center gap-2 text-[15px] font-semibold text-ink no-underline hover:text-accent">
@@ -215,7 +215,7 @@ export function Walkthrough({project}: {project: ProjectDetail}) {
         optimizedUrls={optimizedUrls}
         hero={<Hero project={project} opening={opening} host={host} optimizedUrls={optimizedUrls} />}
         notes={
-          <section aria-labelledby="walkthrough-tour" className="pr-5 pl-5 md:px-14 lg:pr-10 lg:pl-(--gutter)">
+          <section aria-labelledby="walkthrough-tour" className="pl-(--pad-l) pr-(--pad-r) lg:pr-10 lg:pl-(--gutter)">
             <div className="flex flex-col gap-5 py-10 lg:pt-0 lg:pb-14">
               <Eyebrow>The tour</Eyebrow>
               <h2 id="walkthrough-tour" className={HEADING}>

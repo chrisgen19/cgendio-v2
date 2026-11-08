@@ -48,7 +48,13 @@ export const MobileScene: React.FC<{
     <SceneShell number={n} numberSize={Math.round(M.height * 0.42)}>
       <AbsoluteFill
         style={{
-          padding: `${PAD_TOP}px ${PAD_X}px ${PAD_BOTTOM}px`,
+          paddingBlock: `${PAD_TOP}px ${PAD_BOTTOM}px`,
+          // The mobile cut's one page-edge gutter. env() is 0 off a notched phone and in the Remotion CLI render,
+          // so the film is unchanged everywhere else (#113). The cards inside keep their own padding: they already
+          // sit within this gutter. `scale` above still divides by the plain PAD_X, so a real inset scales the
+          // stage a fraction large rather than pushing the headline under the cutout.
+          paddingLeft: `max(${PAD_X}px, env(safe-area-inset-left, 0px))`,
+          paddingRight: `max(${PAD_X}px, env(safe-area-inset-right, 0px))`,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',

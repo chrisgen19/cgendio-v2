@@ -20,11 +20,22 @@ export const useLayout = () => {
   const padBottom = portrait ? 104 : 116;
   const innerW = Math.min(width - padX * 2, 1320);
   const innerH = height - padTop - padBottom;
+  /*
+   * The film is the full-bleed hero, and the page is `viewport-fit: cover` (#112, #113), so on a notched phone held
+   * sideways the gutter has to clear the cutout. env() is 0 in every other browser and in the Remotion CLI render,
+   * so the film's own layout and the rendered poster are unchanged. CSS strings, not numbers: only the browser knows
+   * the inset. innerW stays the number the scenes do their maths with, and the widths below clamp it to the padded
+   * box so a wider inset shrinks the content instead of overflowing it.
+   */
+  const padL = `max(${padX}px, env(safe-area-inset-left, 0px))`;
+  const padR = `max(${padX}px, env(safe-area-inset-right, 0px))`;
   return {
     width,
     height,
     portrait,
     padX,
+    padL,
+    padR,
     padTop,
     padBottom,
     innerW,
@@ -208,7 +219,9 @@ export const ProcessScene: React.FC<{
     <SceneShell number={n}>
       <AbsoluteFill
         style={{
-          padding: `${L.padTop}px ${L.padX}px ${L.padBottom}px`,
+          paddingBlock: `${L.padTop}px ${L.padBottom}px`,
+          paddingLeft: L.padL,
+          paddingRight: L.padR,
           display: 'flex',
           flexDirection: L.portrait ? 'column' : 'row',
           alignItems: 'center',

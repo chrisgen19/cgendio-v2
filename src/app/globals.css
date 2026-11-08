@@ -166,10 +166,37 @@
   color-scheme: light;
   /*
    * The sticky header's height. Everything that pins near the top of the viewport offsets by this, so the header
-   * never covers it. Keep in step with HEADER_HEIGHT in src/components/site/site-header.tsx, which uses the same
-   * number as the IntersectionObserver offset that decides the header has left the hero.
+   * never covers it. Keep the 72px in step with HEADER_HEIGHT in src/components/site/site-header.tsx.
+   *
+   * The viewport is `viewport-fit: cover` (#112), so on a notched phone the top of the viewport is under the status
+   * bar. The inset is part of the header's height rather than a separate offset, so everything pinning below it
+   * (--t0, --ms-pin-min) clears the status bar too without each one having to know about the inset. The header pads
+   * itself by the same amount, so its own content still centres in the 72px bar.
+   *
+   * HEADER_HEIGHT stays 72: it is only the IntersectionObserver offset that decides the header has left the hero, so
+   * on a notched phone that background fades in one inset earlier. That is a threshold, not a layout offset.
    */
-  --header-h: 72px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --header-h: calc(72px + var(--safe-top));
+  /*
+   * The page gutter: the design's 56px (20px under 860px), widened only where a display cutout needs more room.
+   * One pair of tokens rather than env() in every wrapper, because the gutter is set in a dozen places that don't
+   * share a component: Section, Container, the footer, the hero's static frame and the case study wrappers.
+   * max() means every browser without an inset, which is all of them bar a notched phone held sideways, keeps the
+   * design's values exactly. Cards nested inside one of those wrappers keep their own padding; they are already
+   * inside the safe area, and adding the inset again would push them in twice.
+   */
+  --pad-l: max(56px, env(safe-area-inset-left, 0px));
+  --pad-r: max(56px, env(safe-area-inset-right, 0px));
+}
+
+/* Matches Tailwind's max-md (--breakpoint-md is 860px), so the gutter still narrows on phones */
+@media (width < 860px) {
+  :root {
+    --pad-l: max(20px, env(safe-area-inset-left, 0px));
+    --pad-r: max(20px, env(safe-area-inset-right, 0px));
+  }
 }
 
 :root[data-theme="dark"]:not(:has(.admin-theme)) {

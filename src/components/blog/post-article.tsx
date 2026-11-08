@@ -34,7 +34,11 @@ export async function PostArticle({post}: {post: PostDetail}) {
           {copy['blog.allLabel']}
         </Link>
         <p className="m-0 flex flex-wrap items-center gap-x-2 font-mono text-[13px] text-muted">
-          <Link href={blogHref({tag: tagSlug(post.tag)})} className="inline-flex min-h-11 items-center tracking-[0.06em] text-accent no-underline">
+          {/* Uppercase is styling, not data: the tag is stored in its real casing ("WordPress") so metadata reads properly (#112) */}
+          <Link
+            href={blogHref({tag: tagSlug(post.tag)})}
+            className="inline-flex min-h-11 items-center tracking-[0.06em] text-accent uppercase no-underline"
+          >
             {post.tag}
           </Link>
           <span aria-hidden="true">·</span>

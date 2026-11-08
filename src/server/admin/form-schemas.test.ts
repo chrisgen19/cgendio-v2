@@ -146,7 +146,7 @@ describe('projectFormSchema', () => {
 });
 
 describe('postFormSchema', () => {
-  const postForm = {title: 'A post', slug: 'a-post', excerpt: 'Excerpt', tag: 'MIGRATION', body: '# Hello', coverImageUrl: ''};
+  const postForm = {title: 'A post', slug: 'a-post', excerpt: 'Excerpt', tag: 'Migration', body: '# Hello', coverImageUrl: ''};
 
   it('leaves the publish date empty until the post is published', () => {
     expect(postFormSchema.parse({...postForm, publishedAt: ''}).publishedAt).toBeNull();

@@ -242,7 +242,7 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
     >
       <p className="sr-only">
         A short animated film of my process in six steps — research, design, Figma to web development, QA, deploying to Vercel and going live — ending
-        with what Cgdiomampo.dev offers, a link to the work and a replay button.
+        with what Chris Diomampo offers, a link to the work and a replay button.
       </p>
 
       {/* theme.ts colours follow the site theme through CSS variables; data-film-box lets the visual tests hide the film */}
@@ -337,7 +337,7 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
   const progress = Math.min(1, frame / (durationInFrames - 1));
   return (
     <>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-site items-center justify-between gap-4 px-10 pb-6 xl:px-14">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-site items-center justify-between gap-4 pb-[calc(1.5rem+var(--safe-bottom))] pl-[max(2.5rem,env(safe-area-inset-left,0px))] pr-[max(2.5rem,env(safe-area-inset-right,0px))] xl:pl-[max(3.5rem,env(safe-area-inset-left,0px))] xl:pr-[max(3.5rem,env(safe-area-inset-right,0px))]">
         <div role="group" aria-label="Film chapters" className="pointer-events-auto flex flex-wrap gap-1.5">
           {chapters.map((c) => {
             const active = frame >= c.startFrame && frame < c.endFrame;
@@ -396,9 +396,9 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
  * covers its buttons.
  */
 function MobileHud({chapters, current, frame, atBrand, ended, playing, onJump, onSkip, onToggle, toggleRef}: HudProps) {
-  const label = atBrand ? 'Cgdiomampo.dev' : current ? `${current.number} · ${current.label}` : 'Intro';
+  const label = atBrand ? 'Chris Diomampo' : current ? `${current.number} · ${current.label}` : 'Intro';
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 px-4 pb-3">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 pb-[calc(0.75rem+var(--safe-bottom))] pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
       <div className="flex items-center justify-between gap-3">
         <span aria-live="polite" className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted">
           {label}

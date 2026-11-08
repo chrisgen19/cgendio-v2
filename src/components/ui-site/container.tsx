@@ -6,7 +6,11 @@ type ContainerProps = {
   className?: string;
 };
 
-/** 1320px max width including 56px side padding (20px under 860px), as the design's nav and film HUD. */
+/*
+ * 1320px max width including the page gutter, as the design's nav and film HUD. --pad-l and --pad-r in globals.css
+ * carry the design's 56px and 20px plus the display cutout's inset, which the viewport needs since it is
+ * `viewport-fit: cover` (#112).
+ */
 export function Container({children, className}: ContainerProps) {
-  return <div className={cn('mx-auto w-full max-w-site px-14 max-md:px-5', className)}>{children}</div>;
+  return <div className={cn('mx-auto w-full max-w-site pl-(--pad-l) pr-(--pad-r)', className)}>{children}</div>;
 }

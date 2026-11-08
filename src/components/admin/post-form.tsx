@@ -45,7 +45,14 @@ export function PostForm({post}: {post: PostFormValues | null}) {
               required
             />
             <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-              <TextField name="tag" label="Tag" hint="e.g. MIGRATION" defaultValue={post?.tag} errors={errors} required />
+              <TextField
+                name="tag"
+                label="Tag"
+                hint="e.g. Migration. Shown uppercase on the site; stored as typed, so write it the way it should read in search results and feeds."
+                defaultValue={post?.tag}
+                errors={errors}
+                required
+              />
               <TextField
                 name="publishedAt"
                 label="Publish date"
