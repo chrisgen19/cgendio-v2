@@ -26,6 +26,27 @@ test('hero (film hidden)', async ({page}) => {
   await expect(hero).toHaveScreenshot('hero.png', {stylePath: 'e2e/support/hide-film.css'});
 });
 
+/*
+ * The header once it has left the film: its surface, the filled-in rail, and the lime indicator under the section in
+ * view. The hero shot above covers the other half of the design, the transparent state over the film; the section
+ * shots hide the header entirely, so without this the stuck surface and the position indicator have no cover at all.
+ */
+test('header, stuck past the hero', async ({page}, testInfo) => {
+  const header = page.getByRole('banner');
+  // Work is a section the nav links to, so the rail marks a labelled graduation and the readout names it
+  await page.evaluate(() => document.getElementById('work')?.scrollIntoView({behavior: 'instant', block: 'start'}));
+  await expect(header).toHaveAttribute('data-surface', 'true');
+
+  // Wait for the state the picture is of, not for a scroll offset: the indicator is placed from the measured box of
+  // the active graduation, so the capture has to come after that measurement, not merely after the scroll.
+  const phone = testInfo.project.name === 'mobile';
+  // Under 860px the rail is ticks only and hands its label to the sheet trigger; above it the link carries aria-current
+  if (phone) await expect(header.getByRole('button', {name: /Work/})).toBeVisible();
+  else await expect(header.getByRole('link', {name: 'Work', exact: true})).toHaveAttribute('aria-current', 'true');
+
+  await expect(header).toHaveScreenshot('header-stuck.png');
+});
+
 test('stack strip', async ({page}) => {
   // The strip has no id: it's the section right before About
   await expect(page.locator('#about').locator('xpath=preceding-sibling::section[1]')).toHaveScreenshot('stack.png', {stylePath: [HIDE_HEADER]});
