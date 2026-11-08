@@ -796,7 +796,7 @@
 
 /*
  * The What we build split (src/components/sections/what-we-build/). One registered property, --build-split, places
- * the seam: each half of the portrait clips to its side of it, left/right from lg and top/bottom below it, where the
+ * the seam: each logo clips to its side of it, left/right from lg and top/bottom below it, where the
  * split stacks (a text column there is narrower than the one-word WordPress label).
  * BuildSplit sets data-active from hover, keyboard focus or a pressed side; the spring transition retargets mid-way if
  * that changes. Without JavaScript, or with reduced motion before any press, it stays at 50/50.
@@ -811,12 +811,13 @@
   --build-split: 50%;
 }
 
+/* All the way across: the logos share one spot, so anything less would leave the active one cut */
 .build-split[data-active="wp"] {
-  --build-split: 76%;
+  --build-split: 100%;
 }
 
 .build-split[data-active="next"] {
-  --build-split: 24%;
+  --build-split: 0%;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -841,6 +842,17 @@
   background: linear-gradient(to bottom, transparent, var(--color-ink) 16% 84%, transparent);
 }
 
+/* With one logo showing there's nothing left to divide, and the seam would sit on the stage's edge */
+.build-split:not([data-active="none"]) .build-seam {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .build-seam {
+    transition: opacity 0.3s;
+  }
+}
+
 @media (width < 1080px) {
   .build-half-wp {
     clip-path: inset(0 0 calc(100% - var(--build-split)) 0);
@@ -862,65 +874,21 @@
 }
 
 /*
- * Each half is the same photo through a print screen, made in CSS: the photo (grey, inverted, softened) is screened with
- * a pattern, then contrast() snaps the mix to hard shapes that grow with the photo's brightness and invert() turns them
- * light on black. brightness() first moves that snap point to about 68%, so the face's shading still prints. A soft
- * vignette fades the room behind him, a multiply layer colours the shapes, and the half screens onto the stage, so black
- * becomes the stage. WordPress gets the dot grid as a halftone; Next.js gets a line screen: one technique, equal weight.
+ * Each logo is printed in CSS, as the mask of a pattern (the mask itself is inline, from BuildLogos). WordPress gets a
+ * dot grid as a halftone; Next.js gets a line screen: one technique, equal weight.
  */
-.build-half {
-  mix-blend-mode: screen;
-}
-
 .build-screen {
-  position: absolute;
-  inset: 0;
-  filter: brightness(0.74) contrast(24) invert(1);
+  mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
 }
 
-/* Scaled up around the face, so the screen has more of it to draw */
-.build-screen img {
-  filter: grayscale(1) contrast(1.1) invert(1) blur(1px);
-  scale: 1.3;
-  transform-origin: 50% 56%;
+.build-screen-dots {
+  background: radial-gradient(circle at center, var(--color-side-wp) 0 1.75px, transparent 2.15px) 0 0 / 4.4px 4.4px;
 }
 
-.build-screen::before,
-.build-screen::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-}
-
-/* Lighten on the inverted photo darkens the original towards the edges */
-.build-screen::before {
-  z-index: 1;
-  mix-blend-mode: lighten;
-  background: radial-gradient(ellipse 50% 52% at 50% 54%, #000 46%, #fff 80%);
-}
-
-.build-screen::after {
-  z-index: 2;
-  mix-blend-mode: screen;
-}
-
-.build-screen-dots::after {
-  background: radial-gradient(circle at center, #000 0, #fff 7px) 0 0 / 7px 7px;
-}
-
-.build-screen-lines::after {
-  background: repeating-linear-gradient(-45deg, #000 0, #fff 3.5px, #000 7px);
-}
-
-@media (width < 1080px) {
-  .build-screen img {
-    scale: 1.36;
-  }
-
-  /* Narrower in the square stacked portrait, where the scaled photo brings the window behind him closer to the face */
-  .build-screen::before {
-    background: radial-gradient(ellipse 42% 50% at 50% 54%, #000 52%, #fff 84%);
-  }
+.build-screen-lines {
+  background: repeating-linear-gradient(-45deg, var(--color-side-next) 0 1.8px, transparent 1.8px 4px);
 }
 
 /*

@@ -1,6 +1,6 @@
 import type {PageCopy} from '@/server/content';
 
-/** The two kinds of site the What we build stage splits the portrait between. */
+/** The two kinds of site the What we build stage splits between. */
 export type BuildSideId = 'wp' | 'next';
 
 export type BuildSideCopy = {
