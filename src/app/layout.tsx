@@ -32,8 +32,21 @@ export const viewport: Viewport = {
 
 export default function RootLayout({children}: LayoutProps<'/'>) {
   return (
-    // The head script changes data-theme before React hydrates, hence suppressHydrationWarning (it covers <html> only)
-    <html lang="en" data-theme="light" suppressHydrationWarning className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    /*
+     * The head script changes data-theme before React hydrates, hence suppressHydrationWarning (it covers <html> only).
+     *
+     * data-scroll-behavior tells Next that globals.css sets `scroll-behavior: smooth` here, so it can turn that off
+     * while it moves the scroll on a route change and put it back afterwards. Without it a navigation that resets the
+     * scroll is animated the whole way instead of being instant, which is what made #110's mis-targeted scroll slide
+     * visibly down to the footer rather than simply landing in the wrong place. In-page anchors still scroll smoothly.
+     */
+    <html
+      lang="en"
+      data-theme="light"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
+    >
       <head>
         {/* Reads the theme cookie and sets data-theme before the first paint, so static pages never flash (src/lib/theme.ts) */}
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: a fixed script from src/lib/theme.ts, no user input */}
