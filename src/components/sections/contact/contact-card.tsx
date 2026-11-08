@@ -13,7 +13,9 @@ export function ContactCard({copy, settings}: {copy: PageCopy; settings: SiteSet
 
   return (
     <TiltCard>
-      <div className="relative flex aspect-[1.66] flex-col justify-between gap-8 overflow-hidden rounded-card bg-ink p-8 text-white shadow-(--shadow-deep) max-md:aspect-auto max-md:p-6">
+      {/* A card-shaped floor, not a fixed ratio: a locked aspect ratio clipped the email and location whenever the
+          column was narrow (1080px) or the reader increased text spacing (WCAG 1.4.12). */}
+      <div className="relative flex flex-col justify-between gap-8 overflow-hidden rounded-card bg-ink p-8 text-white shadow-(--shadow-deep) md:min-h-75 max-md:p-6">
         <div className="flex items-start justify-between gap-4">
           <span
             aria-hidden="true"
