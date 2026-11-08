@@ -337,7 +337,7 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
   const progress = Math.min(1, frame / (durationInFrames - 1));
   return (
     <>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-site items-center justify-between gap-4 px-10 pb-6 xl:px-14">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-site items-center justify-between gap-4 pb-[calc(1.5rem+var(--safe-bottom))] pl-[max(2.5rem,env(safe-area-inset-left,0px))] pr-[max(2.5rem,env(safe-area-inset-right,0px))] xl:pl-[max(3.5rem,env(safe-area-inset-left,0px))] xl:pr-[max(3.5rem,env(safe-area-inset-right,0px))]">
         <div role="group" aria-label="Film chapters" className="pointer-events-auto flex flex-wrap gap-1.5">
           {chapters.map((c) => {
             const active = frame >= c.startFrame && frame < c.endFrame;
@@ -398,7 +398,7 @@ function DesktopHud({chapters, frame, durationInFrames, atBrand, ended, playing,
 function MobileHud({chapters, current, frame, atBrand, ended, playing, onJump, onSkip, onToggle, toggleRef}: HudProps) {
   const label = atBrand ? 'Chris Diomampo' : current ? `${current.number} · ${current.label}` : 'Intro';
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 px-4 pb-3">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 pb-[calc(0.75rem+var(--safe-bottom))] pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
       <div className="flex items-center justify-between gap-3">
         <span aria-live="polite" className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted">
           {label}

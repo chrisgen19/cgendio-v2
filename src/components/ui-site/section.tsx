@@ -42,7 +42,7 @@ export function Section({id, tone = 'ground', padding = 'default', className, in
     <section
       id={id}
       className={cn(
-        'scroll-mt-[calc(var(--header-h)+1rem)] px-14 max-md:px-5',
+        'scroll-mt-[calc(var(--header-h)+1rem)] pl-(--pad-l) pr-(--pad-r)',
         PADDING[padding],
         tone === 'white' && 'border-y border-line bg-white',
         className,

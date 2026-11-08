@@ -53,7 +53,7 @@ export function NextProject({project}: {project: ProjectDetail | null}) {
   if (!project) return null;
   const brand = brandPanelStyle(project.brandColor, project.brandTint);
   return (
-    <nav aria-label="Next project" className="px-14 pt-14 pb-28 max-md:px-5 max-md:pt-10 max-md:pb-18">
+    <nav aria-label="Next project" className="pt-14 pb-28 pl-(--pad-l) pr-(--pad-r) max-md:pt-10 max-md:pb-18">
       <div className="mx-auto max-w-site">
         <div
           data-theme={!brand && project.theme === 'lime' ? 'light' : undefined}

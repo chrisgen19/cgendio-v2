@@ -21,7 +21,7 @@ export async function SiteFooter() {
      * indicator over the final 34px, which would otherwise sit on top of the footer links. The side padding matches
      * Container's, insets included, since the footer sets its own rather than using one.
      */
-    <footer className="pt-10 pb-[calc(3rem+var(--safe-bottom))] pl-[max(3.5rem,env(safe-area-inset-left,0px))] pr-[max(3.5rem,env(safe-area-inset-right,0px))] max-md:pl-[max(1.25rem,env(safe-area-inset-left,0px))] max-md:pr-[max(1.25rem,env(safe-area-inset-right,0px))]">
+    <footer className="pt-10 pb-[calc(3rem+var(--safe-bottom))] pl-(--pad-l) pr-(--pad-r)">
       <div className="mx-auto flex max-w-site flex-wrap items-center justify-between gap-5 border-t border-line pt-8">
         <Logo />
         <ul className="m-0 flex list-none flex-wrap gap-1 p-0">

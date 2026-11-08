@@ -37,7 +37,7 @@ export async function WriteUp({project}: {project: ProjectDetail}) {
     ...reasons.map(({id, label}) => ({id, label, group: 'reasoning' as const})),
   ];
   return (
-    <div className="border-y border-line bg-white px-14 py-28 max-md:px-5 max-md:py-18">
+    <div className="border-y border-line bg-white py-28 pl-(--pad-l) pr-(--pad-r) max-md:py-18">
       <section
         aria-labelledby="write-up-heading"
         className="write-up-block mx-auto grid max-w-site grid-cols-[minmax(0,1fr)] gap-y-10 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)] lg:gap-x-24"
