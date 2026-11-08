@@ -59,3 +59,20 @@ test('the film plays once and holds on the brand card', async ({page}) => {
   await expect(seeMyWork).toBeVisible();
   if (!isMobile()) await expect(page.getByText('00:30 / 00:30')).toBeVisible();
 });
+
+/*
+ * The overlay header is bare only while the page is still. Once the film scrolls, the hero's headline and mock-ups
+ * travel up through the logo and the rail, so the surface has to be there a whole viewport before the hero ends.
+ */
+test('the header takes its surface as soon as the hero scrolls', async ({page}) => {
+  const header = page.getByRole('banner');
+  await expect(header).not.toHaveAttribute('data-surface', 'true');
+
+  await page.evaluate(() => window.scrollTo({top: 200, behavior: 'instant'}));
+  await expect(header).toHaveAttribute('data-surface', 'true');
+  // Still inside the hero, so the rail is measuring and has no section to name yet
+  await expect(page.locator('#top')).toBeInViewport();
+
+  await page.evaluate(() => window.scrollTo({top: 0, behavior: 'instant'}));
+  await expect(header).not.toHaveAttribute('data-surface', 'true');
+});

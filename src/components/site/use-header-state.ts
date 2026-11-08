@@ -6,6 +6,8 @@ import {SECTION_IDS} from './nav-links';
 export type HeaderState = {
   /** The header has passed the hero (or the top of an inner page) and now sits over content. */
   stuck: boolean;
+  /** The page has moved at all, so content is travelling under the header and it needs its own surface. */
+  scrolled: boolean;
   /** The home section crossing the reading line, or null before the scrollspy has resolved one. */
   active: string | null;
   /** `active`'s place in SECTION_IDS, or -1. For headers that show a position as a count. */
@@ -14,7 +16,10 @@ export type HeaderState = {
   scrollingDown: boolean;
 };
 
-const INITIAL: HeaderState = {stuck: false, active: null, activeIndex: -1, scrollingDown: false};
+const INITIAL: HeaderState = {stuck: false, scrolled: false, active: null, activeIndex: -1, scrollingDown: false};
+
+/** Past this many pixels of scroll the page is moving under the header, and the header needs a surface. */
+const SURFACE_AT = 8;
 
 /**
  * Everything the sticky header needs to know about the page under it, in one hook.
@@ -27,6 +32,11 @@ const INITIAL: HeaderState = {stuck: false, active: null, activeIndex: -1, scrol
  * On a page with no such marker (an inner page, which has no hero) `stuck` falls back to "scrolled past the header",
  * read from a passive scroll listener. The hook never creates a marker of its own: see the note in the effect.
  *
+ * `scrolled` is the separate, earlier question "is anything moving under the header". Over the hero the header is
+ * transparent, so as soon as the film scrolls its headline and mock-ups run straight through the logo and the rail;
+ * the surface therefore comes on at the first few pixels of scroll, while `stuck` keeps gating the rail's readout so
+ * the instrument still only names a section once the film has ended.
+ *
  * @param offset Distance from the viewport top at which the change happens — the header's own height.
  */
 export function useHeaderState(offset = 72): HeaderState {
@@ -35,6 +45,14 @@ export function useHeaderState(offset = 72): HeaderState {
 
   useEffect(() => {
     const setStuck = (stuck: boolean) => setState((current) => (current.stuck === stuck ? current : {...current, stuck}));
+
+    // The surface, on its own listener: it has to answer at the first few pixels, before any sentinel is in play.
+    const onSurfaceScroll = () => {
+      const scrolled = window.scrollY > SURFACE_AT;
+      setState((current) => (current.scrolled === scrolled ? current : {...current, scrolled}));
+    };
+    onSurfaceScroll();
+    window.addEventListener('scroll', onSurfaceScroll, {passive: true});
 
     /*
      * The marker the page puts at the hero's bottom edge, if it has a hero. Where there is none, `stuck` falls back to
@@ -98,6 +116,7 @@ export function useHeaderState(offset = 72): HeaderState {
       stuckObserver?.disconnect();
       sectionObserver.disconnect();
       window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', onSurfaceScroll);
       if (onStuckScroll) window.removeEventListener('scroll', onStuckScroll);
     };
   }, [offset]);

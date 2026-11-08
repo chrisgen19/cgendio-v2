@@ -53,7 +53,7 @@ looks for it.
 
 ### `useHeaderState(offset)` — `src/components/site/use-header-state.ts`
 
-Returns `{stuck, active, activeIndex, scrollingDown}`.
+Returns `{stuck, scrolled, active, activeIndex, scrollingDown}`.
 
 `stuck` is read from an `IntersectionObserver` on `[data-nav-sentinel]` — the marker `home-page.tsx` puts at the
 bottom edge of the hero — and **not** from `@container scroll-state(stuck: top)`. Two reasons:
@@ -65,6 +65,13 @@ bottom edge of the hero — and **not** from `@container scroll-state(stuck: top
   content, so it cannot be a progressive enhancement.
 
 With no sentinel on the page, `stuck` falls back to "scrolled past the header", read from a passive scroll listener.
+
+`scrolled` is the earlier, cheaper question: has the page moved at all (more than 8px, from its own passive scroll
+listener). It is what drives the header's **surface**, while `stuck` drives the **readout**. The two were one flag
+at first, and over the hero that was wrong: the overlay header has no background, so the moment the film scrolls the
+hero's headline and its mock-ups travel straight up through the logo and the rail and neither is readable. The film
+only ends a whole viewport later. So the surface comes on at the first few pixels of scroll, and the rail still only
+names a section once the sentinel has passed. At rest at the top of the page the header is bare, as designed.
 
 **Nothing is appended to the DOM to stand in for a missing marker.** An earlier version planted a 1px node in
 `document.body`, which is React's root container in the App Router: an unmanaged node inside it derails React's own
