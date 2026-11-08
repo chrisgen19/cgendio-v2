@@ -69,6 +69,15 @@
   --color-highlight: #d7ff3d;
   --color-highlight-ink: currentColor;
 
+  /*
+   * The sticky header's surface and its measuring edge. Separate from `white` and `line` because the header is the
+   * one element that floats over every other surface on the page: on the light page `line` separates it from
+   * anything underneath, but in dark mode it crosses the What I build stage (a deep indigo) where a `line` hairline
+   * all but disappears, so the edge there is pitched lighter than the page's own borders.
+   */
+  --color-header: color-mix(in srgb, #ffffff 88%, transparent);
+  --color-header-edge: #e3e5ea;
+
   --radius-pill: 999px;
   --radius-card: 22px;
   --radius-panel: 28px;
@@ -155,6 +164,12 @@
  */
 :root {
   color-scheme: light;
+  /*
+   * The sticky header's height. Everything that pins near the top of the viewport offsets by this, so the header
+   * never covers it. Keep in step with HEADER_HEIGHT in src/components/site/site-header.tsx, which uses the same
+   * number as the IntersectionObserver offset that decides the header has left the hero.
+   */
+  --header-h: 72px;
 }
 
 :root[data-theme="dark"]:not(:has(.admin-theme)) {
@@ -186,6 +201,9 @@
   --color-on-accent: #0d0e12;
   --color-highlight: rgba(215, 255, 61, 0.22);
   --color-highlight-ink: #d7ff3d;
+  /* More opaque than the light surface, and a lighter edge: see the note on the light values */
+  --color-header: color-mix(in srgb, #15171d 94%, transparent);
+  --color-header-edge: #3a3f4b;
   --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 18px 40px -18px rgba(0, 0, 0, 0.75);
   --shadow-deep: 0 0 0 1px #2a2e37, 0 30px 60px -24px rgba(0, 0, 0, 0.85);
   --shadow-menu: 0 24px 48px -20px rgba(0, 0, 0, 0.8);
@@ -315,6 +333,40 @@
     html {
       scroll-behavior: smooth;
     }
+  }
+}
+
+/*
+ * Reading progress (src/components/site/scroll-progress.tsx). The bar is scaled on its x axis, so the work stays on
+ * the compositor. Where the browser has scroll-driven animations it is driven entirely in CSS off the root scroller;
+ * elsewhere (Firefox) the component writes --nav-progress from a passive scroll listener instead.
+ *
+ * Longhands, not the `animation` shorthand: a shorthand with no name is rewritten to `animation: none` by the
+ * production CSS build (see the gotcha in CLAUDE.md), which would lose the timing function and the fill mode.
+ */
+.scroll-progress {
+  transform: scaleX(var(--nav-progress, 0));
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+
+@supports (animation-timeline: scroll()) {
+  @keyframes scroll-progress-fill {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .scroll-progress {
+    animation-name: scroll-progress-fill;
+    /* Scroll timelines ignore the value, but Firefox skips an animation with no time-based duration */
+    animation-duration: 1ms;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll(root block);
   }
 }
 
@@ -472,7 +524,8 @@
 }
 
 .work-card {
-  --t0: 24px;
+  /* The first card's pin, below the sticky header rather than at the viewport's own top edge */
+  --t0: calc(var(--header-h) + 24px);
   --step: 14px;
   --h: min(640px, 78svh, calc(100svh - 160px));
   counter-increment: work;
@@ -494,7 +547,8 @@
 
 @media (width < 860px) {
   .work-card {
-    --t0: 12px;
+    /* Still below the header: this overrides the rule above, so it has to carry --header-h too */
+    --t0: calc(var(--header-h) + 12px);
     --step: 10px;
     --h: min(600px, calc(100svh - 112px));
   }
@@ -1249,8 +1303,16 @@
  * Long admin text grows the panel downward from that line, up to 8px short of the viewport's bottom edge.
  */
 .ms-track {
-  --ms-panel-h: min(580px, calc(100svh - 80px));
-  --ms-pin-top: calc((100svh - var(--ms-panel-h)) / 2);
+  /* The highest the panel may pin: clear of the sticky header, with a gap */
+  --ms-pin-min: calc(var(--header-h) + 8px);
+  /*
+   * The design height, capped by the room actually left between the header and the bottom edge. Taking the header out
+   * here and not only in --ms-pin-top is what keeps a short screen honest: min-height wins over max-height, so a panel
+   * sized for the whole viewport would hang off the bottom however the clamp below moved it.
+   */
+  --ms-panel-h: min(580px, calc(100svh - var(--ms-pin-min) - 8px));
+  /* Centred in the viewport, but never so high that the header covers the panel on a short screen */
+  --ms-pin-top: max(var(--ms-pin-min), calc((100svh - var(--ms-panel-h)) / 2));
   --ms-panel-max: calc(100svh - var(--ms-pin-top) - 8px);
 }
 
@@ -1282,7 +1344,7 @@
 
 @media (width < 860px) {
   .ms-track {
-    --ms-panel-h: min(560px, calc(100svh - 48px));
+    --ms-panel-h: min(560px, calc(100svh - var(--ms-pin-min) - 8px));
   }
 }
 
@@ -1421,13 +1483,13 @@
 /* The pinned stage: compact and full width over the notes, then a tall column once there is room beside them */
 .walkthrough-stage {
   position: sticky;
-  top: 0;
+  top: var(--header-h);
 }
 
 @media (min-width: 1080px) {
-  /* The site header does not stick. 110px keeps the frame clear of the page's end when stuck and of the fold at the very top. */
+  /* Below the sticky header, with a gap that keeps the frame clear of the page's end when stuck */
   .walkthrough-stage {
-    top: 16px;
+    top: calc(var(--header-h) + 16px);
     height: calc(100svh - 110px);
     padding: 24px 40px 0;
     container-type: inline-size;

@@ -1,14 +1,28 @@
 'use client';
 
+import {ArrowRight, ChevronDown} from 'lucide-react';
 import {type KeyboardEvent, useEffect, useId, useRef, useState} from 'react';
-import {MOBILE_NAV_LINKS} from './nav-links';
+import {cn} from '@/lib/cn';
+import {NAV_ITEMS, resolveHref, SECTION_LABELS} from './nav-links';
 import {ThemeMenuItem} from './theme-toggle';
 
+type MobileMenuProps = {
+  /** Sections live on this page, so the links are same-page jumps. */
+  sectionsOnThisPage: boolean;
+  /** The section crossing the reading line, which the trigger reads out and the sheet marks. */
+  marked: string | null;
+};
+
 /**
- * Menu button and disclosure panel for phones (under 860px). While open, focus moves to the first link,
- * Tab cycles between the button, the links and the theme switch, and Esc, an outside click or a link closes it.
+ * The phone treatment (under 860px): the rail stays along the header's bottom edge and its readout becomes the button
+ * that opens a sheet. The sheet is the same ruler turned on its side — a hairline with a graduation per item, long for
+ * the sections that have a place on the page and short for the page that does not.
+ *
+ * The trigger names the section the reader is in rather than saying "Menu", so the control that opens the navigation
+ * is also the thing that tells them where they are. While the sheet is open, focus moves to the first link, Tab cycles
+ * between the button and the sheet, and Esc, an outside click or following a link closes it.
  */
-export function MobileMenu() {
+export function MobileMenu({sectionsOnThisPage, marked}: MobileMenuProps) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -23,17 +37,17 @@ export function MobileMenu() {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
     const desktop = window.matchMedia('(min-width: 860px)');
-    const onResize = () => desktop.matches && setOpen(false);
+    const onChange = () => desktop.matches && setOpen(false);
 
     document.addEventListener('pointerdown', onPointerDown);
-    desktop.addEventListener('change', onResize);
+    desktop.addEventListener('change', onChange);
     return () => {
       document.removeEventListener('pointerdown', onPointerDown);
-      desktop.removeEventListener('change', onResize);
+      desktop.removeEventListener('change', onChange);
     };
   }, [open]);
 
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (!open) return;
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -54,41 +68,71 @@ export function MobileMenu() {
   };
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: keydown only scopes Tab and Esc handling to the button and panel
-    <div ref={rootRef} onKeyDown={onKeyDown} className="md:hidden">
-      <button
-        ref={toggleRef}
-        type="button"
-        aria-label={open ? 'Close menu' : 'Open menu'}
-        aria-expanded={open}
-        aria-controls={panelId}
-        onClick={() => setOpen((value) => !value)}
-        className="inline-flex h-11 min-w-11 cursor-pointer items-center justify-center rounded-pill border border-line bg-white/88 px-3.5 text-ink backdrop-blur-[8px] hover:border-ink"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-          {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
-        </svg>
-      </button>
-      <div
-        ref={panelRef}
-        id={panelId}
-        hidden={!open}
-        className="absolute inset-x-4 top-[76px] z-30 flex flex-col rounded-card border border-line bg-white p-2.5 shadow-(--shadow-menu)"
-      >
-        {MOBILE_NAV_LINKS.map((link) => (
-          <a
-            key={link.href}
-            href={link.href}
-            onClick={() => setOpen(false)}
-            className="flex min-h-12 items-center rounded-[14px] px-3.5 font-medium text-ink no-underline hover:bg-ground hover:text-ink"
-          >
-            {link.label}
-          </a>
-        ))}
-        <div className="mt-1.5 border-t border-line pt-1.5">
-          <ThemeMenuItem />
+    <nav aria-label="Main" className="ml-auto md:hidden">
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: keydown only scopes Tab and Esc to the button and the sheet */}
+      <div ref={rootRef} onKeyDown={onKeyDown} className="flex items-center">
+        <button
+          ref={toggleRef}
+          type="button"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => setOpen((value) => !value)}
+          className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-pill border border-header-edge bg-header pr-3 pl-3.5 text-ink backdrop-blur-[8px] hover:border-ink"
+        >
+          {/*
+           * The visible text leads the accessible name, so the name contains the label a voice-control user can see
+           * (WCAG 2.5.3); the action follows it. Naming the section here is also the only way a screen reader hears
+           * which of the unlinked sections is in view, since those have no nav link to carry aria-current.
+           */}
+          <span className="font-mono text-[11px] leading-none font-medium tracking-[0.08em] uppercase">
+            {marked ? SECTION_LABELS[marked] : 'Menu'}
+          </span>
+          <span className="sr-only">{open ? ': close menu' : ': open menu'}</span>
+          <ChevronDown
+            aria-hidden="true"
+            size={14}
+            className={cn('shrink-0 text-muted transition-transform duration-200 motion-reduce:transition-none', open && 'rotate-180')}
+          />
+        </button>
+        <div
+          ref={panelRef}
+          id={panelId}
+          hidden={!open}
+          className="absolute inset-x-0 top-[calc(100%+6px)] z-10 rounded-card border border-line bg-white p-2 shadow-(--shadow-menu)"
+        >
+          <div className="relative">
+            <span aria-hidden="true" className="absolute top-3 bottom-3 left-4 w-px bg-line" />
+            <ul className="m-0 flex list-none flex-col p-0">
+              {NAV_ITEMS.map((item) => {
+                const on = item.id !== undefined && item.id === marked;
+                return (
+                  <li key={item.href}>
+                    <a
+                      href={resolveHref(item, sectionsOnThisPage)}
+                      aria-current={on ? 'true' : undefined}
+                      onClick={() => setOpen(false)}
+                      className="relative flex min-h-12 items-center gap-3 rounded-[14px] py-2 pr-4 pl-10 text-[15px] font-medium text-ink no-underline hover:bg-ground hover:text-ink"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={cn('absolute left-4 h-px', item.kind === 'section' ? 'w-[22px] bg-muted' : 'w-2.5 bg-line')}
+                      />
+                      <span className="relative">
+                        {on ? <span aria-hidden="true" className="absolute inset-x-[-0.12em] bottom-[0.06em] h-[0.36em] bg-highlight" /> : null}
+                        <span className={cn('relative', on && 'text-highlight-ink')}>{item.label}</span>
+                      </span>
+                      {item.kind === 'route' ? <ArrowRight aria-hidden="true" size={14} className="ml-auto shrink-0 text-muted" /> : null}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className="mt-1.5 border-t border-line pt-1.5">
+            <ThemeMenuItem />
+          </div>
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

@@ -51,7 +51,7 @@ export function WriteUpIndex({items}: {items: WriteUpIndexItem[]}) {
   return (
     <nav
       aria-label="Write-up sections"
-      className="max-lg:sticky max-lg:top-0 max-lg:z-10 max-lg:border-b max-lg:border-line max-lg:bg-white/92 max-lg:backdrop-blur-[10px] max-md:-mx-5 md:max-lg:-mx-14"
+      className="max-lg:sticky max-lg:top-(--header-h) max-lg:z-10 max-lg:border-b max-lg:border-line max-lg:bg-white/92 max-lg:backdrop-blur-[10px] max-md:-mx-5 md:max-lg:-mx-14"
     >
       <div className="relative">
         <ol

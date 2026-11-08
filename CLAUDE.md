@@ -10,6 +10,7 @@ Portfolio and dev blog for Christian Diomampo, a solo developer (not a studio or
 - **Design:** `docs/design/design-reference.dc.html`. Read it as a spec for layout, copy, colours, type and spacing (its `<helmet><style>` block and inline styles hold the exact values, `renderVals()` holds the content). It runs on a custom `<x-dc>` runtime: never copy the runtime, `support.js` or `vendor/` into the app.
 - **Dark mode design:** `docs/design/dark-version/Main.dc.html`, the same canvas with a dark token layer (`.pg[data-theme="dark"]`). Read it the same way.
 - **Hero film:** `docs/design/remotion-src/` (read its README first). It is the production hero, with a desktop and a mobile cut. Where it differs from the canvas's CSS film, the Remotion code wins.
+- **Header:** `docs/design/nav-directions.md`. The header is the one place the canvas is out of date: it still shows the old pill nav, which was replaced by a sticky measuring rail. Read that document as the spec for the header, and don't "fix" the header back to the canvas.
 
 ## Stack
 

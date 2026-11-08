@@ -16,7 +16,7 @@ export function PageShell({children, tracked = true}: {children: ReactNode; trac
       {tracked ? <GoogleAnalytics /> : null}
       <SkipLink />
       <SiteHeader />
-      <main id="main" tabIndex={-1} className="focus-visible:outline-none">
+      <main id="main" tabIndex={-1} className="scroll-mt-[calc(var(--header-h)+1rem)] focus-visible:outline-none">
         {children}
       </main>
       <SiteFooter />

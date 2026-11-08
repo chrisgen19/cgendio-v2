@@ -42,7 +42,7 @@ export async function WriteUp({project}: {project: ProjectDetail}) {
         aria-labelledby="write-up-heading"
         className="write-up-block mx-auto grid max-w-site grid-cols-[minmax(0,1fr)] gap-y-10 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)] lg:gap-x-24"
       >
-        <div className="max-lg:contents lg:sticky lg:top-12 lg:flex lg:flex-col lg:gap-12 lg:self-start">
+        <div className="max-lg:contents lg:sticky lg:top-[calc(var(--header-h)+1rem)] lg:flex lg:flex-col lg:gap-12 lg:self-start">
           <div className="flex flex-col gap-5">
             <Eyebrow>The write-up</Eyebrow>
             <h2 id="write-up-heading" className="m-0 font-display text-[clamp(36px,3.6vw,52px)] leading-[0.98] font-bold tracking-[-0.04em]">

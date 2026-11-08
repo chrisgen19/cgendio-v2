@@ -1,18 +1,33 @@
 import Link from 'next/link';
+import {cn} from '@/lib/cn';
 import {SITE_NAME} from '@/lib/metadata';
 
-export function Logo() {
+type LogoProps = {
+  /**
+   * Header treatment: under 1080px the name is kept for assistive technology but taken off the screen, so the rail
+   * gets the width. `sr-only`, never `hidden` — hidden text drops out of the accessible name and would leave the
+   * link called "cg".
+   */
+  compact?: boolean;
+};
+
+export function Logo({compact = false}: LogoProps) {
   return (
     <Link
       href="/"
-      className="relative inline-flex items-center gap-2.5 text-base font-semibold tracking-[-0.01em] text-ink no-underline after:absolute after:-inset-y-1 after:inset-x-0 after:content-[''] hover:text-ink"
+      className={cn(
+        "relative inline-flex items-center gap-2.5 text-base font-semibold tracking-[-0.01em] text-ink no-underline after:absolute after:content-[''] hover:text-ink",
+        compact ? 'h-11 shrink-0 after:-inset-x-1 after:inset-y-0' : 'after:-inset-y-1 after:inset-x-0',
+      )}
     >
       <b className="inline-grid size-9 place-items-center rounded-logo bg-badge font-display text-base leading-none font-extrabold tracking-[-0.04em] text-badge-ink">
         cg
       </b>
-      {/* Under 360px the wordmark is the only thing that cannot shrink far enough for the header to fit (WCAG 1.4.10
-          Reflow at 320px). `sr-only` drops it out of flow but keeps it in the link's accessible name. */}
-      <span className="max-[359px]:sr-only">{SITE_NAME}</span>
+      {/* `sr-only` both ways, never `hidden`: it drops the wordmark out of flow but keeps it in the link's accessible
+          name. Compact is the header, where the rail wants the width from 1080px down; everywhere else it only goes
+          under 360px, which is the width at which it is the one thing that cannot shrink far enough (WCAG 1.4.10
+          Reflow at 320px, #107). */}
+      <span className={compact ? 'max-lg:sr-only' : 'max-[359px]:sr-only'}>{SITE_NAME}</span>
     </Link>
   );
 }
