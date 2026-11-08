@@ -21,15 +21,6 @@ const labs = {
       {port: 3006, slug: 'kinetic', title: 'Fresh perspective'},
     ],
   },
-  nav: {
-    base: '/design-lab/nav',
-    headline: 'Nav lab — three sticky header directions over the real home page.',
-    previews: [
-      {port: 3001, slug: 'ruler', title: 'The ruler'},
-      {port: 3002, slug: 'dock', title: 'The dock'},
-      {port: 3003, slug: 'transport', title: 'The transport'},
-    ],
-  },
 };
 
 const labName = process.argv[2] ?? 'fresh-fruit';

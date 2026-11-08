@@ -2,13 +2,14 @@
 
 import {useEffect, useRef} from 'react';
 import {cn} from '@/lib/cn';
-import styles from './scroll-progress.module.css';
 
 /**
  * How far the reader is through the page, as a bar that fills from the left. Decorative — it repeats what the
  * scrollbar already says — so it carries `aria-hidden` and no role.
  *
- * Give it a height, a colour and a position from `className`; it brings only the fill.
+ * Give it a height, a colour and a position from `className`; it brings only the fill. The fill itself is the
+ * `.scroll-progress` rule in globals.css, which is pure CSS wherever scroll-driven animations exist; this component
+ * only supplies the fallback for the browsers that lack them.
  */
 export function ScrollProgress({className}: {className?: string}) {
   const ref = useRef<HTMLDivElement>(null);
@@ -31,5 +32,5 @@ export function ScrollProgress({className}: {className?: string}) {
     };
   }, []);
 
-  return <div ref={ref} aria-hidden="true" className={cn(styles.bar, className)} />;
+  return <div ref={ref} aria-hidden="true" className={cn('scroll-progress', className)} />;
 }

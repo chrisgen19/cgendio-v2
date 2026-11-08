@@ -49,7 +49,7 @@ export async function PostArticle({post}: {post: PostDetail}) {
       <Section tone="white" padding="under-head">
         <div className={hasToc ? 'grid grid-cols-[minmax(0,68ch)_240px] justify-between gap-16 max-lg:grid-cols-1 max-lg:gap-10' : undefined}>
           {hasToc ? (
-            <div className="lg:sticky lg:top-8 lg:order-2 lg:self-start">
+            <div className="lg:sticky lg:top-[calc(var(--header-h)+1rem)] lg:order-2 lg:self-start">
               <TableOfContents items={toc} />
             </div>
           ) : null}

@@ -1,7 +1,7 @@
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
-import {SECTION_IDS} from './nav-items';
+import {SECTION_IDS} from './nav-links';
 
 export type HeaderState = {
   /** The header has passed the hero (or the top of an inner page) and now sits over content. */

@@ -25,6 +25,8 @@ export function HomePage() {
         {/* Inside <main> so every piece of content sits in a landmark */}
         <h1 className="sr-only">{HOME_TITLE}</h1>
         <Hero />
+        {/* The hero's bottom edge: what the header watches to decide the film has ended and the rail should fill in */}
+        <div data-nav-sentinel aria-hidden="true" className="-mt-px h-px" />
         <StackStrip />
         <About />
         <WhatWeBuild />

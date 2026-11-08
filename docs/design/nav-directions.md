@@ -1,118 +1,111 @@
-# Nav lab — three sticky header directions
+# The header: why it is a ruler
 
-Comparison tool for choosing the site header, in the same shape as `fresh-fruit-directions.md`. Dev only: everything
-under `/design-lab` answers 404 in a production build (`src/app/design-lab/layout.tsx`).
+Decision record. Three directions were built and compared in a design lab over the real home page; Christian chose
+**the ruler**, and it now lives in `src/components/site/site-header.tsx` and `mobile-menu.tsx`. The lab and the other
+two directions were deleted with the move — `git show 93a5019` has all three if one is ever wanted back.
 
-```sh
-pnpm dev:nav-lab
-```
+## What was wrong with the old header
 
-| | URL |
-| --- | --- |
-| Compare all | <http://localhost:3000/design-lab/nav> |
-| The ruler | <http://localhost:3001/design-lab/nav/ruler> |
-| The dock | <http://localhost:3002/design-lab/nav/dock> |
-| The transport | <http://localhost:3003/design-lab/nav/transport> |
+It was not sticky: `absolute` over the hero on the home page, `relative` everywhere else, so it scrolled away and
+never came back. More to the point, it had no concept of position. All four links looked the same whether they jumped
+within the home page (`/#work`) or left it (`/writing`), there was no active state, and so no `aria-current` either —
+a screen reader got no orientation from it. Its blur and translucency did nothing, because the bar never sat over
+scrolling content. The phone panel was hard-pinned at `top-[76px]`, matching the header's height by coincidence.
 
-The three ports proxy one `next dev` runtime, hot reload included, so three browser windows can sit side by side
-without three compiles. Add `?view=article` to any direction for the reading view, or use the toolbar at the bottom
-left. The toolbar is the instrument, not part of what is being judged.
+Making it sticky was the smallest of those four problems, which is why all three directions were built around a
+position readout rather than around the link list.
 
-## What every direction has to do
+## What the header does now
 
-Agreed with Christian before the directions were drawn:
+1. Overlays the hero film at scroll 0, then takes a surface once the film ends.
+2. Says which section the reader is in, visually and with `aria-current`.
+3. Shows reading progress on pages that have no sections to mark.
 
-1. Overlay the hero film at scroll 0, then take a surface once the film ends.
-2. Say which section the reader is in (and keep saying it on inner pages, where the answer is the page).
-3. Show reading progress.
-4. Stay inside the existing tokens — colours, radii, shadows and the three fonts. New structure, not a new palette.
+### The idea
 
-## The shared mechanics
+The design borrows the vocabulary the About canvas already gave the site — hairlines, graduations, a mono readout,
+the accent as the redline colour. The header is a **measuring rail** rather than a bar of links.
 
-`src/components/design-lab/nav/shared/` holds everything the three directions have in common, so they answer to the
-same signals and only their looks differ.
+Over the film it carries almost nothing: the wordmark and a hairline with one small, undifferentiated tick per
+section — the page's structure drawn as a plain measure. Leaving the film fills the rail in: it takes a surface, the
+hairline runs the full width, and the graduations sort themselves into the long ones that are navigation and the
+short ones that are only structure.
 
-### `useHeaderState(offset)`
+The move the design exists for: **the lime highlighter becomes the position indicator.** The site's signature under
+one word of every section heading stops being decoration and starts doing a job — it rides the rail's baseline and
+sits under the graduation the reader is on. Because it also lands on unlabelled graduations, the mono readout beside
+the rail names the section: it is the value the instrument is reading.
+
+Blog is the only nav item that leaves the page, so it has no position and gets no tick. It sits past the rail's end
+divider with an arrow. That split is what `NavItem.kind` encodes in `nav-links.ts`.
+
+On a phone the rail keeps the header's bottom edge as ticks only, and its readout becomes the button that opens the
+sheet — so the control that opens the navigation is also the thing that says where you are. The sheet is the same
+ruler turned on its side.
+
+### What it dropped
+
+The **"Open to projects" chip**. A header whose whole argument is precision cannot carry two unrelated readouts. The
+`openToProjects` setting is unchanged and still drives the About panel and the contact CTA, which is where a visitor
+looks for it.
+
+## How it works
+
+### `useHeaderState(offset)` — `src/components/site/use-header-state.ts`
 
 Returns `{stuck, active, activeIndex, scrollingDown}`.
 
-`stuck` comes from an `IntersectionObserver` on `[data-nav-sentinel]` — a marker `PreviewHome` puts at the bottom edge
-of the hero — and **not** from `@container scroll-state(stuck: top)`. Two reasons:
+`stuck` is read from an `IntersectionObserver` on `[data-nav-sentinel]` — the marker `home-page.tsx` puts at the
+bottom edge of the hero — and **not** from `@container scroll-state(stuck: top)`. Two reasons:
 
 - A header that overlays the hero is already sitting at its sticky position on the first paint, so the CSS query
-  reports it stuck at scroll 0. The question these headers are actually asking is "has the film ended", which is a
-  different question that happens to have the same answer on an inner page.
+  reports it stuck at scroll 0. The question this header actually asks is "has the film ended", which only happens to
+  have the same answer on an inner page.
 - `container-type: scroll-state` is Chrome and Edge only. The stuck surface is what makes the nav legible over
-  content, so it cannot be a progressive enhancement here.
+  content, so it cannot be a progressive enhancement.
 
-With no sentinel on the page the hook plants a 1px one at the top of the document, so `stuck` degrades to "scrolled"
-on inner pages. `offset` is the header's own height: the change happens when the hero's bottom edge reaches the
-header's bottom edge, not at an arbitrary pixel.
+With no sentinel on the page, the hook plants a 1px one at the top of the document, so `stuck` degrades to "scrolled"
+on inner pages.
 
 `active` is a second observer over `SECTION_IDS` with a thin `-38% / -56%` band — whatever crosses the reading line.
-Each direction must mirror it with `aria-current`, because a visual-only indicator says nothing to a screen reader.
 
-### `<ScrollProgress />`
+`useScrollPaddingTop` lives in the same file and reserves the header's height on the scroll container, so clicking
+"Work" lands the section below the header instead of behind it. It is set from script, not from `globals.css`, so it
+stays tied to `HEADER_HEIGHT` — a header that changes height and a `scroll-padding-top` that does not is a bug nobody
+notices until they click a nav link.
+
+### `<ScrollProgress />` — `src/components/site/scroll-progress.tsx`
 
 A bar that scales on its x axis: a scroll-driven CSS animation off the root scroller where the browser has one
 (Chrome, Edge, Safari 26), a passive scroll listener writing `--nav-progress` where it does not (Firefox). Only
 `transform` animates, so it stays on the compositor. It carries `aria-hidden` — it repeats what the scrollbar already
 says, and an unnamed node in the reading order helps nobody.
 
-The keyframes use animation longhands rather than the `animation` shorthand: the production CSS build rewrites a
-shorthand with no name to `animation: none` (see the gotcha in `CLAUDE.md`), which would lose the timing function and
-the fill mode.
+The `.scroll-progress` rule is in `globals.css` (site components get no CSS files of their own) and uses animation
+longhands rather than the `animation` shorthand: the production CSS build rewrites a shorthand with no name to
+`animation: none`, which would lose the timing function and the fill mode.
 
-### `NAV_ITEMS`
+### Positioning
 
-Split by `kind`: `section` items jump within the home page and can report a position, `route` items leave and cannot.
-The current header treats both the same, which is why it has nothing to say about where you are. Each direction
-expresses the split differently, but each one expresses it.
-
-## Positioning contract
-
-Every direction's root is a `<header>` that is `sticky top-0 z-40`. Overlaying the hero without taking space in the
-flow is a negative bottom margin equal to the header's own height:
+The header is `sticky top-0 z-40`. Overlaying the hero without taking space in the flow is a negative bottom margin
+equal to its own height:
 
 ```tsx
-style={{'--header-h': '72px', marginBottom: overlay ? 'calc(var(--header-h) * -1)' : undefined}}
+style={{'--header-h': `${HEADER_HEIGHT}px`, marginBottom: overlay ? 'calc(var(--header-h) * -1)' : undefined}}
 ```
 
 `position: sticky` still works, because the element's flow position is `y = 0` and it never leaves it.
 
-The other half of the contract is `scroll-padding-top`. A sticky header covers the top of whatever an in-page link
-jumps to, so every direction has to reserve its own height on the scroll container — otherwise clicking "Work" lands
-the reader under the bar. Each direction sets it for its own height; it is not in the shared layer because the
-heights differ, and because one direction docks to the bottom on phones and needs `scroll-padding-bottom` instead.
+### `--color-header` and `--color-header-edge`
 
-## The directions
+The header is the one element that floats over every other surface on the page, so its surface and its edge are their
+own tokens rather than `white` and `line`. On the light page a `line` hairline separates it from anything underneath.
+In dark mode it crosses the What I build stage — a deep indigo — where the header resolved to about `rgb(21,22,32)`
+against the stage's `rgb(19,17,54)` and the `line` hairline all but disappeared. The dark values are therefore a more
+opaque surface and an edge pitched lighter than the page's own borders.
 
-Each borrows from a world the site already has, so the header belongs to this site rather than to sticky headers in
-general.
+## Against the design canvas
 
-### 01 — The ruler
-
-The design-tool vocabulary of the About canvas (`about-guides`, `about-inspect`, `about-pin`). The header is a
-measuring rail carrying a tick per section. The lime highlighter — the site's strongest existing signature, swept
-under one word in every section heading — is promoted from decoration to the position indicator and slides along the
-rail. Reading progress is the rail itself.
-
-### 02 — The dock
-
-The extruded plates of the Stack section. Wide, airy and transparent over the film; then one orchestrated move into a
-detached ink plate, inset from the edges and lifted on `--shadow-deep`. The most confident and the most conventional
-of the three, so the transition is the thing that has to be excellent.
-
-### 03 — The transport
-
-The hero film's own transport bar. A mono counter reads the section the way a timecode reads a frame, so the loudest
-element is a position rather than a link list. It hides on the way down and returns on the way up, giving long reads
-their height back, with the progress rule pinned at the top of the viewport even while the bar is away. Docks to the
-bottom edge on a phone, in reach of a thumb.
-
-## Decision
-
-Not made yet. Once one is chosen it moves into `src/components/site/site-header.tsx` and `mobile-menu.tsx`, the
-shared hooks move to `src/lib/` or `src/components/site/`, and this lab can be deleted along with the other two
-directions. The design canvas (`docs/design/design-reference.dc.html`) still shows the old pill nav and will be out
-of date for the header; note that where the canvas is cited as the source of truth.
+`docs/design/design-reference.dc.html` and `docs/design/dark-version/Main.dc.html` still show the old pill nav. **The
+header is the one place where the canvas is out of date** — treat this document as the spec for it. Everything else
+on the canvas still stands.

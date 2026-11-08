@@ -11,7 +11,12 @@ import {AnchoredHeading, COMPONENTS, SHIKI_OPTIONS} from '@/components/prose/mar
 import {rehypeDemoteH1, rehypeWriteUpChapters, SANITIZE_SCHEMA, type WriteUpChapter} from '@/lib/markdown-plugins';
 
 /** One chapter: a section, then its heading. Shared with the reasoning rows in write-up.tsx. */
-export const CHAPTER = 'flex scroll-mt-24 flex-col gap-5 border-t border-line py-12 first:border-t-0 first:pt-0 lg:scroll-mt-12 lg:gap-6 lg:py-14';
+/*
+ * scroll-mt lands a chapter clear of everything pinned above it: the sticky header, plus — under 1080px, where the
+ * jump index is a chip row stuck beneath the header rather than a side column — that row as well.
+ */
+export const CHAPTER =
+  'flex scroll-mt-[calc(var(--header-h)+96px)] flex-col gap-5 border-t border-line py-12 first:border-t-0 first:pt-0 lg:scroll-mt-[calc(var(--header-h)+1rem)] lg:gap-6 lg:py-14';
 export const CHAPTER_HEADING = 'm-0 font-display text-lg leading-tight font-bold tracking-[-0.01em] text-muted';
 
 // The one-sentence paragraphs read as statements: display type, kept under about 45 characters a line

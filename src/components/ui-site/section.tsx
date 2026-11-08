@@ -34,7 +34,20 @@ type SectionProps = {
 /** A home page section: the canvas `.sec` padding plus the 1320px `.wrap`. */
 export function Section({id, tone = 'ground', padding = 'default', className, innerClassName, innerTheme, children}: SectionProps) {
   return (
-    <section id={id} className={cn('px-14 max-md:px-5', PADDING[padding], tone === 'white' && 'border-y border-line bg-white', className)}>
+    /*
+     * scroll-mt clears the sticky header (72px) plus a gap, so a nav link lands the section below the bar instead of
+     * behind it. It lives here rather than as a `scroll-padding-top` on the root because the case study chapters and
+     * the blog's headings already set their own scroll-margin, and a root padding would add to theirs.
+     */
+    <section
+      id={id}
+      className={cn(
+        'scroll-mt-[calc(var(--header-h)+1rem)] px-14 max-md:px-5',
+        PADDING[padding],
+        tone === 'white' && 'border-y border-line bg-white',
+        className,
+      )}
+    >
       <div data-theme={innerTheme} className={cn('mx-auto max-w-site', innerClassName)}>
         {children}
       </div>
