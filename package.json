@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:design-lab": "node scripts/design-lab.mjs",
+    "dev:hero-lab": "node scripts/design-lab.mjs hero-film",
     "build": "next build",
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit",
