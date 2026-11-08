@@ -17,14 +17,15 @@ export type HeaderState = {
 const INITIAL: HeaderState = {stuck: false, active: null, activeIndex: -1, scrollingDown: false};
 
 /**
- * Everything a sticky header needs to know about the page under it, in one hook, so the three lab directions all
- * answer to the same signals and only their looks differ.
+ * Everything the sticky header needs to know about the page under it, in one hook.
  *
- * `stuck` is read from an IntersectionObserver on `[data-nav-sentinel]` — the marker the preview page puts at the
+ * `stuck` is read from an IntersectionObserver on `[data-nav-sentinel]` — the marker `home-page.tsx` puts at the
  * bottom edge of the hero — rather than from `@container scroll-state(stuck: top)`. A header that overlays the hero
  * is already at its sticky position on the first paint, so the CSS query would report it stuck at scroll 0; and the
- * query is Chrome-only, while the stuck surface is what makes the nav readable over content. With no sentinel on the
- * page (an inner page with no hero) the hook plants one at the top of the document, so `stuck` means "scrolled".
+ * query is Chrome and Edge only, while the stuck surface is what makes the nav readable over content.
+ *
+ * On a page with no such marker (an inner page, which has no hero) `stuck` falls back to "scrolled past the header",
+ * read from a passive scroll listener. The hook never creates a marker of its own: see the note in the effect.
  *
  * @param offset Distance from the viewport top at which the change happens — the header's own height.
  */
@@ -33,24 +34,31 @@ export function useHeaderState(offset = 72): HeaderState {
   const lastY = useRef(0);
 
   useEffect(() => {
-    const planted = document.querySelector('[data-nav-sentinel]') === null;
-    let sentinel = document.querySelector<HTMLElement>('[data-nav-sentinel]');
-    if (!sentinel) {
-      sentinel = document.createElement('div');
-      sentinel.dataset.navSentinel = '';
-      sentinel.setAttribute('aria-hidden', 'true');
-      sentinel.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:1px;pointer-events:none';
-      document.body.append(sentinel);
-    }
+    const setStuck = (stuck: boolean) => setState((current) => (current.stuck === stuck ? current : {...current, stuck}));
 
-    const stuckObserver = new IntersectionObserver(
-      ([entry]) => {
-        const stuck = !entry.isIntersecting && entry.boundingClientRect.top < offset;
-        setState((current) => (current.stuck === stuck ? current : {...current, stuck}));
-      },
-      {rootMargin: `${-offset}px 0px 0px 0px`, threshold: 0},
-    );
-    stuckObserver.observe(sentinel);
+    /*
+     * The marker the page puts at the hero's bottom edge, if it has a hero. Where there is none, `stuck` falls back to
+     * "scrolled past the header" from a scroll listener.
+     *
+     * Nothing is ever appended to the DOM to stand in for a missing marker. In the App Router <body> is React's root
+     * container, and an unmanaged node inside it derails React's own traversal of the page's top-level children: it
+     * made Next scroll to the footer on every client-side navigation to a page without a hero.
+     */
+    const sentinel = document.querySelector<HTMLElement>('[data-nav-sentinel]');
+    let stuckObserver: IntersectionObserver | undefined;
+    let onStuckScroll: (() => void) | undefined;
+
+    if (sentinel) {
+      stuckObserver = new IntersectionObserver(([entry]) => setStuck(!entry.isIntersecting && entry.boundingClientRect.top < offset), {
+        rootMargin: `${-offset}px 0px 0px 0px`,
+        threshold: 0,
+      });
+      stuckObserver.observe(sentinel);
+    } else {
+      onStuckScroll = () => setStuck(window.scrollY > offset);
+      onStuckScroll();
+      window.addEventListener('scroll', onStuckScroll, {passive: true});
+    }
 
     // A thin band across the upper third: whatever crosses it is what the reader is looking at.
     const visible = new Set<string>();
@@ -87,10 +95,10 @@ export function useHeaderState(offset = 72): HeaderState {
     window.addEventListener('scroll', onScroll, {passive: true});
 
     return () => {
-      stuckObserver.disconnect();
+      stuckObserver?.disconnect();
       sectionObserver.disconnect();
       window.removeEventListener('scroll', onScroll);
-      if (planted) sentinel?.remove();
+      if (onStuckScroll) window.removeEventListener('scroll', onStuckScroll);
     };
   }, [offset]);
 

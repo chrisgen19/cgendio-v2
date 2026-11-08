@@ -17,7 +17,8 @@ import {Work} from './work';
 /** The whole home page. */
 export function HomePage() {
   return (
-    <>
+    // One root element rather than a fragment, for the reason spelled out in page-shell.tsx
+    <div>
       <SkipLink />
       <GoogleAnalytics />
       <SiteHeader overlay />
@@ -38,6 +39,6 @@ export function HomePage() {
       </main>
       <SiteFooter />
       <ScrollReveal />
-    </>
+    </div>
   );
 }

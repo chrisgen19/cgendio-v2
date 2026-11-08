@@ -6,6 +6,6 @@
  * `visibility`, not `display`, so the header keeps its box and nothing below it shifts. visual.spec.ts's hero test is
  * the one that compares the header itself, and it does not use this file.
  */
-body > header {
+header {
   visibility: hidden;
 }
