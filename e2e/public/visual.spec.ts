@@ -11,6 +11,9 @@ test.use({reducedMotion: 'reduce'});
 
 const SECTIONS = ['about', 'what-we-build', 'work', 'milestones', 'timeline', 'blog', 'contact'];
 
+// The header is sticky, so it would otherwise paint over whichever section the capture scrolled past
+const HIDE_HEADER = 'e2e/support/hide-header.css';
+
 test.beforeEach(async ({page}) => {
   await page.goto('/');
   await page.evaluate(() => document.fonts.ready);
@@ -25,7 +28,7 @@ test('hero (film hidden)', async ({page}) => {
 
 test('stack strip', async ({page}) => {
   // The strip has no id: it's the section right before About
-  await expect(page.locator('#about').locator('xpath=preceding-sibling::section[1]')).toHaveScreenshot('stack.png');
+  await expect(page.locator('#about').locator('xpath=preceding-sibling::section[1]')).toHaveScreenshot('stack.png', {stylePath: [HIDE_HEADER]});
 });
 
 // The Work cards are sticky and the timeline's counter follows the scroll: flatten them so the screenshot doesn't depend
@@ -34,6 +37,7 @@ const STYLES: Record<string, string> = {work: 'e2e/support/flatten-work-stack.cs
 
 for (const id of SECTIONS) {
   test(`#${id}`, async ({page}) => {
-    await expect(page.locator(`#${id}`)).toHaveScreenshot(`${id}.png`, {stylePath: STYLES[id]});
+    const styles = STYLES[id] ? [HIDE_HEADER, STYLES[id]] : [HIDE_HEADER];
+    await expect(page.locator(`#${id}`)).toHaveScreenshot(`${id}.png`, {stylePath: styles});
   });
 }
