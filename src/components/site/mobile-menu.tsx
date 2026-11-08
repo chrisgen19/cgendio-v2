@@ -79,10 +79,15 @@ export function MobileMenu({sectionsOnThisPage, marked}: MobileMenuProps) {
           onClick={() => setOpen((value) => !value)}
           className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-pill border border-header-edge bg-header pr-3 pl-3.5 text-ink backdrop-blur-[8px] hover:border-ink"
         >
-          <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
-          <span aria-hidden="true" className="font-mono text-[11px] leading-none font-medium tracking-[0.08em] uppercase">
+          {/*
+           * The visible text leads the accessible name, so the name contains the label a voice-control user can see
+           * (WCAG 2.5.3); the action follows it. Naming the section here is also the only way a screen reader hears
+           * which of the unlinked sections is in view, since those have no nav link to carry aria-current.
+           */}
+          <span className="font-mono text-[11px] leading-none font-medium tracking-[0.08em] uppercase">
             {marked ? SECTION_LABELS[marked] : 'Menu'}
           </span>
+          <span className="sr-only">{open ? ': close menu' : ': open menu'}</span>
           <ChevronDown
             aria-hidden="true"
             size={14}

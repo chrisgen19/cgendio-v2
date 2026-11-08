@@ -24,7 +24,8 @@ const labs = {
 };
 
 const labName = process.argv[2] ?? 'fresh-fruit';
-const lab = labs[labName];
+// hasOwnProperty, not a plain lookup: `toString` and `__proto__` are inherited and would pass a truthiness check
+const lab = Object.hasOwn(labs, labName) ? labs[labName] : undefined;
 if (!lab) {
   console.error(`Unknown lab "${labName}". Available: ${Object.keys(labs).join(', ')}`);
   process.exit(1);

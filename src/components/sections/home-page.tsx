@@ -21,7 +21,7 @@ export function HomePage() {
       <SkipLink />
       <GoogleAnalytics />
       <SiteHeader overlay />
-      <main id="main" tabIndex={-1} className="focus-visible:outline-none">
+      <main id="main" tabIndex={-1} className="scroll-mt-[calc(var(--header-h)+1rem)] focus-visible:outline-none">
         {/* Inside <main> so every piece of content sits in a landmark */}
         <h1 className="sr-only">{HOME_TITLE}</h1>
         <Hero />

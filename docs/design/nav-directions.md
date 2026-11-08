@@ -69,10 +69,11 @@ on inner pages.
 
 `active` is a second observer over `SECTION_IDS` with a thin `-38% / -56%` band — whatever crosses the reading line.
 
-`useScrollPaddingTop` lives in the same file and reserves the header's height on the scroll container, so clicking
-"Work" lands the section below the header instead of behind it. It is set from script, not from `globals.css`, so it
-stays tied to `HEADER_HEIGHT` — a header that changes height and a `scroll-padding-top` that does not is a bug nobody
-notices until they click a nav link.
+Anchors are landed with `scroll-margin-top` on each target, not a `scroll-padding-top` on the root. `Section` sets
+`--header-h` plus a gap, `main#main` the same for the skip link, and the case study chapters and blog headings carry
+their own (larger, because the write-up index pins under the header on phones). A root padding would be added to all
+of those rather than replace them, which pushed chapters far down the page and left `WriteUpIndex`'s reading line
+pointing at the wrong chapter.
 
 ### `<ScrollProgress />` — `src/components/site/scroll-progress.tsx`
 

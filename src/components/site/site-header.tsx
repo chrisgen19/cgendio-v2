@@ -166,9 +166,14 @@ export function SiteHeader({overlay = false}: SiteHeaderProps) {
         <div className="relative flex h-full items-center gap-6 max-md:gap-3">
           <Logo compact />
 
-          {/* The instrument's readout. Decorative: aria-current on the active link is what carries this to a reader. */}
-          <div aria-hidden="true" className="flex w-[120px] shrink-0 items-center gap-2 max-lg:hidden">
+          {/*
+           * The instrument's readout. Not aria-hidden: `aria-current` on a rail link only speaks for the three
+           * sections that are in the nav, so for the rest (Stack, About, What I build, Writing, Contact) this is the
+           * only place the section in view is named at all. The lime dash beside it is the decorative part.
+           */}
+          <div className="flex w-[120px] shrink-0 items-center gap-2 max-lg:hidden">
             <span
+              aria-hidden="true"
               className={cn(
                 'h-[4px] w-3.5 shrink-0 bg-lime transition-opacity duration-300 motion-reduce:transition-none',
                 marked ? 'opacity-100' : 'opacity-0',
@@ -180,7 +185,12 @@ export function SiteHeader({overlay = false}: SiteHeaderProps) {
                 marked ? 'opacity-100' : 'opacity-0',
               )}
             >
-              {active ? SECTION_LABELS[active] : ''}
+              {marked ? (
+                <>
+                  <span className="sr-only">Current section: </span>
+                  {SECTION_LABELS[marked]}
+                </>
+              ) : null}
             </span>
           </div>
 

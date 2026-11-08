@@ -547,7 +547,8 @@
 
 @media (width < 860px) {
   .work-card {
-    --t0: 12px;
+    /* Still below the header: this overrides the rule above, so it has to carry --header-h too */
+    --t0: calc(var(--header-h) + 12px);
     --step: 10px;
     --h: min(600px, calc(100svh - 112px));
   }
