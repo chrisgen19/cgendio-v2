@@ -64,8 +64,13 @@ bottom edge of the hero — and **not** from `@container scroll-state(stuck: top
 - `container-type: scroll-state` is Chrome and Edge only. The stuck surface is what makes the nav legible over
   content, so it cannot be a progressive enhancement.
 
-With no sentinel on the page, the hook plants a 1px one at the top of the document, so `stuck` degrades to "scrolled"
-on inner pages.
+With no sentinel on the page, `stuck` falls back to "scrolled past the header", read from a passive scroll listener.
+
+**Nothing is appended to the DOM to stand in for a missing marker.** An earlier version planted a 1px node in
+`document.body`, which is React's root container in the App Router: an unmanaged node inside it derails React's own
+traversal of the page's top-level children, and Next scrolled to the footer on every client-side navigation to a page
+without a hero. If this hook ever needs a marker on a page that has none, render one from the component tree the way
+`home-page.tsx` does, rather than creating it at runtime.
 
 `active` is a second observer over `SECTION_IDS` with a thin `-38% / -56%` band — whatever crosses the reading line.
 

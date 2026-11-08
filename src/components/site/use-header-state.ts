@@ -33,24 +33,31 @@ export function useHeaderState(offset = 72): HeaderState {
   const lastY = useRef(0);
 
   useEffect(() => {
-    const planted = document.querySelector('[data-nav-sentinel]') === null;
-    let sentinel = document.querySelector<HTMLElement>('[data-nav-sentinel]');
-    if (!sentinel) {
-      sentinel = document.createElement('div');
-      sentinel.dataset.navSentinel = '';
-      sentinel.setAttribute('aria-hidden', 'true');
-      sentinel.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:1px;pointer-events:none';
-      document.body.append(sentinel);
-    }
+    const setStuck = (stuck: boolean) => setState((current) => (current.stuck === stuck ? current : {...current, stuck}));
 
-    const stuckObserver = new IntersectionObserver(
-      ([entry]) => {
-        const stuck = !entry.isIntersecting && entry.boundingClientRect.top < offset;
-        setState((current) => (current.stuck === stuck ? current : {...current, stuck}));
-      },
-      {rootMargin: `${-offset}px 0px 0px 0px`, threshold: 0},
-    );
-    stuckObserver.observe(sentinel);
+    /*
+     * The marker the page puts at the hero's bottom edge, if it has a hero. Where there is none, `stuck` falls back to
+     * "scrolled past the header" from a scroll listener.
+     *
+     * Nothing is ever appended to the DOM to stand in for a missing marker. In the App Router <body> is React's root
+     * container, and an unmanaged node inside it derails React's own traversal of the page's top-level children: it
+     * made Next scroll to the footer on every client-side navigation to a page without a hero.
+     */
+    const sentinel = document.querySelector<HTMLElement>('[data-nav-sentinel]');
+    let stuckObserver: IntersectionObserver | undefined;
+    let onStuckScroll: (() => void) | undefined;
+
+    if (sentinel) {
+      stuckObserver = new IntersectionObserver(([entry]) => setStuck(!entry.isIntersecting && entry.boundingClientRect.top < offset), {
+        rootMargin: `${-offset}px 0px 0px 0px`,
+        threshold: 0,
+      });
+      stuckObserver.observe(sentinel);
+    } else {
+      onStuckScroll = () => setStuck(window.scrollY > offset);
+      onStuckScroll();
+      window.addEventListener('scroll', onStuckScroll, {passive: true});
+    }
 
     // A thin band across the upper third: whatever crosses it is what the reader is looking at.
     const visible = new Set<string>();
@@ -87,10 +94,10 @@ export function useHeaderState(offset = 72): HeaderState {
     window.addEventListener('scroll', onScroll, {passive: true});
 
     return () => {
-      stuckObserver.disconnect();
+      stuckObserver?.disconnect();
       sectionObserver.disconnect();
       window.removeEventListener('scroll', onScroll);
-      if (planted) sentinel?.remove();
+      if (onStuckScroll) window.removeEventListener('scroll', onStuckScroll);
     };
   }, [offset]);
 
