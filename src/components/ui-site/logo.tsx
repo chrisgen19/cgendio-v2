@@ -23,7 +23,11 @@ export function Logo({compact = false}: LogoProps) {
       <b className="inline-grid size-9 place-items-center rounded-logo bg-badge font-display text-base leading-none font-extrabold tracking-[-0.04em] text-badge-ink">
         cg
       </b>
-      <span className={compact ? 'max-lg:sr-only' : undefined}>{SITE_NAME}</span>
+      {/* `sr-only` both ways, never `hidden`: it drops the wordmark out of flow but keeps it in the link's accessible
+          name. Compact is the header, where the rail wants the width from 1080px down; everywhere else it only goes
+          under 360px, which is the width at which it is the one thing that cannot shrink far enough (WCAG 1.4.10
+          Reflow at 320px, #107). */}
+      <span className={compact ? 'max-lg:sr-only' : 'max-[359px]:sr-only'}>{SITE_NAME}</span>
     </Link>
   );
 }

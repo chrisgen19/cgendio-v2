@@ -2,7 +2,7 @@ import type {ReactNode} from 'react';
 import type {ContactField} from '@/lib/contact';
 
 export const CONTROL =
-  'w-full scroll-mt-28 rounded-field border border-line bg-ground px-4 text-base text-ink transition-colors duration-150 hover:border-ink focus:bg-white aria-invalid:border-danger motion-reduce:transition-none';
+  'w-full scroll-mt-28 rounded-field border border-field bg-ground px-4 text-base text-ink transition-colors duration-150 hover:border-ink focus:bg-white aria-invalid:border-danger motion-reduce:transition-none';
 
 export type ControlProps = {id: string; name: ContactField; 'aria-invalid'?: true; 'aria-describedby'?: string};
 
