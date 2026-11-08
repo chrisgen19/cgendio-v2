@@ -97,6 +97,34 @@ style={{'--header-h': `${HEADER_HEIGHT}px`, marginBottom: overlay ? 'calc(var(--
 
 `position: sticky` still works, because the element's flow position is `y = 0` and it never leaves it.
 
+### Everything that offsets by `--header-h`
+
+The header is sticky, so anything that pins near the top of the viewport, or that lands there from an anchor, has to
+reserve its height. Three bugs on this branch were all the same shape: a base rule was given `--header-h`, and a
+**narrower media query re-declared the same value without it**. If the header's height ever changes, or it stops
+being sticky, this is the list to walk — and for each line, check whether a narrower query overrides it.
+
+| What | Where | Offset |
+| --- | --- | --- |
+| The header itself | `site-header.tsx` | `sticky top-0`, `h-(--header-h)`, negative margin when it overlays the hero |
+| Home sections | `ui-site/section.tsx` | `scroll-mt` |
+| Skip-link target | `page-shell.tsx`, `home-page.tsx` | `scroll-mt` on `main#main` |
+| Work card stack | `globals.css` `.work-card` | `--t0`, **and again under 860px** |
+| Milestone panel | `globals.css` `.ms-track` | `--ms-pin-min`, feeding both `--ms-panel-h` (**again under 860px**) and `--ms-pin-top` |
+| Walkthrough stage | `globals.css` `.walkthrough-stage` | `top`, and again at 1080px |
+| Walkthrough path links | `walkthrough.tsx` | `scroll-mt`, which has to clear the **stage**, not just the header |
+| Case study chapters | `write-up-markdown.tsx` | `scroll-mt`, clearing the chip row too under 1080px |
+| Case study index | `write-up-index.tsx`, `write-up.tsx` | `top` |
+| Blog aside | `post-article.tsx` | `top` |
+
+Two that deliberately do not: `.tl-counter` pins at `45svh` and the contact CTA column at `lg:top-28`, both far
+enough down that the header never reaches them. The milestone panel only pins at `min-height: 600px`, which is why
+its overflow sat exactly at that threshold.
+
+Anything measuring a reading line in JS is safe by construction: `useHeaderState`, the timeline counter and the
+walkthrough stage all use viewport percentages, and `WriteUpIndex` and `milestone-stage` read the computed
+`scroll-margin-top` and `top` rather than hard-coding them.
+
 ### `--color-header` and `--color-header-edge`
 
 The header is the one element that floats over every other surface on the page, so its surface and its edge are their
