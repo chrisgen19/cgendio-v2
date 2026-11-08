@@ -7,7 +7,7 @@ export function HeroStaticFrame() {
   return (
     <div className="dot-grid absolute inset-0 flex flex-col items-center justify-center gap-[26px] border-b border-line px-14 text-center @max-[1200px]:px-10 @max-[860px]:gap-[18px] @max-[860px]:px-5 portrait:gap-[18px] portrait:px-5">
       <span className="font-mono text-[13px] tracking-[0.14em] text-muted uppercase @max-[860px]:text-xs portrait:text-xs">
-        Cgdiomampo.dev presents
+        Chris Diomampo presents
       </span>
       <div className="max-w-[1100px] font-display text-[min(128px,8.5cqw)] leading-[0.95] font-bold tracking-[-0.04em] text-ink @max-[860px]:text-[min(52px,12cqw)] portrait:text-[min(52px,12cqw)]">
         <div>Great websites</div>

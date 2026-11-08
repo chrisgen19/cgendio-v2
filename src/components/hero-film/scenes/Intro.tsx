@@ -43,7 +43,7 @@ export const Intro: React.FC = () => {
       >
         <Appear delay={6}>
           <MonoLabel size={L.step} style={{letterSpacing: '0.14em', textTransform: 'uppercase'}}>
-            Cgdiomampo.dev presents
+            Chris Diomampo presents
           </MonoLabel>
         </Appear>
         <Headline size={size} style={{maxWidth: 1100}}>
