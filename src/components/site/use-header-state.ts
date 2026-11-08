@@ -17,14 +17,15 @@ export type HeaderState = {
 const INITIAL: HeaderState = {stuck: false, active: null, activeIndex: -1, scrollingDown: false};
 
 /**
- * Everything a sticky header needs to know about the page under it, in one hook, so the three lab directions all
- * answer to the same signals and only their looks differ.
+ * Everything the sticky header needs to know about the page under it, in one hook.
  *
- * `stuck` is read from an IntersectionObserver on `[data-nav-sentinel]` — the marker the preview page puts at the
+ * `stuck` is read from an IntersectionObserver on `[data-nav-sentinel]` — the marker `home-page.tsx` puts at the
  * bottom edge of the hero — rather than from `@container scroll-state(stuck: top)`. A header that overlays the hero
  * is already at its sticky position on the first paint, so the CSS query would report it stuck at scroll 0; and the
- * query is Chrome-only, while the stuck surface is what makes the nav readable over content. With no sentinel on the
- * page (an inner page with no hero) the hook plants one at the top of the document, so `stuck` means "scrolled".
+ * query is Chrome and Edge only, while the stuck surface is what makes the nav readable over content.
+ *
+ * On a page with no such marker (an inner page, which has no hero) `stuck` falls back to "scrolled past the header",
+ * read from a passive scroll listener. The hook never creates a marker of its own: see the note in the effect.
  *
  * @param offset Distance from the viewport top at which the change happens — the header's own height.
  */
