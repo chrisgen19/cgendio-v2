@@ -1,4 +1,4 @@
-/** Six preview ports share one Next dev runtime, including its hot-reload connection. */
+/** Each preview port shares one Next dev runtime, including its hot-reload connection. */
 import {spawn} from 'node:child_process';
 import {createServer, request} from 'node:http';
 import {connect} from 'node:net';
@@ -6,14 +6,39 @@ import {fileURLToPath} from 'node:url';
 
 const projectRoot = fileURLToPath(new URL('..', import.meta.url));
 const upstream = new URL('http://127.0.0.1:3000');
-const previews = [
-  {port: 3001, slug: 'editorial', title: 'The editorial'},
-  {port: 3002, slug: 'cinematic', title: 'After hours'},
-  {port: 3003, slug: 'swiss', title: 'The index'},
-  {port: 3004, slug: 'organic', title: 'Field notes'},
-  {port: 3005, slug: 'blueprint', title: 'Under the hood'},
-  {port: 3006, slug: 'kinetic', title: 'Fresh perspective'},
-];
+
+/** Every lab: a route prefix, a headline, and one port per direction. Pick one with `pnpm dev:design-lab <name>`. */
+const labs = {
+  'fresh-fruit': {
+    base: '/design-lab/fresh-fruit',
+    headline: 'Fresh Fruit design lab — six live previews, one shared Next development runtime.',
+    previews: [
+      {port: 3001, slug: 'editorial', title: 'The editorial'},
+      {port: 3002, slug: 'cinematic', title: 'After hours'},
+      {port: 3003, slug: 'swiss', title: 'The index'},
+      {port: 3004, slug: 'organic', title: 'Field notes'},
+      {port: 3005, slug: 'blueprint', title: 'Under the hood'},
+      {port: 3006, slug: 'kinetic', title: 'Fresh perspective'},
+    ],
+  },
+  nav: {
+    base: '/design-lab/nav',
+    headline: 'Nav lab — three sticky header directions over the real home page.',
+    previews: [
+      {port: 3001, slug: 'ruler', title: 'The ruler'},
+      {port: 3002, slug: 'dock', title: 'The dock'},
+      {port: 3003, slug: 'transport', title: 'The transport'},
+    ],
+  },
+};
+
+const labName = process.argv[2] ?? 'fresh-fruit';
+const lab = labs[labName];
+if (!lab) {
+  console.error(`Unknown lab "${labName}". Available: ${Object.keys(labs).join(', ')}`);
+  process.exit(1);
+}
+const previews = lab.previews;
 
 const isListening = () =>
   new Promise((resolve) => {
@@ -50,7 +75,7 @@ function shutdown() {
 }
 
 try {
-  // Bind all six before starting Next, so a port conflict fails cleanly.
+  // Bind every port before starting Next, so a port conflict fails cleanly.
   for (const preview of previews) {
     const server = createServer((incoming, outgoing) => {
       const proxy = request(
@@ -128,9 +153,9 @@ try {
     });
   }
 
-  console.log('\nFresh Fruit design lab — six live previews, one shared Next development runtime.');
-  console.log('Compare all: http://localhost:3000/design-lab/fresh-fruit');
-  for (const preview of previews) console.log(`${preview.title.padEnd(20)} http://localhost:${preview.port}/design-lab/fresh-fruit/${preview.slug}`);
+  console.log(`\n${lab.headline}`);
+  console.log(`Compare all: http://localhost:3000${lab.base}`);
+  for (const preview of previews) console.log(`${preview.title.padEnd(20)} http://localhost:${preview.port}${lab.base}/${preview.slug}`);
   console.log('\nPress Ctrl+C to stop the preview ports.\n');
 } catch (error) {
   console.error(`Could not start design lab: ${error.message}`);

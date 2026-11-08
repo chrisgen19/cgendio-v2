@@ -1,0 +1,85 @@
+/*
+ * The transport bar's frame: where it sits, what surface it carries, and how it gets out of the way.
+ *
+ * These three are decided together by the 860px dock switch, the stuck state and prefers-reduced-motion, so they live
+ * in one place rather than in a stack of competing variants. A CSS module is unlayered, so it resolves against
+ * Tailwind's utility layer deterministically whichever order the classes end up in.
+ */
+
+.root {
+  /* The flow space the sticky box reserves. The phone dock is fixed to the bottom edge, so it reserves none. */
+  --header-h: 64px;
+  height: var(--header-h);
+}
+
+.bar {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 1;
+  height: 64px;
+  border-bottom: 1px solid transparent;
+  transition:
+    transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 220ms linear,
+    border-color 220ms linear,
+    box-shadow 220ms linear;
+}
+
+/* Over the film the bar is bare glass; once the film is behind us it takes a surface so it stays legible on content. */
+.bar[data-stuck] {
+  border-bottom-color: var(--color-line);
+  background-color: color-mix(in srgb, var(--color-white) 88%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-card);
+}
+
+/*
+ * The extra 28px carries the shadow off screen with the bar, so no smudge is left at the edge. `:not(:focus-within)`
+ * is what stops the bar hiding a control the keyboard is currently on: CSS answers it without a focus/blur listener
+ * and without a re-render.
+ */
+.bar[data-hidden]:not(:focus-within) {
+  transform: translateY(calc(-100% - 28px));
+}
+
+@media (width < 860px) {
+  .root {
+    --header-h: 0px;
+  }
+
+  /*
+   * Thumb reach: the bar docks to the bottom edge and keeps clear of the home indicator. A bar that sits over the
+   * page rather than above it always needs its surface, stuck or not, so this one does not wait for the film to end.
+   */
+  .bar {
+    top: auto;
+    bottom: 0;
+    height: auto;
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid var(--color-line);
+    border-bottom: 0;
+    background-color: color-mix(in srgb, var(--color-white) 92%, transparent);
+    backdrop-filter: blur(10px);
+    /* --shadow-menu's values, cast upwards: a bar on the bottom edge lifts off the page in the other direction */
+    box-shadow: 0 -24px 48px -20px rgba(13, 14, 18, 0.3);
+  }
+
+  :root[data-theme="dark"] .bar {
+    box-shadow: 0 -24px 48px -20px rgba(0, 0, 0, 0.8);
+  }
+
+  /* Docked at the bottom, "out of the way" is downwards. */
+  .bar[data-hidden]:not(:focus-within) {
+    transform: translateY(calc(100% + 28px));
+  }
+}
+
+/* Hiding is motion nobody asked for. With reduced motion the bar simply stays where it is. */
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  .bar[data-hidden]:not(:focus-within) {
+    transform: none;
+    transition: none;
+  }
+}
