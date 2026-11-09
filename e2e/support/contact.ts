@@ -1,7 +1,7 @@
 import {type APIRequestContext, expect, type Page, type TestInfo} from '@playwright/test';
 import {MOCK_RESEND_URL} from './test-env';
 
-type Email = {from: string; to: string | string[]; subject: string; text: string; reply_to?: string | string[]};
+type Email = {from: string; to: string | string[]; subject: string; text: string; html?: string; reply_to?: string | string[]};
 
 /**
  * The contact form allows three messages per IP every ten minutes. Each test sends a made-up x-real-ip (the header the

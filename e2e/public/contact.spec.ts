@@ -103,7 +103,7 @@ test.describe('on /contact', () => {
     expect((await sentEmails(request)).some((email) => email.text.includes(token))).toBe(false);
   });
 
-  test('a valid message is stored and emailed (Resend mocked)', async ({page, request}) => {
+  test('a valid message is stored, emailed and confirmed to the visitor (Resend mocked)', async ({page, request}) => {
     const token = uniqueToken();
     const name = `Visitor ${token}`;
     await fillContactForm(page, {name, message: `We need a new marketing site. Reference ${token}.`});
@@ -112,12 +112,21 @@ test.describe('on /contact', () => {
     await expect(thanks(page)).toBeVisible();
     await expect(thanks(page)).toBeFocused();
 
+    // Both emails quote the message, so tell them apart by who they go to
+    const sentTo = async (to: string) => (await sentEmails(request)).find((email) => email.to === to && email.text.includes(token)) ?? null;
     await expect
-      .poll(async () => (await sentEmails(request)).find((email) => email.text.includes(token)) ?? null)
+      .poll(() => sentTo(CONTACT_EMAIL))
       .toMatchObject({
-        to: CONTACT_EMAIL,
         subject: `New inquiry: Next.js & React from ${name}`,
         reply_to: 'visitor@example.test',
+        html: expect.stringContaining('New inquiry'),
+      });
+    await expect
+      .poll(() => sentTo('visitor@example.test'))
+      .toMatchObject({
+        subject: "Thanks, I've got your message",
+        reply_to: CONTACT_EMAIL,
+        html: expect.stringContaining(token),
       });
   });
 });
