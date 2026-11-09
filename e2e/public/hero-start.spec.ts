@@ -2,8 +2,8 @@ import {expect, test} from '@playwright/test';
 import {heroControls, startFilm} from '../support/hero';
 
 /*
- * The film waits for the visitor's first scroll, tap or key press (src/components/sections/hero-stage.tsx), so the
- * server-rendered intro card is the hero until then. Reduced motion is covered by reduced-motion.spec.ts.
+ * The film waits for the visitor's first scroll, tap, mouse movement or key press (src/components/sections/hero-stage.tsx),
+ * so the server-rendered intro card is the hero until then. Reduced motion is covered by reduced-motion.spec.ts.
  */
 test.beforeEach(async ({page}) => {
   await page.goto('/');
@@ -21,6 +21,19 @@ test('the intro card holds and the film does not load before any interaction', a
 test('the first scroll starts the film', async ({page}) => {
   const {toggle} = heroControls(page);
   await page.mouse.wheel(0, 120);
+  await expect(toggle).toHaveAccessibleName('Pause film');
+});
+
+test('moving the mouse starts the film', async ({page}) => {
+  test.skip(test.info().project.name === 'mobile', 'phones have no hover: a scroll or tap starts the film there');
+  const {toggle} = heroControls(page);
+  // The listener only exists once React has hydrated, so keep moving, as a visitor would, until the film appears
+  let x = 100;
+  await expect(async () => {
+    x += 40;
+    await page.mouse.move(x, 300);
+    await expect(toggle).toBeVisible({timeout: 1_000});
+  }).toPass();
   await expect(toggle).toHaveAccessibleName('Pause film');
 });
 

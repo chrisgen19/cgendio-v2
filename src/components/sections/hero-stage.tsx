@@ -35,8 +35,8 @@ const useIdleAfterLoad = (enabled: boolean) => {
 
 /**
  * When to mount the film. Playing it costs about 2s of main-thread work on a mid-range phone, so it waits for the
- * visitor's first scroll, tap or key press and the intro card holds until then. With reduced motion the film only
- * shows its paused brand card (no playback), so it still loads once the page is idle.
+ * visitor's first scroll, tap, mouse movement or key press and the intro card holds until then. With reduced motion the
+ * film only shows its paused brand card (no playback), so it still loads once the page is idle.
  */
 const useLoadFilm = () => {
   const [reducedMotion, setReducedMotion] = useState<boolean | null>(null);

@@ -1,8 +1,8 @@
 import {expect, type Page} from '@playwright/test';
 
 /**
- * The film mounts on the visitor's first scroll, tap or key press (src/lib/use-first-interaction.ts), so tests that
- * drive it press a key first. The listener only exists once React has hydrated, so a press can land too early: keep
+ * The film mounts on the visitor's first scroll, tap, mouse movement or key press (src/lib/use-first-interaction.ts), so
+ * tests that drive it press a key first. The listener only exists once React has hydrated, so a press can land too early: keep
  * pressing, as a visitor would, until the film's controls appear. Shift has no side effects on either project.
  * Reduced motion skips this: the film loads on idle there and opens on its brand card.
  */
