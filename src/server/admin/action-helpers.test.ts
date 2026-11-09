@@ -43,6 +43,11 @@ describe('resolvePublishedAt', () => {
     expect(resolvePublishedAt({day: '2026-10-05', stored, isPublished: true})).toBe(stored);
   });
 
+  it('keeps a post stamped at midnight Manila when the form submits the Manila day it shows', () => {
+    const midnightManila = new Date('2026-09-30T16:00:00.000Z');
+    expect(resolvePublishedAt({day: '2026-10-01', stored: midnightManila, isPublished: true})).toBe(midnightManila);
+  });
+
   it('takes a different day as a real change and starts it at midnight UTC', () => {
     expect(resolvePublishedAt({day: '2026-10-06', stored, isPublished: true})?.toISOString()).toBe('2026-10-06T00:00:00.000Z');
   });

@@ -4,6 +4,7 @@ import {PageHeader} from '@/components/admin/page-header';
 import {SortableList} from '@/components/admin/sortable-list';
 import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
+import {publishedDay} from '@/lib/format-date';
 import {listPosts} from '@/server/admin/data';
 
 export const metadata: Metadata = {title: 'Posts'};
@@ -31,7 +32,7 @@ export default async function PostsPage() {
           meta: (
             <>
               <Badge variant={post.status === 'PUBLISHED' ? 'default' : 'secondary'}>{post.status === 'PUBLISHED' ? 'Published' : 'Draft'}</Badge>
-              <span>{post.publishedAt ? post.publishedAt.slice(0, 10) : 'Not published yet'}</span>
+              <span>{post.publishedAt ? publishedDay(new Date(post.publishedAt)) : 'Not published yet'}</span>
               <span>/{post.slug}</span>
             </>
           ),

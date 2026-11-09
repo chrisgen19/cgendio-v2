@@ -1,6 +1,6 @@
 import {expect, test} from '@playwright/test';
 
-/* Seeded published posts, newest first: "WordPress news, October 2026…", "Redirect maps…". The four canvas posts are drafts. */
+/* Seeded published posts, newest first: "WordPress news, October 2026…", "Redirect maps…". The canvas posts and v1's title-only posts are drafts. */
 
 test('blog list, then a post, then the next post', async ({page}) => {
   await page.goto('/writing');

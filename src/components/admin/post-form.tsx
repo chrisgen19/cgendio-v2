@@ -1,6 +1,7 @@
 'use client';
 
 import {Card, CardContent} from '@/components/ui/card';
+import {publishedDay} from '@/lib/format-date';
 import {savePost} from '@/server/actions/posts';
 import {SubmitButton, SwitchField, TextAreaField, TextField} from './form-fields';
 import {MarkdownField} from './markdown-field';
@@ -58,7 +59,7 @@ export function PostForm({post}: {post: PostFormValues | null}) {
                 label="Publish date"
                 type="date"
                 hint="Leave empty to use the day you first publish"
-                defaultValue={post?.publishedAt?.slice(0, 10) ?? ''}
+                defaultValue={post?.publishedAt ? publishedDay(new Date(post.publishedAt)) : ''}
                 errors={errors}
               />
               <UploadField name="coverImageUrl" label="Cover image" kind="image" defaultValue={post?.coverImageUrl} />
