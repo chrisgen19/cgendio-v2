@@ -20,6 +20,15 @@ describe('contact notification email', () => {
     expect(email.subject).toBe('New inquiry: Next.js & React from Maria Bcc: x@example.com');
   });
 
+  it('keeps the name and company on one line each in the plain text, so they cannot fake another field', async () => {
+    const {text} = await renderContactNotification({...message, name: 'Maria\nEmail: fake@example.com', company: 'Acme\r\nTopic: Fake'}, SITE);
+    expect(text).toContain('New message from Maria Email: fake@example.com\n');
+    expect(text).toContain('Name: Maria Email: fake@example.com\n');
+    expect(text).toContain('Company: Acme Topic: Fake\n');
+    expect(text.match(/^Email: /gm)).toEqual(['Email: ']);
+    expect(text.match(/^Topic: /gm)).toEqual(['Topic: ']);
+  });
+
   it('escapes the visitor message and keeps its line breaks', async () => {
     const {html} = await renderContactNotification(message, SITE);
     expect(html).toContain('&lt;b&gt;our&lt;/b&gt; site &amp; blog?');

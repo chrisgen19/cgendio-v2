@@ -48,11 +48,12 @@ export const renderContactNotification = async (message: ContactEmailMessage, si
     />,
   );
   const text = [
-    `New message from ${message.name}`,
+    // One line each, so a line break typed into a field can't fake another field (such as a second "Email:")
+    `New message from ${oneLine(message.name)}`,
     '',
-    `Name: ${message.name}`,
+    `Name: ${oneLine(message.name)}`,
     `Email: ${message.email}`,
-    `Company: ${message.company ?? '-'}`,
+    `Company: ${message.company === null ? '-' : oneLine(message.company)}`,
     `Topic: ${topic}`,
     `Received: ${receivedAt}`,
     '',
