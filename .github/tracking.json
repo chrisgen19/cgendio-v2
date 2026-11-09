@@ -117,25 +117,25 @@
         "title": "SEO parity",
         "branch": null,
         "pr": null,
-        "status": "Not started"
+        "status": "Done"
       },
       "D": {
         "title": "Content migration",
         "branch": "feature/phase-d-content-import",
         "pr": 122,
-        "status": "In review"
+        "status": "Done"
       },
       "E": {
         "title": "Deploy readiness (overlaps #10)",
         "branch": null,
         "pr": null,
-        "status": "Not started"
+        "status": "In progress"
       },
       "F": {
         "title": "Cutover and monitoring",
         "branch": null,
         "pr": null,
-        "status": "Not started"
+        "status": "In progress"
       }
     },
     "related": {
