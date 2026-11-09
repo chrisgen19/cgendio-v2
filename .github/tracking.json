@@ -122,8 +122,8 @@
       "D": {
         "title": "Content migration",
         "branch": "feature/phase-d-content-import",
-        "pr": null,
-        "status": "In progress"
+        "pr": 122,
+        "status": "In review"
       },
       "E": {
         "title": "Deploy readiness (overlaps #10)",
