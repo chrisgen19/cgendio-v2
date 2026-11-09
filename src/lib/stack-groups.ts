@@ -31,3 +31,39 @@ export const groupStack = (names: readonly string[]): StackGroup[] =>
   [...GROUPS, OTHER]
     .map(({members: _members, ...group}) => ({...group, tools: names.filter((name) => groupIdOf(name) === group.id)}))
     .filter((group) => group.tools.length > 0);
+
+export type StackExtraGroup = {
+  name: string;
+  /** One line on what the group is for. */
+  note: string;
+  tools: readonly string[];
+};
+
+/**
+ * The tools that aren't on the plates, in the previous site's groups and words (#85). Only the plates' tools are in the
+ * `stack_items` table, because a name `groupStack` doesn't know would draw its own "Other" plate.
+ */
+export const STACK_EXTRAS: readonly StackExtraGroup[] = [
+  {
+    name: 'App plumbing',
+    note: 'The libraries my Next.js apps share.',
+    tools: ['Better Auth', 'TanStack Query v5', 'Zustand', 'Zod', 'Biome', 'pnpm'],
+  },
+  {
+    name: 'CMS and e-commerce',
+    note: "15+ years of client sites, and the headless setup they're moving to.",
+    tools: ['Shopify', 'Elementor', 'Divi', 'Gutenberg', 'MemberPress', 'Stripe'],
+  },
+  {name: 'Backend', note: 'PHP and Node work alongside the Next.js apps.', tools: ['Laravel', 'CodeIgniter', 'Node.js', 'MySQL', 'REST APIs']},
+  {
+    name: 'Infrastructure and data',
+    note: 'Where things run and where the data lives.',
+    tools: ['Docker', 'AWS', 'Azure', 'DigitalOcean', 'SiteGround', 'Linux', 'Firebase', 'BigQuery', 'GitHub Actions'],
+  },
+  {
+    name: 'Workflow',
+    note: 'How I plan, write and check code.',
+    tools: ['Claude Code', 'Cursor', 'MCP', 'Git', 'Jira', 'ClickUp', 'SEMrush', 'NitroPack'],
+  },
+  {name: 'Exploring', note: 'Learning now, not in production yet.', tools: ['React Native + Expo', 'Swift / SwiftUI']},
+];

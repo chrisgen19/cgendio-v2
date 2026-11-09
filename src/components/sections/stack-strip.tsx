@@ -5,6 +5,7 @@ import {SectionHeading} from '@/components/ui-site/section-heading';
 import {groupStack} from '@/lib/stack-groups';
 import {getPageCopy, getStack} from '@/server/content';
 import {StackAssembly} from './stack/stack-assembly';
+import {StackEverythingElse} from './stack/stack-everything-else';
 import {StackLayer} from './stack/stack-layer';
 
 const LIST_ID = 'stack-layers';
@@ -68,6 +69,7 @@ export async function StackStrip() {
         </div>
         <StackAssembly targetId={LIST_ID} />
       </div>
+      <StackEverythingElse />
     </Section>
   );
 }
