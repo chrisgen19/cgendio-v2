@@ -13,10 +13,11 @@ export function GoogleAnalytics() {
   if (!id) return null;
   return (
     <>
-      <Script id="ga-config">
+      {/* lazyOnload: gtag.js waits for the page's load event and an idle moment, so it stays out of hydration */}
+      <Script id="ga-config" strategy="lazyOnload">
         {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config',${JSON.stringify(id)});`}
       </Script>
-      <Script src={`https://www.googletagmanager.com/gtag/js?id=${id}`} />
+      <Script src={`https://www.googletagmanager.com/gtag/js?id=${id}`} strategy="lazyOnload" />
     </>
   );
 }
