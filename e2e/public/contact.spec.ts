@@ -103,22 +103,60 @@ test.describe('on /contact', () => {
     expect((await sentEmails(request)).some((email) => email.text.includes(token))).toBe(false);
   });
 
-  test('a valid message is stored and emailed (Resend mocked)', async ({page, request}) => {
+  test('a valid message is stored, emailed and confirmed to the visitor (Resend mocked)', async ({page, request}) => {
     const token = uniqueToken();
     const name = `Visitor ${token}`;
-    await fillContactForm(page, {name, message: `We need a new marketing site. Reference ${token}.`});
+    // An address of its own, so this test's auto-reply (which never repeats the message or name) can be found
+    const visitor = `visitor+${token}@example.test`;
+    await fillContactForm(page, {name, email: visitor, message: `We need a new marketing site. Reference ${token}.`});
     await contactForm(page).getByRole('button', {name: 'Send message'}).click();
 
     await expect(thanks(page)).toBeVisible();
     await expect(thanks(page)).toBeFocused();
 
     await expect
-      .poll(async () => (await sentEmails(request)).find((email) => email.text.includes(token)) ?? null)
+      .poll(async () => (await sentEmails(request)).find((email) => email.to === CONTACT_EMAIL && email.text.includes(token)) ?? null)
       .toMatchObject({
-        to: CONTACT_EMAIL,
         subject: `New inquiry: Next.js & React from ${name}`,
-        reply_to: 'visitor@example.test',
+        reply_to: visitor,
+        html: expect.stringContaining('New inquiry'),
       });
+    await expect
+      .poll(async () => (await sentEmails(request)).find((email) => email.to === visitor) ?? null)
+      .toMatchObject({
+        subject: "Thanks, I've got your message",
+        reply_to: CONTACT_EMAIL,
+        // Neither the message nor the name ("Visitor ..."; the address is lowercase "visitor+...") comes back
+        text: expect.not.stringMatching(/marketing site|Visitor/),
+        html: expect.not.stringMatching(/marketing site|Visitor/),
+      });
+  });
+
+  test('a second message from the same address within a day gets no second auto-reply', async ({page, request}) => {
+    const token = uniqueToken();
+    const visitor = `visitor+${token}@example.test`;
+    const send = async (email: string, reference: string) => {
+      await page.goto('/contact');
+      await fillContactForm(page, {name: `Repeat ${token}`, email, message: `Following up on my message. Reference ${reference}.`});
+      await contactForm(page).getByRole('button', {name: 'Send message'}).click();
+      await expect(thanks(page)).toBeVisible();
+    };
+    // The same address in another letter case still counts as the same person
+    await send(visitor, `${token}-1`);
+    await send(visitor.toUpperCase(), `${token}-2`);
+
+    const forThisTest = async () => {
+      const emails = await sentEmails(request);
+      return {
+        notifications: emails.filter((email) => email.to === CONTACT_EMAIL && email.text.includes(token)).length,
+        autoReplies: emails.filter((email) => String(email.to).toLowerCase() === visitor).length,
+      };
+    };
+    // Both notifications reach me; the auto-reply goes out with the first one only
+    await expect.poll(forThisTest).toEqual({notifications: 2, autoReplies: 1});
+    // Each auto-reply is sent alongside its notification; give a wrongly sent second one time to arrive
+    await page.waitForTimeout(2_000);
+    expect(await forThisTest()).toEqual({notifications: 2, autoReplies: 1});
   });
 });
 
