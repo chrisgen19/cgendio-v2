@@ -1,4 +1,6 @@
 import {z} from 'zod';
+// A relative path with its extension: prisma/seed.mts imports this file under plain Node, which has neither `@/` nor extension lookup
+import {publishedDay} from '../../lib/format-date.ts';
 
 /** What every admin server action returns. Expected failures are values; only the unexpected throws. */
 export type ActionResult = {ok: true; message: string; id?: string} | {ok: false; error: string; fieldErrors?: Record<string, string[]>};
@@ -32,6 +34,6 @@ type PublishedAtInput = {day: string | null; stored: Date | null; isPublished: b
 
 export const resolvePublishedAt = ({day, stored, isPublished, now = new Date()}: PublishedAtInput) => {
   if (!day) return isPublished ? (stored ?? now) : stored;
-  if (stored && stored.toISOString().slice(0, 10) === day) return stored;
+  if (stored && publishedDay(stored) === day) return stored;
   return new Date(`${day}T00:00:00Z`);
 };

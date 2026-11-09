@@ -128,6 +128,13 @@ describe('posts', () => {
     expect(posts[0].date).toBe('2026-10-01');
   });
 
+  it('dates a post by its day in Manila and keeps the exact timestamp', async () => {
+    db.post.findMany.mockResolvedValue([postRow('imported', '2026-09-30T16:00:00.000Z')]);
+    const [post] = await getPosts({limit: 4});
+    expect(post.date).toBe('2026-10-01');
+    expect(post.publishedAt).toBe('2026-09-30T16:00:00.000Z');
+  });
+
   it('returns null for a draft or unknown slug', async () => {
     db.post.findFirst.mockResolvedValue(null);
     expect(await getPost('missing')).toBeNull();

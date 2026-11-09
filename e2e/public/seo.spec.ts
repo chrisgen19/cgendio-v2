@@ -298,6 +298,22 @@ test("the sitemap keeps the previous site's last-modified date for each case stu
   }
 });
 
+/** The previous site's timestamps for each post (#81 Phase D), and the month it showed for them. */
+const LIVE_POST_TIMES = {
+  'wordpress-news-october-2026': {published: '2026-10-05T05:00:00.000Z', lastmod: '2026-10-05T05:01:19.745Z'},
+  'redirect-maps-wordpress-to-nextjs': {published: '2026-09-30T16:00:00.000Z', lastmod: '2026-10-04T03:27:38.521Z'},
+};
+
+test("posts keep the previous site's timestamps, and midnight Manila still reads as October", async ({page, request}) => {
+  const xml = await (await request.get('/sitemap.xml')).text();
+  for (const [slug, {published, lastmod}] of Object.entries(LIVE_POST_TIMES)) {
+    expect(xml, slug).toMatch(new RegExp(`/writing/${slug}</loc>\\s*<lastmod>${lastmod.replaceAll('.', '\\.')}</lastmod>`));
+    const html = (await (await page.goto(`/writing/${slug}`))?.text()) ?? '';
+    expect(content(html, 'property="article:published_time"'), slug).toContain(published);
+    await expect(page.locator('main time').first(), slug).toHaveText('Oct 2026');
+  }
+});
+
 test("the home page describes itself with the previous site's keyword-led description", async ({page}) => {
   const html = (await (await page.goto('/'))?.text()) ?? '';
   const description =

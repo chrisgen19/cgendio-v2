@@ -107,7 +107,9 @@ const seed = async () => {
           body,
           readMinutes: readMinutesFor(body),
           status: p.status,
-          publishedAt: p.status === 'PUBLISHED' ? new Date(`${p.date}T00:00:00Z`) : null,
+          publishedAt: p.status === 'PUBLISHED' ? new Date(p.publishedAt) : null,
+          // The live site's last save, not the seed time (#81 Phase D); later admin saves move it on as usual
+          updatedAt: p.updatedAt ? new Date(p.updatedAt) : undefined,
         };
       }),
       skipDuplicates: true,

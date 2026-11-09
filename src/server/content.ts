@@ -1,6 +1,7 @@
 import 'server-only';
 import {cacheLife, cacheTag} from 'next/cache';
 import type {Post as PostRow, Project as ProjectRow} from '@/generated/prisma/client';
+import {publishedDay} from '@/lib/format-date';
 import {tagSlug} from '@/lib/tag-slug';
 import {
   type ContentLink,
@@ -94,8 +95,7 @@ const postFields = (row: PostRow, date: Date | null = row.publishedAt) => ({
   slug: row.slug,
   title: row.title,
   tag: row.tag,
-  // Pages show the day or month and year; the date part of the UTC timestamp is enough
-  date: date?.toISOString().slice(0, 10),
+  date: date ? publishedDay(date) : undefined,
   publishedAt: date?.toISOString(),
   readMinutes: row.readMinutes,
   excerpt: row.excerpt,

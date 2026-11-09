@@ -121,9 +121,9 @@
       },
       "D": {
         "title": "Content migration",
-        "branch": null,
+        "branch": "feature/phase-d-content-import",
         "pr": null,
-        "status": "Not started"
+        "status": "In progress"
       },
       "E": {
         "title": "Deploy readiness (overlaps #10)",
