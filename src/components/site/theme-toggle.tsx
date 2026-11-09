@@ -31,7 +31,7 @@ const useTheme = () => {
 };
 
 /**
- * Header button from 860px up (phones get ThemeMenuItem): a moon in light mode and a sun in dark mode (the mockup's toggle). The icons follow
+ * Header button on every viewport: a moon in light mode and a sun in dark mode. The icons follow
  * <html data-theme>, which the head script sets, so the right one shows before hydration.
  */
 export function ThemeToggle({className}: {className?: string}) {
@@ -50,23 +50,6 @@ export function ThemeToggle({className}: {className?: string}) {
     >
       <Moon aria-hidden="true" size={18} className="in-data-[theme=dark]:hidden" />
       <Sun aria-hidden="true" size={18} className="hidden in-data-[theme=dark]:block" />
-    </button>
-  );
-}
-
-/** Mobile menu row (under 860px, where the header has no room for ThemeToggle). Names the theme it switches to. */
-export function ThemeMenuItem() {
-  const theme = useTheme();
-  return (
-    <button
-      type="button"
-      onClick={() => setTheme((theme ?? readTheme()) === 'dark' ? 'light' : 'dark')}
-      className="flex min-h-12 w-full cursor-pointer items-center gap-2.5 rounded-[14px] px-3.5 text-left font-medium text-ink hover:bg-ground"
-    >
-      <Moon aria-hidden="true" size={18} className="in-data-[theme=dark]:hidden" />
-      <Sun aria-hidden="true" size={18} className="hidden in-data-[theme=dark]:block" />
-      <span className="in-data-[theme=dark]:hidden">Dark mode</span>
-      <span className="hidden in-data-[theme=dark]:inline">Light mode</span>
     </button>
   );
 }

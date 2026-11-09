@@ -39,9 +39,33 @@ the rail names the section: it is the value the instrument is reading.
 Blog is the only nav item that leaves the page, so it has no position and gets no tick. It sits past the rail's end
 divider with an arrow. That split is what `NavItem.kind` encodes in `nav-links.ts`.
 
-On a phone the rail keeps the header's bottom edge as ticks only, and its readout becomes the button that opens the
-sheet — so the control that opens the navigation is also the thing that says where you are. The sheet is the same
-ruler turned on its side.
+On a phone the rail keeps the header's bottom edge as ticks only. The theme toggle sits immediately left of the
+right-aligned Menu button. The current-section readout lives inside the menu, alongside the navigation links and
+the “Let's talk” contact action, so the trigger always has a stable, discoverable label.
+
+### Mobile navigation
+
+Selected after comparing four live directions: the compact outlined Menu button opens the full-screen navigation.
+The accepted combination is now the default across the website. The preview variants and launcher were removed.
+Run the normal `pnpm dev` server to view it.
+
+Visual thesis: use the existing ruler vocabulary, calm surfaces, and lime position marker to make the mobile header
+feel precise and light. Content plan: keep the logo left, theme and Menu right; reveal the section readout, four
+links, and one final contact action. Interaction thesis: a short panel entrance, directional arrow feedback, and
+clear expanded state, with reduced-motion support.
+
+The menu uses Radix Dialog for modal focus containment, focus restoration, and background scroll locking. It
+preserves semantic navigation links, Escape dismissal, accessible names, and touch targets of at least 44px.
+Crossing the 860px desktop breakpoint closes the mobile menu.
+
+Research consulted:
+
+- [NN/g: hidden navigation reduces discoverability](https://www.nngroup.com/articles/hamburger-menus/): use a stable
+  Menu label and retain visible navigation on desktop.
+- [W3C: disclosure navigation](https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation/):
+  use ordinary links and a navigation landmark rather than application-style menu roles.
+- [W3C: enhanced target size](https://www.w3.org/WAI/WCAG22/Understanding/target-size-enhanced.html): 44 × 44 CSS pixels
+  is the enhanced target-size criterion, used here as a design target.
 
 ### What it dropped
 
