@@ -3,17 +3,19 @@
 import dynamic from 'next/dynamic';
 import {type ReactNode, useCallback, useEffect, useState} from 'react';
 import {cn} from '@/lib/cn';
+import {useFirstInteraction} from '@/lib/use-first-interaction';
 
-// Remotion is heavy and client-only: its chunk is only fetched once HeroPlayer renders (see useIdleAfterLoad)
+// Remotion is heavy and client-only: its chunk is only fetched once HeroPlayer renders (see useLoadFilm)
 const HeroPlayer = dynamic(() => import('@/components/hero-film/HeroPlayer').then((m) => m.HeroPlayer), {ssr: false});
 
 /**
  * True once the page has loaded and the main thread is idle (or after 2s at most). Starting Remotion then keeps its
  * parse and first render out of the window where the static frame paints and the page becomes interactive.
  */
-const useIdleAfterLoad = () => {
+const useIdleAfterLoad = (enabled: boolean) => {
   const [idle, setIdle] = useState(false);
   useEffect(() => {
+    if (!enabled) return;
     let handle = 0;
     const schedule = () => {
       handle = window.requestIdleCallback
@@ -27,8 +29,23 @@ const useIdleAfterLoad = () => {
       if (window.cancelIdleCallback) window.cancelIdleCallback(handle);
       else window.clearTimeout(handle);
     };
-  }, []);
+  }, [enabled]);
   return idle;
+};
+
+/**
+ * When to mount the film. Playing it costs about 2s of main-thread work on a mid-range phone, so it waits for the
+ * visitor's first scroll, tap or key press and the intro card holds until then. With reduced motion the film only
+ * shows its paused brand card (no playback), so it still loads once the page is idle.
+ */
+const useLoadFilm = () => {
+  const [reducedMotion, setReducedMotion] = useState<boolean | null>(null);
+  useEffect(() => {
+    setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }, []);
+  const idle = useIdleAfterLoad(reducedMotion === true);
+  const interacted = useFirstInteraction(reducedMotion === false);
+  return reducedMotion ? idle : interacted;
 };
 
 type HeroStageProps = {
@@ -40,7 +57,7 @@ type HeroStageProps = {
 export function HeroStage({worksHref, children}: HeroStageProps) {
   const [ready, setReady] = useState(false);
   const onFirstFrame = useCallback(() => setReady(true), []);
-  const loadFilm = useIdleAfterLoad();
+  const loadFilm = useLoadFilm();
 
   return (
     <>

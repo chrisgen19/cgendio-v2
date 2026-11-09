@@ -1,5 +1,14 @@
 import type {Page} from '@playwright/test';
 
+/**
+ * The film mounts on the visitor's first scroll, tap or key press (src/lib/use-first-interaction.ts), so tests that
+ * drive it press a key first. Shift has no side effects and works the same on the desktop and mobile projects.
+ * Reduced motion skips this: the film loads on idle there and opens on its brand card.
+ */
+export const startFilm = async (page: Page) => {
+  await page.keyboard.press('Shift');
+};
+
 /** The hero film's section and the HUD controls the tests drive, found by their accessible names. */
 export const heroControls = (page: Page) => {
   const hero = page.getByRole('region', {name: /^Brand film/});
