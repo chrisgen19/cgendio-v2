@@ -1,12 +1,11 @@
 'use client';
 
 import {type PointerEvent, useState} from 'react';
-import {type BuildPhoto, BuildPortrait} from './build-portrait';
+import {BuildLogos} from './build-logos';
 import {BuildSide} from './build-side';
 import type {BuildSideCopy, BuildSideId} from './copy';
 
 type BuildSplitProps = {
-  photo: BuildPhoto | null;
   /** WordPress first, then Next.js. */
   sides: BuildSideCopy[];
 };
@@ -19,10 +18,10 @@ const allows = (query: string) => window.matchMedia(query).matches;
 
 /**
  * The interactive part of the What we build stage. The side under the pointer, then a keyboard-focused side, then a
- * pressed side takes over the portrait; with none, it rests at 50/50 (as it renders without JavaScript). All of the
+ * pressed side shows its whole logo; with none, it rests at 50/50 (as it renders without JavaScript). All of the
  * text is always in the page: the split only shifts emphasis.
  */
-export function BuildSplit({photo, sides}: BuildSplitProps) {
+export function BuildSplit({sides}: BuildSplitProps) {
   const [pressed, setPressed] = useState<BuildSideId | null>(null);
   const [hovered, setHovered] = useState<BuildSideId | null>(null);
   const [focused, setFocused] = useState<BuildSideId | null>(null);
@@ -54,7 +53,7 @@ export function BuildSplit({photo, sides}: BuildSplitProps) {
       className="build-split group/split grid grid-cols-[minmax(0,1fr)_clamp(300px,29vw,420px)_minmax(0,1fr)] items-center gap-x-12 gap-y-8 max-lg:grid-cols-1"
     >
       <BuildSide side={wp} {...sideProps('wp')} className="lg:col-start-1 lg:row-start-1" />
-      <BuildPortrait photo={photo} className="lg:col-start-2 lg:row-start-1" />
+      <BuildLogos className="lg:col-start-2 lg:row-start-1" />
       <BuildSide side={next} {...sideProps('next')} className="lg:col-start-3 lg:row-start-1" />
     </div>
   );
