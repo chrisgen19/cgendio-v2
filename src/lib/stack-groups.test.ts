@@ -1,5 +1,18 @@
 import {describe, expect, it} from 'vitest';
-import {groupStack} from './stack-groups';
+import {groupStack, STACK_EXTRAS} from './stack-groups';
+
+describe('STACK_EXTRAS', () => {
+  const tools = STACK_EXTRAS.flatMap((group) => group.tools);
+
+  it('lists every tool once', () => {
+    expect(new Set(tools).size).toBe(tools.length);
+    expect(tools).toHaveLength(36);
+  });
+
+  it('repeats nothing that is already on a plate', () => {
+    expect(groupStack(tools).map((group) => group.id)).toEqual(['other']);
+  });
+});
 
 describe('groupStack', () => {
   it('orders the layers bottom to top and keeps the tools in their given order', () => {
