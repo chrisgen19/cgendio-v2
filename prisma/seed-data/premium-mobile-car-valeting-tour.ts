@@ -7,7 +7,7 @@ import type {TourStop} from '../../src/server/content-schema';
  * time picked; nothing was booked. Positions are in each capture's pixels. Note text is the write-up, word for word. The
  * 20261103120000_project_premium_mobile_car_valeting_tour migration backfills the same value, so change both.
  */
-const FOLDER = 'https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/premium-mobile-car-valeting-tour';
+const FOLDER = 'https://media.cgdiomampo.dev/images/2026/premium-mobile-car-valeting-tour';
 
 const SIZES = {
   home: {desktop: [1440, 5567], mobile: [390, 10517]},

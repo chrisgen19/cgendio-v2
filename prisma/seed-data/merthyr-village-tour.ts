@@ -6,7 +6,7 @@ import type {TourStop} from '../../src/server/content-schema';
  * pixels. Note text is the write-up, word for word. The 20261102140000_project_merthyr_village_tour migration backfills the
  * same value, so change both.
  */
-const FOLDER = 'https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/merthyr-village-tour';
+const FOLDER = 'https://media.cgdiomampo.dev/images/2026/merthyr-village-tour';
 
 const SIZES = {
   home: {desktop: [1440, 5203], mobile: [390, 6083]},

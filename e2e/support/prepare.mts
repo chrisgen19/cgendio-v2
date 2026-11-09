@@ -66,7 +66,7 @@ await recreateDatabase();
 prisma('migrate', 'deploy');
 prisma('db', 'seed');
 
-// The seeded photo and project covers live on r2.dev; a data URL keeps the pages offline and the same on every run.
+// The seeded photo and project covers live on R2; a data URL keeps the pages offline and the same on every run.
 // The Settings and project forms only accept http(s) URLs, so a test that saves one has to set its own URL first.
 const fixture = `data:image/png;base64,${readFileSync(new URL('./fixtures/about-photo.png', import.meta.url)).toString('base64')}`;
 
