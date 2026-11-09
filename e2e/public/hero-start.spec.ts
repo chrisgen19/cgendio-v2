@@ -37,6 +37,28 @@ test('moving the mouse starts the film', async ({page}) => {
   await expect(toggle).toHaveAccessibleName('Pause film');
 });
 
+test('the film controls stay hidden if the film fails to load', async ({page}) => {
+  // Each cut is its own chunk, loaded after the player. Fail it (both cuts' Research scene says "90 days") and the
+  // intro card should stay up with no controls, rather than a HUD whose buttons do nothing.
+  let failed = 0;
+  await page.route('**/_next/static/chunks/*.js', async (route) => {
+    const response = await route.fetch();
+    const body = await response.text();
+    if (!body.includes('90 days')) return route.fulfill({response, body});
+    failed++;
+    return route.abort();
+  });
+  const {hero, toggle} = heroControls(page);
+  await expect(async () => {
+    await page.keyboard.press('Shift');
+    await expect(hero).toBeVisible({timeout: 1_000});
+  }).toPass();
+  await expect.poll(() => failed).toBeGreaterThan(0);
+  await page.waitForTimeout(1_000);
+  await expect(toggle).toHaveCount(0);
+  await expect(page.getByText('Chris Diomampo presents')).toBeVisible();
+});
+
 test('a key press starts the film', async ({page}) => {
   const {toggle} = heroControls(page);
   await startFilm(page);

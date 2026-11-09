@@ -338,7 +338,8 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
 
       {header ? <div className="absolute inset-x-0 top-0 z-20">{header}</div> : null}
 
-      {variant === 'mobile' ? <MobileHud {...hud} /> : variant === 'desktop' ? <DesktopHud {...hud} /> : null}
+      {/* Only with a film to drive: while the cut's chunk loads (or if it fails) the controls would do nothing */}
+      {Film ? variant === 'mobile' ? <MobileHud {...hud} /> : <DesktopHud {...hud} /> : null}
     </section>
   );
 }
