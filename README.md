@@ -3,9 +3,9 @@
 Portfolio and dev blog for Chris Diomampo, a senior full-stack developer working in Next.js and WordPress. It is a Next.js app with a custom admin, and the home page opens on a film built in Remotion.
 
 <p align="center">
-  <img src="docs/screenshots/home-desktop.png" alt="Home page hero at desktop width: the headline 'I design, build &amp; ship websites that work', three service cards and a See my work button" width="72%">
+  <img src="docs/screenshots/home-desktop.png" alt="Home page at desktop width, paused on the hero film's intro: the headline 'Great websites don't happen by accident' with the last words highlighted in lime" width="72%">
   &nbsp;
-  <img src="docs/screenshots/home-mobile.png" alt="Home page hero at phone width: the same headline with stacked service cards and a compact header" width="20.8%">
+  <img src="docs/screenshots/home-mobile.png" alt="Home page at phone width, paused on the mobile cut of the same intro, with a compact header" width="20.8%">
 </p>
 
 ## Features
