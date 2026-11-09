@@ -42,9 +42,10 @@ pnpm db:seed     # insert the starter content
 pnpm dev
 ```
 
-The site runs at <http://localhost:3000>. The public pages only need `DATABASE_URL`, which `.env.example` already points at the Docker database. The contact form also needs `BETTER_AUTH_SECRET`, and each remaining variable is explained in `.env.example`:
+The site runs at <http://localhost:3000>. The public pages only need `DATABASE_URL`, which `.env.example` already points at the Docker database. Each remaining variable is explained in `.env.example`:
 
-- `/admin` needs the Better Auth and GitHub OAuth values, plus your GitHub email in `ADMIN_EMAILS`.
+- The contact form needs `BETTER_AUTH_SECRET` (at least 32 characters), `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` and `ADMIN_EMAILS`, because they are validated together. Placeholder GitHub values are enough for the form.
+- `/admin` needs a real GitHub OAuth app for those values, plus your GitHub email in `ADMIN_EMAILS`.
 - Uploads need the `R2_*` values.
 - Without `RESEND_API_KEY`, contact messages still reach the admin inbox and the email is skipped.
 
