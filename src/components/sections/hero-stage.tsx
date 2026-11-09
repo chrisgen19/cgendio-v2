@@ -44,7 +44,9 @@ const useLoadFilm = () => {
     setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   }, []);
   const idle = useIdleAfterLoad(reducedMotion === true);
-  const interacted = useFirstInteraction(reducedMotion === false);
+  // Listening from the first effect, not after the reduced-motion check, so an early interaction isn't missed
+  const interacted = useFirstInteraction();
+  if (reducedMotion === null) return false;
   return reducedMotion ? idle : interacted;
 };
 

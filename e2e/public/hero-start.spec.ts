@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import {heroControls} from '../support/hero';
+import {heroControls, startFilm} from '../support/hero';
 
 /*
  * The film waits for the visitor's first scroll, tap or key press (src/components/sections/hero-stage.tsx), so the
@@ -17,14 +17,15 @@ test('the intro card holds and the film does not load before any interaction', a
   await expect(hero).toHaveCount(0);
 });
 
+// One scroll is enough even before hydration: the page is already scrolled when the listener would attach
 test('the first scroll starts the film', async ({page}) => {
   const {toggle} = heroControls(page);
   await page.mouse.wheel(0, 120);
   await expect(toggle).toHaveAccessibleName('Pause film');
 });
 
-test('the first key press starts the film', async ({page}) => {
+test('a key press starts the film', async ({page}) => {
   const {toggle} = heroControls(page);
-  await page.keyboard.press('Tab');
+  await startFilm(page);
   await expect(toggle).toHaveAccessibleName('Pause film');
 });
