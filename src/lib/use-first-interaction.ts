@@ -6,8 +6,8 @@ import {useEffect, useState} from 'react';
 const INTERACTION_EVENTS = ['scroll', 'wheel', 'pointerdown', 'touchstart', 'keydown'] as const;
 
 /**
- * True from the visitor's first scroll, tap, click or key press. Lets heavy, non-essential work (the hero film,
- * analytics) wait until someone is actually on the page, so it stays out of the first seconds of load.
+ * True from the visitor's first scroll, tap, click or key press. Lets heavy, non-essential work (the hero film) wait
+ * until someone is actually on the page, so it stays out of the first seconds of load.
  *
  * The listeners only exist once React has hydrated. A page that is already scrolled by then (the visitor scrolled
  * during load, or the browser restored a position) counts straight away; a tap or key press before hydration is
