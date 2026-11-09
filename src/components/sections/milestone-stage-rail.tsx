@@ -22,7 +22,6 @@ export function MilestoneStageRail({milestones, active, fillRef, onJump}: Milest
           <li key={m.order} className="min-w-0 flex-1">
             <button
               type="button"
-              aria-label={`${m.value} ${m.title}`}
               aria-current={i === active ? 'step' : undefined}
               onClick={() => onJump(i)}
               className={cn(
@@ -40,7 +39,8 @@ export function MilestoneStageRail({milestones, active, fillRef, onJump}: Milest
               />
               {/* Truncates like the title: on phones a long value ("WOOCOMMERCE") would run into the next segment */}
               <span className="w-full truncate pr-2 font-mono text-xs leading-tight font-medium tracking-[0.04em]">{m.value}</span>
-              <span className="w-full truncate pr-4 text-[13px] leading-tight max-md:hidden">{m.title}</span>
+              {/* sr-only rather than hidden on phones: the visible text is the button's name, so the title still reaches screen readers */}
+              <span className="w-full truncate pr-4 text-[13px] leading-tight max-md:sr-only">{m.title}</span>
             </button>
           </li>
         ))}
