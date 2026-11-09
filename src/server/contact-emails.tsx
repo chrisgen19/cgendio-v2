@@ -64,23 +64,16 @@ export const renderContactNotification = async (message: ContactEmailMessage, si
   return {subject: oneLine(`New inquiry: ${topic} from ${message.name}`), html, text};
 };
 
-/** The visitor's confirmation that their message arrived, with a copy of what they sent. */
+/** The visitor's confirmation that their message arrived. It never quotes the message (see `ContactAutoReplyEmail`). */
 export const renderContactAutoReply = async (message: ContactEmailMessage, siteUrl: string): Promise<RenderedEmail> => {
-  const topic = projectTypeLabel(message.projectType);
   const firstName = firstNameOf(message.name);
   const host = hostOf(siteUrl);
 
-  const html = await render(
-    <ContactAutoReplyEmail firstName={firstName} email={message.email} topic={topic} message={message.message} siteUrl={siteUrl} host={host} />,
-  );
+  const html = await render(<ContactAutoReplyEmail firstName={firstName} email={message.email} siteUrl={siteUrl} host={host} />);
   const text = [
     "Thanks, I've got your message.",
     '',
     `Hi ${firstName}, I'll read it myself and get back to you at ${message.email}.`,
-    '',
-    `What you sent (${topic}):`,
-    '',
-    message.message,
     '',
     'Christian Diomampo',
     siteUrl,

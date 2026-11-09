@@ -39,12 +39,18 @@ describe('contact notification email', () => {
 });
 
 describe('contact auto-reply email', () => {
-  it('thanks the visitor by first name and quotes what they sent', async () => {
+  it('thanks the visitor by first name', async () => {
     const email = await renderContactAutoReply(message, SITE);
     expect(email.subject).toBe("Thanks, I've got your message");
     expect(email.text).toContain("Hi Maria, I'll read it myself and get back to you at maria@example.com.");
-    expect(email.text).toContain('What you sent (Next.js & React):');
     expect(email.html).toContain('cgdiomampo.dev');
-    expect(email.html).toContain('&lt;b&gt;our&lt;/b&gt;');
+  });
+
+  it('never quotes the visitor message, so the form cannot relay spam', async () => {
+    const email = await renderContactAutoReply({...message, message: 'Cheap pills at https://spam.example now'}, SITE);
+    for (const body of [email.html, email.text]) {
+      expect(body).not.toContain('Cheap pills');
+      expect(body).not.toContain('spam.example');
+    }
   });
 });

@@ -18,14 +18,17 @@ export const uniqueToken = () => `e2e-${Date.now()}-${Math.random().toString(36)
 export const contactForm = (page: Page) => page.locator('main #contact').getByRole('form', {name: 'Message me'});
 
 /** Picks a topic, writes the message and fills in who to reply to, one step at a time, ready to send. */
-export const fillContactForm = async (page: Page, {name, message}: {name: string; message: string}) => {
+export const fillContactForm = async (
+  page: Page,
+  {name, message, email = 'visitor@example.test'}: {name: string; message: string; email?: string},
+) => {
   const form = contactForm(page);
   await form.locator('label', {hasText: 'Next.js & React'}).click();
   await form.getByRole('button', {name: 'Next'}).click();
   await form.getByLabel('Your message', {exact: true}).fill(message);
   await form.getByRole('button', {name: 'Next'}).click();
   await form.getByLabel('Your name', {exact: true}).fill(name);
-  await form.getByLabel('Email for my reply', {exact: true}).fill('visitor@example.test');
+  await form.getByLabel('Email for my reply', {exact: true}).fill(email);
 };
 
 export const sentEmails = async (request: APIRequestContext): Promise<Email[]> => {

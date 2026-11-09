@@ -1,18 +1,19 @@
 import {Heading, Link, Section, Text} from 'react-email';
-import {EmailShell, MessageBox} from './email-shell';
+import {EmailShell} from './email-shell';
 import {EMAIL_COLORS, headingStyle, highlightStyle} from './email-tokens';
 
 export type ContactAutoReplyEmailProps = {
   firstName: string;
   email: string;
-  topic: string;
-  message: string;
   siteUrl: string;
   host: string;
 };
 
-/** The visitor's confirmation, in the words of the form's own success message, with a copy of what they sent. */
-export function ContactAutoReplyEmail({firstName, email, topic, message, siteUrl, host}: ContactAutoReplyEmailProps) {
+/**
+ * The visitor's confirmation, in the words of the form's own success message. It never quotes what they sent: anyone
+ * can enter any address, so echoing their text would let the form relay spam from this domain.
+ */
+export function ContactAutoReplyEmail({firstName, email, siteUrl, host}: ContactAutoReplyEmailProps) {
   return (
     <EmailShell
       preview={`I'll read it myself and get back to you at ${email}.`}
@@ -29,8 +30,7 @@ export function ContactAutoReplyEmail({firstName, email, topic, message, siteUrl
         </Link>
         .
       </Text>
-      <MessageBox label={`What you sent · ${topic}`} message={message} />
-      <Section style={{paddingTop: '24px'}}>
+      <Section>
         <Text style={{margin: 0, fontSize: '15px', lineHeight: '1.6', color: EMAIL_COLORS.ink}}>
           Christian Diomampo
           <br />
