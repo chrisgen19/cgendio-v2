@@ -106,7 +106,7 @@ test.describe('on /contact', () => {
   test('a valid message is stored, emailed and confirmed to the visitor (Resend mocked)', async ({page, request}) => {
     const token = uniqueToken();
     const name = `Visitor ${token}`;
-    // An address of its own, so this test's auto-reply (which never quotes the message) can be found
+    // An address of its own, so this test's auto-reply (which never repeats the message or name) can be found
     const visitor = `visitor+${token}@example.test`;
     await fillContactForm(page, {name, email: visitor, message: `We need a new marketing site. Reference ${token}.`});
     await contactForm(page).getByRole('button', {name: 'Send message'}).click();
@@ -126,8 +126,9 @@ test.describe('on /contact', () => {
       .toMatchObject({
         subject: "Thanks, I've got your message",
         reply_to: CONTACT_EMAIL,
-        text: expect.not.stringContaining('marketing site'),
-        html: expect.not.stringContaining('marketing site'),
+        // Neither the message nor the name ("Visitor ..."; the address is lowercase "visitor+...") comes back
+        text: expect.not.stringMatching(/marketing site|Visitor/),
+        html: expect.not.stringMatching(/marketing site|Visitor/),
       });
   });
 });

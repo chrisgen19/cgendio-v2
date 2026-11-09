@@ -3,17 +3,17 @@ import {EmailShell} from './email-shell';
 import {EMAIL_COLORS, headingStyle, highlightStyle} from './email-tokens';
 
 export type ContactAutoReplyEmailProps = {
-  firstName: string;
   email: string;
   siteUrl: string;
   host: string;
 };
 
 /**
- * The visitor's confirmation, in the words of the form's own success message. It never quotes what they sent: anyone
- * can enter any address, so echoing their text would let the form relay spam from this domain.
+ * The visitor's confirmation, in the words of the form's own success message. It never repeats anything they typed
+ * (their message or their name): anyone can enter any address, so echoing their text would let the form relay spam or
+ * phishing links from this domain. Their own address is the only visitor input it shows.
  */
-export function ContactAutoReplyEmail({firstName, email, siteUrl, host}: ContactAutoReplyEmailProps) {
+export function ContactAutoReplyEmail({email, siteUrl, host}: ContactAutoReplyEmailProps) {
   return (
     <EmailShell
       preview={`I'll read it myself and get back to you at ${email}.`}
@@ -24,7 +24,7 @@ export function ContactAutoReplyEmail({firstName, email, siteUrl, host}: Contact
         Thanks, I&apos;ve got your <span style={highlightStyle}>message</span>.
       </Heading>
       <Text style={{margin: '0 0 24px', fontSize: '16px', lineHeight: '1.6', color: EMAIL_COLORS.muted}}>
-        Hi {firstName}, I&apos;ll read it myself and get back to you at{' '}
+        I&apos;ll read it myself and get back to you at{' '}
         <Link href={`mailto:${email}`} style={{color: EMAIL_COLORS.accent}}>
           {email}
         </Link>

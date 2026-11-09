@@ -39,11 +39,19 @@ describe('contact notification email', () => {
 });
 
 describe('contact auto-reply email', () => {
-  it('thanks the visitor by first name', async () => {
+  it('thanks the visitor in the words of the form success message', async () => {
     const email = await renderContactAutoReply(message, SITE);
     expect(email.subject).toBe("Thanks, I've got your message");
-    expect(email.text).toContain("Hi Maria, I'll read it myself and get back to you at maria@example.com.");
+    expect(email.text).toContain("Thanks, I've got your message.\n\nI'll read it myself and get back to you at maria@example.com.");
     expect(email.html).toContain('cgdiomampo.dev');
+  });
+
+  it('never repeats the visitor name, so a link typed as a name cannot be relayed', async () => {
+    const email = await renderContactAutoReply({...message, name: 'https://phish.example/claim-your-refund'}, SITE);
+    for (const body of [email.html, email.text]) {
+      expect(body).not.toContain('phish.example');
+      expect(body).not.toContain('claim-your-refund');
+    }
   });
 
   it('never quotes the visitor message, so the form cannot relay spam', async () => {
