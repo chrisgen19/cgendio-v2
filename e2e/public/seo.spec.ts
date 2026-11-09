@@ -332,31 +332,16 @@ test('the sitemap gives the home page a last-modified date, like the pages under
  * Analytics (#81 Phase A: keep the previous site's GA4 property). The public pages carry the tag; the admin, sign-in
  * and draft previews must not, which is why it is mounted by the public chrome rather than the root layout.
  *
- * These check the browser, not the HTML. The tag is added on the visitor's first interaction (google-analytics-loader.tsx),
- * so it is never in the server response, and the response for an untracked page can still mention gtag inside the RSC
- * payload of a route it prefetches. What matters is whether the tag actually runs.
+ * These check the browser, not the HTML. next/script injects an afterInteractive script after hydration, so it is
+ * never in the server response, and the response for an untracked page can still mention gtag inside the RSC payload
+ * of a route it prefetches. What matters is whether the tag actually runs.
  */
 const gaLoader = (page: Page) => page.locator(`script[src*="googletagmanager.com/gtag/js?id=${GA_TEST_ID}"]`);
 const dataLayerType = (page: Page) => page.evaluate(() => typeof (window as unknown as {dataLayer?: unknown[]}).dataLayer);
-/** Any first interaction loads the tag; Shift has no side effects. */
-const interact = (page: Page) => page.keyboard.press('Shift');
-
-test('the analytics tag waits for the first interaction', async ({page}) => {
-  await page.goto('/writing');
-  await expect(page.getByRole('heading', {level: 1})).toBeVisible();
-  // Long enough for an idle-time load to have happened, so this cannot pass by racing it
-  await page.waitForTimeout(3_000);
-  await expect(gaLoader(page)).toHaveCount(0);
-  expect(await dataLayerType(page)).toBe('undefined');
-
-  await interact(page);
-  await expect(gaLoader(page)).toHaveCount(1);
-});
 
 for (const path of ['/', '/writing', '/writing/wordpress-news-october-2026', '/projects/access-hire', '/contact']) {
   test(`${path} loads the analytics tag`, async ({page}) => {
     await page.goto(path);
-    await interact(page);
     await expect(gaLoader(page)).toHaveCount(1);
     await expect(page.locator('script#ga-config')).toHaveCount(1);
     await expect.poll(() => dataLayerType(page)).toBe('object');
@@ -365,11 +350,8 @@ for (const path of ['/', '/writing', '/writing/wordpress-news-october-2026', '/p
 
 test('the sign-in page is not tracked', async ({page}) => {
   await page.goto('/sign-in');
-  // Wait for the page to be up, and interact as a visitor would, before asserting an absence, so this cannot pass by
-  // racing the tag's injection or by never triggering it
+  // Wait for the page to be up before asserting an absence, so this cannot pass by racing next/script's injection
   await expect(page.getByRole('heading', {level: 1})).toBeVisible();
-  await interact(page);
-  await page.waitForTimeout(1_000);
   await expect(page.locator('script#ga-config')).toHaveCount(0);
   await expect(gaLoader(page)).toHaveCount(0);
   expect(await dataLayerType(page)).toBe('undefined');
