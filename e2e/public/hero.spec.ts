@@ -1,10 +1,11 @@
 import {expect, test} from '@playwright/test';
-import {heroControls} from '../support/hero';
+import {heroControls, startFilm} from '../support/hero';
 
 const isMobile = () => test.info().project.name === 'mobile';
 
 test.beforeEach(async ({page}) => {
   await page.goto('/');
+  await startFilm(page);
 });
 
 test('the hero renders the cut for the screen size', async ({page}) => {

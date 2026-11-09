@@ -2,9 +2,8 @@
 
 import {Player, type PlayerRef} from '@remotion/player';
 import type React from 'react';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {HeroFilm, type HeroFilmProps} from './HeroFilm';
-import {HeroFilmMobile} from './HeroFilmMobile';
+import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import type {HeroFilmProps} from './HeroFilm';
 import {theme} from './theme';
 import {type Chapter, DESKTOP_TIMELINE, FPS, formatTimecode, isPortrait, MOBILE_TIMELINE, type Timeline} from './timeline';
 
@@ -21,10 +20,77 @@ type HeroPlayerProps = {
   onFirstFrame?: () => void;
 };
 
-const FILMS: Record<Variant, {component: React.FC<HeroFilmProps>; timeline: Timeline}> = {
-  desktop: {component: HeroFilm, timeline: DESKTOP_TIMELINE},
-  mobile: {component: HeroFilmMobile, timeline: MOBILE_TIMELINE},
+type FilmComponent = React.FC<HeroFilmProps>;
+
+// Each cut is its own chunk, so a phone never downloads or parses the landscape film (and a desktop never gets the phone cut)
+const FILMS: Record<Variant, {load: () => Promise<FilmComponent>; timeline: Timeline}> = {
+  desktop: {load: () => import('./HeroFilm').then((m) => m.HeroFilm), timeline: DESKTOP_TIMELINE},
+  mobile: {load: () => import('./HeroFilmMobile').then((m) => m.HeroFilmMobile), timeline: MOBILE_TIMELINE},
 };
+
+/**
+ * Loads the film component for the chosen cut. Returns null until that cut's chunk has arrived (or if it fails to load,
+ * in which case the server-rendered first frame simply stays up, since the Player never reports a first frame).
+ */
+const useFilmComponent = (variant: Variant | null) => {
+  const [loaded, setLoaded] = useState<{variant: Variant; component: FilmComponent} | null>(null);
+  useEffect(() => {
+    if (!variant) return;
+    let cancelled = false;
+    FILMS[variant]
+      .load()
+      .then((component) => {
+        if (!cancelled) setLoaded({variant, component});
+      })
+      .catch(() => {
+        // Keep the static first frame: a missing film is better than a broken hero
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [variant]);
+  return loaded?.variant === variant ? loaded.component : null;
+};
+
+const PLAYER_STYLE: React.CSSProperties = {width: '100%', height: '100%'};
+
+type FilmPlayerProps = {
+  playerRef: React.RefObject<PlayerRef | null>;
+  component: FilmComponent;
+  inputProps: HeroFilmProps;
+  durationInFrames: number;
+  width: number;
+  height: number;
+  autoPlay: boolean;
+};
+
+/**
+ * The Remotion Player, memoised: HeroPlayer re-renders on every frame to move the HUD, and none of these props change
+ * during playback, so the Player tree is left alone and only the composition renders each frame.
+ */
+const FilmPlayer = memo(function FilmPlayer({playerRef, component, inputProps, durationInFrames, width, height, autoPlay}: FilmPlayerProps) {
+  return (
+    <Player
+      ref={playerRef}
+      component={component}
+      inputProps={inputProps}
+      durationInFrames={durationInFrames}
+      fps={FPS}
+      compositionWidth={width}
+      compositionHeight={height}
+      style={PLAYER_STYLE}
+      autoPlay={autoPlay}
+      loop={false}
+      moveToBeginningWhenEnded={false}
+      controls={false}
+      clickToPlay={false}
+      doubleClickToFullscreen={false}
+      spaceKeyToPlayOrPause={false}
+      initiallyMuted
+      acknowledgeRemotionLicense
+    />
+  );
+});
 
 /**
  * Full-bleed, above-the-fold hero that plays the Remotion film once.
@@ -65,8 +131,8 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
   const userPaused = useRef(false);
 
   const variant: Variant | null = size ? (isPortrait(size.width, size.height) ? 'mobile' : 'desktop') : null;
-  const film = FILMS[variant ?? 'desktop'];
-  const timeline = film.timeline;
+  const timeline = FILMS[variant ?? 'desktop'].timeline;
+  const Film = useFilmComponent(variant);
   const lastFrame = timeline.durationInFrames - 1;
 
   /* -- measure the section --------------------------------------------- */
@@ -94,7 +160,7 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
   }, []);
 
   /* -- player events (re-subscribe whenever the Player remounts) ------- */
-  // biome-ignore lint/correctness/useExhaustiveDependencies: variant is the Player's key, so a new cut means a new playerRef to subscribe to
+  // biome-ignore lint/correctness/useExhaustiveDependencies: variant is the Player's key and Film gates its mount, so either changing means a new playerRef to subscribe to
   useEffect(() => {
     const player = playerRef.current;
     if (!player) return;
@@ -141,12 +207,12 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
       player.removeEventListener('pause', onPause);
       player.removeEventListener('ended', onEnded);
     };
-  }, [variant, reducedMotion, lastFrame, notifyFirstFrame]);
+  }, [variant, Film, reducedMotion, lastFrame, notifyFirstFrame]);
 
   /* -- pause while the hero is off screen ------------------------------ */
   // The Player only mounts once the box is measured, so the first callback can arrive before it exists (a deep link
   // to #work, or a restored scroll position). Re-observing on each cut gives the new Player its own first check.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: variant is the Player's key, so re-run when a new Player mounts
+  // biome-ignore lint/correctness/useExhaustiveDependencies: variant is the Player's key and Film gates its mount, so re-run when a new Player mounts
   useEffect(() => {
     const el = boxRef.current;
     if (!el) return;
@@ -163,7 +229,7 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [variant, reducedMotion, lastFrame]);
+  }, [variant, Film, reducedMotion, lastFrame]);
 
   /* -- controls --------------------------------------------------------- */
   /**
@@ -247,26 +313,16 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
 
       {/* theme.ts colours follow the site theme through CSS variables; data-film-box lets the visual tests hide the film */}
       <div ref={boxRef} data-film-box style={{position: 'absolute', inset: 0}}>
-        {size && variant ? (
-          <Player
+        {size && variant && Film ? (
+          <FilmPlayer
             key={variant}
-            ref={playerRef}
-            component={film.component}
+            playerRef={playerRef}
+            component={Film}
             inputProps={inputProps}
             durationInFrames={timeline.durationInFrames}
-            fps={FPS}
-            compositionWidth={size.width}
-            compositionHeight={size.height}
-            style={{width: '100%', height: '100%'}}
+            width={size.width}
+            height={size.height}
             autoPlay={!reducedMotion}
-            loop={false}
-            moveToBeginningWhenEnded={false}
-            controls={false}
-            clickToPlay={false}
-            doubleClickToFullscreen={false}
-            spaceKeyToPlayOrPause={false}
-            initiallyMuted
-            acknowledgeRemotionLicense
           />
         ) : (
           <div
@@ -282,7 +338,8 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
 
       {header ? <div className="absolute inset-x-0 top-0 z-20">{header}</div> : null}
 
-      {variant === 'mobile' ? <MobileHud {...hud} /> : variant === 'desktop' ? <DesktopHud {...hud} /> : null}
+      {/* Only with a film to drive: while the cut's chunk loads (or if it fails) the controls would do nothing */}
+      {Film ? variant === 'mobile' ? <MobileHud {...hud} /> : <DesktopHud {...hud} /> : null}
     </section>
   );
 }

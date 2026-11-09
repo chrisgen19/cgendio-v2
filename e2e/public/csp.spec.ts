@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {expect, type Locator, type Page, test} from '@playwright/test';
 import {expectNoCspViolations, recordCspViolations} from '../support/csp';
-import {heroControls} from '../support/hero';
+import {heroControls, startFilm} from '../support/hero';
 
 /*
  * The Content-Security-Policy and HSTS headers (src/lib/security-headers.ts, #99): that every response carries them,
@@ -66,6 +66,7 @@ test.beforeEach(async ({page}) => {
 test('the home page and the hero film run with no CSP violation', async ({page}) => {
   test.setTimeout(90_000);
   await page.goto('/');
+  await startFilm(page);
   const {toggle, skip, seeMyWork} = heroControls(page);
 
   // A few seconds of the film under the policy: the player mounts, renders and animates
