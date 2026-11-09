@@ -66,28 +66,39 @@ function useReadingLine(root: React.RefObject<HTMLDivElement | null>, frameCount
   useEffect(() => {
     const narrow = window.matchMedia('(max-width: 1079.98px)');
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const notes = [...(root.current?.querySelectorAll<HTMLElement>('[data-stop]') ?? [])];
+    const first = notes.at(0);
+    const last = notes.at(-1);
+    if (!first || !last) return;
     let observer: IntersectionObserver | undefined;
+    let line = 50;
+    // A long scroll or a jump can carry the line clear of the notes between two frames, so no note ever reports crossing it
+    const settleEnds = () => {
+      const y = (window.innerHeight * line) / 100;
+      if (first.getBoundingClientRect().top > y) setActive(0);
+      else if (last.getBoundingClientRect().bottom < y) setActive(frameCount - 1);
+    };
     const observe = () => {
       observer?.disconnect();
       // The notes run under the pinned frame on phones, so the reading line sits lower there
-      const line = narrow.matches ? 62 : 50;
+      line = narrow.matches ? 62 : 50;
       observer = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
-            const stop = Number((entry.target as HTMLElement).dataset.stop);
-            if (entry.isIntersecting) setActive(stop);
-            else if (stop === 1 && entry.boundingClientRect.top > 0) setActive(0);
-            else if (stop === frameCount - 1 && entry.boundingClientRect.bottom < 0) setActive(stop);
+            if (entry.isIntersecting) setActive(Number((entry.target as HTMLElement).dataset.stop));
           }
+          settleEnds();
         },
         {rootMargin: `-${line}% 0px -${100 - line}% 0px`},
       );
-      for (const note of root.current?.querySelectorAll('[data-stop]') ?? []) observer.observe(note);
+      for (const note of notes) observer.observe(note);
     };
     observe();
     narrow.addEventListener('change', observe);
+    window.addEventListener('scroll', settleEnds, {passive: true});
     return () => {
       narrow.removeEventListener('change', observe);
+      window.removeEventListener('scroll', settleEnds);
       observer?.disconnect();
     };
   }, [root, frameCount]);
