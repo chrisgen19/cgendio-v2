@@ -112,7 +112,7 @@ test('/sign-in shows the admin sign-in, kept out of search results', async ({pag
   const response = await page.goto('/sign-in');
   expect(response?.status()).toBe(200);
   expect(response?.headers()['x-robots-tag']).toBe('noindex, nofollow');
-  await expect(page.getByRole('heading', {name: 'Cgdiomampo.dev admin'})).toBeVisible();
+  await expect(page.getByRole('heading', {name: 'Chris Diomampo admin'})).toBeVisible();
   await expect(page.getByRole('button', {name: 'Sign in with GitHub'})).toBeVisible();
 });
 
