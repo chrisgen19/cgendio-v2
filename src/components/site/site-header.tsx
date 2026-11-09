@@ -213,12 +213,10 @@ export function SiteHeader({overlay = false}: SiteHeaderProps) {
             </a>
           </nav>
 
-          {/* Phones: the rail keeps the bottom edge and its readout becomes the sheet trigger */}
-          <MobileMenu sectionsOnThisPage={overlay} marked={marked} />
-
-          <div className="ml-auto flex shrink-0 items-center gap-3 max-md:gap-2.5">
-            <ThemeToggle className="max-md:hidden" />
-            <Button href="/contact" size="sm" className="whitespace-nowrap">
+          <div className="ml-auto flex shrink-0 items-center gap-3 max-md:gap-2">
+            <ThemeToggle />
+            <MobileMenu sectionsOnThisPage={overlay} marked={marked} />
+            <Button href="/contact" size="sm" className="whitespace-nowrap max-md:hidden">
               Let&apos;s talk
             </Button>
           </div>

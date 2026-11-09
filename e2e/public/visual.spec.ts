@@ -40,9 +40,20 @@ test('header, stuck past the hero', async ({page}, testInfo) => {
   // Wait for the state the picture is of, not for a scroll offset: the indicator is placed from the measured box of
   // the active graduation, so the capture has to come after that measurement, not merely after the scroll.
   const phone = testInfo.project.name === 'mobile';
-  // Under 860px the rail is ticks only and hands its label to the sheet trigger; above it the link carries aria-current
-  if (phone) await expect(header.getByRole('button', {name: /Work/})).toBeVisible();
-  else await expect(header.getByRole('link', {name: 'Work', exact: true})).toHaveAttribute('aria-current', 'true');
+  // Under 860px the stable Menu trigger opens the section readout; above it the rail link carries aria-current.
+  if (phone) {
+    const menu = header.getByRole('button', {name: 'Menu', exact: true});
+    await expect(menu).toBeVisible();
+    await menu.click();
+    const navigation = page.getByRole('dialog', {name: 'Navigation'});
+    await expect(navigation.getByText('Viewing Work', {exact: true})).toBeVisible();
+    await expect(navigation.getByRole('link', {name: 'Work', exact: true})).toHaveAttribute('aria-current', 'true');
+    await navigation.getByRole('button', {name: 'Close menu', exact: true}).click();
+    await expect(navigation).toBeHidden();
+    await expect(menu).toBeFocused();
+  } else {
+    await expect(header.getByRole('link', {name: 'Work', exact: true})).toHaveAttribute('aria-current', 'true');
+  }
 
   await expect(header).toHaveScreenshot('header-stuck.png');
 });
