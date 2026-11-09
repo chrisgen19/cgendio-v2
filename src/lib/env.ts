@@ -29,6 +29,9 @@ export const authEnvSchema = z.object({
     .pipe(z.array(z.email()).min(1)),
 });
 
+/** Just the signing secret, for features that have nothing to do with sign-in (the contact form's IP hash). */
+export const authSecretEnvSchema = authEnvSchema.pick({BETTER_AUTH_SECRET: true});
+
 export const r2EnvSchema = z.object({
   R2_ACCOUNT_ID: z.string().min(1),
   R2_ACCESS_KEY_ID: z.string().min(1),
@@ -88,6 +91,7 @@ const siteEnvSchema = z.object({
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 export type AuthEnv = z.infer<typeof authEnvSchema>;
+export type AuthSecretEnv = z.infer<typeof authSecretEnvSchema>;
 export type R2Env = z.infer<typeof r2EnvSchema>;
 export type MailEnv = z.infer<typeof mailEnvSchema>;
 export type SiteEnv = z.infer<typeof siteEnvSchema>;
@@ -104,6 +108,7 @@ const lazy = <T>(parse: () => T) => {
 
 export const serverEnv = lazy((): ServerEnv => serverEnvSchema.parse(process.env));
 export const authEnv = lazy((): AuthEnv => authEnvSchema.parse(process.env));
+export const authSecretEnv = lazy((): AuthSecretEnv => authSecretEnvSchema.parse(process.env));
 export const r2Env = lazy((): R2Env => r2EnvSchema.parse(process.env));
 export const mailEnv = lazy((): MailEnv => mailEnvSchema.parse(process.env));
 export const siteEnv = lazy((): SiteEnv => siteEnvSchema.parse(process.env));

@@ -1,5 +1,5 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {parseAnalyticsEnv, parseIndexNowEnv} from './env';
+import {authSecretEnvSchema, parseAnalyticsEnv, parseIndexNowEnv} from './env';
 
 /*
  * GoogleAnalytics reads this while rendering every public page, so a malformed id has to disable the tag rather than
@@ -58,5 +58,22 @@ describe('parseIndexNowEnv', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     expect(parseIndexNowEnv({INDEXNOW_KEY: key}).INDEXNOW_KEY).toBeUndefined();
     expect(warn).toHaveBeenCalledTimes(1);
+  });
+});
+
+/* The contact form hashes visitor IPs with this secret, so it must work without the admin's GitHub sign-in settings. */
+describe('authSecretEnvSchema', () => {
+  const secret = 'x'.repeat(32);
+
+  it('needs nothing but the secret', () => {
+    expect(authSecretEnvSchema.parse({BETTER_AUTH_SECRET: secret}).BETTER_AUTH_SECRET).toBe(secret);
+  });
+
+  it.each([
+    ['unset', {}],
+    ['empty', {BETTER_AUTH_SECRET: ''}],
+    ['too short', {BETTER_AUTH_SECRET: 'x'.repeat(31)}],
+  ])('rejects a secret that is %s', (_label, env) => {
+    expect(authSecretEnvSchema.safeParse(env).success).toBe(false);
   });
 });
