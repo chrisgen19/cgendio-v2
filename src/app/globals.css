@@ -1929,3 +1929,197 @@
     color: var(--color-muted);
   }
 }
+
+/* The "Everything else" toggle under the stack plates (src/components/sections/stack/). */
+/*
+ * The ruler's motion, driven only by the click (see stack-ruler-ticks.tsx, which sets data-anim on the summary's click).
+ * A page load never plays anything: without data-anim there are no animations, and every state below is the rest pose.
+ */
+
+.stack-ruler {
+  position: relative;
+  /* Vertical only: the stretching ticks stay inside the section, and the pill's focus ring keeps its right edge */
+  overflow: visible clip;
+  --dur: 620ms;
+  --step: 8ms;
+}
+
+.stack-ruler-summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.stack-ruler-summary::-webkit-details-marker {
+  display: none;
+}
+
+/* The ring goes on the pill, not around the whole row (the root clips anything outside it) */
+.stack-ruler-summary:focus-visible {
+  outline: none;
+}
+
+.stack-ruler-summary:focus-visible .stack-ruler-pill {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.stack-ruler-show,
+.stack-ruler-hide {
+  white-space: nowrap;
+}
+
+/* visibility, not display: both words keep holding the pill open, and the hidden one still leaves the accessibility tree */
+.stack-ruler:not([open]) .stack-ruler-hide,
+.stack-ruler[open] .stack-ruler-show {
+  visibility: hidden;
+}
+
+/* Each tick hangs from the hairline. 14px is its size as a graduation next to a label; on the ruler it is scaled down. */
+.stack-ruler-tick {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 14px;
+  transform-origin: top;
+  transform: scaleY(var(--rest));
+}
+
+/* Open at rest the ticks have become the slots beside each tool, so the ruler is left as a bare hairline */
+.stack-ruler[open] .stack-ruler-tick {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Panel height: Chromium only, anywhere else the panel simply appears and the ticks still travel */
+  @supports (interpolate-size: allow-keywords) {
+    .stack-ruler {
+      interpolate-size: allow-keywords;
+    }
+
+    .stack-ruler::details-content {
+      block-size: 0;
+      overflow: clip;
+    }
+
+    .stack-ruler[open]::details-content {
+      block-size: auto;
+    }
+
+    /* The glide only answers a click, like the ticks: opened any other way (find-in-page), the panel just appears */
+    .stack-ruler[data-anim="close"]:not([open])::details-content {
+      transition:
+        block-size 300ms var(--ease-mark),
+        content-visibility 300ms allow-discrete;
+    }
+
+    .stack-ruler[data-anim="open"][open]::details-content {
+      transition:
+        block-size 520ms cubic-bezier(0.2, 0.7, 0.2, 1),
+        content-visibility 520ms allow-discrete;
+    }
+  }
+
+  .stack-ruler[data-anim="open"][open] .stack-ruler-tick {
+    animation-name: stack-ruler-tick-unroll;
+    animation-duration: var(--dur);
+    animation-delay: calc(var(--i) * var(--step));
+    animation-fill-mode: backwards;
+  }
+
+  .stack-ruler[data-anim="open"][open] .stack-ruler-slot {
+    animation-name: stack-ruler-slot-wait;
+    animation-duration: calc(var(--i) * var(--step) + var(--dur));
+    animation-timing-function: step-end;
+  }
+
+  .stack-ruler[data-anim="open"][open] .stack-ruler-label {
+    animation-name: stack-ruler-label-unroll;
+    animation-duration: 340ms;
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+    animation-delay: calc(var(--i) * var(--step) + var(--dur) * 0.44);
+    animation-fill-mode: backwards;
+  }
+
+  .stack-ruler[data-anim="open"][open] .stack-ruler-heading {
+    animation-name: stack-ruler-heading-in;
+    animation-duration: 300ms;
+    animation-timing-function: ease-out;
+    animation-delay: calc(var(--g) * 50ms + 140ms);
+    animation-fill-mode: backwards;
+  }
+
+  .stack-ruler[data-anim="close"]:not([open]) .stack-ruler-tick {
+    animation-name: stack-ruler-tick-roll;
+    animation-duration: 300ms;
+    animation-delay: calc(var(--i) * 2ms);
+    animation-fill-mode: backwards;
+  }
+}
+
+/*
+ * The one bold moment. To 46% the tick is pulled out: its top stays on the ruler, it slides over to its tool's column
+ * and stretches until its tip reaches the row. Then the top lets go and retracts while the tip stays put, because
+ * translate and scale share one easing and --stretch is (ty + 14) / 14, so what lands is the 14px graduation.
+ */
+@keyframes stack-ruler-tick-unroll {
+  0% {
+    transform: translate(0, 0) scaleY(var(--rest));
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.2, 1);
+  }
+
+  46% {
+    transform: translate(var(--tx, 0), 0) scaleY(var(--stretch, 1));
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.6, 0, 0.1, 1);
+  }
+
+  100% {
+    transform: translate(var(--tx, 0), var(--ty, 0)) scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* Reeling back in: the same path, quicker, and it starts from the graduation */
+@keyframes stack-ruler-tick-roll {
+  0% {
+    transform: translate(var(--tx, 0), var(--ty, 0)) scaleY(1);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4);
+  }
+
+  45% {
+    transform: translate(var(--tx, 0), 0) scaleY(var(--stretch, 1));
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  100% {
+    transform: translate(0, 0) scaleY(var(--rest));
+  }
+}
+
+/* The real tick stays invisible until the travelling one has landed on it */
+@keyframes stack-ruler-slot-wait {
+  0%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The name unrolls out of the tick, left to right */
+@keyframes stack-ruler-label-unroll {
+  from {
+    clip-path: inset(-2px 100% -2px 0);
+    transform: translateX(-6px);
+  }
+
+  to {
+    clip-path: inset(-2px 0 -2px 0);
+    transform: translateX(0);
+  }
+}
+
+@keyframes stack-ruler-heading-in {
+  from {
+    opacity: 0;
+  }
+}
