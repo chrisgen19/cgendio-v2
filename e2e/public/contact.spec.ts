@@ -131,6 +131,33 @@ test.describe('on /contact', () => {
         html: expect.not.stringMatching(/marketing site|Visitor/),
       });
   });
+
+  test('a second message from the same address within a day gets no second auto-reply', async ({page, request}) => {
+    const token = uniqueToken();
+    const visitor = `visitor+${token}@example.test`;
+    const send = async (email: string, reference: string) => {
+      await page.goto('/contact');
+      await fillContactForm(page, {name: `Repeat ${token}`, email, message: `Following up on my message. Reference ${reference}.`});
+      await contactForm(page).getByRole('button', {name: 'Send message'}).click();
+      await expect(thanks(page)).toBeVisible();
+    };
+    // The same address in another letter case still counts as the same person
+    await send(visitor, `${token}-1`);
+    await send(visitor.toUpperCase(), `${token}-2`);
+
+    const forThisTest = async () => {
+      const emails = await sentEmails(request);
+      return {
+        notifications: emails.filter((email) => email.to === CONTACT_EMAIL && email.text.includes(token)).length,
+        autoReplies: emails.filter((email) => String(email.to).toLowerCase() === visitor).length,
+      };
+    };
+    // Both notifications reach me; the auto-reply goes out with the first one only
+    await expect.poll(forThisTest).toEqual({notifications: 2, autoReplies: 1});
+    // Each auto-reply is sent alongside its notification; give a wrongly sent second one time to arrive
+    await page.waitForTimeout(2_000);
+    expect(await forThisTest()).toEqual({notifications: 2, autoReplies: 1});
+  });
 });
 
 test('the home page contact section sends a message', async ({page, request}) => {
