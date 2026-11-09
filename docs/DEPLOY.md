@@ -2,7 +2,7 @@
 
 How to run this site on Coolify on the Hostinger VPS (#10): the app is built from the `Dockerfile`, Postgres is a Coolify resource, and there is a single app container. The previous site (`cgendio-v1`) runs the same way on the same box, so its `docs/DEPLOY.md` is the reference for anything not repeated here.
 
-Nothing is deployed yet. The checklist in section 5 is what the first deploy runs through.
+Live since 2026-11-09: `cgdiomampo.dev` is served by the Coolify app `cgendio-v2`, and `cgendio-v1` is stopped but kept for rollback (#81). The manual checklist below is what the first deploy ran through, so it is the reference for rebuilding the app from scratch.
 
 ## How the build works (read this first)
 
@@ -68,7 +68,7 @@ So an https value served over plain http makes the browser upgrade the page's ow
 ## Manual checklist
 
 1. **Coolify project and GitHub App.** Connect the repo `chrisgen19/cgendio-v2` through Coolify's GitHub App.
-2. **Postgres: a new database for v2.** Add a PostgreSQL resource (version 18, to match `compose.yaml`) in the shared `Postgres Database` project. **Never reuse v1's database** - the schemas differ, and v1 has to stay intact for rollback. Copy its **internal** URL as `DATABASE_URL`, and do not make it publicly available. Confirm the existing backup schedule covers the new database.
+2. **Postgres: a new database for v2.** Production is the database `cgendio_v2` on the existing shared server in the `Postgres Database` project, owned by its own `cgendio_v2` role with no admin rights. That server runs Postgres 17, while local development and CI run 18 (`compose.yaml`); all the migrations have applied cleanly on 17. **Never reuse v1's database** (`cgendio`) - the schemas differ, and v1 has to stay intact for rollback. Use the server's **internal** host in `DATABASE_URL`, with the `cgendio_v2` role. The backup schedule is a fixed list of database names, so a new database has to be added to it by name.
 3. **Application.** New resource → Application, from `chrisgen19/cgendio-v2`, branch `main`. Build pack: **Dockerfile**. Port `3000`.
 4. **Variables** per the table above, with the four build boxes ticked. Turn on **Use Docker Build Secrets** so build-time values are passed as BuildKit secrets; either way they stay out of the final image, since only the builder stage reads them. Leave the pre- and post-deployment commands empty.
 5. **Production GitHub OAuth app.** A second app (GitHub → Settings → Developer settings → OAuth Apps), homepage `https://<domain>`, callback `https://<domain>/api/auth/callback/github`. Keep the local app for `localhost:3000`.
@@ -86,7 +86,7 @@ So an https value served over plain http makes the browser upgrade the page's ow
    ```
 
 7. **Health check: nothing to set.** The image carries its own `HEALTHCHECK` on `/api/health` (`Dockerfile:71`), and Coolify uses an image's check instead of the dashboard one. It returns 200 whenever the server is up and reports the database state in the body. A database outage does not fail it on purpose: Traefik would stop routing to the container, which would also take down the prerendered pages that work without Postgres.
-8. **Domain, www redirect and DNS.** `cgdiomampo.dev` and `www.cgdiomampo.dev` both point at the VPS already. Both domains stay on the Coolify app, and the permanent redirects live in a Traefik dynamic config file on the server, because Coolify's own non-www setting does not reach the container labels and its HTTP→HTTPS redirect is a 302. v1 ships a copy in `cgendio-v1/docs/traefik/`; moving the domains to the v2 app means pointing that same file at it. Check with `curl -I https://www.cgdiomampo.dev/` and `curl -I http://cgdiomampo.dev/`: both should answer 301.
+8. **Domain, www redirect and DNS.** `cgdiomampo.dev` and `www.cgdiomampo.dev` both point at the VPS already. Both domains stay on the Coolify app, and the permanent redirects live in a Traefik dynamic config file on the server, because Coolify's own non-www and HTTP→HTTPS redirects are temporary. v1 ships a copy in `cgendio-v1/docs/traefik/`. The file only matches the hostnames and uses `noop@internal`, so it names no app and needs no change when the domains move between apps. Check with `curl -sS -o /dev/null -D - https://www.cgdiomampo.dev/` and the same for `http://cgdiomampo.dev/`: both should answer 301 to `https://cgdiomampo.dev/`. `curl -I` sends a HEAD request, which Traefik answers with 308 instead.
 9. **VPS firewall.** Only 22, 80 and 443 open; Postgres not publicly reachable.
 10. **First deploy.** The build log should show `Applying migration ...`, then the seed output, then the route table. Later deploys show `No pending migrations to apply.` and `Content already exists (SEED_ONLY_IF_EMPTY=1), so the seed inserted nothing.`
 
