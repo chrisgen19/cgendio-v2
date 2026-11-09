@@ -338,8 +338,16 @@ test('the sitemap gives the home page a last-modified date, like the pages under
  */
 const gaLoader = (page: Page) => page.locator(`script[src*="googletagmanager.com/gtag/js?id=${GA_TEST_ID}"]`);
 const dataLayerType = (page: Page) => page.evaluate(() => typeof (window as unknown as {dataLayer?: unknown[]}).dataLayer);
-/** Any first interaction loads the tag; Shift has no side effects. */
-const interact = (page: Page) => page.keyboard.press('Shift');
+/**
+ * Any first interaction loads the tag; Shift has no side effects. The listener only exists once React has hydrated,
+ * so keep pressing, as a visitor would, until the tag is in the page.
+ */
+const interactUntilTagged = async (page: Page) => {
+  await expect(async () => {
+    await page.keyboard.press('Shift');
+    await expect(gaLoader(page)).toHaveCount(1, {timeout: 1_000});
+  }).toPass();
+};
 
 test('the analytics tag waits for the first interaction', async ({page}) => {
   await page.goto('/writing');
@@ -349,15 +357,13 @@ test('the analytics tag waits for the first interaction', async ({page}) => {
   await expect(gaLoader(page)).toHaveCount(0);
   expect(await dataLayerType(page)).toBe('undefined');
 
-  await interact(page);
-  await expect(gaLoader(page)).toHaveCount(1);
+  await interactUntilTagged(page);
 });
 
 for (const path of ['/', '/writing', '/writing/wordpress-news-october-2026', '/projects/access-hire', '/contact']) {
   test(`${path} loads the analytics tag`, async ({page}) => {
     await page.goto(path);
-    await interact(page);
-    await expect(gaLoader(page)).toHaveCount(1);
+    await interactUntilTagged(page);
     await expect(page.locator('script#ga-config')).toHaveCount(1);
     await expect.poll(() => dataLayerType(page)).toBe('object');
   });
@@ -365,10 +371,11 @@ for (const path of ['/', '/writing', '/writing/wordpress-news-october-2026', '/p
 
 test('the sign-in page is not tracked', async ({page}) => {
   await page.goto('/sign-in');
-  // Wait for the page to be up, and interact as a visitor would, before asserting an absence, so this cannot pass by
-  // racing the tag's injection or by never triggering it
+  // Wait for the page to be up and hydrated, then interact as a visitor would, before asserting an absence, so this
+  // cannot pass by racing the tag's injection or by never triggering it
   await expect(page.getByRole('heading', {level: 1})).toBeVisible();
-  await interact(page);
+  await page.waitForTimeout(2_000);
+  await page.keyboard.press('Shift');
   await page.waitForTimeout(1_000);
   await expect(page.locator('script#ga-config')).toHaveCount(0);
   await expect(gaLoader(page)).toHaveCount(0);
