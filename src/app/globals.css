@@ -1999,13 +1999,20 @@
     .stack-ruler::details-content {
       block-size: 0;
       overflow: clip;
+    }
+
+    .stack-ruler[open]::details-content {
+      block-size: auto;
+    }
+
+    /* The glide only answers a click, like the ticks: opened any other way (find-in-page), the panel just appears */
+    .stack-ruler[data-anim="close"]:not([open])::details-content {
       transition:
         block-size 300ms var(--ease-mark),
         content-visibility 300ms allow-discrete;
     }
 
-    .stack-ruler[open]::details-content {
-      block-size: auto;
+    .stack-ruler[data-anim="open"][open]::details-content {
       transition:
         block-size 520ms cubic-bezier(0.2, 0.7, 0.2, 1),
         content-visibility 520ms allow-discrete;

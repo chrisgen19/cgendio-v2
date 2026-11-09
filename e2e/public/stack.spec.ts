@@ -4,6 +4,12 @@ import {expect, type Page, test} from '@playwright/test';
 const section = (page: Page) => page.locator('#stack');
 const toggle = (page: Page) => section(page).locator('summary');
 const hiddenTool = (page: Page) => section(page).getByText('Zustand', {exact: true});
+const listHeight = (page: Page) =>
+  section(page)
+    .locator('details')
+    .evaluate((el) => Math.round(el.getBoundingClientRect().height));
+const rulerAnimations = (page: Page) =>
+  page.evaluate(() => document.getAnimations().filter((a) => a instanceof CSSAnimation && a.animationName.startsWith('stack-ruler')).length);
 
 test('the rest of the stack starts closed but stays in the page', async ({page}) => {
   await page.goto('/');
@@ -39,9 +45,21 @@ test('the toggle works from the keyboard and is a 44px target', async ({page}) =
 test.describe('with reduced motion', () => {
   test.use({reducedMotion: 'reduce'});
 
-  test('the list still opens', async ({page}) => {
+  // A height read straight after the click is the final one only if nothing is gliding
+  test('the list opens and closes at once, with nothing animating', async ({page}) => {
     await page.goto('/');
+    const closedHeight = await listHeight(page);
+
     await toggle(page).click();
+    const openHeight = await listHeight(page);
+    expect(openHeight).toBeGreaterThan(closedHeight);
     await expect(hiddenTool(page)).toBeVisible();
+    expect(await rulerAnimations(page)).toBe(0);
+    await page.waitForTimeout(700);
+    expect(await listHeight(page)).toBe(openHeight);
+
+    await toggle(page).click();
+    expect(await listHeight(page)).toBe(closedHeight);
+    expect(await rulerAnimations(page)).toBe(0);
   });
 });
