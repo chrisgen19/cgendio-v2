@@ -1,0 +1,19 @@
+Scope of the license
+
+The MIT License in the LICENSE file applies to the source code in this
+repository only. The "Software" named in that license does not include the
+following material.
+
+Personal content, copyright (c) 2026 Christian Diomampo, all rights reserved:
+
+  - the site's written copy, blog posts and case studies, including everything
+    in prisma/seed-data/
+  - photos, images and videos, including docs/screenshots/, public/design-lab/
+    and the visual baselines under e2e/
+  - the design references in docs/design/
+  - the name "Chris Diomampo", the "cg" logo and the cgdiomampo.dev branding
+
+Client names, logos and project material belong to their respective owners.
+
+Fonts in src/app/_fonts/ and src/app/_og/fonts/ are licensed under the SIL Open
+Font License. The licence texts are in those folders.

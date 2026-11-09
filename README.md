@@ -82,3 +82,7 @@ docs/                     build plan, deployment guide, design references
 
 - [Deploying to Coolify](docs/DEPLOY.md)
 - [Build plan](docs/BUILD_PLAN.md)
+
+## License
+
+The source code is available under the [MIT License](LICENSE). My written content, images, design references and branding are not covered and remain all rights reserved, and the self-hosted fonts keep their own SIL Open Font License. See [NOTICE](NOTICE) for the full scope.
