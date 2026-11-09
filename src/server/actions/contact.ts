@@ -5,7 +5,7 @@ import {headers} from 'next/headers';
 import {after} from 'next/server';
 import {z} from 'zod';
 import {type ContactField, type ContactResult, PROJECT_TYPE_VALUES} from '@/lib/contact';
-import {authEnv} from '@/lib/env';
+import {authSecretEnv} from '@/lib/env';
 import {db} from '../db';
 import {notifyContactMessage} from '../mail';
 
@@ -38,7 +38,7 @@ const contactSchema = z.object({
 const clientIpHash = async () => {
   const request = await headers();
   const ip = request.get('x-real-ip')?.trim() || request.get('x-forwarded-for')?.split(',').at(-1)?.trim() || 'unknown';
-  return createHmac('sha256', authEnv().BETTER_AUTH_SECRET).update(`contact-ip:${ip}`).digest('hex');
+  return createHmac('sha256', authSecretEnv().BETTER_AUTH_SECRET).update(`contact-ip:${ip}`).digest('hex');
 };
 
 /**
