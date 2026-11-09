@@ -23,7 +23,7 @@ export function SignInCard({error}: SignInCardProps) {
     <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>
-          <h1>Cgdiomampo.dev admin</h1>
+          <h1>Chris Diomampo admin</h1>
         </CardTitle>
         <CardDescription>Sign in with the GitHub account on the admin allowlist.</CardDescription>
       </CardHeader>

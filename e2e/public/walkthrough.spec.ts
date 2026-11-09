@@ -41,6 +41,38 @@ test('the address bar follows the note on the reading line', async ({page}) => {
   await expect(frame(page)).toContainText('/category/scissor-lift');
 });
 
+// A long scroll or a jump can carry the reading line past the first note between two frames, so that note never crosses it (#81).
+const OPENING_LINK = /: open Home page on the live site$/;
+const jumpTo = (page: Page, top: number) => page.evaluate((y) => window.scrollTo({top: y, behavior: 'instant'}), top);
+
+test('jumping back to the top from a note returns the frame to the opening stop', async ({page}) => {
+  await page.goto('/projects/access-hire');
+  await page.getByRole('heading', {level: 3, name: 'Category page'}).evaluate((heading) => {
+    window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
+  });
+  await expect(frame(page)).toContainText('/category/scissor-lift');
+
+  await jumpTo(page, 0);
+  await expect(frame(page).getByRole('link', {name: OPENING_LINK})).toBeVisible();
+  await expect(frame(page)).not.toContainText('/category/scissor-lift');
+});
+
+test('jumping back to the top from below the notes returns the frame to the opening stop', async ({page}) => {
+  await page.goto('/projects/access-hire');
+  await jumpTo(page, await page.evaluate(() => document.documentElement.scrollHeight));
+  await expect(frame(page)).toContainText('/what-we-do/services');
+
+  await jumpTo(page, 0);
+  await expect(frame(page).getByRole('link', {name: OPENING_LINK})).toBeVisible();
+});
+
+test('jumping from the top to below the notes moves the frame to the last stop', async ({page}) => {
+  await page.goto('/projects/access-hire');
+  await expect(frame(page).getByRole('link', {name: OPENING_LINK})).toBeVisible();
+  await jumpTo(page, await page.evaluate(() => document.documentElement.scrollHeight));
+  await expect(frame(page)).toContainText('/what-we-do/services');
+});
+
 // The Services stop used to reuse the credit application capture, so it labelled itself with that page and linked there.
 test('the Services stop points at the services page, not the credit application', async ({page}) => {
   await page.goto('/projects/access-hire');
