@@ -37,7 +37,8 @@ export async function StackStrip() {
       </div>
       <div className="relative">
         {/* The rail, phones only: a hairline from the arrowhead down to the ground bar, with a node per layer on it */}
-        <div aria-hidden="true" className="absolute top-2 bottom-[17px] left-[17px] w-px bg-line md:hidden" />
+        {/* top is the arrowhead's own 8px, in px not rem: the rail must meet it at any browser font size */}
+        <div aria-hidden="true" className="absolute top-[8px] bottom-[17px] left-[17px] w-px bg-line md:hidden" />
         <div
           aria-hidden="true"
           className="absolute top-0 left-[11px] size-0 border-x-[6px] border-b-[8px] border-x-transparent border-b-ink md:hidden"
