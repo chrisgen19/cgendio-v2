@@ -103,16 +103,14 @@ test('the address bar link meets the 44px touch target', async ({page}) => {
   expect(box?.height).toBeGreaterThanOrEqual(44);
 });
 
-// The frame opens on the desktop captures at every viewport, so the mobile capture must stay undownloaded until the switch asks for it.
-test('only the visible device downloads its first capture', async ({page}) => {
-  const hidden = 'home-mobile';
-  const shown = 'home-desktop';
+// The frame opens on the desktop captures at every viewport, and no mobile capture is in the page until the switch asks for one.
+test('only the visible device downloads its captures', async ({page}) => {
   const requested: string[] = [];
   page.on('request', (request) => requested.push(decodeURIComponent(request.url())));
   await page.goto('/projects/access-hire');
-  await expect.poll(() => requested.some((url) => url.includes(shown))).toBe(true);
+  await expect.poll(() => requested.some((url) => url.includes('home-desktop'))).toBe(true);
   await page.waitForLoadState('networkidle');
-  expect(requested.filter((url) => url.includes(hidden))).toEqual([]);
+  expect(requested.filter((url) => /-mobile\.webp/.test(url))).toEqual([]);
 });
 
 test('the device switch changes the frame', async ({page}) => {
@@ -173,6 +171,15 @@ test.describe('reduced motion', () => {
     await expect(frame(page)).toBeHidden();
     await expect(page.getByRole('img', {name: /scissor lift category page/}).first()).toBeVisible();
   });
+
+  // The static captures take the device from the frame's own state, so the switch still moves them with the pinned frame gone
+  test('the switch moves the static captures to the other device', async ({page}) => {
+    await page.goto('/projects/access-hire');
+    await expect(main(page).locator('[data-layer="mobile"]')).toHaveCount(0);
+    await main(page).getByRole('button', {name: 'Mobile'}).locator('visible=true').click();
+    await expect(main(page).locator('figure.walkthrough-static-only [data-layer="mobile"]').first()).toBeVisible();
+    await expect(main(page).locator('[data-layer="desktop"]')).toHaveCount(0);
+  });
 });
 
 test.describe('without JavaScript', () => {
@@ -186,16 +193,15 @@ test.describe('without JavaScript', () => {
   });
 
   /*
-   * Without JavaScript the tour keeps the markup's own `data-device="auto"`, which is also what every reader sees until
-   * hydration. The capture that shows there is the CSS's choice alone, so this is the check that names a stale or wrong
-   * `auto` rule outright, instead of leaving it to surface as a capture that downloads when it should not.
+   * What the server renders, which is also what every reader holds until hydration. Hiding the other device with CSS was
+   * not enough: without JavaScript nothing defers a lazy image, so a capture in the markup downloads whether it shows or
+   * not (#142). The mobile captures are therefore absent, not hidden, and this is the check that says so.
    */
-  test('the capture layer before hydration is the desktop one, at every viewport', async ({page}) => {
+  test('the server markup carries the desktop captures alone, at every viewport', async ({page}) => {
     await page.goto('/projects/access-hire');
-    await expect(main(page).locator('.walkthrough-tour[data-device="auto"]')).toBeAttached();
-    const opening = main(page).locator('figure.walkthrough-static-only').first();
-    await expect(opening.locator('[data-layer="desktop"]')).toBeVisible();
-    await expect(opening.locator('[data-layer="mobile"]')).toBeHidden();
+    await expect(main(page).locator('.walkthrough-tour[data-device="desktop"]')).toBeAttached();
+    await expect(main(page).locator('figure.walkthrough-static-only [data-layer="desktop"]').first()).toBeVisible();
+    await expect(main(page).locator('[data-layer="mobile"]')).toHaveCount(0);
   });
 });
 

@@ -1535,17 +1535,6 @@
   isolation: isolate;
 }
 
-/* Which device's captures show. Every width opens on the desktop captures, whatever the viewport. */
-.walkthrough-tour[data-device="desktop"] .walkthrough-page[data-layer="mobile"],
-.walkthrough-tour[data-device="mobile"] .walkthrough-page[data-layer="desktop"] {
-  display: none;
-}
-
-/* Before hydration, and without JavaScript: the desktop captures, so a phone sees the same frame it gets once the switch is live */
-.walkthrough-tour[data-device="auto"] .walkthrough-page[data-layer="mobile"] {
-  display: none;
-}
-
 /* One page of the site: it slides like a navigation, forward from the right and back from the left */
 .walkthrough-page {
   position: absolute;

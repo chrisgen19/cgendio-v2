@@ -1,14 +1,13 @@
 import Link from 'next/link';
 import {Button} from '@/components/ui-site/button';
-import {CaptureSkeleton} from '@/components/ui-site/capture-skeleton';
 import {isOptimizableCover} from '@/components/ui-site/cover-image';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {Mark} from '@/components/ui-site/mark';
 import {Tag} from '@/components/ui-site/tag';
 import {tourAddress, tourFrames, tourHref} from '@/lib/tour';
 import type {ProjectDetail, TourStop} from '@/server/content';
-import {CaptureImage, PanSurface, Selection, type TourDevice} from './walkthrough-capture';
 import {WalkthroughTour} from './walkthrough-stage';
+import {StaticCapture} from './walkthrough-static';
 import {WriteUp} from './write-up';
 
 const hostOf = (url: string | null) => (url ? new URL(url).hostname.replace(/^www\./, '') : null);
@@ -20,46 +19,8 @@ const EXTERNAL_ICON = (
 );
 
 const HEADING = 'm-0 font-display text-[clamp(36px,3.6vw,52px)] leading-[0.98] font-bold tracking-[-0.04em]';
-const DEVICES: TourDevice[] = ['desktop', 'mobile'];
 const NOTE_ROW = 'grid grid-cols-[84px_minmax(0,1fr)] items-baseline gap-3';
 const NOTE_TERM = 'font-mono text-xs tracking-[0.06em] text-muted uppercase';
-
-type StaticCaptureProps = {
-  stop: TourStop;
-  host: string | null;
-  optimizedUrls: string[];
-  first?: boolean;
-};
-
-/** A note's own capture, for readers without the pinned frame: no JavaScript, or reduced motion. One device shows at a time, by CSS. */
-function StaticCapture({stop, host, optimizedUrls, first = false}: StaticCaptureProps) {
-  const caption = tourAddress(stop.path, host);
-  return (
-    <figure className="walkthrough-static-only m-0 max-lg:mt-6">
-      <figcaption className="walkthrough-static-caption flex min-h-9 items-center rounded-t-[14px] border border-b-0 border-line bg-white px-3 font-mono text-xs text-ink">
-        {caption.host}
-        {caption.path}
-      </figcaption>
-      <div data-theme="light" className="walkthrough-viewport walkthrough-static-frame relative overflow-hidden border border-line bg-white">
-        {DEVICES.map((device) => (
-          <div key={device} data-layer={device} data-state="active" className="walkthrough-page skeleton-host">
-            <CaptureSkeleton />
-            <PanSurface view={stop.positions[device]} capture={stop.captures[device]}>
-              <CaptureImage
-                stop={stop}
-                device={device}
-                optimized={optimizedUrls.includes(stop.captures[device].url)}
-                zoom={stop.positions[device].zoom}
-                first={first}
-              />
-              <Selection stop={stop} device={device} on />
-            </PanSurface>
-          </div>
-        ))}
-      </div>
-    </figure>
-  );
-}
 
 type HeroProps = {
   project: ProjectDetail;
