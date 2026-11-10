@@ -49,7 +49,8 @@ export const setStopCapture = <T extends Pick<TourStop, 'key' | 'captures'>>(
 
 const FRAME_WIDTHS = {
   desktop: {wide: '62vw', narrow: '560px'},
-  mobile: {wide: '340px', narrow: 'min(100vw, 560px)'},
+  // The phone's width under 1080px, --phone-w in globals.css
+  mobile: {wide: '340px', narrow: 'clamp(200px, 56vw, 250px)'},
 } as const;
 
 /** The image `sizes` for a capture. A zoomed stop renders wider than its frame, so it needs a larger file to stay sharp. */

@@ -1431,6 +1431,8 @@
 /* The layout's left edge lines up with the site's 1320px container */
 .walkthrough-tour {
   --gutter: max(56px, calc((100vw - 1320px) / 2 + 56px));
+  /* The phone under 1080px, for the mobile captures. captureSizes('mobile') in src/lib/tour.ts repeats it */
+  --phone-w: clamp(200px, 56vw, 250px);
   overflow-x: clip;
 }
 
@@ -1506,6 +1508,70 @@
   .walkthrough-viewport {
     flex: none;
     height: clamp(180px, 31svh, 270px);
+  }
+
+  /*
+   * The mobile captures in a phone rising from the stage's bottom edge: the toolbar keeps its own card and the viewport
+   * becomes the phone, a status bar with a notch over the page. --phone-w is mirrored by captureSizes('mobile') in
+   * src/lib/tour.ts, so the phone never asks for a larger file than it shows.
+   */
+  .walkthrough-tour[data-device="mobile"] .walkthrough-stage {
+    padding-bottom: 0;
+  }
+
+  .walkthrough-tour[data-device="mobile"] .walkthrough-frame {
+    gap: 10px;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .walkthrough-tour[data-device="mobile"] .walkthrough-frame > :first-child {
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    background: var(--color-white);
+  }
+
+  .walkthrough-tour[data-device="mobile"] .walkthrough-frame .walkthrough-viewport {
+    width: var(--phone-w);
+    height: clamp(200px, 31svh, 280px);
+    margin-inline: auto;
+    padding-top: 22px;
+    border: 6px solid var(--color-thumb-ink);
+    border-bottom: 0;
+    border-radius: 30px 30px 0 0;
+  }
+
+  /* Each page starts under the status bar and clips there, so a capture panned down the page never shows through it */
+  .walkthrough-tour[data-device="mobile"] .walkthrough-frame .walkthrough-page {
+    top: 22px;
+    overflow: clip;
+  }
+
+  /* The notch hangs from the bezel into the status bar, so it never covers the capture or its selection label */
+  .walkthrough-tour[data-device="mobile"] .walkthrough-frame .walkthrough-viewport::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 50%;
+    width: 42%;
+    height: 16px;
+    translate: -50% 0;
+    border-radius: 0 0 11px 11px;
+    background: var(--color-thumb-ink);
+  }
+
+  /* A note's own capture, without the pinned frame: the same phone width */
+  .walkthrough-tour[data-device="mobile"] .walkthrough-static-frame,
+  .walkthrough-tour[data-device="mobile"] .walkthrough-static-caption {
+    max-width: var(--phone-w);
+  }
+
+  .walkthrough-tour[data-device="mobile"] .walkthrough-static-frame {
+    aspect-ratio: 9 / 16;
   }
 }
 
