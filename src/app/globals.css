@@ -1671,6 +1671,15 @@
   display: block;
 }
 
+/*
+ * A label above its box drops just far enough to stay 4px inside the page's top edge, for a box near the top of the
+ * visible window (or under the phone's status bar). --box-y is the box's top in capture pixels; the second term is the
+ * pan's own offset from .walkthrough-pan, so this tracks the zoom and the frame size. 100% is the label's height, 6px its gap.
+ */
+.walkthrough-label[data-at="top"] {
+  translate: 0 max(0px, calc(100% + 10px - (var(--box-y) * var(--unit) - max(0px, min(var(--y) * var(--unit), var(--cap-h) * var(--unit) - 100cqh)))));
+}
+
 @keyframes walkthrough-snap {
   from {
     opacity: 0;

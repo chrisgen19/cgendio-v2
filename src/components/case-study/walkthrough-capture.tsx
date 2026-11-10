@@ -58,12 +58,14 @@ type SelectionProps = {
 export function Selection({stop, device, on}: SelectionProps) {
   const {width, height} = stop.captures[device];
   const {box, labelAt} = stop.positions[device];
-  const place: CSSProperties = {
+  const place = {
+    '--box-y': box.y,
     left: `${(box.x / width) * 100}%`,
     top: `${(box.y / height) * 100}%`,
     width: `${(box.w / width) * 100}%`,
     height: `${(box.h / height) * 100}%`,
-  };
+  } as CSSProperties;
+  const at = labelAt ?? 'top';
   return (
     <span aria-hidden="true" data-on={on || undefined} style={place} className="walkthrough-selection pointer-events-none absolute">
       <span className="walkthrough-outline absolute -inset-px border-[1.5px] border-accent">
@@ -72,9 +74,10 @@ export function Selection({stop, device, on}: SelectionProps) {
         ))}
       </span>
       <span
+        data-at={at}
         className={cn(
           'walkthrough-label absolute rounded-[3px] bg-accent px-2 py-1 font-mono text-[11px] leading-none font-medium whitespace-nowrap text-on-accent',
-          LABEL_PLACES[labelAt ?? 'top'],
+          LABEL_PLACES[at],
         )}
       >
         {stop.selected}
