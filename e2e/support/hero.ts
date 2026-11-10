@@ -1,20 +1,20 @@
 import {expect, type Page} from '@playwright/test';
 
 /**
- * The film mounts on the visitor's first scroll, tap, mouse movement or key press (src/lib/use-first-interaction.ts), so
- * tests that drive it press a key first. The listener only exists once React has hydrated, so a press can land too early: keep
- * pressing, as a visitor would, until the film's controls appear. Shift has no side effects on either project.
- * Reduced motion skips this: the film loads on idle there and opens on its brand card.
- */
-/**
- * With reduced motion the film loads by itself, but only once the page is idle (up to 2s, see hero-stage.tsx) and its
- * two chunks have arrived, so on a busy machine its controls can take longer than the default 5s to exist. Wait for
- * them first, then assert on their state with the usual timeout.
+ * Once something starts it (a first interaction, or idle time with reduced motion, see hero-stage.tsx), the film still
+ * has to fetch its two chunks and mount, so on a busy machine its controls can take longer than the default 5s to
+ * exist. Wait for them first, then assert on their state with the usual timeout.
  */
 export const waitForFilm = async (page: Page) => {
   await expect(heroControls(page).toggle).toBeVisible({timeout: 15_000});
 };
 
+/**
+ * The film mounts on the visitor's first scroll, tap, mouse movement or key press (src/lib/use-first-interaction.ts), so
+ * tests that drive it press a key first. The listener only exists once React has hydrated, so a press can land too early: keep
+ * pressing, as a visitor would, until the film's controls appear. Shift has no side effects on either project.
+ * Reduced motion skips this: the film loads on idle there and opens on its brand card.
+ */
 export const startFilm = async (page: Page) => {
   const {toggle} = heroControls(page);
   await expect(async () => {
