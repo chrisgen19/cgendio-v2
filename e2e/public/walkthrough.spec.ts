@@ -184,6 +184,19 @@ test.describe('without JavaScript', () => {
     await expect(page.getByRole('img', {name: /branch finder/}).first()).toBeVisible();
     await expect(page.getByRole('button', {name: 'Mobile'})).toBeHidden();
   });
+
+  /*
+   * Without JavaScript the tour keeps the markup's own `data-device="auto"`, which is also what every reader sees until
+   * hydration. The capture that shows there is the CSS's choice alone, so this is the check that names a stale or wrong
+   * `auto` rule outright, instead of leaving it to surface as a capture that downloads when it should not.
+   */
+  test('the capture layer before hydration is the desktop one, at every viewport', async ({page}) => {
+    await page.goto('/projects/access-hire');
+    await expect(main(page).locator('.walkthrough-tour[data-device="auto"]')).toBeAttached();
+    const opening = main(page).locator('figure.walkthrough-static-only').first();
+    await expect(opening.locator('[data-layer="desktop"]')).toBeVisible();
+    await expect(opening.locator('[data-layer="mobile"]')).toBeHidden();
+  });
 });
 
 test('a project without a tour keeps the current layout', async ({page}) => {
