@@ -172,17 +172,19 @@ export function HeroPlayer({worksHref = '#work', header, className, onFirstFrame
 
     // The Player fires frameupdate from a useEffect, so setting state right away counts as a nested passive update.
     // When slow frames batch every commit together, React warns "Maximum update depth exceeded"; a microtask runs after the flush.
+    // frameupdate only moves the HUD. It can arrive late (the effect of an earlier frame's commit, flushed after `ended`
+    // or after the reduced-motion seek), so it must never decide whether the film has ended: see onPlay.
     const onFrame = (e: {detail: {frame: number}}) => {
       notifyFirstFrame();
       const next = e.detail.frame;
-      queueMicrotask(() => {
-        setFrame(next);
-        if (next < lastFrame) setEnded(false);
-      });
+      queueMicrotask(() => setFrame(next));
     };
+    // Every way out of the brand card (replay, a chapter, the toggle) goes through player.play(), which always fires
+    // `play`, so that is the one signal that clears `ended`.
     const onPlay = () => {
       notifyFirstFrame();
       setPlaying(true);
+      setEnded(false);
     };
     const onPause = () => setPlaying(false);
     const onEnded = () => {
