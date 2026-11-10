@@ -1433,7 +1433,14 @@
   --gutter: max(56px, calc((100vw - 1320px) / 2 + 56px));
   /* The phone under 1080px, for the mobile captures. captureSizes('mobile') in src/lib/tour.ts repeats it */
   --phone-w: clamp(200px, 56vw, 250px);
+  /* Resolved here, outside the phone's light-themed viewport, so dark mode's line colour reaches the bezel's edge */
+  --phone-edge: transparent;
   overflow-x: clip;
+}
+
+/* In dark mode the bezel is as dark as the stage, so a line traces it, as --shadow-deep does for the 1080px+ frame */
+:root[data-theme="dark"] .walkthrough-tour {
+  --phone-edge: var(--color-line);
 }
 
 /* Without JavaScript or under reduced motion the pinned frame goes away and each note shows its own capture */
@@ -1542,6 +1549,7 @@
     border: 6px solid var(--color-thumb-ink);
     border-bottom: 0;
     border-radius: 30px 30px 0 0;
+    box-shadow: 0 0 0 1px var(--phone-edge);
   }
 
   /* Each page starts under the status bar and clips there, so a capture panned down the page never shows through it */
