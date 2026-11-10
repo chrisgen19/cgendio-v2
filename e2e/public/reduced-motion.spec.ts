@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import {heroControls} from '../support/hero';
+import {heroControls, waitForFilm} from '../support/hero';
 
 test.use({reducedMotion: 'reduce'});
 
@@ -7,6 +7,7 @@ test('with reduced motion the hero opens on the brand card, paused', async ({pag
   await page.goto('/');
   const {skip, toggle, seeMyWork} = heroControls(page);
 
+  await waitForFilm(page);
   await expect(toggle).toHaveAccessibleName('Replay film');
   await expect(skip).toHaveCount(0);
   await expect(seeMyWork).toBeVisible();
