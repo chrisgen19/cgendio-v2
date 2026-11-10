@@ -178,8 +178,9 @@ export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, not
   const {active, reached} = useReadingLine(root, frames.length);
   const [device, setDevice] = useState<TourDevice | 'auto'>('auto');
 
+  // The frame opens on the desktop captures at every width: that is what the CSS shows before hydration, and a phone can switch to mobile
   useEffect(() => {
-    setDevice(window.matchMedia('(max-width: 1079.98px)').matches ? 'mobile' : 'desktop');
+    setDevice('desktop');
   }, []);
 
   const choose = (next: TourDevice) => {
