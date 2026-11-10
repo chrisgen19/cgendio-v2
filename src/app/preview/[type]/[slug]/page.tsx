@@ -8,7 +8,9 @@ import {PageShell} from '@/components/site/page-shell';
 import {isPreviewType, verifyPreview} from '@/lib/preview-signature';
 import {getPreviewContent} from '@/server/preview';
 
-export const metadata: Metadata = {title: 'Draft preview', robots: {index: false, follow: false}};
+// no-referrer: the site's Referrer-Policy (same-origin) would hand the next page this preview's signed URL as its
+// referrer, and gtag reports document.referrer as page_referrer, so a link out of a preview could put the signature in GA
+export const metadata: Metadata = {title: 'Draft preview', robots: {index: false, follow: false}, referrer: 'no-referrer'};
 
 /** A signed, one-hour preview of a post or case study, drafts included, in the real page templates. */
 export default function PreviewPage({params, searchParams}: PageProps<'/preview/[type]/[slug]'>) {
