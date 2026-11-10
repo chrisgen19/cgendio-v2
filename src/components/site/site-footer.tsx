@@ -22,7 +22,7 @@ export async function SiteFooter() {
      * Container's, insets included, since the footer sets its own rather than using one.
      */
     <footer className="pt-10 pb-[calc(3rem+var(--safe-bottom))] pl-(--pad-l) pr-(--pad-r)">
-      <div className="mx-auto flex max-w-site flex-col gap-5 border-t border-line pt-8">
+      <div className="mx-auto flex max-w-site flex-col gap-5">
         <div className="flex flex-col items-start gap-5 md:flex-row md:items-center md:justify-between">
           <Logo />
           <nav aria-label="Footer">
