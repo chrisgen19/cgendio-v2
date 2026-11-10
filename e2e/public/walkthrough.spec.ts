@@ -103,9 +103,10 @@ test('the address bar link meets the 44px touch target', async ({page}) => {
   expect(box?.height).toBeGreaterThanOrEqual(44);
 });
 
-test('only the visible device downloads its first capture', async ({page}, testInfo) => {
-  const hidden = testInfo.project.name === 'mobile' ? 'home-desktop' : 'home-mobile';
-  const shown = testInfo.project.name === 'mobile' ? 'home-mobile' : 'home-desktop';
+// The frame opens on the desktop captures at every viewport, so the mobile capture must stay undownloaded until the switch asks for it.
+test('only the visible device downloads its first capture', async ({page}) => {
+  const hidden = 'home-mobile';
+  const shown = 'home-desktop';
   const requested: string[] = [];
   page.on('request', (request) => requested.push(decodeURIComponent(request.url())));
   await page.goto('/projects/access-hire');
@@ -114,14 +115,11 @@ test('only the visible device downloads its first capture', async ({page}, testI
   expect(requested.filter((url) => url.includes(hidden))).toEqual([]);
 });
 
-test('the device switch changes the frame', async ({page}, testInfo) => {
+test('the device switch changes the frame', async ({page}) => {
   await page.goto('/projects/access-hire');
-  const target = testInfo.project.name === 'mobile' ? 'desktop' : 'mobile';
-  await frame(page)
-    .getByRole('button', {name: target === 'mobile' ? 'Mobile' : 'Desktop'})
-    .click();
-  await expect(main(page).locator(`[data-device="${target}"]`)).toBeAttached();
-  await expect(frame(page).locator(`[data-layer="${target}"][data-state="active"]`)).toBeVisible();
+  await frame(page).getByRole('button', {name: 'Mobile'}).click();
+  await expect(main(page).locator('[data-device="mobile"]')).toBeAttached();
+  await expect(frame(page).locator('[data-layer="mobile"][data-state="active"]')).toBeVisible();
 });
 
 test('the write-up shows and empty reasoning stays hidden', async ({page}) => {
