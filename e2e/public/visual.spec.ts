@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import {heroControls} from '../support/hero';
+import {heroControls, waitForFilm} from '../support/hero';
 
 /*
  * Screenshot of each home section, compared with the committed baseline for this viewport and platform. Reduced motion
@@ -21,6 +21,7 @@ test.beforeEach(async ({page}) => {
 
 test('hero (film hidden)', async ({page}) => {
   const {hero, toggle} = heroControls(page);
+  await waitForFilm(page);
   await expect(toggle).toHaveAccessibleName('Replay film');
   // The film box fills the whole hero, so a mask would also cover the header and HUD drawn over it: hide the film instead
   await expect(hero).toHaveScreenshot('hero.png', {stylePath: 'e2e/support/hide-film.css'});

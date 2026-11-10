@@ -6,6 +6,15 @@ import {expect, type Page} from '@playwright/test';
  * pressing, as a visitor would, until the film's controls appear. Shift has no side effects on either project.
  * Reduced motion skips this: the film loads on idle there and opens on its brand card.
  */
+/**
+ * With reduced motion the film loads by itself, but only once the page is idle (up to 2s, see hero-stage.tsx) and its
+ * two chunks have arrived, so on a busy machine its controls can take longer than the default 5s to exist. Wait for
+ * them first, then assert on their state with the usual timeout.
+ */
+export const waitForFilm = async (page: Page) => {
+  await expect(heroControls(page).toggle).toBeVisible({timeout: 15_000});
+};
+
 export const startFilm = async (page: Page) => {
   const {toggle} = heroControls(page);
   await expect(async () => {
