@@ -1,5 +1,6 @@
+import {runInNewContext} from 'node:vm';
 import {describe, expect, it} from 'vitest';
-import {isUntrackedPath} from './analytics-paths';
+import {gaOptOutScript, isUntrackedPath} from './analytics-paths';
 
 describe('isUntrackedPath', () => {
   it.each(['/admin', '/admin/', '/admin/projects/abc', '/preview/post/a-draft', '/sign-in', '/sign-in/'])('%s is untracked', (path) => {
@@ -17,5 +18,62 @@ describe('isUntrackedPath', () => {
     '/sign-inside',
   ])('%s is tracked', (path) => {
     expect(isUntrackedPath(path)).toBe(false);
+  });
+});
+
+describe('gaOptOutScript', () => {
+  const ID = 'G-TEST000000';
+  const KEY = `ga-disable-${ID}`;
+
+  /** Runs the script against a fake window and location, as the browser would, and returns both to inspect. */
+  const run = (pathname: string, setUp?: (window: Record<string, unknown>) => void) => {
+    const window: Record<string, unknown> = {};
+    const location = {pathname};
+    setUp?.(window);
+    runInNewContext(gaOptOutScript(ID), {window, location});
+    return {window, location};
+  };
+
+  it('reports an opt-out only while an untracked page is showing', () => {
+    const {window, location} = run('/writing');
+    expect(window[KEY]).toBe(false);
+    for (const path of ['/preview/post/x', '/admin', '/sign-in']) {
+      location.pathname = path;
+      expect(window[KEY]).toBe(true);
+    }
+    location.pathname = '/contact';
+    expect(window[KEY]).toBe(false);
+  });
+
+  it('keeps an opt-out that was already set', () => {
+    const {window} = run('/writing', (w) => {
+      w[KEY] = true;
+    });
+    expect(window[KEY]).toBe(true);
+  });
+
+  it('still lets a later script opt the visit out, and back in', () => {
+    const {window, location} = run('/writing');
+    window[KEY] = true;
+    expect(window[KEY]).toBe(true);
+    window[KEY] = false;
+    expect(window[KEY]).toBe(false);
+    location.pathname = '/preview/post/x';
+    expect(window[KEY]).toBe(true);
+  });
+
+  it('leaves a flag that another script already controls alone', () => {
+    const {window} = run('/preview/post/x', (w) => {
+      Object.defineProperty(w, KEY, {configurable: true, get: () => 'theirs'});
+    });
+    expect(window[KEY]).toBe('theirs');
+  });
+
+  it('does not throw when the flag cannot be redefined', () => {
+    expect(() =>
+      run('/writing', (w) => {
+        Object.defineProperty(w, KEY, {configurable: false, writable: false, value: true});
+      }),
+    ).not.toThrow();
   });
 });
