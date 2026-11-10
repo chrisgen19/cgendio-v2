@@ -136,12 +136,12 @@ describe('captureGroups', () => {
 describe('captureSizes', () => {
   it('uses the frame width when a stop has no zoom', () => {
     expect(captureSizes('desktop', 1)).toBe('(min-width: 1080px) 62vw, 560px');
-    expect(captureSizes('mobile', 1)).toBe('(min-width: 1080px) 340px, min(100vw, 560px)');
+    expect(captureSizes('mobile', 1)).toBe('(min-width: 1080px) 340px, clamp(200px, 56vw, 250px)');
   });
 
   it('scales the width by the zoom, so a zoomed capture is not upscaled', () => {
     expect(captureSizes('desktop', 1.93)).toBe('(min-width: 1080px) calc(62vw * 1.93), calc(560px * 1.93)');
-    expect(captureSizes('mobile', 2)).toBe('(min-width: 1080px) calc(340px * 2), calc(min(100vw, 560px) * 2)');
+    expect(captureSizes('mobile', 2)).toBe('(min-width: 1080px) calc(340px * 2), calc(clamp(200px, 56vw, 250px) * 2)');
   });
 });
 
