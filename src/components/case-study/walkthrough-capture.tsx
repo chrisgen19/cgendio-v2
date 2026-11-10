@@ -37,7 +37,9 @@ export function CaptureImage({stop, device, optimized, zoom = 1, first = false}:
       height={height}
       sizes={captureSizes(device, zoom)}
       unoptimized={!optimized}
-      // Always lazy: every device's capture is in the markup and CSS hides all but one, and a lazy image that is hidden never downloads
+      // Always lazy: every device's capture is in the markup and CSS hides all but one, and a hidden image only stays undownloaded
+      // because lazy loading never brings it into view. Chromium stops deferring lazy images with scripting off, so a reader
+      // without JavaScript downloads both layers (#142)
       loading="lazy"
       fetchPriority={first ? 'high' : undefined}
       draggable={false}
