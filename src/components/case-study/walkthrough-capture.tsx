@@ -1,3 +1,4 @@
+import {getImageProps} from 'next/image';
 import type {CSSProperties, ReactNode} from 'react';
 import {LoadingImage} from '@/components/ui-site/loading-image';
 import {cn} from '@/lib/cn';
@@ -24,27 +25,36 @@ type CaptureImageProps = {
   zoom?: number;
   /** The capture in the first viewport: fetched first, once the browser knows it is visible. */
   first?: boolean;
+  /** Media-gated source for the responsive server render. */
+  responsive?: boolean;
 };
 
 /** A full-page capture of the live site. */
-export function CaptureImage({stop, device, optimized, zoom = 1, first = false}: CaptureImageProps) {
+export function CaptureImage({stop, device, optimized, zoom = 1, first = false, responsive = false}: CaptureImageProps) {
   const {url, width, height} = stop.captures[device];
-  return (
+  const sizes = captureSizes(device, zoom);
+  const image = (
     <LoadingImage
-      src={url}
+      src={responsive ? 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' : url}
       alt={stop.alt}
       width={width}
       height={height}
-      sizes={captureSizes(device, zoom)}
-      unoptimized={!optimized}
-      // Always lazy: every device's capture is in the markup and CSS hides all but one, and a hidden image only stays undownloaded
-      // because lazy loading never brings it into view. Chromium stops deferring lazy images with scripting off, so a reader
-      // without JavaScript downloads both layers (#142)
+      sizes={sizes}
+      unoptimized={responsive || !optimized}
       loading="lazy"
       fetchPriority={first ? 'high' : undefined}
       draggable={false}
       className="block h-auto w-full max-w-none select-none"
     />
+  );
+  if (!responsive) return image;
+  const {props} = getImageProps({src: url, alt: stop.alt, width, height, sizes, unoptimized: !optimized});
+  // The transparent fallback prevents a hidden layer from downloading even with JavaScript disabled (#142).
+  return (
+    <picture>
+      <source media={device === 'mobile' ? '(width < 1080px)' : '(width >= 1080px)'} srcSet={props.srcSet ?? props.src} sizes={props.sizes} />
+      {image}
+    </picture>
   );
 }
 

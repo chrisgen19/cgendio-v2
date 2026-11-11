@@ -19,12 +19,41 @@ test.beforeEach(async ({page}) => {
   );
 });
 
-test('Access Hire opens on the frame with its facts in view', async ({page}) => {
+test('Access Hire opens on the frame with its facts in view', async ({page, isMobile}) => {
   await page.goto('/projects/access-hire');
   await expect(page.getByRole('heading', {level: 1})).toHaveText('Access Hire Australia');
   await expect(frame(page)).toBeVisible();
+  await expect(main(page).locator('.walkthrough-tour')).toHaveAttribute('data-device', isMobile ? 'mobile' : 'desktop');
   await expect(main(page).getByRole('definition').filter({hasText: 'Senior Full Stack Developer'})).toBeVisible();
   await expect(main(page).getByRole('link', {name: 'Live site', exact: true})).toHaveAttribute('href', 'https://www.accesshire.net/');
+});
+
+test('the layout shows its default frame before hydration without downloading the other device', async ({page, isMobile}) => {
+  let release = () => {};
+  const scripts = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/_next/static/**/*.js*', async (route) => {
+    await scripts;
+    await route.continue();
+  });
+  const requested: string[] = [];
+  page.on('request', (request) => requested.push(decodeURIComponent(request.url())));
+  try {
+    await page.goto('/projects/access-hire', {waitUntil: 'domcontentloaded'});
+    await expect(main(page).locator('.walkthrough-tour')).toHaveAttribute('data-device', 'responsive');
+    const device = isMobile ? 'mobile' : 'desktop';
+    const other = isMobile ? 'desktop' : 'mobile';
+    await expect(frame(page).locator(`[data-layer="${device}"][data-state="active"]`)).toBeVisible();
+    await expect(frame(page).locator(`[data-layer="${other}"][data-state="active"]`)).toBeHidden();
+    await expect(frame(page).locator('.walkthrough-viewport')).toHaveCSS('border-top-width', isMobile ? '6px' : '0px');
+    await expect.poll(() => requested.some((url) => url.includes(`home-${device}`))).toBe(true);
+    expect(requested.filter((url) => url.includes(`-${other}.webp`))).toEqual([]);
+  } finally {
+    release();
+  }
+  await page.waitForLoadState('load');
+  await expect(main(page).locator('.walkthrough-tour')).toHaveAttribute('data-device', isMobile ? 'mobile' : 'desktop');
 });
 
 test('the opening stop shows in the frame but has no note of its own', async ({page}) => {
@@ -103,21 +132,32 @@ test('the address bar link meets the 44px touch target', async ({page}) => {
   expect(box?.height).toBeGreaterThanOrEqual(44);
 });
 
-// The frame opens on the desktop captures at every viewport, and no mobile capture is in the page until the switch asks for one.
-test('only the visible device downloads its captures', async ({page}) => {
+// Once hydrated, only the layout default remains mounted; the responsive picture sources avoid extra downloads before it.
+test('the layout default loads its captures and leaves the other device out of the page', async ({page, isMobile}) => {
   const requested: string[] = [];
   page.on('request', (request) => requested.push(decodeURIComponent(request.url())));
   await page.goto('/projects/access-hire');
-  await expect.poll(() => requested.some((url) => url.includes('home-desktop'))).toBe(true);
-  await page.waitForLoadState('networkidle');
-  expect(requested.filter((url) => /-mobile\.webp/.test(url))).toEqual([]);
+  const device = isMobile ? 'mobile' : 'desktop';
+  await expect.poll(() => requested.some((url) => url.includes(`home-${device}`))).toBe(true);
+  await expect(main(page).locator(`[data-layer="${isMobile ? 'desktop' : 'mobile'}"]`)).toHaveCount(0);
+  if (!isMobile) {
+    await page.waitForLoadState('networkidle');
+    expect(requested.filter((url) => /-mobile\.webp/.test(url))).toEqual([]);
+  }
 });
 
-test('the device switch changes the frame', async ({page}) => {
+test('the device switch changes the frame in both directions', async ({page, isMobile}) => {
   await page.goto('/projects/access-hire');
-  await frame(page).getByRole('button', {name: 'Mobile'}).click();
-  await expect(main(page).locator('[data-device="mobile"]')).toBeAttached();
-  await expect(frame(page).locator('[data-layer="mobile"][data-state="active"]')).toBeVisible();
+  const initial = isMobile ? 'mobile' : 'desktop';
+  const other = isMobile ? 'desktop' : 'mobile';
+  await expect(main(page).locator('.walkthrough-tour')).toHaveAttribute('data-device', initial);
+  for (const device of [other, initial]) {
+    await frame(page)
+      .getByRole('button', {name: device === 'mobile' ? 'Mobile' : 'Desktop', exact: true})
+      .click();
+    await expect(frame(page).locator(`[data-layer="${device}"][data-state="active"]`)).toBeVisible();
+    await expect(main(page).locator(`[data-layer="${device === 'mobile' ? 'desktop' : 'mobile'}"]`)).toHaveCount(0);
+  }
 });
 
 test('the write-up shows and empty reasoning stays hidden', async ({page}) => {
@@ -173,12 +213,18 @@ test.describe('reduced motion', () => {
   });
 
   // The static captures take the device from the frame's own state, so the switch still moves them with the pinned frame gone
-  test('the switch moves the static captures to the other device', async ({page}) => {
+  test('the switch moves the static captures to the other device', async ({page, isMobile}) => {
     await page.goto('/projects/access-hire');
-    await expect(main(page).locator('[data-layer="mobile"]')).toHaveCount(0);
-    await main(page).getByRole('button', {name: 'Mobile'}).locator('visible=true').click();
-    await expect(main(page).locator('figure.walkthrough-static-only [data-layer="mobile"]').first()).toBeVisible();
-    await expect(main(page).locator('[data-layer="desktop"]')).toHaveCount(0);
+    const initial = isMobile ? 'mobile' : 'desktop';
+    const other = isMobile ? 'desktop' : 'mobile';
+    await expect(main(page).locator('.walkthrough-tour')).toHaveAttribute('data-device', initial);
+    await expect(main(page).locator(`[data-layer="${other}"]`)).toHaveCount(0);
+    await main(page)
+      .getByRole('button', {name: isMobile ? 'Desktop' : 'Mobile', exact: true})
+      .locator('visible=true')
+      .click();
+    await expect(main(page).locator(`figure.walkthrough-static-only [data-layer="${other}"]`).first()).toBeVisible();
+    await expect(main(page).locator(`[data-layer="${initial}"]`)).toHaveCount(0);
   });
 });
 
@@ -192,16 +238,19 @@ test.describe('without JavaScript', () => {
     await expect(page.getByRole('button', {name: 'Mobile'})).toBeHidden();
   });
 
-  /*
-   * What the server renders, which is also what every reader holds until hydration. Hiding the other device with CSS was
-   * not enough: without JavaScript nothing defers a lazy image, so a capture in the markup downloads whether it shows or
-   * not (#142). The mobile captures are therefore absent, not hidden, and this is the check that says so.
-   */
-  test('the server markup carries the desktop captures alone, at every viewport', async ({page}) => {
+  // Picture media queries must gate downloads even when the browser does not defer hidden lazy images (#142).
+  test('the server markup shows and downloads the layout default without JavaScript', async ({page, isMobile}) => {
+    const requested: string[] = [];
+    page.on('request', (request) => requested.push(decodeURIComponent(request.url())));
     await page.goto('/projects/access-hire');
-    await expect(main(page).locator('.walkthrough-tour[data-device="desktop"]')).toBeAttached();
-    await expect(main(page).locator('figure.walkthrough-static-only [data-layer="desktop"]').first()).toBeVisible();
-    await expect(main(page).locator('[data-layer="mobile"]')).toHaveCount(0);
+    const device = isMobile ? 'mobile' : 'desktop';
+    const other = isMobile ? 'desktop' : 'mobile';
+    await expect(main(page).locator('.walkthrough-tour')).toHaveAttribute('data-device', 'responsive');
+    await expect(main(page).locator(`figure.walkthrough-static-only [data-layer="${device}"]`).first()).toBeVisible();
+    for (const layer of await main(page).locator(`[data-layer="${other}"]`).all()) await expect(layer).toBeHidden();
+    await expect.poll(() => requested.some((url) => url.includes(`-${device}.webp`))).toBe(true);
+    await page.waitForLoadState('networkidle');
+    expect(requested.filter((url) => url.includes(`-${other}.webp`))).toEqual([]);
   });
 });
 
