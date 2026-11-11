@@ -17,7 +17,7 @@ export function ContactLinks({copy, settings}: {copy: PageCopy; settings: SiteSe
   return (
     <div className="flex flex-wrap items-center gap-3">
       {settings.cvUrl ? (
-        <Button href={settings.cvUrl} size="sm">
+        <Button href={settings.cvUrl} size="sm" data-track="cv_download">
           {copy['contact.cvLabel']}
         </Button>
       ) : null}

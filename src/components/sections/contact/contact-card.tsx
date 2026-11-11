@@ -44,6 +44,8 @@ export function ContactCard({copy, settings}: {copy: PageCopy; settings: SiteSet
             {live ? (
               <a
                 href={`mailto:${email}`}
+                data-track="contact_email"
+                data-track-method="mailto"
                 className="relative inline-flex min-h-11 items-center font-mono text-base break-all text-white underline decoration-white/35 underline-offset-[5px] hover:text-white hover:decoration-white focus-visible:outline-white"
               >
                 {email}

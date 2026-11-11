@@ -1,6 +1,7 @@
 'use client';
 
 import {type FormEvent, type SubmitEvent, startTransition, useActionState, useEffect, useMemo, useRef, useState} from 'react';
+import {track} from '@/lib/analytics';
 import {CONTACT_FIELDS, type ContactField, type ContactResult} from '@/lib/contact';
 import {submitContact} from '@/server/actions/contact';
 
@@ -11,11 +12,15 @@ import {submitContact} from '@/server/actions/contact';
  *
  * `errors` drops a field's error as soon as the visitor edits that field (attach `onEdit` as the form's onChange);
  * `serverErrors` is the untouched set from the last send, stable until the next one.
+ *
+ * A successful send records a GA4 `generate_lead` with the topic's value (never what was typed). Not when the honeypot
+ * was filled: the server answers bots with the same fake success, so the form checks the field itself.
  */
 export const useContactForm = <Done extends HTMLElement = HTMLHeadingElement>() => {
   const [result, dispatch, pending] = useActionState<ContactResult | null, FormData>(submitContact, null);
   const formRef = useRef<HTMLFormElement>(null);
   const doneRef = useRef<Done>(null);
+  const lead = useRef<{topic: string; bot: boolean} | null>(null);
   const [edited, setEdited] = useState<ReadonlySet<string>>(new Set());
   const [lastResult, setLastResult] = useState(result);
   const serverErrors = result && !result.ok ? result.fieldErrors : undefined;
@@ -39,6 +44,8 @@ export const useContactForm = <Done extends HTMLElement = HTMLHeadingElement>() 
   useEffect(() => {
     if (!result) return;
     if (result.ok) {
+      if (lead.current && !lead.current.bot) track('generate_lead', {form_topic: lead.current.topic});
+      lead.current = null;
       doneRef.current?.focus();
       return;
     }
@@ -52,6 +59,7 @@ export const useContactForm = <Done extends HTMLElement = HTMLHeadingElement>() 
   const onSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+    lead.current = {topic: String(formData.get('projectType') ?? ''), bot: String(formData.get('website') ?? '') !== ''};
     startTransition(() => dispatch(formData));
   };
 
