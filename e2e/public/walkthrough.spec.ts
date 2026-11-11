@@ -138,12 +138,43 @@ test('the layout default loads its captures and leaves the other device out of t
   page.on('request', (request) => requested.push(decodeURIComponent(request.url())));
   await page.goto('/projects/access-hire');
   const device = isMobile ? 'mobile' : 'desktop';
+  const other = isMobile ? 'desktop' : 'mobile';
   await expect.poll(() => requested.some((url) => url.includes(`home-${device}`))).toBe(true);
-  await expect(main(page).locator(`[data-layer="${isMobile ? 'desktop' : 'mobile'}"]`)).toHaveCount(0);
-  if (!isMobile) {
-    await page.waitForLoadState('networkidle');
-    expect(requested.filter((url) => /-mobile\.webp/.test(url))).toEqual([]);
-  }
+  await expect(main(page).locator(`[data-layer="${other}"]`)).toHaveCount(0);
+  await page.waitForLoadState('networkidle');
+  expect(requested.filter((url) => url.includes(`-${other}.webp`))).toEqual([]);
+});
+
+// Hydrating drops the source's media gate on the same element: the capture already shown is neither replaced nor fetched again
+test('hydration keeps the first capture element and its loaded state', async ({page, isMobile}) => {
+  let release = () => {};
+  const scripts = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/_next/static/**/*.js*', async (route) => {
+    await scripts;
+    await route.continue();
+  });
+  const device = isMobile ? 'mobile' : 'desktop';
+  const fetches: string[] = [];
+  page.on('request', (request) => {
+    const url = decodeURIComponent(request.url());
+    if (url.includes(`home-${device}`)) fetches.push(url);
+  });
+  await page.goto('/projects/access-hire', {waitUntil: 'domcontentloaded'});
+  const image = frame(page).locator(`[data-layer="${device}"][data-state="active"] img`).first();
+  await expect
+    .poll(() => image.evaluate((img: HTMLImageElement, name) => img.complete && decodeURIComponent(img.currentSrc).includes(`home-${name}`), device))
+    .toBe(true);
+  await image.evaluate((img) => {
+    img.dataset.beforeHydration = 'true';
+  });
+  release();
+  await expect(main(page).locator('.walkthrough-tour')).toHaveAttribute('data-device', device);
+  await expect(frame(page).locator(`[data-layer="${device}"][data-state="active"] img[data-before-hydration="true"]`)).toHaveCount(1);
+  await expect(image).toHaveAttribute('data-image', 'loaded');
+  await page.waitForLoadState('networkidle');
+  expect(fetches).toHaveLength(1);
 });
 
 test('the device switch changes the frame in both directions', async ({page, isMobile}) => {

@@ -25,35 +25,42 @@ type CaptureImageProps = {
   zoom?: number;
   /** The capture in the first viewport: fetched first, once the browser knows it is visible. */
   first?: boolean;
-  /** Media-gated source for the responsive server render. */
+  /** Before hydration: the capture only loads at the widths where its device is the layout default. */
   responsive?: boolean;
 };
 
-/** A full-page capture of the live site. */
+/** A transparent 1px GIF: the `<img>` fallback, so a layer whose source does not match downloads nothing. */
+const BLANK_GIF = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
+/**
+ * A full-page capture of the live site. The markup is the same before and after hydration (a `<picture>` whose `<img>`
+ * is the blank fallback), so hydrating only drops the source's media gate: the element is not replaced, the capture is
+ * not fetched again and its skeleton does not come back. Before hydration both devices are in the markup, and the gate
+ * keeps the hidden one from downloading even with JavaScript off, where lazy images are not deferred (#142).
+ */
 export function CaptureImage({stop, device, optimized, zoom = 1, first = false, responsive = false}: CaptureImageProps) {
   const {url, width, height} = stop.captures[device];
   const sizes = captureSizes(device, zoom);
-  const image = (
-    <LoadingImage
-      src={responsive ? 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=' : url}
-      alt={stop.alt}
-      width={width}
-      height={height}
-      sizes={sizes}
-      unoptimized={responsive || !optimized}
-      loading="lazy"
-      fetchPriority={first ? 'high' : undefined}
-      draggable={false}
-      className="block h-auto w-full max-w-none select-none"
-    />
-  );
-  if (!responsive) return image;
   const {props} = getImageProps({src: url, alt: stop.alt, width, height, sizes, unoptimized: !optimized});
-  // The transparent fallback prevents a hidden layer from downloading even with JavaScript disabled (#142).
   return (
-    <picture>
-      <source media={device === 'mobile' ? '(width < 1080px)' : '(width >= 1080px)'} srcSet={props.srcSet ?? props.src} sizes={props.sizes} />
-      {image}
+    <picture className="contents">
+      <source
+        media={responsive ? (device === 'mobile' ? '(width < 1080px)' : '(width >= 1080px)') : undefined}
+        srcSet={props.srcSet ?? props.src}
+        sizes={props.sizes}
+      />
+      <LoadingImage
+        src={BLANK_GIF}
+        alt={stop.alt}
+        width={width}
+        height={height}
+        sizes={sizes}
+        unoptimized
+        loading="lazy"
+        fetchPriority={first ? 'high' : undefined}
+        draggable={false}
+        className="block h-auto w-full max-w-none select-none"
+      />
     </picture>
   );
 }
