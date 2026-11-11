@@ -1638,14 +1638,25 @@
   transform: translateX(-6%);
 }
 
-/* The pan. --cap-w, --cap-h, --x, --y and --zoom are capture pixels, set inline. The y clamp stops it running past the end of the page. */
+/*
+ * The pan. --cap-w, --cap-h, --x, --y, --zoom and the box's --focus-top and --focus-bottom are capture pixels, set inline. --y is the view
+ * picked in a full-size frame; a frame of another shape shows a different slice of the page, so --pan-y holds --y between two limits.
+ * --pan-min is the least that shows the box's bottom 12px clear, but never closer than 6px to the box's top (its outline and handles).
+ * --pan-max is the most that leaves room above the box for its label: 11px of text, its py-1 padding, its mb-1.5 gap and 4px clear, in
+ * --spacing like the classes, so it grows with the reader's font size (29px at a 16px root). A box too tall for that room wins, and the
+ * label drops inside it.
+ * The last clamp stops the pan running past either end of the page. --pan-y is read again by the label.
+ */
 .walkthrough-pan {
   --unit: calc(100cqw * var(--zoom) / var(--cap-w));
+  --pan-min: min(var(--focus-bottom) * var(--unit) + 12px - 100cqh, var(--focus-top) * var(--unit) - 6px);
+  --pan-max: max(var(--focus-top) * var(--unit) - (15px + var(--spacing) * 3.5), var(--pan-min));
+  --pan-y: max(0px, min(min(max(var(--y) * var(--unit), var(--pan-min)), var(--pan-max)), var(--cap-h) * var(--unit) - 100cqh));
   position: absolute;
   top: 0;
   left: 0;
   width: calc(100cqw * var(--zoom));
-  transform: translate(calc(var(--x) * var(--unit) * -1), calc(-1 * max(0px, min(var(--y) * var(--unit), var(--cap-h) * var(--unit) - 100cqh))));
+  transform: translate(calc(var(--x) * var(--unit) * -1), calc(-1 * var(--pan-y)));
   transition: transform 0s linear 420ms;
 }
 
@@ -1669,6 +1680,15 @@
 
 .walkthrough-handle {
   display: block;
+}
+
+/*
+ * A label above its box drops just far enough to stay 4px inside the page's top edge, where the pan can't make room for it: a box at the
+ * very top of the page, or under the phone's status bar. --box-y is the box's top in capture pixels and --pan-y the pan's offset from
+ * .walkthrough-pan, so this tracks the zoom and the frame size. 100% is the label's height, --spacing * 1.5 its mb-1.5 gap.
+ */
+.walkthrough-label[data-at="top"] {
+  translate: 0 max(0px, calc(100% + var(--spacing) * 1.5 + 4px - (var(--box-y) * var(--unit) - var(--pan-y))));
 }
 
 @keyframes walkthrough-snap {

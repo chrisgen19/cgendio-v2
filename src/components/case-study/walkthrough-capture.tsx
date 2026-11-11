@@ -58,12 +58,14 @@ type SelectionProps = {
 export function Selection({stop, device, on}: SelectionProps) {
   const {width, height} = stop.captures[device];
   const {box, labelAt} = stop.positions[device];
-  const place: CSSProperties = {
+  const place = {
+    '--box-y': box.y,
     left: `${(box.x / width) * 100}%`,
     top: `${(box.y / height) * 100}%`,
     width: `${(box.w / width) * 100}%`,
     height: `${(box.h / height) * 100}%`,
-  };
+  } as CSSProperties;
+  const at = labelAt ?? 'top';
   return (
     <span aria-hidden="true" data-on={on || undefined} style={place} className="walkthrough-selection pointer-events-none absolute">
       <span className="walkthrough-outline absolute -inset-px border-[1.5px] border-accent">
@@ -72,9 +74,10 @@ export function Selection({stop, device, on}: SelectionProps) {
         ))}
       </span>
       <span
+        data-at={at}
         className={cn(
           'walkthrough-label absolute rounded-[3px] bg-accent px-2 py-1 font-mono text-[11px] leading-none font-medium whitespace-nowrap text-on-accent',
-          LABEL_PLACES[labelAt ?? 'top'],
+          LABEL_PLACES[at],
         )}
       >
         {stop.selected}
@@ -91,7 +94,10 @@ type PanSurfaceProps = {
   children: ReactNode;
 };
 
-/** The capture plus its selections, moved as one inside a size container. The CSS works out the pan from these capture-pixel values. */
+/**
+ * The capture plus its selections, moved as one inside a size container. The CSS works out the pan from these capture-pixel values, and moves it
+ * off `y` only as far as it takes to keep the stop's box in a frame of any shape.
+ */
 export function PanSurface({view, capture, atStart = false, children}: PanSurfaceProps) {
   const vars = {
     '--cap-w': capture.width,
@@ -99,6 +105,9 @@ export function PanSurface({view, capture, atStart = false, children}: PanSurfac
     '--x': view.x ?? 0,
     '--y': atStart ? (view.startY ?? 0) : view.y,
     '--zoom': view.zoom ?? 1,
+    // The box the pan keeps in view. At its start the pan holds startY, so a box from the bottom up to the end leaves it alone
+    '--focus-top': atStart ? capture.height : view.box.y,
+    '--focus-bottom': atStart ? 0 : view.box.y + view.box.h,
   } as CSSProperties;
   return (
     <div style={vars} className="walkthrough-pan">
