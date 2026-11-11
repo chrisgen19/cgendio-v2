@@ -3,8 +3,9 @@
 import {ExternalLink, LogOut} from 'lucide-react';
 import Link from 'next/link';
 import {usePathname, useRouter} from 'next/navigation';
-import type {ReactNode} from 'react';
+import {type ReactNode, useEffect} from 'react';
 import {Button} from '@/components/ui/button';
+import {markInternal} from '@/lib/analytics';
 import {authClient} from '@/lib/auth-client';
 import {cn} from '@/lib/utils';
 
@@ -29,6 +30,9 @@ type AdminShellProps = {
 export function AdminShell({user, children}: AdminShellProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  // Marks this browser as the owner's, so the public pages tag its GA hits as internal traffic. Kept after sign-out.
+  useEffect(markInternal, []);
 
   const signOut = async () => {
     await authClient.signOut();

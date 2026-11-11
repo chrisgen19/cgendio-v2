@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
+import {track} from '@/lib/analytics';
 
 export type CopyStatus = 'idle' | 'copied' | 'failed';
 
@@ -47,6 +48,7 @@ export const useCopyEmail = (address: string, onFail: () => void) => {
     }
     if (attempt !== latest.current) return;
     if (next === 'failed') onFail();
+    else track('contact_email', {method: 'copy'});
     setStatus(next);
     timers.current = [window.setTimeout(() => setMessage(ANNOUNCE[next]), 100), window.setTimeout(() => setStatus('idle'), SHOW_MS[next])];
   };
