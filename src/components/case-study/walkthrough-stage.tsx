@@ -16,7 +16,7 @@ const DEVICES: {key: TourDevice; label: string; icon: typeof Monitor}[] = [
 ];
 
 type DeviceSwitchProps = {
-  device: TourDevice;
+  device: TourDevice | null;
   onChange: (device: TourDevice) => void;
   className?: string;
 };
@@ -28,6 +28,7 @@ function DeviceSwitch({device, onChange, className}: DeviceSwitchProps) {
       {DEVICES.map(({key, label, icon: Icon}) => (
         <button
           key={key}
+          data-device-option={key}
           type="button"
           aria-pressed={device === key}
           onClick={() => onChange(key)}
@@ -119,12 +120,13 @@ type PagesProps = {
   current: TourStop;
   reached: number;
   optimizedUrls: string[];
-  /** The one device in the markup. The other device's pages are rendered when the switch moves to it, not before. */
+  /** Capture geometry for this layer; CSS gates responsive layers before hydration. */
   layer: TourDevice;
+  responsive?: boolean;
 };
 
 /** Every page the frame has reached, and the next one, so it is ready to slide in. Stops that share captures share a page and pan within it. */
-function Pages({frames, current, reached, optimizedUrls, layer}: PagesProps) {
+function Pages({frames, current, reached, optimizedUrls, layer, responsive}: PagesProps) {
   const groups = captureGroups(frames);
   const indexOf = (stop: TourStop) => groups.findIndex(({key}) => key === captureKey(stop));
   const currentPage = indexOf(current);
@@ -144,6 +146,7 @@ function Pages({frames, current, reached, optimizedUrls, layer}: PagesProps) {
         <CaptureSkeleton />
         <PanSurface view={shown.positions[layer]} capture={shown.captures[layer]} atStart={!isCurrent}>
           <CaptureImage
+            responsive={responsive}
             stop={group.stops[0]}
             device={layer}
             optimized={optimizedUrls.includes(shown.captures[layer].url)}
@@ -177,8 +180,12 @@ type TourProps = {
 export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, notes}: TourProps) {
   const root = useRef<HTMLDivElement>(null);
   const {active, reached} = useReadingLine(root, frames.length);
-  // The frame opens on the desktop captures at every width, server and client alike, and a phone can switch to mobile
-  const [device, setDevice] = useState<TourDevice>('desktop');
+  // CSS chooses the first frame before hydration. Then keep one device mounted and preserve manual choices on resize.
+  const [device, setDevice] = useState<TourDevice | null>(null);
+
+  useEffect(() => {
+    setDevice(window.matchMedia('(width < 1080px)').matches ? 'mobile' : 'desktop');
+  }, []);
 
   const choose = (next: TourDevice) => {
     if (next === device) return;
@@ -199,7 +206,7 @@ export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, not
     <DeviceContext value={device}>
       <div
         ref={root}
-        data-device={device}
+        data-device={device ?? 'responsive'}
         className="walkthrough-tour motion-js:lg:grid motion-js:lg:grid-cols-[calc(var(--gutter)+clamp(320px,28vw,400px)+40px)_minmax(0,1fr)]"
       >
         <div className="motion-js:lg:col-start-1 motion-js:lg:row-start-1">{hero}</div>
@@ -243,7 +250,17 @@ export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, not
                 <span key={captureKey(current)} aria-hidden="true" className="walkthrough-progress absolute inset-x-0 -bottom-px h-0.5 bg-accent" />
               </div>
               <div data-theme="light" className="walkthrough-viewport relative min-h-0 flex-1 overflow-hidden bg-white">
-                <Pages frames={frames} current={current} reached={reached} optimizedUrls={optimizedUrls} layer={device} />
+                {(device ? [device] : (['desktop', 'mobile'] as const)).map((layer) => (
+                  <Pages
+                    key={layer}
+                    frames={frames}
+                    current={current}
+                    reached={reached}
+                    optimizedUrls={optimizedUrls}
+                    layer={layer}
+                    responsive={device === null}
+                  />
+                ))}
               </div>
             </div>
           </figure>

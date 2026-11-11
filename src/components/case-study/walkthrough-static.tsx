@@ -15,14 +15,13 @@ type StaticCaptureProps = {
 
 /**
  * A note's own capture, for readers without the pinned frame: no JavaScript, or reduced motion. It renders the device the
- * switch is on, and only that one, so the other device's file is never fetched (a hidden image still downloads wherever
- * lazy loading is not deferring, which is every page without JavaScript).
+ * switch is on. Before hydration, CSS and picture media queries choose the layout default without downloading the other capture.
  */
 export function StaticCapture({stop, host, optimizedUrls, first = false}: StaticCaptureProps) {
-  const device = useTourDevice();
+  const chosen = useTourDevice();
   const caption = tourAddress(stop.path, host);
-  return (
-    <figure className="walkthrough-static-only m-0 max-lg:mt-6">
+  return (chosen ? [chosen] : (['desktop', 'mobile'] as const)).map((device) => (
+    <figure key={device} data-responsive-device={device} className="walkthrough-static-only m-0 max-lg:mt-6">
       <figcaption className="walkthrough-static-caption flex min-h-9 items-center rounded-t-[14px] border border-b-0 border-line bg-white px-3 font-mono text-xs text-ink">
         {caption.host}
         {caption.path}
@@ -32,6 +31,7 @@ export function StaticCapture({stop, host, optimizedUrls, first = false}: Static
           <CaptureSkeleton />
           <PanSurface view={stop.positions[device]} capture={stop.captures[device]}>
             <CaptureImage
+              responsive={chosen === null}
               stop={stop}
               device={device}
               optimized={optimizedUrls.includes(stop.captures[device].url)}
@@ -43,5 +43,5 @@ export function StaticCapture({stop, host, optimizedUrls, first = false}: Static
         </div>
       </div>
     </figure>
-  );
+  ));
 }

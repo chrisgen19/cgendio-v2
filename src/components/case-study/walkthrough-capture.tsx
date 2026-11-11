@@ -1,3 +1,4 @@
+import {getImageProps} from 'next/image';
 import type {CSSProperties, ReactNode} from 'react';
 import {LoadingImage} from '@/components/ui-site/loading-image';
 import {cn} from '@/lib/cn';
@@ -24,27 +25,43 @@ type CaptureImageProps = {
   zoom?: number;
   /** The capture in the first viewport: fetched first, once the browser knows it is visible. */
   first?: boolean;
+  /** Before hydration: the capture only loads at the widths where its device is the layout default. */
+  responsive?: boolean;
 };
 
-/** A full-page capture of the live site. */
-export function CaptureImage({stop, device, optimized, zoom = 1, first = false}: CaptureImageProps) {
+/** A transparent 1px GIF: the `<img>` fallback, so a layer whose source does not match downloads nothing. */
+const BLANK_GIF = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
+/**
+ * A full-page capture of the live site. The markup is the same before and after hydration (a `<picture>` whose `<img>`
+ * is the blank fallback), so hydrating only drops the source's media gate: the element is not replaced, the capture is
+ * not fetched again and its skeleton does not come back. Before hydration both devices are in the markup, and the gate
+ * keeps the hidden one from downloading even with JavaScript off, where lazy images are not deferred (#142).
+ */
+export function CaptureImage({stop, device, optimized, zoom = 1, first = false, responsive = false}: CaptureImageProps) {
   const {url, width, height} = stop.captures[device];
+  const sizes = captureSizes(device, zoom);
+  const {props} = getImageProps({src: url, alt: stop.alt, width, height, sizes, unoptimized: !optimized});
   return (
-    <LoadingImage
-      src={url}
-      alt={stop.alt}
-      width={width}
-      height={height}
-      sizes={captureSizes(device, zoom)}
-      unoptimized={!optimized}
-      // Always lazy: every device's capture is in the markup and CSS hides all but one, and a hidden image only stays undownloaded
-      // because lazy loading never brings it into view. Chromium stops deferring lazy images with scripting off, so a reader
-      // without JavaScript downloads both layers (#142)
-      loading="lazy"
-      fetchPriority={first ? 'high' : undefined}
-      draggable={false}
-      className="block h-auto w-full max-w-none select-none"
-    />
+    <picture className="contents">
+      <source
+        media={responsive ? (device === 'mobile' ? '(width < 1080px)' : '(width >= 1080px)') : undefined}
+        srcSet={props.srcSet ?? props.src}
+        sizes={props.sizes}
+      />
+      <LoadingImage
+        src={BLANK_GIF}
+        alt={stop.alt}
+        width={width}
+        height={height}
+        sizes={sizes}
+        unoptimized
+        loading="lazy"
+        fetchPriority={first ? 'high' : undefined}
+        draggable={false}
+        className="block h-auto w-full max-w-none select-none"
+      />
+    </picture>
   );
 }
 

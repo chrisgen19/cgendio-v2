@@ -1484,6 +1484,31 @@
   }
 }
 
+/* The server-rendered default follows the layout before JavaScript loads. Picture sources gate downloads too. */
+@media (width < 1080px) {
+  .walkthrough-tour[data-device="responsive"] [data-layer="desktop"],
+  .walkthrough-tour[data-device="responsive"] [data-responsive-device="desktop"] {
+    display: none;
+  }
+
+  .walkthrough-tour[data-device="responsive"] [data-device-option="mobile"] {
+    background: var(--color-ink);
+    color: var(--color-white);
+  }
+}
+
+@media (width >= 1080px) {
+  .walkthrough-tour[data-device="responsive"] [data-layer="mobile"],
+  .walkthrough-tour[data-device="responsive"] [data-responsive-device="mobile"] {
+    display: none;
+  }
+
+  .walkthrough-tour[data-device="responsive"] [data-device-option="desktop"] {
+    background: var(--color-ink);
+    color: var(--color-white);
+  }
+}
+
 /* The pinned stage: compact and full width over the notes, then a tall column once there is room beside them */
 .walkthrough-stage {
   position: sticky;
@@ -1522,11 +1547,11 @@
    * becomes the phone, a status bar with a notch over the page. --phone-w is mirrored by captureSizes('mobile') in
    * src/lib/tour.ts, so the phone never asks for a larger file than it shows.
    */
-  .walkthrough-tour[data-device="mobile"] .walkthrough-stage {
+  .walkthrough-tour:is([data-device="mobile"], [data-device="responsive"]) .walkthrough-stage {
     padding-bottom: 0;
   }
 
-  .walkthrough-tour[data-device="mobile"] .walkthrough-frame {
+  .walkthrough-tour:is([data-device="mobile"], [data-device="responsive"]) .walkthrough-frame {
     gap: 10px;
     overflow: visible;
     border: 0;
@@ -1535,13 +1560,13 @@
     box-shadow: none;
   }
 
-  .walkthrough-tour[data-device="mobile"] .walkthrough-frame > :first-child {
+  .walkthrough-tour:is([data-device="mobile"], [data-device="responsive"]) .walkthrough-frame > :first-child {
     border: 1px solid var(--color-line);
     border-radius: 14px;
     background: var(--color-white);
   }
 
-  .walkthrough-tour[data-device="mobile"] .walkthrough-frame .walkthrough-viewport {
+  .walkthrough-tour:is([data-device="mobile"], [data-device="responsive"]) .walkthrough-frame .walkthrough-viewport {
     width: var(--phone-w);
     height: clamp(200px, 31svh, 280px);
     margin-inline: auto;
@@ -1553,13 +1578,13 @@
   }
 
   /* Each page starts under the status bar and clips there, so a capture panned down the page never shows through it */
-  .walkthrough-tour[data-device="mobile"] .walkthrough-frame .walkthrough-page {
+  .walkthrough-tour:is([data-device="mobile"], [data-device="responsive"]) .walkthrough-frame .walkthrough-page {
     top: 22px;
     overflow: clip;
   }
 
   /* The notch hangs from the bezel into the status bar, so it never covers the capture or its selection label */
-  .walkthrough-tour[data-device="mobile"] .walkthrough-frame .walkthrough-viewport::before {
+  .walkthrough-tour:is([data-device="mobile"], [data-device="responsive"]) .walkthrough-frame .walkthrough-viewport::before {
     content: "";
     position: absolute;
     z-index: 1;
@@ -1573,12 +1598,12 @@
   }
 
   /* A note's own capture, without the pinned frame: the same phone width */
-  .walkthrough-tour[data-device="mobile"] .walkthrough-static-frame,
-  .walkthrough-tour[data-device="mobile"] .walkthrough-static-caption {
+  .walkthrough-tour:is([data-device="mobile"], [data-device="responsive"]) .walkthrough-static-frame,
+  .walkthrough-tour:is([data-device="mobile"], [data-device="responsive"]) .walkthrough-static-caption {
     max-width: var(--phone-w);
   }
 
-  .walkthrough-tour[data-device="mobile"] .walkthrough-static-frame {
+  .walkthrough-tour:is([data-device="mobile"], [data-device="responsive"]) .walkthrough-static-frame {
     aspect-ratio: 9 / 16;
   }
 }
