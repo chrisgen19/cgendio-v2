@@ -77,6 +77,9 @@ jobs:
       - name: E2E tests
         run: pnpm exec playwright test ${{ inputs.update_snapshots && '--update-snapshots=all' || '' }}
 
+      - name: Admin development validation
+        run: pnpm exec playwright test --config=playwright.admin-dev.config.ts
+
       - name: Upload the Playwright report
         if: failure()
         uses: actions/upload-artifact@v7

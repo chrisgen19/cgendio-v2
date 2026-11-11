@@ -7,6 +7,11 @@
 export const E2E_PORT = 3100;
 export const E2E_BASE_URL = `http://localhost:${E2E_PORT}`;
 
+export const ADMIN_DEV_PORT = 3102;
+export const ADMIN_DEV_URL = `http://localhost:${ADMIN_DEV_PORT}`;
+export const ADMIN_DEV_FIXTURES = 'e2e/.auth/admin-dev.json';
+export const ADMIN_DEV_LOG = 'e2e/.auth/admin-dev-server.log';
+
 /** e2e/support/mock-resend.mts listens here and records every email the app sends. */
 export const MOCK_RESEND_PORT = 3199;
 export const MOCK_RESEND_URL = `http://127.0.0.1:${MOCK_RESEND_PORT}`;
