@@ -1,4 +1,5 @@
 import 'server-only';
+import {io} from 'next/cache';
 import {headers} from 'next/headers';
 import {redirect} from 'next/navigation';
 import {cache} from 'react';
@@ -11,6 +12,8 @@ import {getAuth, isAdminEmail} from './auth';
 export const getAdminSession = cache(async () => {
   // headers() first: it's request data, so a build-time prerender stops here instead of creating the auth instance
   const requestHeaders = await headers();
+  // Better Auth reads the clock even when prefetching supplies the headers; keep that work out of the static shell.
+  await io();
   const session = await getAuth().api.getSession({headers: requestHeaders});
   if (!session || !isAdminEmail(session.user.email)) return null;
   return session;

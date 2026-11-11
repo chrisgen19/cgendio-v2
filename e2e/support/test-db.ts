@@ -1,5 +1,5 @@
 import pg from 'pg';
-import {testEnv} from './test-env';
+import {testEnv} from './test-env.ts';
 
 /**
  * One query against the e2e database, for test setup. It goes around the app, so nothing is revalidated: only use it

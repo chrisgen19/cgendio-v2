@@ -3,6 +3,9 @@ import {InboxList} from '@/components/admin/inbox-list';
 import {PageHeader} from '@/components/admin/page-header';
 import {listContactMessages} from '@/server/admin/data';
 
+// Session checks may redirect before this page renders; instant validation is segment-local.
+export const instant = false;
+
 export const metadata: Metadata = {title: 'Inbox'};
 
 export default async function InboxPage() {

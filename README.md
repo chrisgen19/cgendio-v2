@@ -59,6 +59,7 @@ The site runs at <http://localhost:3000>. The public pages only need `DATABASE_U
 | `pnpm lint` / `pnpm format` | Check, or fix, with Biome |
 | `pnpm test` | Unit tests with Vitest |
 | `pnpm test:e2e` | Reset the `cgendio_test` database, build, and run Playwright at 1440px and 390px |
+| `pnpm test:e2e:admin-dev` | Reset the test database and check all admin redirects and Instant Navigation warnings under `next dev` on port 3102 |
 | `pnpm db:up` / `pnpm db:down` | Start or stop local Postgres |
 | `pnpm db:studio` | Open Prisma Studio |
 | `pnpm remotion:studio` | Open the hero film in Remotion Studio |

@@ -3,6 +3,9 @@ import {PageCopyForm} from '@/components/admin/page-copy-form';
 import {PageHeader} from '@/components/admin/page-header';
 import {getPageCopyForEdit} from '@/server/admin/data';
 
+// Session checks may redirect before this page renders; instant validation is segment-local.
+export const instant = false;
+
 export const metadata: Metadata = {title: 'Page copy'};
 
 export default async function PageCopyPage() {

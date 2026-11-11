@@ -7,6 +7,9 @@ import {Button} from '@/components/ui/button';
 import {publishedDay} from '@/lib/format-date';
 import {listPosts} from '@/server/admin/data';
 
+// Session checks may redirect before this page renders; instant validation is segment-local.
+export const instant = false;
+
 export const metadata: Metadata = {title: 'Posts'};
 
 export default async function PostsPage() {

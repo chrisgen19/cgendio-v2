@@ -5,6 +5,9 @@ import {PostForm} from '@/components/admin/post-form';
 import {PreviewButton} from '@/components/admin/preview-button';
 import {getPostForEdit} from '@/server/admin/data';
 
+// Session checks may redirect before this page renders; instant validation is segment-local.
+export const instant = false;
+
 export const metadata: Metadata = {title: 'Edit post'};
 
 /** /admin/posts/new creates; /admin/posts/<id> edits. */

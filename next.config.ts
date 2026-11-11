@@ -12,6 +12,8 @@ const csp = contentSecurityPolicy({
 });
 
 const nextConfig: NextConfig = {
+  // The development regression suite owns a separate dev server and never shares next dev's lock or output.
+  distDir: process.env.E2E_ADMIN_DEV === '1' ? '.next/admin-dev' : '.next',
   cacheComponents: true,
   // Docker on Coolify (Dockerfile): server.js plus only the node_modules it uses
   output: 'standalone',

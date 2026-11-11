@@ -5,6 +5,9 @@ import {PreviewButton} from '@/components/admin/preview-button';
 import {ProjectForm} from '@/components/admin/project-form';
 import {getProjectForEdit} from '@/server/admin/data';
 
+// Session checks may redirect before this page renders; instant validation is segment-local.
+export const instant = false;
+
 export const metadata: Metadata = {title: 'Edit project'};
 
 /** /admin/projects/new creates; /admin/projects/<id> edits. */
