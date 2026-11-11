@@ -6,6 +6,9 @@ import {Badge} from '@/components/ui/badge';
 import {Button} from '@/components/ui/button';
 import {listTimeline} from '@/server/admin/data';
 
+// Session checks may redirect before this page renders; instant validation is segment-local.
+export const instant = false;
+
 export const metadata: Metadata = {title: 'Timeline'};
 
 export default async function TimelinePage() {

@@ -5,6 +5,9 @@ import {SortableList} from '@/components/admin/sortable-list';
 import {Button} from '@/components/ui/button';
 import {listMilestones} from '@/server/admin/data';
 
+// Session checks may redirect before this page renders; instant validation is segment-local.
+export const instant = false;
+
 export const metadata: Metadata = {title: 'Milestones'};
 
 export default async function MilestonesPage() {

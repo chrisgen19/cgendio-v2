@@ -4,6 +4,9 @@ import {PageHeader} from '@/components/admin/page-header';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {getDashboard} from '@/server/admin/data';
 
+// Session checks may redirect before this page renders; instant validation is segment-local.
+export const instant = false;
+
 export const metadata: Metadata = {title: 'Dashboard'};
 
 const COLLECTIONS = [

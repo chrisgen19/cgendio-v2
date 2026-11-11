@@ -4,6 +4,9 @@ import {PageHeader} from '@/components/admin/page-header';
 import {TimelineForm} from '@/components/admin/small-forms';
 import {getTimelineEntryForEdit} from '@/server/admin/data';
 
+// Session checks may redirect before this page renders; instant validation is segment-local.
+export const instant = false;
+
 export const metadata: Metadata = {title: 'Edit timeline entry'};
 
 export default async function TimelineEditPage({params}: PageProps<'/admin/timeline/[id]'>) {
