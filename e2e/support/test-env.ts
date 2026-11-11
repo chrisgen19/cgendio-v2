@@ -37,8 +37,8 @@ export const testEnv = {
   RESEND_BASE_URL: MOCK_RESEND_URL,
   MAIL_FROM: 'Chris Diomampo <e2e@example.test>',
   NEXT_PUBLIC_SITE_URL: E2E_BASE_URL,
-  // A real-shaped id so the analytics tag renders and e2e can check where it does and does not appear. gtag.js is
-  // never actually fetched: the specs assert the tags in the HTML, and nothing in e2e reaches googletagmanager.com.
+  // A real-shaped id keeps analytics enabled so tests can check where its tags appear. The admin workflow fixture
+  // serves gtag.js locally; browser tests without that stub can still request the script from Google.
   GA_MEASUREMENT_ID: GA_TEST_ID,
   INDEXNOW_KEY: INDEXNOW_TEST_KEY,
   // No test uploads, but the startup check (src/server/startup-env-check.ts) won't start the server without the R2
