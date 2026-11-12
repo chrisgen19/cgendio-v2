@@ -1,7 +1,7 @@
 import 'server-only';
 import {writeSync} from 'node:fs';
 import type {ZodError, ZodType} from 'zod';
-import {analyticsEnvSchema, authEnvSchema, indexNowEnvSchema, mailEnvSchema, r2EnvSchema, serverEnvSchema} from '@/lib/env';
+import {analyticsEnvSchema, authEnvSchema, clarityEnvSchema, indexNowEnvSchema, mailEnvSchema, r2EnvSchema, serverEnvSchema} from '@/lib/env';
 
 /*
  * Server secrets, checked once when the server starts (#10 step 3, #103). Every schema in src/lib/env.ts is parsed
@@ -53,12 +53,17 @@ export const checkServerSecrets = (env: Env): EnvCheck => {
   if (!env.RESEND_API_KEY) {
     warnings.push('RESEND_API_KEY is not set: contact messages are stored in the admin inbox but no email is sent.');
   }
-  // These two never throw on purpose (src/lib/env.ts), so a typo in an optional setting can't take the site down.
+  // These never throw on purpose (src/lib/env.ts), so a typo in an optional setting can't take the site down.
   // Reporting their resolved state here means a deploy log answers "is analytics actually on?".
   if (!analyticsEnvSchema.safeParse(env).success) {
     warnings.push(`GA_MEASUREMENT_ID is not a G-XXXXXXXXXX id (${JSON.stringify(env.GA_MEASUREMENT_ID)}): analytics is off.`);
   } else if (!env.GA_MEASUREMENT_ID) {
     warnings.push('GA_MEASUREMENT_ID is not set: analytics is off.');
+  }
+  if (!clarityEnvSchema.safeParse(env).success) {
+    warnings.push(`CLARITY_PROJECT_ID is not a Clarity project id (${JSON.stringify(env.CLARITY_PROJECT_ID)}): Clarity is off.`);
+  } else if (!env.CLARITY_PROJECT_ID) {
+    warnings.push('CLARITY_PROJECT_ID is not set: Clarity is off.');
   }
   if (!indexNowEnvSchema.safeParse(env).success) {
     warnings.push('INDEXNOW_KEY must be 8 to 128 letters, digits or hyphens: IndexNow is off and /indexnow-key.txt 404s.');

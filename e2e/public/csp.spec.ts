@@ -15,12 +15,12 @@ import {heroControls, startFilm} from '../support/hero';
 
 const CSP_DIRECTIVES = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://*.googletagmanager.com",
+  "script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.clarity.ms https://c.bing.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self'",
   "media-src 'self' data:",
-  "connect-src 'self' https://*.r2.cloudflarestorage.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+  "connect-src 'self' https://*.r2.cloudflarestorage.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.clarity.ms https://c.bing.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

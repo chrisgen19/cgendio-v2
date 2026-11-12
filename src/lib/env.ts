@@ -64,6 +64,20 @@ export const analyticsEnvSchema = z.object({
 });
 
 /**
+ * Microsoft Clarity (session recordings and heatmaps). The project id also goes into an inline script, so only lowercase
+ * letters and digits are accepted. Like analytics it never throws: a malformed id turns Clarity off with a warning.
+ */
+export const clarityEnvSchema = z.object({
+  CLARITY_PROJECT_ID: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z
+      .string()
+      .regex(/^[a-z0-9]{6,20}$/)
+      .optional(),
+  ),
+});
+
+/**
  * IndexNow (https://www.indexnow.org): the key search engines fetch from /indexnow-key.txt to check that pings come from
  * the site owner. Public by design. Like analytics it never throws: a malformed key turns IndexNow off with a warning,
  * so a typo can't fail an admin save or the key route (#81).
@@ -97,6 +111,7 @@ export type MailEnv = z.infer<typeof mailEnvSchema>;
 export type SiteEnv = z.infer<typeof siteEnvSchema>;
 export type AnalyticsEnv = z.infer<typeof analyticsEnvSchema>;
 export type IndexNowEnv = z.infer<typeof indexNowEnvSchema>;
+export type ClarityEnv = z.infer<typeof clarityEnvSchema>;
 
 const lazy = <T>(parse: () => T) => {
   let cached: T | undefined;
@@ -121,6 +136,16 @@ export const parseAnalyticsEnv = (env: Record<string, string | undefined>): Anal
 };
 
 export const analyticsEnv = lazy((): AnalyticsEnv => parseAnalyticsEnv(process.env));
+
+/** Exported for its test, as parseAnalyticsEnv is. */
+export const parseClarityEnv = (env: Record<string, string | undefined>): ClarityEnv => {
+  const parsed = clarityEnvSchema.safeParse(env);
+  if (parsed.success) return parsed.data;
+  console.warn(`Ignoring CLARITY_PROJECT_ID: ${JSON.stringify(env.CLARITY_PROJECT_ID)} is not a Clarity project id. Clarity is off.`);
+  return {CLARITY_PROJECT_ID: undefined};
+};
+
+export const clarityEnv = lazy((): ClarityEnv => parseClarityEnv(process.env));
 
 /** Exported for its test, as parseAnalyticsEnv is. */
 export const parseIndexNowEnv = (env: Record<string, string | undefined>): IndexNowEnv => {

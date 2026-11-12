@@ -46,6 +46,7 @@ Two things specific to this site:
 | `NEXT_PUBLIC_SITE_URL` | yes | yes | | `https://<domain>`, no trailing slash. Inlined into the client bundle. The build fails without it (guarded). See the scheme rule below. |
 | `R2_PUBLIC_URL` | yes | yes | **fatal** | The bucket's public base URL, no trailing slash. Fixes the allowed image host for the optimizer (`next.config.ts:24`), so a wrong value breaks every optimized image. The build fails without it (guarded), and the server refuses to start without it: `r2Env()` parses the whole R2 schema at runtime, so a value that reaches the build and not the container would only fail on the first admin upload. |
 | `GA_MEASUREMENT_ID` | yes | yes | warns | `G-XXXXXXXXXX`. Build variable because the public pages are prerendered with the tag. Not guarded: unset means no tag at all, and a malformed value is ignored with a logged warning rather than taking a page down. |
+| `CLARITY_PROJECT_ID` | yes | yes | warns | The Clarity project id (Settings > Overview). Build variable for the same reason as `GA_MEASUREMENT_ID`, and handled the same way when unset or malformed. |
 | `BETTER_AUTH_SECRET` | | yes | **fatal** | A new value, `openssl rand -base64 32`. Do not reuse the local one. At least 32 characters. |
 | `BETTER_AUTH_URL` | | yes | **fatal** | Same as `NEXT_PUBLIC_SITE_URL`. |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | | yes | **fatal** | From the **production** OAuth app (section 5). The server refuses to start without them. |
