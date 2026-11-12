@@ -30,6 +30,25 @@ describe('track', () => {
     expect(() => track('cv_download')).not.toThrow();
   });
 
+  it('sends the event to Clarity too, with each param as a tag set before it', () => {
+    const calls: unknown[][] = [];
+    global.window = {clarity: (...args: unknown[]) => calls.push(args)};
+    track('generate_lead', {form_topic: 'NEXTJS'});
+    expect(calls).toEqual([
+      ['set', 'form_topic', 'NEXTJS'],
+      ['event', 'generate_lead'],
+    ]);
+  });
+
+  it('sends to both when both tags are on the page', () => {
+    const gtag: unknown[][] = [];
+    const clarity: unknown[][] = [];
+    global.window = {gtag: (...args: unknown[]) => gtag.push(args), clarity: (...args: unknown[]) => clarity.push(args)};
+    track('cv_download');
+    expect(gtag).toEqual([['event', 'cv_download', {}]]);
+    expect(clarity).toEqual([['event', 'cv_download']]);
+  });
+
   it('does nothing on the server', () => {
     expect(() => track('cv_download')).not.toThrow();
   });

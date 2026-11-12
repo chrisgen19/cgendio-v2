@@ -1,7 +1,7 @@
 import {runInNewContext} from 'node:vm';
 import {describe, expect, it} from 'vitest';
 import {INTERNAL_COOKIE} from './analytics';
-import {clarityScript} from './clarity';
+import {CLARITY_READY, clarityPageTags, clarityScript} from './clarity';
 
 const ID = 'zc88qmno9y';
 
@@ -10,10 +10,14 @@ const run = ({pathname = '/', cookie = ''}: {pathname?: string; cookie?: string}
   const inserted: Array<{src?: string; async?: number}> = [];
   const firstScript = {parentNode: {insertBefore: (tag: {src?: string}) => inserted.push(tag)}};
   const document = {cookie, createElement: () => ({}), getElementsByTagName: () => [firstScript]};
-  const window: Record<string, unknown> = {};
-  runInNewContext(clarityScript(ID), {window, document, location: {pathname}});
+  const dispatched: string[] = [];
+  const window: Record<string, unknown> = {dispatchEvent: (event: {type: string}) => dispatched.push(event.type)};
+  const Event = class {
+    constructor(readonly type: string) {}
+  };
+  runInNewContext(clarityScript(ID), {window, document, location: {pathname}, Event});
   const queue = (window.clarity as {q?: IArguments[]} | undefined)?.q ?? [];
-  return {inserted, queued: queue.map((entry) => Array.from(entry))};
+  return {inserted, queued: queue.map((entry) => Array.from(entry)), dispatched};
 };
 
 describe('clarityScript', () => {
@@ -26,14 +30,33 @@ describe('clarityScript', () => {
   });
 
   it.each(['/admin', '/admin/posts', '/sign-in', '/preview/post/x'])('loads nothing on %s', (pathname) => {
-    expect(run({pathname})).toEqual({inserted: [], queued: []});
+    expect(run({pathname})).toEqual({inserted: [], queued: [], dispatched: []});
   });
 
   it("loads nothing in the owner's browser", () => {
-    expect(run({cookie: `theme=dark; ${INTERNAL_COOKIE}=1`})).toEqual({inserted: [], queued: []});
+    expect(run({cookie: `theme=dark; ${INTERNAL_COOKIE}=1`})).toEqual({inserted: [], queued: [], dispatched: []});
+  });
+
+  it('announces itself once window.clarity exists, so page tags set at hydration can follow', () => {
+    expect(run().dispatched).toEqual([CLARITY_READY]);
   });
 
   it('does not match a cookie whose name only ends the same way', () => {
     expect(run({cookie: `x${INTERNAL_COOKIE}=1`}).inserted).toHaveLength(1);
+  });
+});
+
+describe('clarityPageTags', () => {
+  it.each([
+    ['/', {page_type: 'home'}],
+    ['/projects/access-hire', {page_type: 'case_study', project: 'access-hire'}],
+    ['/writing', {page_type: 'blog'}],
+    ['/writing/', {page_type: 'blog'}],
+    ['/writing/redirect-maps-wordpress-to-nextjs', {page_type: 'post', post: 'redirect-maps-wordpress-to-nextjs'}],
+    ['/contact', {page_type: 'contact'}],
+    ['/projects', {page_type: 'other'}],
+    ['/design-lab/fresh-fruit', {page_type: 'other'}],
+  ])('%s is tagged %j', (pathname, tags) => {
+    expect(clarityPageTags(pathname)).toEqual(tags);
   });
 });

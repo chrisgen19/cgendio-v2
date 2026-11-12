@@ -1,5 +1,6 @@
 import {expect, type Page, test} from '@playwright/test';
 import {clarityCalls, stubClarity} from '../support/analytics';
+import {contactForm, fillContactForm, uniqueToken, useOwnIp} from '../support/contact';
 import {previewPath} from '../support/preview';
 import {CLARITY_TEST_ID, E2E_BASE_URL} from '../support/test-env';
 
@@ -20,13 +21,54 @@ test.beforeEach(async ({page}) => {
   await stubClarity(page);
 });
 
-for (const path of ['/', '/writing', '/contact']) {
-  test(`${path} loads Clarity without cookies`, async ({page}) => {
+const tags = (entries: Record<string, string>) => Object.entries(entries).map(([key, value]) => ['set', key, value]);
+
+for (const [path, pageTags] of [
+  ['/', {page_type: 'home'}],
+  ['/writing', {page_type: 'blog'}],
+  ['/contact', {page_type: 'contact'}],
+  ['/projects/access-hire', {page_type: 'case_study', project: 'access-hire'}],
+] as const) {
+  test(`${path} loads Clarity without cookies and tags the page`, async ({page}) => {
     await page.goto(path);
     await expect(tag(page)).toHaveCount(1);
-    expect(await clarityCalls(page)).toEqual([CONSENT]);
+    await expect.poll(() => clarityCalls(page)).toEqual([CONSENT, ...tags({...pageTags, theme: 'light'})]);
   });
 }
+
+test('the theme tag follows the theme the page opened in', async ({page, context}) => {
+  await context.addCookies([{name: 'theme', value: 'dark', url: E2E_BASE_URL}]);
+  await page.goto('/writing');
+  await expect.poll(() => clarityCalls(page)).toEqual([CONSENT, ...tags({page_type: 'blog', theme: 'dark'})]);
+});
+
+test('a client-side navigation tags the new page view', async ({page}) => {
+  await page.goto('/writing');
+  await expect.poll(() => clarityCalls(page)).toHaveLength(3);
+  const post = page.locator('main a[href^="/writing/"]').first();
+  const slug = (await post.getAttribute('href'))?.replace('/writing/', '') ?? '';
+  await post.click();
+  await page.waitForURL(`**/writing/${slug}`);
+  // The real clarity.js restarts on the URL change and replays its queue, so these land on the new page view
+  await expect.poll(async () => (await clarityCalls(page))?.slice(3)).toEqual(tags({page_type: 'post', post: slug, theme: 'light'}));
+});
+
+test('a sent contact message reaches Clarity as an event, with its topic and nothing the visitor typed', async ({page}, testInfo) => {
+  await useOwnIp(page, testInfo);
+  await page.goto('/contact');
+  await expect.poll(() => clarityCalls(page)).toHaveLength(3);
+  const token = uniqueToken();
+  await fillContactForm(page, {name: `Visitor ${token}`, email: `visitor+${token}@example.test`, message: `A new site, ref ${token}.`});
+  await contactForm(page).getByRole('button', {name: 'Send message'}).click();
+  await expect(page.getByRole('heading', {name: "Thanks, I've got your message."})).toBeVisible();
+
+  const calls = (await clarityCalls(page)) ?? [];
+  expect(calls.slice(3)).toEqual([
+    ['set', 'form_topic', 'NEXTJS'],
+    ['event', 'generate_lead'],
+  ]);
+  expect(JSON.stringify(calls)).not.toContain(token);
+});
 
 test('the sign-in page does not load Clarity', async ({page}) => {
   await page.goto('/sign-in');

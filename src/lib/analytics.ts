@@ -2,15 +2,23 @@ import {gaOptOutScript} from './analytics-paths';
 
 type Params = Record<string, string>;
 type Gtag = (command: 'event', name: string, params: Params) => void;
+type Clarity = (command: string, ...args: unknown[]) => void;
 
 /**
- * Sends a GA4 event through gtag.js. Does nothing on the server, before the tag has loaded (it loads lazily, so a very
- * early click goes uncounted) or where it never loads: the admin, draft previews and builds without GA_MEASUREMENT_ID.
- * Never pass what a visitor typed: GA's terms forbid personal data in events.
+ * Sends an event to GA4 through gtag.js and to Microsoft Clarity, where each param becomes a custom tag (set first, so
+ * the page view carrying the event can be filtered by them) and the name a custom event. Each does nothing where its
+ * tag isn't on the page: on the server, before it has loaded (both load lazily, so a very early click goes uncounted),
+ * in the admin, draft previews, the owner's browser (Clarity) or a build without the id.
+ * Never pass what a visitor typed: neither service may receive personal data.
  */
 export const track = (name: string, params: Params = {}) => {
-  const gtag = (globalThis as {window?: {gtag?: Gtag}}).window?.gtag;
-  if (typeof gtag === 'function') gtag('event', name, params);
+  const window = (globalThis as {window?: {gtag?: Gtag; clarity?: Clarity}}).window;
+  if (typeof window?.gtag === 'function') window.gtag('event', name, params);
+  const clarity = window?.clarity;
+  if (typeof clarity === 'function') {
+    for (const [key, value] of Object.entries(params)) clarity('set', key, value);
+    clarity('event', name);
+  }
 };
 
 /**
