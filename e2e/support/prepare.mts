@@ -14,11 +14,24 @@ import {prismaAdapter} from 'better-auth/adapters/prisma';
 import {testUtils} from 'better-auth/plugins';
 import pg from 'pg';
 import {PrismaClient} from '../../src/generated/prisma/client.ts';
-import {ADMIN_EMAIL, ADMIN_STORAGE_STATE, CONTACT_EMAIL, NO_TOUR_SLUG, testEnv} from './test-env.ts';
+import {portInUse} from './port-in-use.ts';
+import {ADMIN_EMAIL, ADMIN_STORAGE_STATE, CONTACT_EMAIL, E2E_INSTANCE, E2E_PORT, MOCK_RESEND_PORT, NO_TOUR_SLUG, testEnv} from './test-env.ts';
 
 const databaseUrl = new URL(testEnv.DATABASE_URL);
 const databaseName = databaseUrl.pathname.slice(1);
 if (!/^[a-z0-9_]+_test$/.test(databaseName)) throw new Error(`Refusing to reset "${databaseName}": the e2e database name must end in _test`);
+
+// Playwright would reuse a server already on these ports (another checkout's, or one left from an earlier run) and test
+// that instead of this build, so stop before touching anything
+for (const port of [E2E_PORT, MOCK_RESEND_PORT]) {
+  if (await portInUse(port)) {
+    throw new Error(
+      `Port ${port} is already in use: another checkout's e2e run, or a server left from an earlier one. Wait for it or stop it ` +
+        '(check `ss -ltnp` and `readlink /proc/<pid>/cwd` first), or set E2E_INSTANCE to give this checkout other ports.',
+    );
+  }
+}
+console.info(`e2e instance ${E2E_INSTANCE.name ?? 'default'}: database "${databaseName}", ports ${E2E_PORT} and ${MOCK_RESEND_PORT}`);
 
 /** Drop and create the test database from the server's maintenance database. FORCE closes a running e2e server's connections. */
 const recreateDatabase = async () => {

@@ -1,4 +1,5 @@
 import {expect, test} from '@playwright/test';
+import {E2E_BASE_URL} from '../support/test-env';
 
 /* Seeded published posts, newest first: "WordPress news, October 2026…", "Redirect maps…". The canvas posts and v1's title-only posts are drafts. */
 
@@ -36,5 +37,5 @@ test('the RSS feed is valid XML with every published post', async ({page, reques
   expect(feed.error).toBeNull();
   expect(feed.title).toBeTruthy();
   expect(feed.links).toHaveLength(2);
-  expect(feed.links[0]).toBe('http://localhost:3100/writing/wordpress-news-october-2026');
+  expect(feed.links[0]).toBe(`${E2E_BASE_URL}/writing/wordpress-news-october-2026`);
 });
