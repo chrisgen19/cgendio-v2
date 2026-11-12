@@ -5,40 +5,13 @@ import {expectNoCspViolations, recordCspViolations} from '../support/csp';
 import {heroControls, startFilm} from '../support/hero';
 
 /*
- * The Content-Security-Policy and HSTS headers (src/lib/security-headers.ts, #99): that every response carries them,
- * and that nothing the public pages load is blocked by the policy. The policy is static, so this sweep is what catches
- * a script, style, image or fetch added later that production would block.
+ * The Content-Security-Policy (src/lib/security-headers.ts, #99): that nothing the public pages load is blocked by it.
+ * The policy is static, so this sweep is what catches a script, style, image or fetch added later that production would
+ * block. That every response carries the header is checked in deploy.spec.ts.
  *
  * e2e runs over http with R2_PUBLIC_URL empty (e2e/support/test-env.ts), so the policy has no `upgrade-insecure-requests`
  * and no R2 public origin of its own; the covers are on the bucket's default domain, which `https://*.r2.dev` covers.
  */
-
-const CSP_DIRECTIVES = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.clarity.ms https://c.bing.com",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
-  "font-src 'self'",
-  "media-src 'self' data:",
-  "connect-src 'self' https://*.r2.cloudflarestorage.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.clarity.ms https://c.bing.com",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-];
-
-// A prerendered page, a post, the feed and a route handler: the headers come from next.config.ts, so all of them get them
-for (const path of ['/', '/writing/wordpress-news-october-2026', '/feed.xml', '/api/health']) {
-  test(`${path} sends the CSP and HSTS headers`, async ({request}) => {
-    const headers = (await request.get(path)).headers();
-    expect(headers['content-security-policy'], `CSP on ${path}`).toBe(CSP_DIRECTIVES.join('; '));
-    expect(headers['strict-transport-security'], `HSTS on ${path}`).toBe('max-age=63072000; includeSubDomains');
-  });
-}
-
-test('the policy has no upgrade-insecure-requests on an http site', async ({request}) => {
-  expect((await request.get('/')).headers()['content-security-policy']).not.toContain('upgrade-insecure-requests');
-});
 
 /** The tour captures live on R2; the local fixture keeps the sweep offline, as in walkthrough.spec.ts. */
 const FIXTURE = readFileSync(join(__dirname, '../support/fixtures/about-photo.png'));
