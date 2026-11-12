@@ -49,13 +49,12 @@ test('the film plays once and holds on the brand card', async ({page}) => {
   // From the last chapter, so this waits through the film's last few seconds rather than all of it, and still sees it
   // end once and hold
   test.setTimeout(60_000);
-  const {hero, skip, toggle, seeMyWork, desktopChapter, mobileSegment} = heroControls(page);
+  const {skip, toggle, seeMyWork, desktopChapter, mobileSegment} = heroControls(page);
 
   const live = isMobile() ? mobileSegment('Live') : desktopChapter('Live');
   await live.click();
   await expect(live).toHaveAttribute('aria-current', 'step');
-  // A jump should leave the film playing; resume it if a chapter click ever pauses it, or this would wait forever
-  if (await hero.getByRole('button', {name: 'Play film'}).count()) await toggle.click();
+  // A chapter jump keeps the film playing (HeroPlayer's seekAndPlay): fail here, not by waiting for an end that never comes
   await expect(toggle).toHaveAccessibleName('Pause film');
   await expect(toggle).toHaveAccessibleName('Replay film', {timeout: 20_000});
 
