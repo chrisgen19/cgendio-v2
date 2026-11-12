@@ -15,7 +15,7 @@ Fable 5.2 and Mythos 5.2 are the same model. Fable ships with stronger cybersecu
 - **Cheaper per token.** $8 / $40 per million input / output tokens, down from $10 / $50. Cache reads are $0.20 per million, and the Batch API halves the price to $4 / $20 ([model page](https://www.anthropic.com/claude/fable), [pricing](https://platform.claude.com/docs/en/about-claude/pricing)).
 - **Faster.** Output is up to 30% faster than Fable 5.1. There's also a fast mode, new for Fable: up to 2.5x faster output at twice the price ($16 / $80). In the API you set `"speed": "fast"`, and in Claude Code you toggle it in the model picker, where it bills through extra usage credits ([@ClaudeDevs](https://x.com/ClaudeDevs/status/2119868701994570178)).
 - **Fewer false blocks.** Anthropic reports about 55% fewer safeguard blocks than 5.1, with about 60% fewer in cybersecurity and 40% fewer in biology. Requests that are still blocked can fall back to an older model: cybersecurity questions go to Opus 4.8 and biology questions to Opus 5.
-- **The same limits.** A 1M token context window, up to 128K output tokens, and a June 2026 knowledge cutoff ([what's new in Fable 5.2](https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2)).
+- **Limits.** A 1M token context window, up to 128K output tokens, and a June 2026 knowledge cutoff ([what's new in Fable 5.2](https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2)).
 - **Everywhere.** The model ID is `claude-fable-5-2` on the Claude Platform, AWS, Google Cloud and Microsoft Foundry.
 
 The benchmark jump over 5.1 is large. These are Anthropic's numbers from the [model page](https://www.anthropic.com/claude/fable), with most scores at each model's highest effort setting:
@@ -34,9 +34,9 @@ Against Opus 5.5 the gap is small on coding and computer use, and large on long,
 Coming from Fable 5.1, moving to 5.2 is mostly a model ID swap. Coming from Opus or an older model, there's more to change. These are the ones that return errors, each with its fix (details in [what's new in Fable 5.2](https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2)):
 
 1. **Thinking is always on.** Sending `thinking: {type: 'disabled'}` or a `budget_tokens` value returns a 400. You control how hard it thinks with `output_config.effort`: `low`, `medium`, `high`, `xhigh` or `max`. The API default is `high`. Claude Code and the Claude apps default to Medium.
-2. **No forced tool calls.** A `tool_choice` of `any` or `tool` returns a 400. Use `auto` with `strict: true` on the tool and name the tool in the prompt, or use [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) when you only wanted JSON back.
+2. **No forced tool calls.** A `tool_choice` of `any` or `tool` returns a 400. Use `auto` with `strict: true` on the tool, or use [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) when you only wanted JSON back.
 3. **No prefill and no sampling settings.** An assistant prefill, or any of `temperature`, `top_p` and `top_k`, returns a 400.
-4. **Refusals are a stop reason.** A declined request comes back as HTTP 200 with `stop_reason: "refusal"`, so check it before you read `content`. You can opt into server-side fallbacks with `fallbacks: "default"` and the `server-side-fallback-2026-07-01` beta ([refusals and fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback)).
+4. **Refusals are a stop reason.** A declined request comes back as a normal response, not an error, with `stop_reason: "refusal"`, so check it before you read `content`. You can opt into server-side fallbacks with `fallbacks: "default"` and the `server-side-fallback-2026-07-01` beta ([refusals and fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback)).
 5. **History has to stay append-only.** The preserved thinking check now applies to every account. If you send a thinking block back after editing the system prompt, the tools or an earlier message, you get a 400. Keep `system` and `tools` fixed for a session and only add to `messages` ([preserved thinking](https://platform.claude.com/docs/en/build-with-claude/preserved-thinking)). No older model can read Fable 5.2's thinking blocks either, so a fallback to Opus carries on without that reasoning.
 6. **Computer use moved.** `computer_20251124` returns a 400 everywhere except Amazon Bedrock. Use `computer_toolset_20260801` ([computer use tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool)).
 7. **Advisor pairing.** With the advisor tool, a Fable 5.2 executor only accepts Fable 5.2 or Mythos 5.2 as its advisor.
@@ -56,7 +56,7 @@ The price per token went down, but the price per task can go up, because the mod
 
 Both can be true. The lever that decides which one you get is effort:
 
-- **`high`** is the API default and where Anthropic says most of the gain arrives. I'd use it for hard coding, research and long unattended runs.
+- **`high`** is the API default, and Anthropic's prompting guide says it's where you get most of the capability gain. I'd use it for hard coding, research and long unattended runs.
 - **`medium`** suits interactive coding and chat.
 - **`low`** is for quick, well-specified work and high-volume calls such as subagents.
 - **`xhigh` and `max`** are only worth it where you've measured a gain. They use many more tokens.
@@ -71,7 +71,7 @@ So where would I pay for it? Multi-repo refactors and migrations, deep code and 
 
 *Hacker News, at the time of writing (November 12, 2026).*
 
-I read through the two big Hacker News threads, the [launch thread](https://news.ycombinator.com/item?id=50429068) (914 points and over 1,000 comments at the time of writing) and the [Artificial Analysis thread](https://news.ycombinator.com/item?id=50431144) (379 points), plus reactions on X. I didn't use Reddit for this post. A few themes came up again and again.
+I read through the two big Hacker News threads, the [launch thread](https://news.ycombinator.com/item?id=50429068) (914 points and over 1,000 comments at the time of writing) and the [Artificial Analysis thread](https://news.ycombinator.com/item?id=50431144) (379 points, also at the time of writing), plus reactions on X. I didn't use Reddit for this post. A few themes came up again and again.
 
 **On ordinary work, it's hard to tell apart from Opus 5.5.** postalcoder, who had used it, [wrote](https://news.ycombinator.com/item?id=50430766): "I personally have a hard time telling the difference between Fable 5.2 and Opus 5.5 for ordinary coding tasks." And: "Fable is good, but you really have to push the ambition of your prompt in order to see proper separation from Opus 5.5." ariwilson [measured](https://news.ycombinator.com/item?id=50432483) 30 regular coding tasks and found "Fable 5.2 and Opus 5.5 both solved 26 (Fable 5.1 was at 25)". On the same tasks, 5.2 finished in 0.62x the time of 5.1, with no runs stopped by safeguards.
 
@@ -89,19 +89,23 @@ These are the patterns I'd reach for in a Next.js App Router project with the of
 
 ### Stream a response from a route handler
 
-Fable 5.2 turns can run for minutes and produce up to 128K tokens, so stream anything that isn't tiny. This route handler at `app/api/chat/route.ts` sets the effort explicitly, turns on server-side fallbacks, and only shows a refusal message when the whole fallback chain declined.
+Fable 5.2 turns can run for minutes and produce up to 128K tokens, so stream anything that isn't tiny. This route handler at `app/api/chat/route.ts` sets the effort explicitly and turns on server-side fallbacks. If Fable declines partway through, a fallback block marks the switch, and the fallback model carries on from the partial text. If the whole chain declines, the route says so, and the client should discard the partial text. It also stops the request when the reader closes the tab, so you don't pay for tokens nobody sees.
+
+A route handler is a public endpoint, and at Fable prices that matters. Cap the input as this one does, and put auth and rate limiting in front of it before it goes live. The same goes for the server action below.
 
 ```ts
 import Anthropic from '@anthropic-ai/sdk';
 
 const client = new Anthropic();
 const encoder = new TextEncoder();
+const MAX_PROMPT_CHARS = 20_000;
 
 export async function POST(request: Request): Promise<Response> {
   const {prompt} = (await request.json()) as {prompt?: unknown};
   if (typeof prompt !== 'string' || !prompt.trim()) {
     return new Response('Missing prompt', {status: 400});
   }
+  if (prompt.length > MAX_PROMPT_CHARS) return new Response('Too long', {status: 413});
 
   const stream = client.beta.messages.stream({
     model: 'claude-fable-5-2',
@@ -118,16 +122,24 @@ export async function POST(request: Request): Promise<Response> {
       const send = (text: string) => controller.enqueue(encoder.encode(text));
       try {
         for await (const event of stream) {
-          if (event.type !== 'content_block_delta') continue;
-          if (event.delta.type === 'text_delta') send(event.delta.text);
+          if (event.type === 'content_block_start') {
+            // Marks where the fallback model takes over from the partial text
+            if (event.content_block.type === 'fallback') send('\n[Switched model]\n');
+          } else if (event.type === 'content_block_delta') {
+            if (event.delta.type === 'text_delta') send(event.delta.text);
+          }
         }
         const final = await stream.finalMessage();
-        // Only when the whole fallback chain declined
+        // The whole fallback chain declined: the client should discard the partial text
         if (final.stop_reason === 'refusal') send('\n[Declined]');
         controller.close();
       } catch (error) {
         controller.error(error);
       }
+    },
+    cancel() {
+      // The reader went away: stop paying for tokens nobody will see
+      stream.abort();
     },
   });
   return new Response(body, {headers: {'Content-Type': 'text/plain; charset=utf-8'}});
@@ -241,7 +253,10 @@ export async function planAndDelegate(task: string): Promise<string[]> {
     output_config: {effort: 'high', format: zodOutputFormat(planSchema)},
     messages: [{role: 'user', content: `${PLAN_PROMPT}\n\n${task}`}],
   });
-  const steps = plan.parsed_output?.steps ?? [];
+  if (plan.stop_reason === 'refusal' || !plan.parsed_output) {
+    throw new Error('No plan returned');
+  }
+  const {steps} = plan.parsed_output;
 
   // Haiku 5.5 does the bulk of the work, all steps at once
   const results = await Promise.all(
