@@ -232,7 +232,11 @@ export async function askDocs(question: string): Promise<string> {
     system,
     messages,
   });
-  if (response.stop_reason === 'refusal') return 'Declined.';
+  // Only end_turn is a finished answer. On refusal, max_tokens or
+  // model_context_window_exceeded the text is empty or cut off.
+  if (response.stop_reason !== 'end_turn') {
+    throw new Error(`Answer did not finish: ${response.stop_reason}`);
+  }
   const text = response.content.map((b) => (b.type === 'text' ? b.text : ''));
   return text.join('');
 }

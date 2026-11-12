@@ -14,5 +14,6 @@ check "5 route streams NDJSON"                "grep -q 'application/x-ndjson' $R
 check "5 no literal marker strings"           "! grep -q '\[Declined\]\|\[Switched model\]' $R"
 check "6 guard described as input-only"       "grep -q 'not a cost cap' $C && grep -q 'only counts input' $T"
 check "8 prose says workers only see text"    "grep -q 'only see text' $T"
+check "9 cached answer checked for end_turn"  "grep -q \"stop_reason !== 'end_turn'\" $C && ! grep -q 'Declined' $C"
 check "tsc passes"                            "(cd $P/examples && pnpm exec tsc --noEmit)"
 exit $f
