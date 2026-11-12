@@ -1,9 +1,11 @@
 import {expect, type Page, test} from '@playwright/test';
+import {STACK_EXTRAS} from '../../src/lib/stack-groups';
 
 /* "Everything else" under the stack plates: closed by default so the section stays short, with the tools still in the page. */
 const section = (page: Page) => page.locator('#stack');
 const toggle = (page: Page) => section(page).locator('summary');
-const hiddenTool = (page: Page) => section(page).getByText('Zustand', {exact: true});
+const TOOL_COUNT = STACK_EXTRAS.reduce((total, group) => total + group.tools.length, 0);
+const hiddenTool = (page: Page) => section(page).getByText(STACK_EXTRAS[0].tools[0], {exact: true});
 const listHeight = (page: Page) =>
   section(page)
     .locator('details')
@@ -15,7 +17,7 @@ test('the rest of the stack starts closed but stays in the page', async ({page})
   await page.goto('/');
   await expect(hiddenTool(page)).toBeAttached();
   await expect(hiddenTool(page)).toBeHidden();
-  await expect(section(page).getByText('Show 36 more tools')).toBeVisible();
+  await expect(section(page).getByText(`Show ${TOOL_COUNT} more tools`)).toBeVisible();
 });
 
 test('the toggle opens and closes the list', async ({page}) => {
@@ -23,14 +25,14 @@ test('the toggle opens and closes the list', async ({page}) => {
   await toggle(page).scrollIntoViewIfNeeded();
   await toggle(page).click();
   await expect(hiddenTool(page)).toBeVisible();
-  await expect(section(page).getByText('Hide 36 tools')).toBeVisible();
+  await expect(section(page).getByText(`Hide ${TOOL_COUNT} tools`)).toBeVisible();
   // Both labels stay in the pill to hold its width, so only one may be painted at a time
-  await expect(section(page).getByText('Show 36 more tools')).toBeHidden();
+  await expect(section(page).getByText(`Show ${TOOL_COUNT} more tools`)).toBeHidden();
 
   await toggle(page).click();
   await expect(hiddenTool(page)).toBeHidden();
-  await expect(section(page).getByText('Show 36 more tools')).toBeVisible();
-  await expect(section(page).getByText('Hide 36 tools')).toBeHidden();
+  await expect(section(page).getByText(`Show ${TOOL_COUNT} more tools`)).toBeVisible();
+  await expect(section(page).getByText(`Hide ${TOOL_COUNT} tools`)).toBeHidden();
 });
 
 test('the toggle works from the keyboard and is a 44px target', async ({page}) => {

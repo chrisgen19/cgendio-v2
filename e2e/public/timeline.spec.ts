@@ -1,4 +1,6 @@
 import {expect, type Page, test} from '@playwright/test';
+import {timeline} from '../../prisma/seed-data/timeline';
+import {parseStartYear} from '../../src/lib/timeline-years';
 
 /* The Work timeline marks the role on the reading line (45% down the viewport) active, and the counter rolls to its start year. */
 
@@ -21,11 +23,13 @@ const counterYear = (page: Page) =>
     );
 
 // From the seed: the third role, the earliest one, then back to the current one
-const STOPS = [
-  {n: 2, year: '2022', when: 'Mar 2022 - Nov 2024', label: '03'},
-  {n: 5, year: '2007', when: '2007 - 2018', label: '06'},
-  {n: 0, year: '2025', when: 'Jun 2025 - Now', label: '01'},
-];
+const position = (n: number) => String(n).padStart(2, '0');
+const STOPS = [2, timeline.length - 1, 0].map((n) => ({
+  n,
+  year: String(parseStartYear(timeline[n].when)),
+  when: timeline[n].when,
+  label: position(n + 1),
+}));
 
 test('the role on the reading line is the active one', async ({page}) => {
   await page.goto('/');
@@ -44,6 +48,6 @@ test('the counter rolls to the start year of the active role', async ({page, isM
     await scrollToRole(page, n);
     await expect.poll(() => counterYear(page)).toBe(year);
     await expect(counter.locator('.tl-when[data-on]')).toHaveText(when);
-    await expect(counter.getByText(`${label} / 06`)).toBeVisible();
+    await expect(counter.getByText(`${label} / ${position(timeline.length)}`)).toBeVisible();
   }
 });

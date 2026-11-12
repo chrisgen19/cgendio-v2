@@ -6,7 +6,6 @@ describe('STACK_EXTRAS', () => {
 
   it('lists every tool once', () => {
     expect(new Set(tools).size).toBe(tools.length);
-    expect(tools).toHaveLength(36);
   });
 
   it('repeats nothing that is already on a plate', () => {

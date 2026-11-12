@@ -1,4 +1,6 @@
 import {expect, type Page, test} from '@playwright/test';
+import {milestones} from '../../prisma/seed-data/milestones';
+import {parseCountedValue} from '../../src/lib/milestone-value';
 
 /*
  * The milestones stage. With JS and motion allowed it pins while the page scrolls past and plays one milestone at a
@@ -6,14 +8,8 @@ import {expect, type Page, test} from '@playwright/test';
  * Both layouts are server-rendered and CSS picks one, so the section's height never changes after hydration.
  */
 
-// From the seed, in order
-const MILESTONES = [
-  {value: '15+', title: 'Years on the web', count: '15'},
-  {value: '6', title: 'Developers led', count: '6'},
-  {value: 'CMS', title: 'Headless CMS on Builder.io'},
-  {value: '40+', title: 'Client sites managed', count: '40'},
-  {value: 'VPS', title: 'Self-hosted infrastructure'},
-];
+// From the seed, in order. A counted value ends on its number ("15+" counts up to 15); a word value has no count.
+const MILESTONES = milestones.map(({value, title}) => ({value, title, count: parseCountedValue(value)?.to.toString()}));
 
 // The slide on show (data-active only marks one that plays its entrance)
 const activeSlide = (page: Page) => page.locator('#milestones .ms-slide[data-shown]');
@@ -122,7 +118,7 @@ const serveLongDescription = (page: Page) =>
     (url) => url.pathname === '/',
     async (route) => {
       const response = await route.fetch();
-      const body = (await response.text()).replaceAll('Planning and assigning work across 40+ sites at Access Group Australia.', LONG_DESCRIPTION);
+      const body = (await response.text()).replaceAll(milestones[1].description, LONG_DESCRIPTION);
       await route.fulfill({response, body});
     },
   );
