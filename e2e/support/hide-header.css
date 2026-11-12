@@ -1,10 +1,10 @@
 /*
- * Applied while taking the section screenshots: hides the sticky header. A tall element screenshot scrolls through the
- * page, so the header would be painted over whichever section the capture happened to pass, and every section baseline
- * would then move whenever the header changed. Same reasoning as flatten-work-stack.css.
+ * Applied while taking the stack strip screenshot: hides the sticky header. An element screenshot can scroll the page,
+ * so the header would be painted over whatever the capture passed, and the baseline would then move whenever the header
+ * changed: a screenshot should only change when the thing it pictures does.
  *
- * `visibility`, not `display`, so the header keeps its box and nothing below it shifts. visual.spec.ts's hero test is
- * the one that compares the header itself, and it does not use this file.
+ * `visibility`, not `display`, so the header keeps its box and nothing below it shifts. visual.spec.ts's hero and stuck
+ * header tests are the ones that compare the header itself, and they do not use this file.
  */
 header {
   visibility: hidden;

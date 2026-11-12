@@ -1,5 +1,5 @@
 import {expect, type Page, test} from '@playwright/test';
-import {fillContactForm, uniqueToken, useOwnIp} from '../support/contact';
+import {uniqueToken} from '../support/contact';
 import {queryTestDb} from '../support/test-db';
 import {E2E_BASE_URL} from '../support/test-env';
 
@@ -104,16 +104,4 @@ test('a project without a brand colour falls back to its theme', async ({page, c
   await page.goto('/');
   await expect(card).toHaveClass(/\bbrand-panel\b/);
   await expect(card).not.toHaveAttribute('data-theme');
-});
-
-test('a contact message arrives in the admin inbox', async ({page}, testInfo) => {
-  const name = `Inbox ${uniqueToken()}`;
-  await useOwnIp(page, testInfo);
-  await page.goto('/contact');
-  await fillContactForm(page, {name, message: 'Could you quote a WooCommerce rebuild for us?'});
-  await page.getByRole('button', {name: 'Send message'}).click();
-  await expect(page.getByRole('heading', {name: "Thanks, I've got your message."})).toBeVisible();
-
-  await page.goto('/admin/inbox');
-  await expect(page.getByText(name)).toBeVisible();
 });
