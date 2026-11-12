@@ -3,6 +3,7 @@ import {join} from 'node:path';
 import {expect, type Page, test} from '@playwright/test';
 import {projects} from '../../prisma/seed-data/projects';
 import {tourFrames} from '../../src/lib/tour';
+import {escapeRegExp} from '../support/regexp';
 import {NO_TOUR_SLUG} from '../support/test-env';
 
 /*
@@ -26,7 +27,6 @@ const stop = (slug: string, key: string) => {
   if (!found) throw new Error(`No stop ${key} in the seeded ${slug} tour`);
   return found;
 };
-const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const ACCESS_HIRE = project('access-hire');
 const OPENING = stop('access-hire', 'opening');

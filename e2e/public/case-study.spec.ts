@@ -1,5 +1,6 @@
 import {expect, test} from '@playwright/test';
 import {projects} from '../../prisma/seed-data/projects';
+import {escapeRegExp} from '../support/regexp';
 import {NO_TOUR_SLUG} from '../support/test-env';
 
 const ACCESS_HIRE = projects.find(({slug}) => slug === 'access-hire');
@@ -7,7 +8,7 @@ if (!ACCESS_HIRE) throw new Error('No seeded access-hire project');
 
 test('a home page card opens its case study', async ({page}) => {
   await page.goto('/');
-  await page.getByRole('link', {name: new RegExp(`^View case study\\s*: ${ACCESS_HIRE.title}$`)}).click();
+  await page.getByRole('link', {name: new RegExp(`^View case study\\s*: ${escapeRegExp(ACCESS_HIRE.title)}$`)}).click();
 
   await expect(page).toHaveURL(/\/projects\/access-hire$/);
   await expect(page.getByRole('heading', {level: 1})).toHaveText(ACCESS_HIRE.title);
