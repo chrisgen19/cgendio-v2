@@ -16,7 +16,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: CI,
   retries: CI ? 1 : 0,
-  workers: CI ? 2 : undefined,
+  workers: CI ? 4 : undefined,
   reporter: CI ? [['html', {open: 'never'}], ['github'], ['list']] : [['html', {open: 'never'}], ['list']],
   // Screenshots differ between macOS and Linux font rendering, so each platform keeps its own baselines
   snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}-{projectName}-{platform}{ext}',
