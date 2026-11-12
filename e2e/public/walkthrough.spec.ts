@@ -25,7 +25,7 @@ test('Access Hire opens on the frame with its facts in view', async ({page, isMo
   await expect(frame(page)).toBeVisible();
   await expect(main(page).locator('.walkthrough-tour')).toHaveAttribute('data-device', isMobile ? 'mobile' : 'desktop');
   await expect(main(page).getByRole('definition').filter({hasText: 'Senior Full Stack Developer'})).toBeVisible();
-  await expect(main(page).getByRole('link', {name: 'Live site', exact: true})).toHaveAttribute('href', 'https://www.accesshire.net/');
+  await expect(main(page).getByRole('link', {name: 'Live site', exact: true})).toHaveAttribute('href', '/out/access-hire');
 });
 
 test('the layout shows its default frame before hydration without downloading the other device', async ({page, isMobile}) => {
@@ -298,12 +298,14 @@ test('a stop on a subdomain shows and links to its own address', async ({page}) 
     window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
   });
   await expect(frame(page)).toContainText('courses.myimprov.com');
-  await expect(frame(page).getByRole('link', {name: /on the live site/})).toHaveAttribute('href', 'https://courses.myimprov.com/');
-  await expect(
-    main(page)
-      .getByRole('link', {name: /open Student login/})
-      .last(),
-  ).toHaveAttribute('href', 'https://courses.myimprov.com/');
+  const frameLink = frame(page).getByRole('link', {name: /on the live site/});
+  await expect(frameLink).toHaveAttribute('href', /^\/out\/myimprov\?stop=/);
+  const noteLink = main(page)
+    .getByRole('link', {name: /open Student login/})
+    .last();
+  await expect(noteLink).toHaveAttribute('href', (await frameLink.getAttribute('href')) ?? '');
+  const response = await page.request.get((await noteLink.getAttribute('href')) ?? '', {maxRedirects: 0});
+  expect(response.headers().location).toBe('https://courses.myimprov.com/');
 });
 
 test('MyImprov shows a note for each stop after its opening, including two states', async ({page}) => {

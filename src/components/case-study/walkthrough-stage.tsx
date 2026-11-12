@@ -5,6 +5,7 @@ import {type ReactNode, useEffect, useRef, useState} from 'react';
 import {flushSync} from 'react-dom';
 import {CaptureSkeleton} from '@/components/ui-site/capture-skeleton';
 import {cn} from '@/lib/cn';
+import {liveSiteTracking, outboundHref} from '@/lib/outbound';
 import {captureGroups, captureKey, tourAddress, tourHref} from '@/lib/tour';
 import type {TourStop} from '@/server/content';
 import {CaptureImage, PanSurface, Selection, type TourDevice} from './walkthrough-capture';
@@ -165,6 +166,7 @@ function Pages({frames, current, reached, optimizedUrls, layer, responsive}: Pag
 type TourProps = {
   /** frames[0] is what the frame opens on; frames[i + 1] is the note marked data-stop={i + 1}. */
   frames: TourStop[];
+  slug: string;
   liveUrl: string | null;
   host: string | null;
   optimizedUrls: string[];
@@ -177,7 +179,7 @@ type TourProps = {
  * timelines do not), the switch sets the device. Everything else is server-rendered: without JavaScript or with reduced motion this frame is hidden
  * by CSS and each note shows its own capture.
  */
-export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, notes}: TourProps) {
+export function WalkthroughTour({frames, slug, liveUrl, host, optimizedUrls, hero, notes}: TourProps) {
   const root = useRef<HTMLDivElement>(null);
   const {active, reached} = useReadingLine(root, frames.length);
   // CSS chooses the first frame before hydration. Then keep one device mounted and preserve manual choices on resize.
@@ -200,7 +202,7 @@ export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, not
   };
 
   const current = frames[active] ?? frames[0];
-  const href = tourHref(current.path, liveUrl);
+  const href = tourHref(current.path, liveUrl) ? outboundHref(slug, current.key) : null;
 
   return (
     <DeviceContext value={device}>
@@ -227,6 +229,7 @@ export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, not
                   <a
                     href={href}
                     rel="nofollow noreferrer"
+                    {...liveSiteTracking(slug, 'tour')}
                     className="flex min-h-11 min-w-0 flex-1 items-center gap-2 text-ink no-underline hover:text-accent"
                   >
                     <Address stop={current} host={host} />

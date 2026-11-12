@@ -1,7 +1,9 @@
 import type {MetadataRoute} from 'next';
 import {siteEnv} from '@/lib/env';
+import {OUTBOUND_PATH} from '@/lib/outbound';
 
-const DISALLOW = ['/admin', '/preview', '/api', '/design-lab', '/md'];
+// OUTBOUND_PATH keeps crawlers from following live-site links to client domains (see outboundHref)
+const DISALLOW = ['/admin', '/preview', '/api', '/design-lab', '/md', OUTBOUND_PATH];
 
 /**
  * The assistants and AI search engines that read the site, listed so their answers can cite it. Several of them ignore a
