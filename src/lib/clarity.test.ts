@@ -1,8 +1,7 @@
 import {runInNewContext} from 'node:vm';
 import {describe, expect, it} from 'vitest';
 import {INTERNAL_COOKIE} from './analytics';
-import {isUntrackedPath} from './analytics-paths';
-import {clarityScript, stopClarityOn} from './clarity';
+import {clarityScript} from './clarity';
 
 const ID = 'zc88qmno9y';
 
@@ -36,37 +35,5 @@ describe('clarityScript', () => {
 
   it('does not match a cookie whose name only ends the same way', () => {
     expect(run({cookie: `x${INTERNAL_COOKIE}=1`}).inserted).toHaveLength(1);
-  });
-});
-
-describe('stopClarityOn', () => {
-  const withClarity = (clarity: unknown) => {
-    const previous = (globalThis as {window?: unknown}).window;
-    (globalThis as {window?: unknown}).window = {clarity};
-    return () => {
-      (globalThis as {window?: unknown}).window = previous;
-    };
-  };
-
-  it('stops Clarity on an untracked page', () => {
-    const calls: unknown[][] = [];
-    const restore = withClarity((...args: unknown[]) => calls.push(args));
-    stopClarityOn('/preview/post/x', isUntrackedPath);
-    restore();
-    expect(calls).toEqual([['stop']]);
-  });
-
-  it('leaves it running on a public page', () => {
-    const calls: unknown[][] = [];
-    const restore = withClarity((...args: unknown[]) => calls.push(args));
-    stopClarityOn('/writing', isUntrackedPath);
-    restore();
-    expect(calls).toEqual([]);
-  });
-
-  it('does nothing where Clarity never started', () => {
-    const restore = withClarity(undefined);
-    expect(() => stopClarityOn('/admin', isUntrackedPath)).not.toThrow();
-    restore();
   });
 });

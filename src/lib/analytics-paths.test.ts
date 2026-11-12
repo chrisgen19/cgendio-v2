@@ -1,6 +1,6 @@
 import {runInNewContext} from 'node:vm';
 import {describe, expect, it} from 'vitest';
-import {gaOptOutScript, isUntrackedPath} from './analytics-paths';
+import {crossesTrackingBoundary, gaOptOutScript, isUntrackedPath} from './analytics-paths';
 
 describe('isUntrackedPath', () => {
   it.each(['/admin', '/admin/', '/admin/projects/abc', '/preview/post/a-draft', '/sign-in', '/sign-in/'])('%s is untracked', (path) => {
@@ -75,5 +75,43 @@ describe('gaOptOutScript', () => {
         Object.defineProperty(w, KEY, {configurable: false, writable: false, value: true});
       }),
     ).not.toThrow();
+  });
+});
+
+describe('crossesTrackingBoundary', () => {
+  const PREVIEW = 'https://cgdiomampo.dev/preview/post/a-draft?expires=1&signature=abc';
+
+  it.each([
+    [PREVIEW, '/writing'],
+    [PREVIEW, 'https://cgdiomampo.dev/'],
+    ['https://cgdiomampo.dev/writing', '/preview/post/a-draft'],
+    ['https://cgdiomampo.dev/', '/sign-in'],
+    ['https://cgdiomampo.dev/admin/posts', '/writing/a-post'],
+  ])('%s to %s is a full page load', (from, to) => {
+    expect(crossesTrackingBoundary({from, to})).toBe(true);
+  });
+
+  it.each([
+    ['https://cgdiomampo.dev/', '/writing'],
+    ['https://cgdiomampo.dev/writing', '/writing/a-post#intro'],
+    ['https://cgdiomampo.dev/admin', '/admin/posts'],
+    ['https://cgdiomampo.dev/sign-in', '/admin'],
+    [PREVIEW, '#section'],
+  ])('%s to %s stays client-side', (from, to) => {
+    expect(crossesTrackingBoundary({from, to})).toBe(false);
+  });
+
+  it('leaves other origins to the browser', () => {
+    expect(crossesTrackingBoundary({from: PREVIEW, to: 'https://example.com/writing'})).toBe(false);
+  });
+
+  it('leaves new tabs, windows and downloads alone', () => {
+    expect(crossesTrackingBoundary({from: PREVIEW, to: '/writing', target: '_blank'})).toBe(false);
+    expect(crossesTrackingBoundary({from: PREVIEW, to: '/writing', modified: true})).toBe(false);
+    expect(crossesTrackingBoundary({from: PREVIEW, to: '/writing', download: true})).toBe(false);
+  });
+
+  it('treats an explicit _self target as the same tab', () => {
+    expect(crossesTrackingBoundary({from: PREVIEW, to: '/writing', target: '_self'})).toBe(true);
   });
 });

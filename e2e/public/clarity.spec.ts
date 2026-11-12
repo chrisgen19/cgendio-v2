@@ -5,8 +5,11 @@ import {CLARITY_TEST_ID, E2E_BASE_URL} from '../support/test-env';
 
 /*
  * Microsoft Clarity (src/lib/clarity.ts): public pages load it cookieless, the admin, sign-in, draft previews and the
- * owner's browser never do, and a client-side navigation into an untracked page stops it (ClarityRouteGuard). Like the
- * GA checks in seo.spec.ts, these look at what runs in the browser, not at the HTML.
+ * owner's browser never do, and a link between a preview and a public page is a full page load (TrackingBoundary), so the
+ * two never share a document. Like the GA checks in seo.spec.ts, these look at what runs in the browser, not the HTML.
+ *
+ * The tag is stubbed, so clarity.js never runs here. That is why the boundary is asserted as documents rather than as
+ * Clarity calls: the real script stops and restarts itself on every URL change, which a stub can't reproduce.
  */
 
 const tag = (page: Page) => page.locator(`script[src="https://www.clarity.ms/tag/${CLARITY_TEST_ID}"]`);
@@ -48,20 +51,43 @@ test("the owner's browser runs the loader but skips Clarity", async ({page, cont
   expect(await clarityCalls(page)).toBeNull();
 });
 
-test('going back from a public page to a draft preview stops Clarity', async ({page}) => {
+/** Marks the current document, so a later check can tell a client-side navigation from a page load. */
+const markDocument = (page: Page) => page.evaluate(() => Object.assign(window, {__sameDocument: true}));
+const sameDocument = (page: Page) => page.evaluate(() => (window as {__sameDocument?: boolean}).__sameDocument === true);
+
+test('a link out of a draft preview loads a new page, with no trace of the preview', async ({page}) => {
   await page.goto(PREVIEW());
   await expect(page.getByText(/preview · link valid for an hour/i)).toBeVisible();
+  await markDocument(page);
 
-  // The marker survives only client-side navigations. A plain <a> (the footer's) is a full load, and Back then restores
-  // the preview's own document from the bfcache, where Clarity never ran; the post's back link is a next/link.
-  await page.evaluate(() => Object.assign(window, {__sameDocument: true}));
+  // The post's back link is a next/link, which would otherwise navigate client-side and keep the preview in the DOM
+  await page.locator('main article a[href="/writing"]').first().click();
+  await page.waitForURL('**/writing');
+  expect(await sameDocument(page)).toBe(false);
+  await expect(tag(page)).toHaveCount(1);
+  // Hidden pages count too: a client-side navigation would leave the preview here, out of sight but recordable
+  await expect(page.getByText(/preview · link valid for an hour/i)).toHaveCount(0);
+});
+
+test('Back from a public page to a draft preview is a separate page that never ran Clarity', async ({page}) => {
+  await page.goto(PREVIEW());
   await page.locator('main article a[href="/writing"]').first().click();
   await page.waitForURL('**/writing');
   await expect(tag(page)).toHaveCount(1);
+  await markDocument(page);
 
   await page.goBack();
   await page.waitForURL('**/preview/**');
-  // Still the same document, so this was the client-side Back that the loader's one-time path check cannot see
-  expect(await page.evaluate(() => (window as {__sameDocument?: boolean}).__sameDocument)).toBe(true);
-  await expect.poll(() => clarityCalls(page)).toEqual([CONSENT, ['stop']]);
+  await expect(page.getByText(/preview · link valid for an hour/i)).toBeVisible();
+  expect(await sameDocument(page)).toBe(false);
+  expect(await clarityCalls(page)).toBeNull();
+});
+
+test('links between public pages stay client-side', async ({page}) => {
+  await page.goto('/writing');
+  await expect(tag(page)).toHaveCount(1);
+  await markDocument(page);
+  await page.locator('main a[href^="/writing/"]').first().click();
+  await page.waitForURL('**/writing/*');
+  expect(await sameDocument(page)).toBe(true);
 });

@@ -1,6 +1,5 @@
 import type {Metadata, Viewport} from 'next';
-import {Suspense} from 'react';
-import {ClarityRouteGuard} from '@/components/site/clarity-route-guard';
+import {TrackingBoundary} from '@/components/site/tracking-boundary';
 import {siteEnv} from '@/lib/env';
 import {OG_LOCALE, SITE_DESCRIPTION, SITE_NAME} from '@/lib/metadata';
 import {THEME_COLORS, THEME_SCRIPT} from '@/lib/theme';
@@ -64,10 +63,7 @@ export default function RootLayout({children}: LayoutProps<'/'>) {
       </head>
       <body>
         {children}
-        {/* Renders nothing. Its own boundary because usePathname can suspend on a route with an unknown dynamic param */}
-        <Suspense fallback={null}>
-          <ClarityRouteGuard />
-        </Suspense>
+        <TrackingBoundary />
       </body>
     </html>
   );

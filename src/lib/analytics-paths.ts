@@ -18,3 +18,31 @@ export const gaOptOutScript = (measurementId: string) =>
   `(function(){var k=${JSON.stringify(`ga-disable-${measurementId}`)},r=new RegExp(${JSON.stringify(UNTRACKED_PATH.source)}),d=Object.getOwnPropertyDescriptor(window,k);` +
   `if(d&&(d.get||d.set))return;var o=!!d&&d.value===true;` +
   'try{Object.defineProperty(window,k,{configurable:true,get:function(){return o||r.test(location.pathname)},set:function(v){o=v===true}})}catch(e){}})();';
+
+/** The parts of a link click that decide whether it may stay a client-side navigation. */
+type LinkClick = {
+  /** The page the click happens on: `location.href`. */
+  from: string;
+  /** The link's resolved `href`. */
+  to: string;
+  /** The link's `target` attribute, if any. */
+  target?: string | null;
+  /** A modifier key or a non-primary button: the browser opens a new tab or window, so the page itself stays put. */
+  modified?: boolean;
+  download?: boolean;
+};
+
+/**
+ * Whether a link click crosses between an untracked page (admin, sign-in, a draft preview) and a public one in the
+ * same tab, so it has to be a full page load. A client-side navigation would keep both in one document: Clarity's
+ * history wrapper would record the preview URL on Back (it stops and restarts itself on every URL change, so a stop
+ * from the app can't hold it), and the previous page stays in the DOM, hidden, where Clarity's snapshot reads it.
+ * Same-origin links on one side of the line stay client-side.
+ */
+export const crossesTrackingBoundary = ({from, to, target, modified, download}: LinkClick) => {
+  if (modified || download || (target && target !== '_self')) return false;
+  const current = new URL(from);
+  const next = new URL(to, current);
+  if (next.origin !== current.origin) return false;
+  return isUntrackedPath(current.pathname) !== isUntrackedPath(next.pathname);
+};
