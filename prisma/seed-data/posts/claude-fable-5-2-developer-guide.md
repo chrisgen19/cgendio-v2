@@ -16,7 +16,7 @@ Fable 5.2 and Mythos 5.2 are the same model. Fable ships with stronger cybersecu
 - **Faster.** Output is up to 30% faster than Fable 5.1. There's also a fast mode, new for Fable: up to 2.5x faster output at twice the price ($16 / $80). In the API you set `"speed": "fast"`, and in Claude Code you toggle it in the model picker, where it bills through extra usage credits ([@ClaudeDevs](https://x.com/ClaudeDevs/status/2119868701994570178)).
 - **Fewer false blocks.** Anthropic reports about 55% fewer safeguard blocks than 5.1, with about 60% fewer in cybersecurity and 40% fewer in biology. Requests that are still blocked can fall back to an older model: cybersecurity questions go to Opus 4.8 and biology questions to Opus 5.
 - **Limits.** A 1M token context window, up to 128K output tokens, and a June 2026 knowledge cutoff ([what's new in Fable 5.2](https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2)).
-- **Everywhere.** The model ID is `claude-fable-5-2` on the Claude Platform, AWS, Google Cloud and Microsoft Foundry.
+- **Most platforms.** The model ID is `claude-fable-5-2` on the Claude API, Claude Platform on AWS, Google Cloud and Microsoft Foundry. On Amazon Bedrock it's `global.anthropic.claude-fable-5-2` ([model overview](https://platform.claude.com/docs/en/models/fable-5-2/overview)).
 
 The benchmark jump over 5.1 is large. These are Anthropic's numbers from the [model page](https://www.anthropic.com/claude/fable), with most scores at each model's highest effort setting:
 
@@ -89,7 +89,7 @@ These are the patterns I'd reach for in a Next.js App Router project with the of
 
 ### Stream a response from a route handler
 
-Fable 5.2 turns can run for minutes and produce up to 128K tokens, so stream anything that isn't tiny. This route handler at `app/api/chat/route.ts` sets the effort explicitly and turns on server-side fallbacks. If Fable declines partway through, a fallback block marks the switch, and the fallback model carries on from the partial text. If the whole chain declines, the route says so, and the client should discard the partial text. It also stops the request when the reader closes the tab, so you don't pay for tokens nobody sees.
+Fable 5.2 turns can run for minutes and produce up to 128K tokens, so stream anything that isn't tiny. This route handler at `app/api/chat/route.ts` sets the effort explicitly and turns on server-side fallbacks. It streams newline-delimited JSON instead of plain text, so the client can always tell the model's words from status events. `text` events carry the answer. If Fable declines partway through, a `switch` event marks the switch, and the fallback model carries on from the partial text. A final `end` event carries the stop reason, and only `end_turn` means a finished answer. On `refusal` the whole chain declined, and the client should discard the partial text. On `max_tokens` or `model_context_window_exceeded` the answer was cut off. The route also stops the request when the reader closes the tab, so you don't pay for tokens nobody sees.
 
 A route handler is a public endpoint, and at Fable prices that matters. Cap the input as this one does, and put auth and rate limiting in front of it before it goes live. The same goes for the server action below.
 
@@ -99,6 +99,12 @@ import Anthropic from '@anthropic-ai/sdk';
 const client = new Anthropic();
 const encoder = new TextEncoder();
 const MAX_PROMPT_CHARS = 20_000;
+
+// One JSON object per line, so the model's text can't be mistaken for a status event
+type StreamEvent =
+  | {type: 'text'; text: string}
+  | {type: 'switch'}
+  | {type: 'end'; stopReason: string | null};
 
 export async function POST(request: Request): Promise<Response> {
   // Invalid JSON becomes null, so it gets a 400 below instead of a 500
@@ -121,19 +127,21 @@ export async function POST(request: Request): Promise<Response> {
 
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const send = (text: string) => controller.enqueue(encoder.encode(text));
+      const send = (event: StreamEvent) =>
+        controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
       try {
         for await (const event of stream) {
           if (event.type === 'content_block_start') {
             // Marks where the fallback model takes over from the partial text
-            if (event.content_block.type === 'fallback') send('\n[Switched model]\n');
+            if (event.content_block.type === 'fallback') send({type: 'switch'});
           } else if (event.type === 'content_block_delta') {
-            if (event.delta.type === 'text_delta') send(event.delta.text);
+            const {delta} = event;
+            if (delta.type === 'text_delta') send({type: 'text', text: delta.text});
           }
         }
+        // Only 'end_turn' is a finished answer; the client handles the rest
         const final = await stream.finalMessage();
-        // The whole fallback chain declined: the client should discard the partial text
-        if (final.stop_reason === 'refusal') send('\n[Declined]');
+        send({type: 'end', stopReason: final.stop_reason});
         controller.close();
       } catch (error) {
         controller.error(error);
@@ -144,7 +152,8 @@ export async function POST(request: Request): Promise<Response> {
       stream.abort();
     },
   });
-  return new Response(body, {headers: {'Content-Type': 'text/plain; charset=utf-8'}});
+  const headers = {'Content-Type': 'application/x-ndjson; charset=utf-8'};
+  return new Response(body, {headers});
 }
 ```
 
@@ -186,7 +195,7 @@ export async function explainError(log: string): Promise<Diagnosis> {
 
 ### Cache the big, stable part of the prompt
 
-Cache reads cost $0.20 per million tokens against $8 for fresh input, so a large system prompt that stays the same on every request pays off quickly. Caching is a prefix match: change one byte near the start and everything after it is a cache miss. The minimum cacheable prompt is 512 tokens. Counting tokens first lets you refuse a request that would cost more than you expect. The file is read from `process.cwd()`. If you deploy with `output: 'standalone'`, list it in `outputFileTracingIncludes` so it gets copied into the build.
+Cache reads cost $0.20 per million tokens against $8 for fresh input, so a large system prompt that stays the same on every request pays off quickly. Caching is a prefix match: change one byte near the start and everything after it is a cache miss. The minimum cacheable prompt is 512 tokens. Counting tokens first lets you turn away an oversized prompt before you pay for it. It only counts input: the output, up to `max_tokens`, and any cache write come on top. The file is read from `process.cwd()`. If you deploy with `output: 'standalone'`, list it in `outputFileTracingIncludes` so it gets copied into the build.
 
 ```ts
 import {readFileSync} from 'node:fs';
@@ -206,7 +215,8 @@ const system: Anthropic.TextBlockParam[] = [
   },
 ];
 
-// 200K input tokens cost $1.60 uncached at $8 per million, or $0.04 as cache reads
+// An input-size limit, not a cost cap: output (up to max_tokens) and cache writes
+// come on top. 200K input tokens cost $1.60 uncached, or $0.04 as cache reads.
 const MAX_INPUT_TOKENS = 200_000;
 
 export async function askDocs(question: string): Promise<string> {
@@ -235,7 +245,7 @@ export async function askDocs(question: string): Promise<string> {
 
 *The orchestrator pattern: one planner, many cheap workers.*
 
-Anthropic's prompting guide says early testers had good results using Fable 5.2 as the planner and orchestrator for other models, and warns that subagents can be a large share of the cost. The idea: the expensive model writes a short plan, and a cheap model does the bulk of the work in parallel. This sketch assumes the steps don't depend on each other.
+Anthropic's prompting guide says early testers had good results using Fable 5.2 as the planner and orchestrator for other models, and warns that subagents can be a large share of the cost. The idea: the expensive model writes a short plan, and a cheap model does the bulk of the work in parallel. This sketch assumes the steps don't depend on each other. The workers have no tools, so they only see text: put any file contents or data a step needs into the task. The function rejects a plan with more than 8 steps before any worker starts, and it fails if a worker refuses or runs out of tokens, instead of returning half-done work.
 
 ```ts
 import Anthropic from '@anthropic-ai/sdk';
@@ -261,6 +271,10 @@ export async function planAndDelegate(task: string): Promise<string[]> {
     throw new Error('No plan returned');
   }
   const {steps} = plan.parsed_output;
+  // The prompt asks for at most 8 steps, but only this check guarantees it
+  if (steps.length === 0 || steps.length > 8) {
+    throw new Error(`Expected 1 to 8 steps, got ${steps.length}`);
+  }
 
   // Haiku 5.5 does the bulk of the work, all steps at once
   const results = await Promise.all(
@@ -274,6 +288,11 @@ export async function planAndDelegate(task: string): Promise<string[]> {
       }),
     ),
   );
+  // A refused or cut-off step isn't finished work, so fail instead of returning it
+  const unfinished = results.filter((result) => result.stop_reason !== 'end_turn');
+  if (unfinished.length > 0) {
+    throw new Error(`${unfinished.length} step(s) did not finish`);
+  }
   return results.map(textOf);
 }
 ```
@@ -300,6 +319,6 @@ export async function planAndDelegate(task: string): Promise<string[]> {
 ## Sources
 
 - Anthropic: [launch post](https://www.anthropic.com/claude-fable-and-mythos-5-2), [Fable model page](https://www.anthropic.com/claude/fable), [system card](https://www.anthropic.com/claude-fable-5-2-mythos-5-2-system-card)
-- Docs: [What's new in Fable 5.2](https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2), [Prompting Claude Fable 5.2](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2), [pricing](https://platform.claude.com/docs/en/about-claude/pricing), [preserved thinking](https://platform.claude.com/docs/en/build-with-claude/preserved-thinking), [refusals and fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback), [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), [computer use tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool)
+- Docs: [Fable 5.2 model overview](https://platform.claude.com/docs/en/models/fable-5-2/overview), [What's new in Fable 5.2](https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2), [Prompting Claude Fable 5.2](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2), [pricing](https://platform.claude.com/docs/en/about-claude/pricing), [preserved thinking](https://platform.claude.com/docs/en/build-with-claude/preserved-thinking), [refusals and fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback), [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), [computer use tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool)
 - Hacker News: [launch thread](https://news.ycombinator.com/item?id=50429068), [Artificial Analysis thread](https://news.ycombinator.com/item?id=50431144), and the comments linked above
 - X: [@claudeai launch post](https://x.com/claudeai/status/2119867114450268322), [@ClaudeDevs on availability](https://x.com/ClaudeDevs/status/2119868698613956992), [@ClaudeDevs on fast mode](https://x.com/ClaudeDevs/status/2119868701994570178), [Matthew Berman](https://x.com/MatthewBerman/status/2119871207206158459)
