@@ -3,11 +3,11 @@
  * (used by CI) all read these values. Variables set here win over .env, so a local run never uses real secrets, the
  * real database or the real Resend API. CI's Postgres service listens on the same port as compose.yaml's.
  */
-import {e2eInstance, e2eInstanceName} from './e2e-instance.ts';
+import {resolveE2eInstance} from './e2e-instance.ts';
 
-/** null in the main checkout and CI; a git worktree's own name otherwise (see e2e-instance.ts). */
-export const E2E_INSTANCE = e2eInstanceName(process.cwd(), process.env);
-const instance = e2eInstance(E2E_INSTANCE);
+/** This checkout's database and ports: the default in the main checkout and CI, a git worktree's own otherwise. */
+export const E2E_INSTANCE = resolveE2eInstance(process.cwd(), process.env);
+const instance = E2E_INSTANCE;
 
 export const E2E_PORT = instance.port;
 export const E2E_BASE_URL = `http://localhost:${E2E_PORT}`;
