@@ -101,10 +101,8 @@ const encoder = new TextEncoder();
 const MAX_PROMPT_CHARS = 20_000;
 
 // One JSON object per line, so the model's text can't be mistaken for a status event
-type StreamEvent =
-  | {type: 'text'; text: string}
-  | {type: 'switch'}
-  | {type: 'end'; stopReason: string | null};
+type EndEvent = {type: 'end'; stopReason: string | null};
+type StreamEvent = {type: 'text'; text: string} | {type: 'switch'} | EndEvent;
 
 export async function POST(request: Request): Promise<Response> {
   // Invalid JSON becomes null, so it gets a 400 below instead of a 500
@@ -127,8 +125,9 @@ export async function POST(request: Request): Promise<Response> {
 
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const send = (event: StreamEvent) =>
+      const send = (event: StreamEvent) => {
         controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+      };
       try {
         for await (const event of stream) {
           if (event.type === 'content_block_start') {
@@ -256,8 +255,10 @@ const client = new Anthropic();
 const planSchema = z.object({steps: z.array(z.string())});
 const PLAN_PROMPT = 'Split this into at most 8 independent steps a small model can do:';
 
-const textOf = (message: Anthropic.Message) =>
-  message.content.map((block) => (block.type === 'text' ? block.text : '')).join('');
+const textOf = (message: Anthropic.Message) => {
+  const parts = message.content.map((b) => (b.type === 'text' ? b.text : ''));
+  return parts.join('');
+};
 
 export async function planAndDelegate(task: string): Promise<string[]> {
   // Fable 5.2 plans: the expensive model only writes a short list
