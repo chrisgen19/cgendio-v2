@@ -67,7 +67,7 @@ So where would I pay for it? Multi-repo refactors and migrations, deep code and 
 
 ## What developers are saying
 
-![Hacker News thread titled Claude Fable 5.2 and Mythos 5.2, showing 914 points and 1,044 comments](/__fable-images/hn-thread.webp)
+![Hacker News thread titled Claude Fable 5.2 and Mythos 5.2, showing 914 points and over 1,000 comments](/__fable-images/hn-thread.webp)
 
 *Hacker News, at the time of writing (November 12, 2026).*
 
@@ -101,7 +101,9 @@ const encoder = new TextEncoder();
 const MAX_PROMPT_CHARS = 20_000;
 
 export async function POST(request: Request): Promise<Response> {
-  const {prompt} = (await request.json()) as {prompt?: unknown};
+  // Invalid JSON becomes null, so it gets a 400 below instead of a 500
+  const input = (await request.json().catch(() => null)) as {prompt?: unknown} | null;
+  const prompt = input?.prompt;
   if (typeof prompt !== 'string' || !prompt.trim()) {
     return new Response('Missing prompt', {status: 400});
   }
@@ -184,20 +186,22 @@ export async function explainError(log: string): Promise<Diagnosis> {
 
 ### Cache the big, stable part of the prompt
 
-Cache reads cost $0.20 per million tokens against $8 for fresh input, so a large system prompt that stays the same on every request pays off quickly. Caching is a prefix match: change one byte near the start and everything after it is a cache miss. The minimum cacheable prompt is 512 tokens. Counting tokens first lets you refuse a request that would cost more than you expect.
+Cache reads cost $0.20 per million tokens against $8 for fresh input, so a large system prompt that stays the same on every request pays off quickly. Caching is a prefix match: change one byte near the start and everything after it is a cache miss. The minimum cacheable prompt is 512 tokens. Counting tokens first lets you refuse a request that would cost more than you expect. The file is read from `process.cwd()`. If you deploy with `output: 'standalone'`, list it in `outputFileTracingIncludes` so it gets copied into the build.
 
 ```ts
 import {readFileSync} from 'node:fs';
+import path from 'node:path';
 import Anthropic from '@anthropic-ai/sdk';
 
 const client = new Anthropic();
 const model = 'claude-fable-5-2';
 
-// The same bytes on every request, so after the first call it's read from the cache
+// The same bytes on every request, so it can be cached. The cache lasts 5 minutes
+// and each hit restarts the clock. Writing it costs $10 per million, not $8.
 const system: Anthropic.TextBlockParam[] = [
   {
     type: 'text',
-    text: readFileSync('./docs/handbook.md', 'utf8'),
+    text: readFileSync(path.join(process.cwd(), 'docs/handbook.md'), 'utf8'),
     cache_control: {type: 'ephemeral'},
   },
 ];
@@ -265,7 +269,8 @@ export async function planAndDelegate(task: string): Promise<string[]> {
         model: 'claude-haiku-5-5',
         max_tokens: 8000,
         output_config: {effort: 'low'},
-        messages: [{role: 'user', content: step}],
+        // The worker sees the whole task, but only does its own step
+        messages: [{role: 'user', content: `${task}\n\nDo only this step: ${step}`}],
       }),
     ),
   );
