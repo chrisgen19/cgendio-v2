@@ -224,7 +224,11 @@ export function WalkthroughTour({frames, liveUrl, host, optimizedUrls, hero, not
                   <i className="size-2.5 rounded-full bg-line" />
                 </span>
                 {href ? (
-                  <a href={href} rel="noreferrer" className="flex min-h-11 min-w-0 flex-1 items-center gap-2 text-ink no-underline hover:text-accent">
+                  <a
+                    href={href}
+                    rel="nofollow noreferrer"
+                    className="flex min-h-11 min-w-0 flex-1 items-center gap-2 text-ink no-underline hover:text-accent"
+                  >
                     <Address stop={current} host={host} />
                     <span className="sr-only">: open {current.heading} on the live site</span>
                     <svg

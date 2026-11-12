@@ -25,7 +25,7 @@ function Fact({label, children}: {label: string; children: ReactNode}) {
 
 function ExternalLink({href, children}: {href: string; children: ReactNode}) {
   return (
-    <a href={href} rel="noreferrer" className="inline-flex min-h-11 items-center gap-1.5 font-semibold">
+    <a href={href} rel="nofollow noreferrer" className="inline-flex min-h-11 items-center gap-1.5 font-semibold">
       {children}
       {EXTERNAL_ICON}
     </a>

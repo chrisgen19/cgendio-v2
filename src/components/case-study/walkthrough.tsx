@@ -51,13 +51,13 @@ function Hero({project, opening, host, optimizedUrls}: HeroProps) {
           </Link>
           <div className="flex flex-wrap items-center gap-2">
             {project.repoUrl ? (
-              <Button href={project.repoUrl} rel="noreferrer" size="sm" variant="secondary">
+              <Button href={project.repoUrl} rel="nofollow noreferrer" size="sm" variant="secondary">
                 Repository
                 {EXTERNAL_ICON}
               </Button>
             ) : null}
             {project.liveUrl ? (
-              <Button href={project.liveUrl} rel="noreferrer" size="sm">
+              <Button href={project.liveUrl} rel="nofollow noreferrer" size="sm">
                 Live site
                 {EXTERNAL_ICON}
               </Button>
@@ -141,7 +141,7 @@ function Note({note, number, liveUrl, host, optimizedUrls}: NoteProps) {
                 {href ? (
                   <a
                     href={href}
-                    rel="noreferrer"
+                    rel="nofollow noreferrer"
                     // min-w-11 so a short path ("/") still gives a 44px-wide target
                     className="-my-3 inline-flex min-h-11 min-w-11 scroll-mt-[calc(46svh+var(--header-h))] scroll-mb-24 items-center gap-1.5 font-mono text-xs break-all lg:scroll-mt-24"
                   >
