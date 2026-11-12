@@ -77,9 +77,6 @@ jobs:
       - name: E2E tests
         run: pnpm exec playwright test ${{ inputs.update_snapshots && '--update-snapshots=all' || '' }}
 
-      - name: Admin development validation
-        run: pnpm exec playwright test --config=playwright.admin-dev.config.ts
-
       - name: Upload the Playwright report
         if: failure()
         uses: actions/upload-artifact@v7
@@ -99,6 +96,61 @@ jobs:
           path: e2e/**/__screenshots__/**/*-linux.png
           if-no-files-found: ignore
           retention-days: 7
+
+  # The admin under `next dev`: redirects and Instant Navigation warnings (playwright.admin-dev.config.ts). It needs a
+  # seeded database but not the production build, so it runs beside `checks` instead of after it. A run that only
+  # regenerates the visual baselines skips it.
+  admin-dev:
+    name: Admin development validation
+    if: ${{ !inputs.update_snapshots }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: cgendio
+          POSTGRES_DB: cgendio
+          # Throwaway container reachable only from this job: no password, so none is committed
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5437:5432
+        options: >-
+          --health-cmd "pg_isready -U cgendio -d cgendio"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare the e2e database
+        run: pnpm test:e2e:prepare
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Admin development validation
+        run: pnpm exec playwright test --config=playwright.admin-dev.config.ts
+
+      - name: Upload the admin development report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: admin-dev-report
+          path: |
+            playwright-report/admin-dev/
+            test-results/admin-dev/
+          retention-days: 14
 
   # Only on a manual run with update_snapshots: writes the -darwin.png baselines (screenshots differ between macOS and
   # Linux font rendering) so they don't have to come from a Mac. It never gates a PR.
