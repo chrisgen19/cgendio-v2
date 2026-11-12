@@ -36,10 +36,16 @@ describe('outboundTarget', () => {
     expect(outboundTarget(project, 'portal')).toBe('https://portal.client.example/login');
   });
 
-  it('never leaves the live site, and has nowhere to go without one or for an unknown stop', () => {
-    expect(outboundTarget(project, 'away')).toBeNull();
-    expect(outboundTarget(project, 'missing')).toBeNull();
-    expect(outboundTarget(project, '')).toBeNull();
+  it('sends an unknown or deleted stop to the live site, so an old link still lands somewhere', () => {
+    expect(outboundTarget(project, 'missing')).toBe('https://www.client.example/');
+    expect(outboundTarget(project, '')).toBe('https://www.client.example/');
+  });
+
+  it('never leaves the live site: a stop on another domain goes to the live site instead', () => {
+    expect(outboundTarget(project, 'away')).toBe('https://www.client.example/');
+  });
+
+  it('has nowhere to go without a live site', () => {
     expect(outboundTarget({...project, liveUrl: null}, null)).toBeNull();
     expect(outboundTarget({...project, liveUrl: null}, 'home')).toBeNull();
   });
