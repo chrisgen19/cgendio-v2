@@ -25,6 +25,7 @@ const COMPLETE = {
   RESEND_API_KEY: 're_live_key',
   MAIL_FROM: 'Chris Diomampo <chris@cgdiomampo.dev>',
   GA_MEASUREMENT_ID: 'G-ABC1234567',
+  CLARITY_PROJECT_ID: 'zc88qmno9y',
   INDEXNOW_KEY: 'abcdef0123456789',
 };
 
@@ -90,9 +91,10 @@ describe('what only warns', () => {
     expect(warnings.join('\n')).toContain('RESEND_API_KEY');
   });
 
-  // These two schemas never throw on purpose, so a typo in an optional setting can't take the site down
+  // These schemas never throw on purpose, so a typo in an optional setting can't take the site down
   it.each([
     ['GA_MEASUREMENT_ID', 'not-a-ga-id'],
+    ['CLARITY_PROJECT_ID', 'NOT-AN-ID'],
     ['INDEXNOW_KEY', '!!'],
   ])('warns, but does not fail, on a malformed %s', (variable, value) => {
     const {errors, warnings} = checkServerSecrets({...COMPLETE, [variable]: value});
@@ -100,7 +102,7 @@ describe('what only warns', () => {
     expect(warnings.join('\n')).toContain(variable);
   });
 
-  it.each(['GA_MEASUREMENT_ID', 'INDEXNOW_KEY'])('warns that %s is off when it is unset', (variable) => {
+  it.each(['GA_MEASUREMENT_ID', 'CLARITY_PROJECT_ID', 'INDEXNOW_KEY'])('warns that %s is off when it is unset', (variable) => {
     expect(checkServerSecrets({...COMPLETE, [variable]: undefined}).warnings.join('\n')).toContain(`${variable} is not set`);
   });
 });

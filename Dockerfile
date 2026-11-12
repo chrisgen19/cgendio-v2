@@ -41,6 +41,7 @@ ARG DATABASE_URL
 ARG NEXT_PUBLIC_SITE_URL
 ARG R2_PUBLIC_URL
 ARG GA_MEASUREMENT_ID
+ARG CLARITY_PROJECT_ID
 # SEED_ONLY_IF_EMPTY: the seed inserts every missing row, so on a database the site already runs against it would bring
 # back seeded content deleted in the admin. With it, only the first deploy seeds (prisma/seed.mts).
 RUN for name in DATABASE_URL NEXT_PUBLIC_SITE_URL R2_PUBLIC_URL; do \

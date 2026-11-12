@@ -17,6 +17,10 @@ export const HSTS = 'max-age=63072000; includeSubDomains';
 const GA_SCRIPT = ['https://*.googletagmanager.com'];
 const GA_CONNECT = ['https://*.google-analytics.com', 'https://*.analytics.google.com', 'https://*.googletagmanager.com'];
 
+/** Clarity's CSP guidance (learn.microsoft.com/clarity/setup-and-installation/clarity-csp): the tag and its beacons use
+ * www.clarity.ms and the load-balanced [a-z].clarity.ms hosts, plus c.bing.com. */
+const CLARITY = ['https://*.clarity.ms', 'https://c.bing.com'];
+
 /** Admin uploads PUT straight to the bucket from the browser (src/components/admin/upload-field.tsx). The account id is
  * only known at runtime, while this header is compiled at build time, so the host stays a wildcard. */
 const R2_UPLOAD = 'https://*.r2.cloudflarestorage.com';
@@ -42,8 +46,8 @@ type PolicyOptions = {
 export const contentSecurityPolicy = ({isDev, siteUrl}: PolicyOptions) => {
   const directives: Array<[string, string[]]> = [
     ['default-src', ["'self'"]],
-    // Inline: the theme script in the root layout and GA's config snippet, plus Next's own flight data scripts
-    ['script-src', ["'self'", "'unsafe-inline'", ...(isDev ? ["'unsafe-eval'"] : []), ...GA_SCRIPT]],
+    // Inline: the theme script in the root layout, GA's config snippet and Clarity's loader, plus Next's own flight data scripts
+    ['script-src', ["'self'", "'unsafe-inline'", ...(isDev ? ["'unsafe-eval'"] : []), ...GA_SCRIPT, ...CLARITY]],
     // React and the Remotion player write style attributes, which count as inline styles
     ['style-src', ["'self'", "'unsafe-inline'"]],
     // Any https host, because an editor may paste a cover URL or a Markdown image on one: the admin accepts any http(s)
@@ -56,7 +60,7 @@ export const contentSecurityPolicy = ({isDev, siteUrl}: PolicyOptions) => {
     // The film is silent, but the Remotion player still preallocates <audio> tags on a base64 data URL
     // (node_modules/remotion/dist/cjs/audio/shared-audio-tags.js), which default-src 'self' would block
     ['media-src', ["'self'", 'data:']],
-    ['connect-src', ["'self'", R2_UPLOAD, ...GA_CONNECT]],
+    ['connect-src', ["'self'", R2_UPLOAD, ...GA_CONNECT, ...CLARITY]],
     ['object-src', ["'none'"]],
     ['base-uri', ["'self'"]],
     // Server actions post to this origin; GitHub sign-in is a script redirect, not a form, so it isn't affected

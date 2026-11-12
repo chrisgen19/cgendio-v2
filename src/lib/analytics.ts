@@ -44,7 +44,8 @@ export const markInternal = () => {
   document.cookie = internalCookie(location.protocol === 'https:');
 };
 
-const INTERNAL_PATTERN = `(?:^|;\\s*)${INTERNAL_COOKIE}=1(?:;|$)`;
+/** Matches the internal-traffic cookie in `document.cookie`. A string, because the inline GA and Clarity scripts embed it. */
+export const INTERNAL_PATTERN = `(?:^|;\\s*)${INTERNAL_COOKIE}=1(?:;|$)`;
 
 /**
  * The inline script that sets up gtag before gtag.js arrives: the opt-out for untracked pages, the dataLayer queue and

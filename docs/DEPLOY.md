@@ -36,7 +36,7 @@ Two things specific to this site:
 
 ## Environment variables
 
-**Build** means the Coolify **Build Variable** box is checked, so the value reaches `next build`. Four variables are needed in *both* places, which is the easy thing to get wrong.
+**Build** means the Coolify **Build Variable** box is checked, so the value reaches `next build`. Five variables are needed in *both* places, which is the easy thing to get wrong.
 
 **Startup** means the server refuses to start without it (`src/server/startup-env-check.ts`, #105): `instrumentation.ts` checks these before the server takes requests, so a missing one fails the deploy instead of a page. Everything else either has a safe default or only disables the feature it belongs to, and is reported as a warning in the same log.
 
@@ -46,6 +46,7 @@ Two things specific to this site:
 | `NEXT_PUBLIC_SITE_URL` | yes | yes | | `https://<domain>`, no trailing slash. Inlined into the client bundle. The build fails without it (guarded). See the scheme rule below. |
 | `R2_PUBLIC_URL` | yes | yes | **fatal** | The bucket's public base URL, no trailing slash. Fixes the allowed image host for the optimizer (`next.config.ts:24`), so a wrong value breaks every optimized image. The build fails without it (guarded), and the server refuses to start without it: `r2Env()` parses the whole R2 schema at runtime, so a value that reaches the build and not the container would only fail on the first admin upload. |
 | `GA_MEASUREMENT_ID` | yes | yes | warns | `G-XXXXXXXXXX`. Build variable because the public pages are prerendered with the tag. Not guarded: unset means no tag at all, and a malformed value is ignored with a logged warning rather than taking a page down. |
+| `CLARITY_PROJECT_ID` | yes | yes | warns | The Clarity project id (Settings > Overview). Build variable for the same reason as `GA_MEASUREMENT_ID`, and handled the same way when unset or malformed. |
 | `BETTER_AUTH_SECRET` | | yes | **fatal** | A new value, `openssl rand -base64 32`. Do not reuse the local one. At least 32 characters. |
 | `BETTER_AUTH_URL` | | yes | **fatal** | Same as `NEXT_PUBLIC_SITE_URL`. |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | | yes | **fatal** | From the **production** OAuth app (section 5). The server refuses to start without them. |
@@ -55,7 +56,7 @@ Two things specific to this site:
 | `MAIL_FROM` | | yes | | A sender on a Resend-verified domain. `onboarding@resend.dev` only delivers to your own Resend account address. |
 | `INDEXNOW_KEY` | | yes | warns | Runtime only; the key route reads it per request. Use v1's existing value so `/indexnow-key.txt` serves the same key through the cutover. Unset means no pings and a 404 key file. |
 
-The build only needs the four build variables: the schemas in `src/lib/env.ts` are split by concern and parsed on first use, so a build never needs the auth, R2 or mail secrets. The running server is stricter - it checks the fatal ones above before it serves anything.
+The build only needs the five build variables: the schemas in `src/lib/env.ts` are split by concern and parsed on first use, so a build never needs the auth, R2 or mail secrets. The running server is stricter - it checks the fatal ones above before it serves anything.
 
 **Renamed from v1's Coolify keys, so do not copy them across blindly:** `SITE_URL` is now `NEXT_PUBLIC_SITE_URL`, and `ADMIN_EMAIL` is now `ADMIN_EMAILS`. New in v2: `RESEND_API_KEY`, `MAIL_FROM` and the four `R2_*` upload keys.
 
@@ -70,7 +71,7 @@ So an https value served over plain http makes the browser upgrade the page's ow
 1. **Coolify project and GitHub App.** Connect the repo `chrisgen19/cgendio-v2` through Coolify's GitHub App.
 2. **Postgres: a new database for v2.** Production is the database `cgendio_v2` on the existing shared server in the `Postgres Database` project, owned by its own `cgendio_v2` role with no admin rights. That server runs Postgres 17, while local development and CI run 18 (`compose.yaml`); all the migrations have applied cleanly on 17. **Never reuse v1's database** (`cgendio`) - the schemas differ, and v1 has to stay intact for rollback. Use the server's **internal** host in `DATABASE_URL`, with the `cgendio_v2` role. The backup schedule is a fixed list of database names, so a new database has to be added to it by name.
 3. **Application.** New resource → Application, from `chrisgen19/cgendio-v2`, branch `main`. Build pack: **Dockerfile**. Port `3000`.
-4. **Variables** per the table above, with the four build boxes ticked. Turn on **Use Docker Build Secrets** so build-time values are passed as BuildKit secrets; either way they stay out of the final image, since only the builder stage reads them. Leave the pre- and post-deployment commands empty.
+4. **Variables** per the table above, with the five build boxes ticked. Turn on **Use Docker Build Secrets** so build-time values are passed as BuildKit secrets; either way they stay out of the final image, since only the builder stage reads them. Leave the pre- and post-deployment commands empty.
 5. **Production GitHub OAuth app.** A second app (GitHub → Settings → Developer settings → OAuth Apps), homepage `https://<domain>`, callback `https://<domain>/api/auth/callback/github`. Keep the local app for `localhost:3000`.
 6. **R2 for production.** Use a custom domain, not `r2.dev`: Cloudflare rate-limits it and documents it as development-only. In the bucket's **CORS Policy**, allow the production origin, or admin uploads fail from the live site - the browser `PUT`s straight to the bucket (`src/components/admin/upload-field.tsx`):
 

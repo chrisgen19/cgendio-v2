@@ -1,4 +1,5 @@
 import type {Metadata, Viewport} from 'next';
+import {TrackingBoundary} from '@/components/site/tracking-boundary';
 import {siteEnv} from '@/lib/env';
 import {OG_LOCALE, SITE_DESCRIPTION, SITE_NAME} from '@/lib/metadata';
 import {THEME_COLORS, THEME_SCRIPT} from '@/lib/theme';
@@ -60,7 +61,10 @@ export default function RootLayout({children}: LayoutProps<'/'>) {
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: a fixed script from src/lib/theme.ts, no user input */}
         <script dangerouslySetInnerHTML={{__html: THEME_SCRIPT}} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <TrackingBoundary />
+      </body>
     </html>
   );
 }

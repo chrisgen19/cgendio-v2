@@ -1,5 +1,5 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {authSecretEnvSchema, parseAnalyticsEnv, parseIndexNowEnv} from './env';
+import {authSecretEnvSchema, parseAnalyticsEnv, parseClarityEnv, parseIndexNowEnv} from './env';
 
 /*
  * GoogleAnalytics reads this while rendering every public page, so a malformed id has to disable the tag rather than
@@ -38,6 +38,26 @@ describe('parseAnalyticsEnv', () => {
     parseAnalyticsEnv({GA_MEASUREMENT_ID: 'nope'});
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn.mock.calls[0]?.[0]).toContain('GA_MEASUREMENT_ID');
+  });
+});
+
+/* MicrosoftClarity reads this while rendering every public page too, so it follows the same never-throw rule. */
+describe('parseClarityEnv', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('reads a well-formed id', () => {
+    expect(parseClarityEnv({CLARITY_PROJECT_ID: 'zc88qmno9y'}).CLARITY_PROJECT_ID).toBe('zc88qmno9y');
+  });
+
+  it('treats unset and empty as no Clarity', () => {
+    expect(parseClarityEnv({}).CLARITY_PROJECT_ID).toBeUndefined();
+    expect(parseClarityEnv({CLARITY_PROJECT_ID: ''}).CLARITY_PROJECT_ID).toBeUndefined();
+  });
+
+  it.each(['ZC88QMNO9Y', 'zc88 qmno9y', 'zc88-qmno9y', '"+alert(1)+"'])('turns Clarity off rather than throwing for %j', (id) => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(parseClarityEnv({CLARITY_PROJECT_ID: id}).CLARITY_PROJECT_ID).toBeUndefined();
+    expect(warn.mock.calls[0]?.[0]).toContain('CLARITY_PROJECT_ID');
   });
 });
 

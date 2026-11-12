@@ -46,8 +46,14 @@ describe('contentSecurityPolicy', () => {
     expect(directives['font-src']).toEqual(["'self'"]);
   });
 
-  it('allows the inline scripts and the GA tag, and nothing else executable', () => {
-    expect(parse(contentSecurityPolicy(PRODUCTION))['script-src']).toEqual(["'self'", "'unsafe-inline'", 'https://*.googletagmanager.com']);
+  it('allows the inline scripts and the GA and Clarity tags, and nothing else executable', () => {
+    expect(parse(contentSecurityPolicy(PRODUCTION))['script-src']).toEqual([
+      "'self'",
+      "'unsafe-inline'",
+      'https://*.googletagmanager.com',
+      'https://*.clarity.ms',
+      'https://c.bing.com',
+    ]);
   });
 
   it("adds 'unsafe-eval' in dev only, where React evaluates code to rebuild server stacks", () => {
@@ -72,13 +78,15 @@ describe('contentSecurityPolicy', () => {
     expect(parse(contentSecurityPolicy(PRODUCTION))['img-src']).not.toContain('http:');
   });
 
-  it('allows the browser-side R2 upload and the GA beacons to connect', () => {
+  it('allows the browser-side R2 upload and the GA and Clarity beacons to connect', () => {
     expect(parse(contentSecurityPolicy(PRODUCTION))['connect-src']).toEqual([
       "'self'",
       'https://*.r2.cloudflarestorage.com',
       'https://*.google-analytics.com',
       'https://*.analytics.google.com',
       'https://*.googletagmanager.com',
+      'https://*.clarity.ms',
+      'https://c.bing.com',
     ]);
   });
 
