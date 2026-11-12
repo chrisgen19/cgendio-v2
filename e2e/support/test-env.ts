@@ -3,17 +3,22 @@
  * (used by CI) all read these values. Variables set here win over .env, so a local run never uses real secrets, the
  * real database or the real Resend API. CI's Postgres service listens on the same port as compose.yaml's.
  */
+import {e2eInstance, e2eInstanceName} from './e2e-instance.ts';
 
-export const E2E_PORT = 3100;
+/** null in the main checkout and CI; a git worktree's own name otherwise (see e2e-instance.ts). */
+export const E2E_INSTANCE = e2eInstanceName(process.cwd(), process.env);
+const instance = e2eInstance(E2E_INSTANCE);
+
+export const E2E_PORT = instance.port;
 export const E2E_BASE_URL = `http://localhost:${E2E_PORT}`;
 
-export const ADMIN_DEV_PORT = 3102;
+export const ADMIN_DEV_PORT = instance.adminDevPort;
 export const ADMIN_DEV_URL = `http://localhost:${ADMIN_DEV_PORT}`;
 export const ADMIN_DEV_FIXTURES = 'e2e/.auth/admin-dev.json';
 export const ADMIN_DEV_LOG = 'e2e/.auth/admin-dev-server.log';
 
 /** e2e/support/mock-resend.mts listens here and records every email the app sends. */
-export const MOCK_RESEND_PORT = 3199;
+export const MOCK_RESEND_PORT = instance.mockResendPort;
 export const MOCK_RESEND_URL = `http://127.0.0.1:${MOCK_RESEND_PORT}`;
 
 export const ADMIN_EMAIL = 'e2e-admin@example.test';
@@ -34,8 +39,9 @@ export const CLARITY_TEST_ID = 'e2etest000';
 export const INDEXNOW_TEST_KEY = 'e2e-indexnow-key-0000';
 
 export const testEnv = {
-  // The prepare script drops and recreates this database, so it refuses any name that doesn't end in _test
-  DATABASE_URL: 'postgresql://cgendio:cgendio@localhost:5437/cgendio_test',
+  // The prepare script drops and recreates this database, so it refuses any name that doesn't end in _test. One Postgres
+  // (compose.yaml's) serves every checkout; each instance has its own database on it.
+  DATABASE_URL: `postgresql://cgendio:cgendio@localhost:5437/${instance.database}`,
   BETTER_AUTH_SECRET: 'e2e-only-secret-not-used-anywhere-else-0123456789',
   BETTER_AUTH_URL: E2E_BASE_URL,
   GITHUB_CLIENT_ID: 'e2e-github-client-id',

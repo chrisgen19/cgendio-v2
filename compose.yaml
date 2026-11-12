@@ -1,4 +1,9 @@
 # Local development database only. Production runs Postgres in Coolify on the Hostinger VPS.
+# A fixed project name, so `pnpm db:up` in a git worktree finds this container instead of creating a second one with
+# the same container_name (compose would otherwise name the project after the folder). Every checkout shares this
+# Postgres, each e2e run with its own database (e2e/support/e2e-instance.ts), so `pnpm db:down` stops it for all of them.
+name: cgendio-v2
+
 services:
   db:
     image: postgres:18-alpine
