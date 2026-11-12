@@ -16,7 +16,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: CI,
   retries: CI ? 1 : 0,
-  workers: CI ? 2 : undefined,
+  workers: CI ? 4 : undefined,
   reporter: CI ? [['html', {open: 'never'}], ['github'], ['list']] : [['html', {open: 'never'}], ['list']],
   // Screenshots differ between macOS and Linux font rendering, so each platform keeps its own baselines
   snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}-{projectName}-{platform}{ext}',
@@ -24,7 +24,8 @@ export default defineConfig({
   use: {baseURL: E2E_BASE_URL, trace: 'on-first-retry', screenshot: 'only-on-failure'},
   projects: [
     {name: 'desktop', testDir: 'e2e/public', use: desktop},
-    {name: 'mobile', testDir: 'e2e/public', use: mobile},
+    // These read HTTP responses and head tags, which no viewport changes, so desktop runs them once
+    {name: 'mobile', testDir: 'e2e/public', testIgnore: [/live-urls\.spec\.ts$/, /deploy\.spec\.ts$/, /seo\.spec\.ts$/], use: mobile},
     // Runs after the public projects: editing a project title would otherwise race the Work section snapshots. One worker,
     // because its files save the same rows and revalidate the same pages, and a save in one can undo what another just checked
     {name: 'admin', testDir: 'e2e/admin', dependencies: ['desktop', 'mobile'], workers: 1, use: {...desktop, storageState: ADMIN_STORAGE_STATE}},

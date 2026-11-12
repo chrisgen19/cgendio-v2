@@ -2,14 +2,17 @@ import {expect, test} from '@playwright/test';
 import {heroControls, waitForFilm} from '../support/hero';
 
 /*
- * Screenshot of each home section, compared with the committed baseline for this viewport and platform. Reduced motion
- * turns off the scroll reveals and the highlighter animation, and opens the hero on its final frame; the film itself
- * is hidden, so only the header and HUD over it are compared. Update baselines with `pnpm test:e2e --update-snapshots`.
+ * Screenshots of the hero, the stuck header and the stack strip, compared with the committed baseline for this viewport
+ * and platform. Reduced motion turns off the scroll reveals and the highlighter animation, and opens the hero on its
+ * final frame; the film itself is hidden, so only the header and HUD over it are compared. Update baselines with
+ * `pnpm test:e2e --update-snapshots`.
+ *
+ * The other home sections have no screenshot: their behaviour is covered by their own specs, and a height change in one
+ * section shifted the crop of every section below it, so their baselines failed on every redesign without catching a
+ * regression.
  */
 
 test.use({reducedMotion: 'reduce'});
-
-const SECTIONS = ['about', 'what-we-build', 'work', 'milestones', 'timeline', 'blog', 'contact'];
 
 // The header is sticky, so it would otherwise paint over whichever section the capture scrolled past
 const HIDE_HEADER = 'e2e/support/hide-header.css';
@@ -63,14 +66,3 @@ test('stack strip', async ({page}) => {
   // The strip has no id: it's the section right before About
   await expect(page.locator('#about').locator('xpath=preceding-sibling::section[1]')).toHaveScreenshot('stack.png', {stylePath: [HIDE_HEADER]});
 });
-
-// The Work cards are sticky and the timeline's counter follows the scroll: flatten them so the screenshot doesn't depend
-// on where the capture scrolled to
-const STYLES: Record<string, string> = {work: 'e2e/support/flatten-work-stack.css', timeline: 'e2e/support/flatten-timeline-counter.css'};
-
-for (const id of SECTIONS) {
-  test(`#${id}`, async ({page}) => {
-    const styles = STYLES[id] ? [HIDE_HEADER, STYLES[id]] : [HIDE_HEADER];
-    await expect(page.locator(`#${id}`)).toHaveScreenshot(`${id}.png`, {stylePath: styles});
-  });
-}

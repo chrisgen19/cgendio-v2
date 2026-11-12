@@ -1,16 +1,42 @@
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {expect, type Page, test} from '@playwright/test';
+import {projects} from '../../prisma/seed-data/projects';
+import {tourFrames} from '../../src/lib/tour';
+import {escapeRegExp} from '../support/regexp';
 import {NO_TOUR_SLUG} from '../support/test-env';
 
 /*
  * The Walkthrough, on the seeded Access Hire tour. The captures live on R2, so requests for them get the local fixture
- * and the spec stays offline. Changes to the row go through the admin, in e2e/admin/tour.spec.ts.
+ * and the spec stays offline. Changes to the row go through the admin, in e2e/admin/tour.spec.ts. Expected headings,
+ * paths and counts come from prisma/seed-data, so rewording a tour never needs a test edit.
  */
 const FIXTURE = readFileSync(join(__dirname, '../support/fixtures/about-photo.png'));
 
 const main = (page: Page) => page.locator('main:visible');
 const frame = (page: Page) => main(page).getByRole('figure', {name: 'The live site, in a browser'});
+
+const project = (slug: string) => {
+  const found = projects.find((candidate) => candidate.slug === slug);
+  if (!found) throw new Error(`No seeded project ${slug}`);
+  return found;
+};
+const tourOf = (slug: string) => project(slug).tourStops ?? [];
+const stop = (slug: string, key: string) => {
+  const found = tourOf(slug).find((candidate) => candidate.key === key);
+  if (!found) throw new Error(`No stop ${key} in the seeded ${slug} tour`);
+  return found;
+};
+
+const ACCESS_HIRE = project('access-hire');
+const OPENING = stop('access-hire', 'opening');
+const HOME = stop('access-hire', 'home');
+const CATEGORY = stop('access-hire', 'category');
+const SERVICES = stop('access-hire', 'services');
+const CREDIT = stop('access-hire', 'credit');
+const BRANCHES = stop('access-hire', 'branches');
+const LAST = tourOf('access-hire').at(-1) ?? OPENING;
+const LMS = stop('myimprov', 'lms');
 
 test.beforeEach(async ({page}) => {
   await page.route(
@@ -21,10 +47,14 @@ test.beforeEach(async ({page}) => {
 
 test('Access Hire opens on the frame with its facts in view', async ({page, isMobile}) => {
   await page.goto('/projects/access-hire');
-  await expect(page.getByRole('heading', {level: 1})).toHaveText('Access Hire Australia');
+  await expect(page.getByRole('heading', {level: 1})).toHaveText(ACCESS_HIRE.title);
   await expect(frame(page)).toBeVisible();
   await expect(main(page).locator('.walkthrough-tour')).toHaveAttribute('data-device', isMobile ? 'mobile' : 'desktop');
-  await expect(main(page).getByRole('definition').filter({hasText: 'Senior Full Stack Developer'})).toBeVisible();
+  await expect(
+    main(page)
+      .getByRole('definition')
+      .filter({hasText: ACCESS_HIRE.role ?? ''}),
+  ).toBeVisible();
   await expect(main(page).getByRole('link', {name: 'Live site', exact: true})).toHaveAttribute('href', '/out/access-hire');
 });
 
@@ -58,38 +88,38 @@ test('the layout shows its default frame before hydration without downloading th
 
 test('the opening stop shows in the frame but has no note of its own', async ({page}) => {
   await page.goto('/projects/access-hire');
-  await expect(main(page).locator('[data-stop]')).toHaveCount(7);
-  await expect(frame(page).getByText('Brand banner').first()).toBeAttached();
+  await expect(main(page).locator('[data-stop]')).toHaveCount(tourFrames(tourOf('access-hire')).notes.length);
+  await expect(frame(page).getByText(OPENING.selected).first()).toBeAttached();
 });
 
 test('the address bar follows the note on the reading line', async ({page}) => {
   await page.goto('/projects/access-hire');
-  await page.getByRole('heading', {level: 3, name: 'Category page'}).evaluate((heading) => {
+  await page.getByRole('heading', {level: 3, name: CATEGORY.heading}).evaluate((heading) => {
     window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
   });
-  await expect(frame(page)).toContainText('/category/scissor-lift');
+  await expect(frame(page)).toContainText(CATEGORY.path);
 });
 
 // A long scroll or a jump can carry the reading line past the first note between two frames, so that note never crosses it (#81).
-const OPENING_LINK = /: open Home page on the live site$/;
+const OPENING_LINK = new RegExp(`: open ${escapeRegExp(OPENING.heading)} on the live site$`);
 const jumpTo = (page: Page, top: number) => page.evaluate((y) => window.scrollTo({top: y, behavior: 'instant'}), top);
 
 test('jumping back to the top from a note returns the frame to the opening stop', async ({page}) => {
   await page.goto('/projects/access-hire');
-  await page.getByRole('heading', {level: 3, name: 'Category page'}).evaluate((heading) => {
+  await page.getByRole('heading', {level: 3, name: CATEGORY.heading}).evaluate((heading) => {
     window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
   });
-  await expect(frame(page)).toContainText('/category/scissor-lift');
+  await expect(frame(page)).toContainText(CATEGORY.path);
 
   await jumpTo(page, 0);
   await expect(frame(page).getByRole('link', {name: OPENING_LINK})).toBeVisible();
-  await expect(frame(page)).not.toContainText('/category/scissor-lift');
+  await expect(frame(page)).not.toContainText(CATEGORY.path);
 });
 
 test('jumping back to the top from below the notes returns the frame to the opening stop', async ({page}) => {
   await page.goto('/projects/access-hire');
   await jumpTo(page, await page.evaluate(() => document.documentElement.scrollHeight));
-  await expect(frame(page)).toContainText('/what-we-do/services');
+  await expect(frame(page)).toContainText(LAST.path);
 
   await jumpTo(page, 0);
   await expect(frame(page).getByRole('link', {name: OPENING_LINK})).toBeVisible();
@@ -99,29 +129,29 @@ test('jumping from the top to below the notes moves the frame to the last stop',
   await page.goto('/projects/access-hire');
   await expect(frame(page).getByRole('link', {name: OPENING_LINK})).toBeVisible();
   await jumpTo(page, await page.evaluate(() => document.documentElement.scrollHeight));
-  await expect(frame(page)).toContainText('/what-we-do/services');
+  await expect(frame(page)).toContainText(LAST.path);
 });
 
 // The Services stop used to reuse the credit application capture, so it labelled itself with that page and linked there.
 test('the Services stop points at the services page, not the credit application', async ({page}) => {
   await page.goto('/projects/access-hire');
-  await page.getByRole('heading', {level: 3, name: 'Services'}).evaluate((heading) => {
+  await page.getByRole('heading', {level: 3, name: SERVICES.heading}).evaluate((heading) => {
     window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
   });
-  await expect(frame(page)).toContainText('/what-we-do/services');
-  await expect(frame(page)).not.toContainText('/credit-application');
+  await expect(frame(page)).toContainText(SERVICES.path);
+  await expect(frame(page)).not.toContainText(CREDIT.path);
 });
 
 // The opening stop and the Home page stop are both on '/', so the frame must hold one layer carrying both their boxes.
 test('stops that share a page stay on one layer of the frame', async ({page}) => {
   await page.goto('/projects/access-hire');
-  await page.getByRole('heading', {level: 3, name: 'Home page'}).evaluate((heading) => {
+  await page.getByRole('heading', {level: 3, name: HOME.heading}).evaluate((heading) => {
     window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
   });
   const active = frame(page).locator('[data-state="active"]:visible');
   await expect(active).toHaveCount(1);
-  await expect(active.locator('[data-on]').getByText('Equipment categories', {exact: true})).toBeAttached();
-  await expect(active.getByText('Brand banner', {exact: true})).toBeAttached();
+  await expect(active.locator('[data-on]').getByText(HOME.selected, {exact: true})).toBeAttached();
+  await expect(active.getByText(OPENING.selected, {exact: true})).toBeAttached();
 });
 
 test('the address bar link meets the 44px touch target', async ({page}) => {
@@ -240,7 +270,7 @@ test.describe('reduced motion', () => {
   test('each note shows its own capture instead of the pinned frame', async ({page}) => {
     await page.goto('/projects/access-hire');
     await expect(frame(page)).toBeHidden();
-    await expect(page.getByRole('img', {name: /scissor lift category page/}).first()).toBeVisible();
+    await expect(page.getByRole('img', {name: CATEGORY.alt, exact: true}).first()).toBeVisible();
   });
 
   // The static captures take the device from the frame's own state, so the switch still moves them with the pinned frame gone
@@ -264,8 +294,8 @@ test.describe('without JavaScript', () => {
 
   test('each note shows its own capture and the switch is gone', async ({page}) => {
     await page.goto('/projects/access-hire');
-    await expect(page.getByRole('heading', {level: 3, name: 'Branch finder'})).toBeVisible();
-    await expect(page.getByRole('img', {name: /branch finder/}).first()).toBeVisible();
+    await expect(page.getByRole('heading', {level: 3, name: BRANCHES.heading})).toBeVisible();
+    await expect(page.getByRole('img', {name: BRANCHES.alt, exact: true}).first()).toBeVisible();
     await expect(page.getByRole('button', {name: 'Mobile'})).toBeHidden();
   });
 
@@ -294,44 +324,30 @@ test('a project without a tour keeps the current layout', async ({page}) => {
 
 test('a stop on a subdomain shows and links to its own address', async ({page}) => {
   await page.goto('/projects/myimprov');
-  await page.getByRole('heading', {level: 3, name: 'Student login'}).evaluate((heading) => {
+  await page.getByRole('heading', {level: 3, name: LMS.heading}).evaluate((heading) => {
     window.scrollTo({top: heading.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2, behavior: 'instant'});
   });
-  await expect(frame(page)).toContainText('courses.myimprov.com');
+  await expect(frame(page)).toContainText(new URL(LMS.path).host);
   const frameLink = frame(page).getByRole('link', {name: /on the live site/});
   await expect(frameLink).toHaveAttribute('href', /^\/out\/myimprov\?stop=/);
   const noteLink = main(page)
-    .getByRole('link', {name: /open Student login/})
+    .getByRole('link', {name: new RegExp(`open ${escapeRegExp(LMS.heading)}`)})
     .last();
   await expect(noteLink).toHaveAttribute('href', (await frameLink.getAttribute('href')) ?? '');
   const response = await page.request.get((await noteLink.getAttribute('href')) ?? '', {maxRedirects: 0});
-  expect(response.headers().location).toBe('https://courses.myimprov.com/');
+  expect(response.headers().location).toBe(LMS.path);
 });
 
-test('MyImprov shows a note for each stop after its opening, including two states', async ({page}) => {
-  await page.goto('/projects/myimprov');
-  await expect(main(page).locator('[data-stop]')).toHaveCount(6);
-  await expect(page.getByRole('heading', {level: 3, name: 'California'})).toBeVisible();
-  await expect(page.getByRole('heading', {level: 3, name: 'Texas'})).toBeVisible();
-});
+// Every other seeded tour: Access Hire is covered stop by stop above, and e2e/support/prepare.mts clears NO_TOUR_SLUG's
+const OTHER_TOURS = projects.filter(({slug, tourStops}) => tourStops?.length && slug !== ACCESS_HIRE.slug && slug !== NO_TOUR_SLUG);
+if (OTHER_TOURS.length === 0) throw new Error('No other seeded tours to cover');
 
-test('Merthyr Village shows a note for each stop after its opening', async ({page}) => {
-  await page.goto('/projects/merthyr-village');
-  await expect(frame(page)).toBeVisible();
-  await expect(main(page).locator('[data-stop]')).toHaveCount(4);
-  await expect(page.getByRole('heading', {level: 3, name: 'Tenant page'})).toBeVisible();
-});
-
-test('Experience Sunnybank shows a note for each stop after its opening', async ({page}) => {
-  await page.goto('/projects/experience-sunnybank');
-  await expect(frame(page)).toBeVisible();
-  await expect(main(page).locator('[data-stop]')).toHaveCount(5);
-  await expect(page.getByRole('heading', {level: 3, name: 'Specialty stores'})).toBeVisible();
-});
-
-test('Fresh Fruit and Veg Shop shows a note for each stop after its opening', async ({page}) => {
-  await page.goto('/projects/fresh-fruit-and-veg');
-  await expect(frame(page)).toBeVisible();
-  await expect(main(page).locator('[data-stop]')).toHaveCount(3);
-  await expect(page.getByRole('heading', {level: 3, name: 'Office boxes'})).toBeVisible();
-});
+for (const {slug, title, tourStops = []} of OTHER_TOURS) {
+  test(`${title} shows a note for each stop after its opening`, async ({page}) => {
+    const {notes} = tourFrames(tourStops);
+    await page.goto(`/projects/${slug}`);
+    await expect(frame(page)).toBeVisible();
+    await expect(main(page).locator('[data-stop]')).toHaveCount(notes.length);
+    for (const note of notes) await expect(main(page).getByRole('heading', {level: 3, name: note.heading, exact: true}).first()).toBeVisible();
+  });
+}
