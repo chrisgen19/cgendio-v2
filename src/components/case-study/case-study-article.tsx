@@ -6,6 +6,7 @@ import {brandPanelStyle, PROJECT_RINGS, PROJECT_THEMES} from '@/components/ui-si
 import {Section} from '@/components/ui-site/section';
 import {Tag} from '@/components/ui-site/tag';
 import {cn} from '@/lib/cn';
+import {liveSiteTracking, outboundHref} from '@/lib/outbound';
 import type {ProjectDetail} from '@/server/content';
 
 const EXTERNAL_ICON = (
@@ -23,9 +24,11 @@ function Fact({label, children}: {label: string; children: ReactNode}) {
   );
 }
 
-function ExternalLink({href, children}: {href: string; children: ReactNode}) {
+type ExternalLinkProps = {href: string; children: ReactNode} & Partial<ReturnType<typeof liveSiteTracking>>;
+
+function ExternalLink({href, children, ...tracking}: ExternalLinkProps) {
   return (
-    <a href={href} rel="nofollow noreferrer" className="inline-flex min-h-11 items-center gap-1.5 font-semibold">
+    <a href={href} rel="nofollow noreferrer" className="inline-flex min-h-11 items-center gap-1.5 font-semibold" {...tracking}>
       {children}
       {EXTERNAL_ICON}
     </a>
@@ -103,7 +106,11 @@ export async function CaseStudyArticle({project}: {project: ProjectDetail}) {
             <div>
               <dt className="sr-only">Links</dt>
               <dd className="m-0 flex flex-col gap-2">
-                {project.liveUrl ? <ExternalLink href={project.liveUrl}>Live site</ExternalLink> : null}
+                {project.liveUrl ? (
+                  <ExternalLink href={outboundHref(project.slug)} {...liveSiteTracking(project.slug, 'live')}>
+                    Live site
+                  </ExternalLink>
+                ) : null}
                 {project.repoUrl ? <ExternalLink href={project.repoUrl}>Repository</ExternalLink> : null}
               </dd>
             </div>

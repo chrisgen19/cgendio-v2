@@ -4,6 +4,7 @@ import {isOptimizableCover} from '@/components/ui-site/cover-image';
 import {Eyebrow} from '@/components/ui-site/eyebrow';
 import {Mark} from '@/components/ui-site/mark';
 import {Tag} from '@/components/ui-site/tag';
+import {liveSiteTracking, outboundHref} from '@/lib/outbound';
 import {tourAddress, tourFrames, tourHref} from '@/lib/tour';
 import type {ProjectDetail, TourStop} from '@/server/content';
 import {WalkthroughTour} from './walkthrough-stage';
@@ -57,7 +58,7 @@ function Hero({project, opening, host, optimizedUrls}: HeroProps) {
               </Button>
             ) : null}
             {project.liveUrl ? (
-              <Button href={project.liveUrl} rel="nofollow noreferrer" size="sm">
+              <Button href={outboundHref(project.slug)} rel="nofollow noreferrer" size="sm" {...liveSiteTracking(project.slug, 'live')}>
                 Live site
                 {EXTERNAL_ICON}
               </Button>
@@ -105,13 +106,15 @@ function NoteBody({body, emphasis}: {body: string; emphasis: string | null}) {
 type NoteProps = {
   note: TourStop;
   number: number;
+  slug: string;
   liveUrl: string | null;
   host: string | null;
   optimizedUrls: string[];
 };
 
-function Note({note, number, liveUrl, host, optimizedUrls}: NoteProps) {
-  const href = tourHref(note.path, liveUrl);
+function Note({note, number, slug, liveUrl, host, optimizedUrls}: NoteProps) {
+  // Only stops with a page on the live site link out, through /out (see outboundHref)
+  const href = tourHref(note.path, liveUrl) ? outboundHref(slug, note.key) : null;
   // The page row names the path alone, or a full address's own host and path
   const address = tourAddress(note.path, null);
   const page = `${address.host ?? ''}${address.path}`;
@@ -142,6 +145,7 @@ function Note({note, number, liveUrl, host, optimizedUrls}: NoteProps) {
                   <a
                     href={href}
                     rel="nofollow noreferrer"
+                    {...liveSiteTracking(slug, 'tour')}
                     // min-w-11 so a short path ("/") still gives a 44px-wide target
                     className="-my-3 inline-flex min-h-11 min-w-11 scroll-mt-[calc(46svh+var(--header-h))] scroll-mb-24 items-center gap-1.5 font-mono text-xs break-all lg:scroll-mt-24"
                   >
@@ -171,6 +175,7 @@ export function Walkthrough({project}: {project: ProjectDetail}) {
     <article>
       <WalkthroughTour
         frames={frames}
+        slug={project.slug}
         liveUrl={project.liveUrl}
         host={host}
         optimizedUrls={optimizedUrls}
@@ -186,7 +191,15 @@ export function Walkthrough({project}: {project: ProjectDetail}) {
             </div>
             <ol className="m-0 list-none border-l border-line p-0 pb-16 lg:pb-[28svh]">
               {notes.map((note, index) => (
-                <Note key={note.key} note={note} number={index + 1} liveUrl={project.liveUrl} host={host} optimizedUrls={optimizedUrls} />
+                <Note
+                  key={note.key}
+                  note={note}
+                  number={index + 1}
+                  slug={project.slug}
+                  liveUrl={project.liveUrl}
+                  host={host}
+                  optimizedUrls={optimizedUrls}
+                />
               ))}
             </ol>
           </section>
