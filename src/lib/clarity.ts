@@ -23,12 +23,19 @@ export const clarityScript = (projectId: string) =>
   `y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script",${JSON.stringify(projectId)});` +
   `window.clarity('consentv2',{ad_Storage:'denied',analytics_Storage:'denied'});window.dispatchEvent(new Event(${JSON.stringify(CLARITY_READY)}))})();`;
 
-/** Clarity custom tags for a public page, from its path: filters for recordings and heatmaps. Slugs are public URLs. */
-export const clarityPageTags = (pathname: string): Record<string, string> => {
+/**
+ * Clarity custom tags for a public page, from its path and query: filters for recordings and heatmaps. Slugs and the
+ * blog's `?tag=` filter are public URLs, nothing a visitor typed.
+ */
+export const clarityPageTags = (pathname: string, search = ''): Record<string, string> => {
   const [section, slug] = pathname.split('/').filter(Boolean);
   if (!section) return {page_type: 'home'};
   if (section === 'projects' && slug) return {page_type: 'case_study', project: slug};
-  if (section === 'writing') return slug ? {page_type: 'post', post: slug} : {page_type: 'blog'};
+  if (section === 'writing' && slug) return {page_type: 'post', post: slug};
+  if (section === 'writing') {
+    const tag = new URLSearchParams(search).get('tag');
+    return tag ? {page_type: 'blog', blog_tag: tag} : {page_type: 'blog'};
+  }
   if (section === 'contact' && !slug) return {page_type: 'contact'};
   return {page_type: 'other'};
 };

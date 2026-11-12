@@ -18,7 +18,7 @@ export function MicrosoftClarity() {
       <Script id="clarity-config" strategy="lazyOnload">
         {clarityScript(id)}
       </Script>
-      {/* Its own boundary: usePathname can suspend on a route with an unknown dynamic param */}
+      {/* Its own boundary: usePathname and useSearchParams can suspend while the page prerenders */}
       <Suspense fallback={null}>
         <ClarityPageTags />
       </Suspense>

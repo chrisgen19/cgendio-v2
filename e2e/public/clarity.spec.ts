@@ -53,6 +53,18 @@ test('a client-side navigation tags the new page view', async ({page}) => {
   await expect.poll(async () => (await clarityCalls(page))?.slice(3)).toEqual(tags({page_type: 'post', post: slug, theme: 'light'}));
 });
 
+test('a tag filter on the blog is a new page view, tagged with the filter', async ({page}) => {
+  await page.goto('/writing');
+  await expect.poll(() => clarityCalls(page)).toHaveLength(3);
+  const filter = page.getByRole('navigation', {name: 'Filter posts by tag'}).getByRole('link').nth(1);
+  const slug = new URL((await filter.getAttribute('href')) ?? '', E2E_BASE_URL).searchParams.get('tag') ?? '';
+  expect(slug).not.toBe('');
+  await filter.click();
+  await page.waitForURL(`**/writing?tag=${slug}`);
+  // Only the query changed, so the pathname alone would not re-run the tags; the real clarity.js restarts on it
+  await expect.poll(async () => (await clarityCalls(page))?.slice(3)).toEqual(tags({page_type: 'blog', blog_tag: slug, theme: 'light'}));
+});
+
 test('a sent contact message reaches Clarity as an event, with its topic and nothing the visitor typed', async ({page}, testInfo) => {
   await useOwnIp(page, testInfo);
   await page.goto('/contact');

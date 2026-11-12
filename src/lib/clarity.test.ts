@@ -59,4 +59,18 @@ describe('clarityPageTags', () => {
   ])('%s is tagged %j', (pathname, tags) => {
     expect(clarityPageTags(pathname)).toEqual(tags);
   });
+
+  it.each([
+    ['?tag=wordpress', {page_type: 'blog', blog_tag: 'wordpress'}],
+    ['?tag=nextjs&page=2', {page_type: 'blog', blog_tag: 'nextjs'}],
+    ['?page=2', {page_type: 'blog'}],
+    ['', {page_type: 'blog'}],
+  ])('/writing%s is tagged %j', (search, tags) => {
+    expect(clarityPageTags('/writing', search)).toEqual(tags);
+  });
+
+  it('ignores a query outside the blog index', () => {
+    expect(clarityPageTags('/writing/a-post', 'tag=wordpress')).toEqual({page_type: 'post', post: 'a-post'});
+    expect(clarityPageTags('/', 'tag=wordpress')).toEqual({page_type: 'home'});
+  });
 });
