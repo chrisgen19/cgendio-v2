@@ -6,7 +6,9 @@ import {tourStopsSchema} from './content-schema';
 
 const MIGRATION = new URL('../../prisma/migrations/20261102120000_project_walkthrough/migration.sql', import.meta.url);
 
-const unquote = (sql: string) => sql.replaceAll("''", "'");
+// The migrations keep the bucket's r2.dev host they shipped with; the seed moved to its custom domain (#81). The files are the same
+const unquote = (sql: string) =>
+  sql.replaceAll("''", "'").replaceAll('https://pub-2804367faf354b5c8072c41278bae114.r2.dev', 'https://media.cgdiomampo.dev');
 
 /*
  * A fresh database runs the migrations before the seed, and an existing one only runs the migrations, so the backfill

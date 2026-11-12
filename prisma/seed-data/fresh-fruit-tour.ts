@@ -7,7 +7,7 @@ import type {TourStop} from '../../src/server/content-schema';
  * and boxes stops, which are reworded to match the live site. The
  * 20261102160000_project_fresh_fruit_tour migration backfills the same value, so change both.
  */
-const FOLDER = 'https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/fresh-fruit-tour';
+const FOLDER = 'https://media.cgdiomampo.dev/images/2026/fresh-fruit-tour';
 
 const SIZES = {
   home: {desktop: [1440, 3350], mobile: [390, 4150]},

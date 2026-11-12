@@ -22,7 +22,7 @@ export type SeedProject = Project &
     updatedAt: string;
   };
 
-const COVERS = 'https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026';
+const COVERS = 'https://media.cgdiomampo.dev/images/2026';
 const ACCESS_GROUP_ROLE = 'Senior Full Stack Developer, Access Group Australia';
 
 export const projects: SeedProject[] = [
