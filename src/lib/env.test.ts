@@ -54,7 +54,7 @@ describe('parseClarityEnv', () => {
     expect(parseClarityEnv({CLARITY_PROJECT_ID: ''}).CLARITY_PROJECT_ID).toBeUndefined();
   });
 
-  it.each(['ZC88QMNO9Y', 'zc88 qmno9y', 'abc', '"+alert(1)+"'])('turns Clarity off rather than throwing for %j', (id) => {
+  it.each(['ZC88QMNO9Y', 'zc88 qmno9y', 'zc88-qmno9y', '"+alert(1)+"'])('turns Clarity off rather than throwing for %j', (id) => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     expect(parseClarityEnv({CLARITY_PROJECT_ID: id}).CLARITY_PROJECT_ID).toBeUndefined();
     expect(warn.mock.calls[0]?.[0]).toContain('CLARITY_PROJECT_ID');

@@ -61,7 +61,7 @@ export const checkServerSecrets = (env: Env): EnvCheck => {
     warnings.push('GA_MEASUREMENT_ID is not set: analytics is off.');
   }
   if (!clarityEnvSchema.safeParse(env).success) {
-    warnings.push(`CLARITY_PROJECT_ID is not a Clarity project id (${JSON.stringify(env.CLARITY_PROJECT_ID)}): Clarity is off.`);
+    warnings.push(`CLARITY_PROJECT_ID must be lowercase letters and digits (${JSON.stringify(env.CLARITY_PROJECT_ID)}): Clarity is off.`);
   } else if (!env.CLARITY_PROJECT_ID) {
     warnings.push('CLARITY_PROJECT_ID is not set: Clarity is off.');
   }

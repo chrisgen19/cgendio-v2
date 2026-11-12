@@ -24,3 +24,14 @@ export const gtagCalls = (page: Page, command: string) =>
 /** The params of every queued event with this name. */
 export const gaEvents = async (page: Page, name: string) =>
   (await gtagCalls(page, 'event')).filter(([, eventName]) => eventName === name).map(([, , params]) => params);
+
+/** Serves an empty Clarity tag, so `window.clarity` stays the install snippet's queue and its calls stay readable. */
+export const stubClarity = (page: Page) =>
+  page.route('https://www.clarity.ms/tag/**', (route) => route.fulfill({contentType: 'application/javascript', body: ''}));
+
+/** Every call queued for Clarity, in order, or null when the loader never defined `window.clarity`. */
+export const clarityCalls = (page: Page) =>
+  page.evaluate(() => {
+    const clarity = (window as {clarity?: {q?: IArguments[]}}).clarity;
+    return clarity ? (clarity.q ?? []).map((entry) => Array.from(entry)) : null;
+  });

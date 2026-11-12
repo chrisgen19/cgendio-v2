@@ -72,7 +72,7 @@ export const clarityEnvSchema = z.object({
     (value) => (value === '' ? undefined : value),
     z
       .string()
-      .regex(/^[a-z0-9]{6,20}$/)
+      .regex(/^[a-z0-9]+$/)
       .optional(),
   ),
 });
@@ -141,7 +141,7 @@ export const analyticsEnv = lazy((): AnalyticsEnv => parseAnalyticsEnv(process.e
 export const parseClarityEnv = (env: Record<string, string | undefined>): ClarityEnv => {
   const parsed = clarityEnvSchema.safeParse(env);
   if (parsed.success) return parsed.data;
-  console.warn(`Ignoring CLARITY_PROJECT_ID: ${JSON.stringify(env.CLARITY_PROJECT_ID)} is not a Clarity project id. Clarity is off.`);
+  console.warn(`Ignoring CLARITY_PROJECT_ID: ${JSON.stringify(env.CLARITY_PROJECT_ID)} is not lowercase letters and digits. Clarity is off.`);
   return {CLARITY_PROJECT_ID: undefined};
 };
 

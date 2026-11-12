@@ -27,6 +27,9 @@ export const NO_TOUR_SLUG = 'premium-mobile-car-valeting';
 /** Not a real property: it only has to match the G-XXXXXXXXXX shape the app accepts. */
 export const GA_TEST_ID = 'G-E2ETEST000';
 
+/** Not a real Clarity project: www.clarity.ms answers an unknown id with an empty 204, so nothing is ever recorded. */
+export const CLARITY_TEST_ID = 'e2etest000';
+
 /** Served at /indexnow-key.txt. No ping is ever sent: the e2e site is localhost, which buildIndexNowPayload skips. */
 export const INDEXNOW_TEST_KEY = 'e2e-indexnow-key-0000';
 
@@ -45,6 +48,8 @@ export const testEnv = {
   // A real-shaped id keeps analytics enabled so tests can check where its tags appear. The admin workflow fixture
   // serves gtag.js locally; browser tests without that stub can still request the script from Google.
   GA_MEASUREMENT_ID: GA_TEST_ID,
+  // Same idea for Clarity. Specs that read its queue stub the tag (stubClarity) so the request never leaves the machine.
+  CLARITY_PROJECT_ID: CLARITY_TEST_ID,
   INDEXNOW_KEY: INDEXNOW_TEST_KEY,
   // No test uploads, but the startup check (src/server/startup-env-check.ts) won't start the server without the R2
   // credentials, so these are placeholders. They never reach Cloudflare: nothing in e2e calls the upload action.
