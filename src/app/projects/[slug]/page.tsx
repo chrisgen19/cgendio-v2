@@ -9,8 +9,12 @@ import {pageMetadata} from '@/lib/metadata';
 import {caseStudyJsonLd} from '@/lib/structured-data';
 import {getNextProject, getPageCopy, getProject, getProjectSlugs} from '@/server/content';
 
-/** Blocks on purpose: unknown slugs must 404 before anything streams, so a Suspense boundary would cost the real status. */
-export const instant = false;
+/**
+ * The whole route must be static, so a slug that wasn't prerendered waits for its render instead of getting the App
+ * Shell first. Partial Prefetching would otherwise stream that shell with a 200, and notFound() would land too late to
+ * change the status. Next.js validates the static requirement at build time.
+ */
+export const ensureStatic = 'navigation';
 
 /** Published projects are prerendered. With none at all, a placeholder slug keeps the build happy and 404s. */
 export async function generateStaticParams() {
@@ -24,7 +28,10 @@ export async function generateMetadata({params}: PageProps<'/projects/[slug]'>):
   return pageMetadata({title: project.title, description: project.summary, path: `/projects/${project.slug}`, markdown: true});
 }
 
-/** A case study. Drafts and unknown slugs 404 before anything streams (see the post page for why that matters). */
+/**
+ * A case study. Drafts and unknown slugs get a real 404: with ensureStatic above, nothing streams before the lookup, so
+ * notFound() still sets the status code instead of streaming a not-found page under a 200.
+ */
 export default async function CaseStudyPage({params}: PageProps<'/projects/[slug]'>) {
   const {slug} = await params;
   const project = await getProject(slug);
