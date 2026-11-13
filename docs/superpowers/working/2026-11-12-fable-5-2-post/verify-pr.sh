@@ -18,6 +18,6 @@ check "9 cached answer checked for end_turn"  "grep -q \"stop_reason !== 'end_tu
 check "10 route passes request.signal to SDK" "grep -q '{signal: request.signal}' \"$R\" && grep -q 'passes the disconnect on' \"$T\""
 check "13 prose warns of host time limits"    "grep -q 'ends without one as cut off' \"$T\""
 check "11 ZDR exception in post and notes"     "grep -q 'eligible customers can keep using it with zero data retention' \"$T\" && grep -q 'Until EFS is available' \"$N\""
-check "12 font-face names a single family"     "! grep -q \"@font-face {font-family: '[^']*', \" \"$P\"/images/src/*.html"
+check "12 font-face names a single family"     "! grep -Eq \"@font-face[[:space:]]*[{][[:space:]]*font-family:[[:space:]]*'[^']*'[[:space:]]*,\" \"$P\"/images/src/*.html"
 check "tsc passes"                           "(cd \"$P/examples\" && pnpm exec tsc --noEmit)"
 exit $f
