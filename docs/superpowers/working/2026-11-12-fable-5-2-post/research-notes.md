@@ -56,7 +56,7 @@
 - Earlier models cannot read its thinking blocks; a fallback runs without that reasoning https://platform.claude.com/docs/en/build-with-claude/preserved-thinking
 - `computer_20251124` returns a 400 except on Amazon Bedrock; use `computer_toolset_20260801` https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool
 - Advisor tool: a Fable 5.2 executor accepts only claude-fable-5-2 or claude-mythos-5-2 as advisor https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2
-- 30-day data retention required; not available under ZDR without Enterprise Frontier Safeguards https://www.anthropic.com/claude/fable
+- 30-day data retention required by default, for safety monitoring. EFS makes it compatible with ZDR; "Until EFS is available, eligible customers can continue using Claude Fable 5.2 with ZDR before implementing safety monitoring with EFS." https://www.anthropic.com/claude/fable
 - Long turns; stream above about 16K max_tokens; set a large max_tokens at high and above https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2
 - Fable 5.2 has its own rate limit https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2
 - Early testers had good results using it as planner and orchestrator for other models; subagents can be a large share of cost https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2

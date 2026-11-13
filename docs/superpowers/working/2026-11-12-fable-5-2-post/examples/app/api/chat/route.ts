@@ -26,6 +26,8 @@ export async function POST(request: Request): Promise<Response> {
     fallbacks: 'default',
     messages: [{role: 'user', content: prompt}],
   });
+  // The client went away: stop paying for tokens nobody will see
+  request.signal.addEventListener('abort', () => stream.abort());
 
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -51,7 +53,7 @@ export async function POST(request: Request): Promise<Response> {
       }
     },
     cancel() {
-      // The reader went away: stop paying for tokens nobody will see
+      // Some runtimes cancel the response stream instead of aborting request.signal
       stream.abort();
     },
   });

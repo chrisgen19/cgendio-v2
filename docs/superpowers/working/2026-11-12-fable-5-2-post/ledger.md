@@ -35,3 +35,6 @@ Final: minor (deferred): M7 invalid JSON body returns 500 instead of 400
 Diagrams: Ruling: redrawn as 1200px portrait (model picker 1200x1572, orchestrator 1200x1300) per Christian; smallest label 8.7px at 390px, main labels 11-17px; on desktop they now take about 945px and 781px of height — cost if wrong: tall images on desktop
 Final: fixed deferred minors M2, M4, M5, M6, M7 at Christian's request — tsc ok, checker OK 2596 words, suite 428/428
 PR161: fixed bot findings 1-6, 8 (verify-pr.sh RED->GREEN, checker OK 2724 words, suite 428/428)
+PR161: fixed Codex finding 9 (cached example throws unless end_turn) in 64113b7
+PR161 CodeRabbit 64113b7: fixed 10 request.signal abort + hedged disconnect copy, 11 ZDR exception from anthropic.com/claude/fable, 12 @font-face descriptors (diagrams had rendered in system fonts; re-rendered at 1200px DSF 1 via Playwright over http, cwebp -q 85), script path quoting; skipped the Vercel maxDuration suggestion (post is host-agnostic, limits unsourced) (verify-pr.sh GREEN, checker OK 2767 words, suite 428/428)
+Diagrams: Ruling: with the real fonts, Opus 5.5 highlighter resized to 0.06em past the measured text (x 92.6, w 219.7) and START HERE pill to 24px padding (w 227) — cost if wrong: small misalignment

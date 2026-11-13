@@ -40,7 +40,7 @@ Coming from Fable 5.1, moving to 5.2 is mostly a model ID swap. Coming from Opus
 5. **History has to stay append-only.** The preserved thinking check now applies to every account. If you send a thinking block back after editing the system prompt, the tools or an earlier message, you get a 400. Keep `system` and `tools` fixed for a session and only add to `messages` ([preserved thinking](https://platform.claude.com/docs/en/build-with-claude/preserved-thinking)). No older model can read Fable 5.2's thinking blocks either, so a fallback to Opus carries on without that reasoning.
 6. **Computer use moved.** `computer_20251124` returns a 400 everywhere except Amazon Bedrock. Use `computer_toolset_20260801` ([computer use tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool)).
 7. **Advisor pairing.** With the advisor tool, a Fable 5.2 executor only accepts Fable 5.2 or Mythos 5.2 as its advisor.
-8. **Data retention.** Fable 5.2 needs 30-day data retention, so an organisation on zero data retention can't use it without Anthropic's Enterprise Frontier Safeguards.
+8. **Data retention.** By default, Fable 5.2 needs 30-day data retention for safety monitoring. Anthropic's Enterprise Frontier Safeguards make it work with zero data retention, and until those are available, eligible customers can keep using it with zero data retention ([Fable 5.2 page](https://www.anthropic.com/claude/fable)).
 
 Two prompting changes from Anthropic's [prompting guide for Fable 5.2](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2) are worth knowing before you test it. A line in the prompt telling it to answer without deliberating no longer stops it thinking at medium effort and above, so lower the effort instead. And on long tasks at low or medium effort it sometimes stops early with a list of what's left, so an agent needs a clear instruction to finish the whole task.
 
@@ -89,7 +89,7 @@ These are the patterns I'd reach for in a Next.js App Router project with the of
 
 ### Stream a response from a route handler
 
-Fable 5.2 turns can run for minutes and produce up to 128K tokens, so stream anything that isn't tiny. This route handler at `app/api/chat/route.ts` sets the effort explicitly and turns on server-side fallbacks. It streams newline-delimited JSON instead of plain text, so the client can always tell the model's words from status events. `text` events carry the answer. If Fable declines partway through, a `switch` event marks the switch, and the fallback model carries on from the partial text. A final `end` event carries the stop reason, and only `end_turn` means a finished answer. On `refusal` the whole chain declined, and the client should discard the partial text. On `max_tokens` or `model_context_window_exceeded` the answer was cut off. The route also stops the request when the reader closes the tab, so you don't pay for tokens nobody sees.
+Fable 5.2 turns can run for minutes and produce up to 128K tokens, so stream anything that isn't tiny. This route handler at `app/api/chat/route.ts` sets the effort explicitly and turns on server-side fallbacks. It streams newline-delimited JSON instead of plain text, so the client can always tell the model's words from status events. `text` events carry the answer. If Fable declines partway through, a `switch` event marks the switch, and the fallback model carries on from the partial text. A final `end` event carries the stop reason, and only `end_turn` means a finished answer. On `refusal` the whole chain declined, and the client should discard the partial text. On `max_tokens` or `model_context_window_exceeded` the answer was cut off. If the reader closes the tab, the route stops the request through `request.signal` or the stream's `cancel()`, so you don't pay for tokens nobody sees. That only works if your host passes the disconnect on to the route, so check that yours does.
 
 A route handler is a public endpoint, and at Fable prices that matters. Cap the input as this one does, and put auth and rate limiting in front of it before it goes live. The same goes for the server action below.
 
@@ -122,6 +122,8 @@ export async function POST(request: Request): Promise<Response> {
     fallbacks: 'default',
     messages: [{role: 'user', content: prompt}],
   });
+  // The client went away: stop paying for tokens nobody will see
+  request.signal.addEventListener('abort', () => stream.abort());
 
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -147,7 +149,7 @@ export async function POST(request: Request): Promise<Response> {
       }
     },
     cancel() {
-      // The reader went away: stop paying for tokens nobody will see
+      // Some runtimes cancel the response stream instead of aborting request.signal
       stream.abort();
     },
   });
