@@ -22,6 +22,14 @@ export const posts: SeedPost[] = [
       'A roundup of the last three months for people who look after WordPress sites: three core security releases, a backdoor that rebuilds itself, what 7.1 shipped, what 7.2 plans, the WP Engine ruling, and what developers are saying about it.',
   },
   {
+    slug: 'claude-fable-5-2-developer-guide',
+    title: "Claude Fable 5.2 for developers: what's new, what people are saying, and how I'd use it",
+    tag: 'AI workflow',
+    status: 'DRAFT',
+    excerpt:
+      "What changed in Claude Fable 5.2, what developers on Hacker News and X make of it, and how I'd wire it into a Next.js app, Claude Code and agent workflows, including when Opus 5.5 is the better pick.",
+  },
+  {
     slug: 'redirect-maps-wordpress-to-nextjs',
     title: 'Redirect maps for a WordPress to Next.js migration',
     tag: 'Migration',
