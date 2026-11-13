@@ -17,17 +17,19 @@ export async function POST(request: Request): Promise<Response> {
   }
   if (prompt.length > MAX_PROMPT_CHARS) return new Response('Too long', {status: 413});
 
-  const stream = client.beta.messages.stream({
-    model: 'claude-fable-5-2',
-    max_tokens: 64000,
-    output_config: {effort: 'high'},
-    // On a safety decline, retry on the model Anthropic recommends
-    betas: ['server-side-fallback-2026-07-01'],
-    fallbacks: 'default',
-    messages: [{role: 'user', content: prompt}],
-  });
-  // The client went away: stop paying for tokens nobody will see
-  request.signal.addEventListener('abort', () => stream.abort());
+  const stream = client.beta.messages.stream(
+    {
+      model: 'claude-fable-5-2',
+      max_tokens: 64000,
+      output_config: {effort: 'high'},
+      // On a safety decline, retry on the model Anthropic recommends
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default',
+      messages: [{role: 'user', content: prompt}],
+    },
+    // The client went away (even before this line): stop paying for tokens nobody will see
+    {signal: request.signal},
+  );
 
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {

@@ -89,7 +89,7 @@ These are the patterns I'd reach for in a Next.js App Router project with the of
 
 ### Stream a response from a route handler
 
-Fable 5.2 turns can run for minutes and produce up to 128K tokens, so stream anything that isn't tiny. This route handler at `app/api/chat/route.ts` sets the effort explicitly and turns on server-side fallbacks. It streams newline-delimited JSON instead of plain text, so the client can always tell the model's words from status events. `text` events carry the answer. If Fable declines partway through, a `switch` event marks the switch, and the fallback model carries on from the partial text. A final `end` event carries the stop reason, and only `end_turn` means a finished answer. On `refusal` the whole chain declined, and the client should discard the partial text. On `max_tokens` or `model_context_window_exceeded` the answer was cut off. If the reader closes the tab, the route stops the request through `request.signal` or the stream's `cancel()`, so you don't pay for tokens nobody sees. That only works if your host passes the disconnect on to the route, so check that yours does.
+Fable 5.2 turns can run for minutes and produce up to 128K tokens, so stream anything that isn't tiny. This route handler at `app/api/chat/route.ts` sets the effort explicitly and turns on server-side fallbacks. It streams newline-delimited JSON instead of plain text, so the client can always tell the model's words from status events. `text` events carry the answer. If Fable declines partway through, a `switch` event marks the switch, and the fallback model carries on from the partial text. A final `end` event carries the stop reason, and only `end_turn` means a finished answer. On `refusal` the whole chain declined, and the client should discard the partial text. On `max_tokens` or `model_context_window_exceeded` the answer was cut off. If the reader closes the tab, the route stops the request through `request.signal` or the stream's `cancel()`, so you don't pay for tokens nobody sees. That only works if your host passes the disconnect on to the route, so check that yours does. Hosts also cap how long a function can run, so a long answer can stop before the `end` event arrives. Treat a stream that ends without one as cut off too, and raise the time limit for this route if your host allows it.
 
 A route handler is a public endpoint, and at Fable prices that matters. Cap the input as this one does, and put auth and rate limiting in front of it before it goes live. The same goes for the server action below.
 
@@ -113,17 +113,19 @@ export async function POST(request: Request): Promise<Response> {
   }
   if (prompt.length > MAX_PROMPT_CHARS) return new Response('Too long', {status: 413});
 
-  const stream = client.beta.messages.stream({
-    model: 'claude-fable-5-2',
-    max_tokens: 64000,
-    output_config: {effort: 'high'},
-    // On a safety decline, retry on the model Anthropic recommends
-    betas: ['server-side-fallback-2026-07-01'],
-    fallbacks: 'default',
-    messages: [{role: 'user', content: prompt}],
-  });
-  // The client went away: stop paying for tokens nobody will see
-  request.signal.addEventListener('abort', () => stream.abort());
+  const stream = client.beta.messages.stream(
+    {
+      model: 'claude-fable-5-2',
+      max_tokens: 64000,
+      output_config: {effort: 'high'},
+      // On a safety decline, retry on the model Anthropic recommends
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default',
+      messages: [{role: 'user', content: prompt}],
+    },
+    // The client went away (even before this line): stop paying for tokens nobody will see
+    {signal: request.signal},
+  );
 
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
