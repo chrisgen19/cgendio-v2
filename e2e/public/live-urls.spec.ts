@@ -71,6 +71,13 @@ test('an unknown slug has no Markdown version', async ({request}) => {
   expect((await request.get('/writing/no-such-post.md')).status()).toBe(404);
 });
 
+test('an unknown post slug answers 404 on its first request, not a 200 with noindex', async ({request}, testInfo) => {
+  // A slug no earlier request has used, so the first response is rendered on demand instead of coming from the ISR cache
+  const path = `/writing/no-such-post-${testInfo.project.name}-${Date.now()}`;
+  expect((await request.get(path)).status()).toBe(404);
+  expect((await request.get(path)).status()).toBe(404);
+});
+
 test('/llms.txt links every published post and case study at its Markdown URL', async ({request}) => {
   const response = await request.get('/llms.txt');
   expect(response.status()).toBe(200);

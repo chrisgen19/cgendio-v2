@@ -9,8 +9,12 @@ import {pageMetadata} from '@/lib/metadata';
 import {postJsonLd} from '@/lib/structured-data';
 import {getAdjacentPosts, getPageCopy, getPost, getPostSlugs} from '@/server/content';
 
-/** Blocks on purpose: unknown slugs must 404 before anything streams, so a Suspense boundary would cost the real status. */
-export const instant = false;
+/**
+ * The whole route must be static, so a slug that wasn't prerendered waits for its render instead of getting the App
+ * Shell first. Partial Prefetching would otherwise stream that shell with a 200, and notFound() would land too late to
+ * change the status. Next.js validates the static requirement at build time.
+ */
+export const ensureStatic = 'navigation';
 
 /** Published posts are prerendered. With no posts at all, a placeholder slug keeps the build happy and 404s. */
 export async function generateStaticParams() {
@@ -33,8 +37,8 @@ export async function generateMetadata({params}: PageProps<'/writing/[slug]'>): 
 }
 
 /**
- * A post. Drafts and unknown slugs get a real 404: the lookup and notFound() happen before anything streams, so the
- * status code is still 404 rather than a 200 with a not-found page.
+ * A post. Drafts and unknown slugs get a real 404: with ensureStatic above, nothing streams before the lookup, so
+ * notFound() still sets the status code instead of streaming a not-found page under a 200.
  */
 export default async function PostPage({params}: PageProps<'/writing/[slug]'>) {
   const {slug} = await params;
