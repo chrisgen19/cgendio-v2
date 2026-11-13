@@ -108,6 +108,13 @@ for (const path of ['/design-lab/fresh-fruit', '/design-lab/fresh-fruit/editoria
   });
 }
 
+test('an unknown project slug answers 404 on its first request, not a 200 with noindex', async ({request}, testInfo) => {
+  // A slug no earlier request has used, so the first response is rendered on demand instead of coming from the ISR cache
+  const path = `/projects/no-such-project-${testInfo.project.name}-${Date.now()}`;
+  expect((await request.get(path)).status()).toBe(404);
+  expect((await request.get(path)).status()).toBe(404);
+});
+
 test('/sign-in shows the admin sign-in, kept out of search results', async ({page}) => {
   const response = await page.goto('/sign-in');
   expect(response?.status()).toBe(200);
