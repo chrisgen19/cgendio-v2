@@ -1,7 +1,7 @@
 import {expect, test} from '@playwright/test';
 import {E2E_BASE_URL} from '../support/test-env';
 
-/* Seeded published posts, newest first: "WordPress news, October 2026…", "Redirect maps…". The canvas posts and v1's title-only posts are drafts. */
+/* Seeded published posts, newest first: "Claude Fable 5.2 for developers…", "WordPress news, October 2026…", "Redirect maps…". The canvas posts and v1's title-only posts are drafts. */
 
 test('blog list, then a post, then the next post', async ({page}) => {
   await page.goto('/writing');
@@ -36,6 +36,9 @@ test('the RSS feed is valid XML with every published post', async ({page, reques
 
   expect(feed.error).toBeNull();
   expect(feed.title).toBeTruthy();
-  expect(feed.links).toHaveLength(2);
-  expect(feed.links[0]).toBe(`${E2E_BASE_URL}/writing/wordpress-news-october-2026`);
+  expect(feed.links).toEqual([
+    `${E2E_BASE_URL}/writing/claude-fable-5-2-developer-guide`,
+    `${E2E_BASE_URL}/writing/wordpress-news-october-2026`,
+    `${E2E_BASE_URL}/writing/redirect-maps-wordpress-to-nextjs`,
+  ]);
 });
