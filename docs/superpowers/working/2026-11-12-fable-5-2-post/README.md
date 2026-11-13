@@ -6,9 +6,9 @@ The source material behind `prisma/seed-data/posts/claude-fable-5-2-developer-gu
 
 | Path | What it is |
 | --- | --- |
-| `images/*.webp` | The 4 final images, still to be uploaded to R2 (Task 5) |
+| `images/*.webp` | The 4 post images and `cover.webp` (1600x900), all uploaded to R2; the post and `post-template.md` use their R2 URLs, and the cover is set in the admin |
 | `images/captions.md` | Alt text and caption for each image |
-| `images/src/*.html` | Diagram sources (inline SVG in the site's tokens). Open one in a browser and screenshot `#diagram` to re-render it |
+| `images/src/*.html` | Diagram and cover sources (inline SVG in the site's tokens). Serve the repo over HTTP so the fonts load, then screenshot `#diagram` to re-render one |
 | `research-notes.md` | Every fact, verified quote and API detail, each with its source URL |
 | `post-template.md` | The post, with `<<route.ts>>`-style placeholders for the code examples |
 | `examples/` | The 4 code examples, type-checked against `@anthropic-ai/sdk` 1.8.0 and never run |
@@ -47,4 +47,4 @@ mkdir -p /tmp/hn && curl -sS -o /tmp/hn/50429068.json https://hn.algolia.com/api
 node $W/hn-flat.mjs /tmp/hn/50429068.json > /tmp/hn/50429068.txt
 ```
 
-After Task 5 swaps in the R2 image URLs, edit `post-template.md` too, so a rebuild doesn't bring the placeholders back.
+The R2 image URLs are in `post-template.md` and the post, so a rebuild keeps them.

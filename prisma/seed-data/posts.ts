@@ -12,6 +12,16 @@ export type SeedPost = Omit<Post, 'readMinutes' | 'date' | 'publishedAt'> &
 
 export const posts: SeedPost[] = [
   {
+    slug: 'claude-fable-5-2-developer-guide',
+    title: "Claude Fable 5.2 for developers: what's new, what people are saying, and how I'd use it",
+    tag: 'AI workflow',
+    status: 'PUBLISHED',
+    publishedAt: '2026-11-13T00:56:26.078Z',
+    updatedAt: '2026-11-13T00:56:26.082Z',
+    excerpt:
+      "What changed in Claude Fable 5.2, what developers on Hacker News and X make of it, and how I'd wire it into a Next.js app, Claude Code and agent workflows, including when Opus 5.5 is the better pick.",
+  },
+  {
     slug: 'wordpress-news-october-2026',
     title: "WordPress news, October 2026: what to patch and what's coming in 7.2",
     tag: 'WordPress',
@@ -20,14 +30,6 @@ export const posts: SeedPost[] = [
     updatedAt: '2026-10-05T05:01:19.745Z',
     excerpt:
       'A roundup of the last three months for people who look after WordPress sites: three core security releases, a backdoor that rebuilds itself, what 7.1 shipped, what 7.2 plans, the WP Engine ruling, and what developers are saying about it.',
-  },
-  {
-    slug: 'claude-fable-5-2-developer-guide',
-    title: "Claude Fable 5.2 for developers: what's new, what people are saying, and how I'd use it",
-    tag: 'AI workflow',
-    status: 'DRAFT',
-    excerpt:
-      "What changed in Claude Fable 5.2, what developers on Hacker News and X make of it, and how I'd wire it into a Next.js app, Claude Code and agent workflows, including when Opus 5.5 is the better pick.",
   },
   {
     slug: 'redirect-maps-wordpress-to-nextjs',

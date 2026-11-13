@@ -6,7 +6,7 @@ I haven't shipped Fable 5.2 in a client project yet, so this isn't a case study.
 
 ## What's new in 5.2
 
-![Anthropic's launch post headline: Claude Fable 5.2 and Mythos 5.2, dated November 9, 2026](/__fable-images/launch-page.webp)
+![Anthropic's launch post headline: Claude Fable 5.2 and Mythos 5.2, dated November 9, 2026](https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/2a32793c-d2a3-4abd-812c-081c48314a9a.webp)
 
 *Anthropic's launch post, November 9, 2026.*
 
@@ -46,7 +46,7 @@ Two prompting changes from Anthropic's [prompting guide for Fable 5.2](https://p
 
 ## Fable 5.2 or Opus 5.5?
 
-![Flowchart: routine work goes to Haiku 5.5 or Sonnet 5.5, everyday coding to Opus 5.5 (start here), and multi-repo changes, deep audits and long agent runs to Fable 5.2 at high effort](/__fable-images/model-picker.webp)
+![Flowchart: routine work goes to Haiku 5.5 or Sonnet 5.5, everyday coding to Opus 5.5 (start here), and multi-repo changes, deep audits and long agent runs to Fable 5.2 at high effort](https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/1045f4fa-6746-421c-a13e-cd65df1d7a83.webp)
 
 *How I pick a model, based on Anthropic's own advice.*
 
@@ -67,7 +67,7 @@ So where would I pay for it? Multi-repo refactors and migrations, deep code and 
 
 ## What developers are saying
 
-![Hacker News thread titled Claude Fable 5.2 and Mythos 5.2, showing 914 points and over 1,000 comments](/__fable-images/hn-thread.webp)
+![Hacker News thread titled Claude Fable 5.2 and Mythos 5.2, showing 914 points and over 1,000 comments](https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/d83537b6-0011-4539-b3fe-a3a379f7c236.webp)
 
 *Hacker News, at the time of writing (November 12, 2026).*
 
@@ -248,7 +248,7 @@ export async function askDocs(question: string): Promise<string> {
 
 ### Let Fable plan and cheaper models do the work
 
-![Diagram: Fable 5.2 plans the work in one call, three Haiku 5.5 workers run the steps in parallel, and the results are merged in your code](/__fable-images/orchestrator.webp)
+![Diagram: Fable 5.2 plans the work in one call, three Haiku 5.5 workers run the steps in parallel, and the results are merged in your code](https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/85f953fb-a484-4449-95ba-bae10a783eed.webp)
 
 *The orchestrator pattern: one planner, many cheap workers.*
 
