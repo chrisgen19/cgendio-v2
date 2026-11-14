@@ -66,7 +66,7 @@ The details that change a bill:
 - **Thinking is output.** The $7.50 includes thinking tokens, so the thinking level is the biggest cost lever you have.
 - **Batch and Flex** halve the price to $0.75 / $3.75 for jobs that can wait. **Priority** costs $2.70 / $13.50.
 - **Caching is automatic only.** Prompts of at least 4,096 tokens get implicit caching, and cached input is billed at $0.075.
-- **Search grounding** gives 5,000 free requests a month, then $14 per 1,000. It isn't available on the free tier.
+- **Search grounding** gives 5,000 free search requests a month, shared across all Gemini 3 and newer models, then $14 per 1,000 requests. One request can run several Google searches, and Google bills "for each individual search query performed", so a grounded request can cost more than one. It isn't available on the free tier.
 - **Free-tier data is used to improve Google's products.** The pricing page marks free-tier data as "Used to improve our products: Yes" and paid as "No". For client work, I'd only ever use the paid tier.
 
 ## What changes in your code
@@ -111,6 +111,8 @@ Put together, the early reports describe a model that's fast enough for interact
 ## Using it in a Next.js app
 
 These examples use the Vercel AI SDK 7 (`ai` 7.0.171) and `@ai-sdk/google` 4.0.119, with the App Router. I type-checked them against those versions but haven't run them. The Google provider reads `GOOGLE_GENERATIVE_AI_API_KEY`, and the plain `'google/...'` model strings go through the AI Gateway, which reads `AI_GATEWAY_API_KEY`.
+
+Before deploying any of them, remember that a route handler and a Server Action are both public endpoints, and every call costs money. I'd put them behind the app's auth check and a rate limit, and bound the size of whatever text they accept.
 
 A route handler that streams a reply. Medium thinking keeps chat quick, and passing the request's signal stops the call when the user leaves:
 
@@ -172,6 +174,9 @@ const invoiceSchema = z.object({
 export type Invoice = z.infer<typeof invoiceSchema>;
 
 export async function extractInvoice(text: string): Promise<Invoice> {
+  // Server Actions are public endpoints, so bound the input like any request body.
+  if (text.length > 20_000) throw new Error('Invoice text is too long');
+
   const {output} = await generateText({
     model: google('gemini-4-hydrogen'),
     output: Output.object({schema: invoiceSchema}),
@@ -202,7 +207,7 @@ const INSTRUCTIONS = [
 ].join('\n');
 
 export async function screenshotToHtml(image: Uint8Array, notes: string): Promise<string> {
-  const {text} = await generateText({
+  const {text, finishReason} = await generateText({
     model: google('gemini-4-hydrogen'),
     messages: [
       {
@@ -219,6 +224,9 @@ export async function screenshotToHtml(image: Uint8Array, notes: string): Promis
       } satisfies GoogleLanguageModelOptions,
     },
   });
+
+  // Half an HTML file is worse than none, so only a clean stop counts as finished.
+  if (finishReason !== 'stop') throw new Error(`Generation did not finish (${finishReason})`);
 
   // Models often wrap code in a ```html fence even when told not to.
   const fenced = text.match(/```(?:html)?\s*\n([\s\S]*?)\n?```/);
@@ -251,11 +259,13 @@ export async function planAndBuild(task: string): Promise<string[]> {
 
   const results = await Promise.all(
     plan.steps.map(async (step) => {
-      const {text} = await generateText({
+      const {text, finishReason} = await generateText({
         model: 'google/gemini-4-hydrogen',
         system: `You are one worker on this task: ${task}\nDo only your step and return the result.`,
         prompt: step,
       });
+      // A worker cut off by its output cap or a filter returns partial text, so only a clean stop counts.
+      if (finishReason !== 'stop') throw new Error(`Step did not finish (${finishReason}): ${step}`);
       return text;
     }),
   );
