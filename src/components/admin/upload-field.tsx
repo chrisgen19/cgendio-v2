@@ -1,12 +1,13 @@
 'use client';
 
 import {FileUp, X} from 'lucide-react';
-import {useId, useRef, useState} from 'react';
+import {useRef, useState} from 'react';
 import {toast} from 'sonner';
 import {Button} from '@/components/ui/button';
-import {Label} from '@/components/ui/label';
+import {Input} from '@/components/ui/input';
 import {MAX_IMAGE_BYTES} from '@/lib/upload-limits';
 import {getUploadTarget} from '@/server/actions/uploads';
+import {FieldShell} from './form-fields';
 import {useUploadStatus} from './upload-status';
 
 export type UploadedImage = {url: string; width: number; height: number};
@@ -25,20 +26,26 @@ type UploadFieldProps = {
   kind: 'image' | 'cv';
   defaultValue?: string | null;
   hint?: string;
-  /** Told about each new image with its size in pixels, and null on Remove. Nothing else changes when it is left out. */
+  errors?: Record<string, string[]>;
+  /**
+   * Told about each new image with its size in pixels, and null on Remove. Nothing else changes when it is left out.
+   * Passing it also turns the URL box off: the size comes from decoding the file, so a URL typed in by hand would
+   * leave the caller with a picture it has no dimensions for.
+   */
   onUploaded?: (image: UploadedImage | null) => void;
 };
 
 /**
- * Uploads straight from the browser to R2 with a server-signed URL, then puts the file's public URL in a hidden
- * input. Nothing is saved until the form itself is saved.
+ * Picks the file that a form field's URL points at, either by uploading one or by typing the URL of a file that is
+ * already in the bucket. An upload goes straight from the browser to R2 with a server-signed URL and then fills the
+ * box in; nothing is saved until the form itself is saved.
  */
-export function UploadField({name, label, kind, defaultValue, hint, onUploaded}: UploadFieldProps) {
-  const id = useId();
+export function UploadField({name, label, kind, defaultValue, hint, errors, onUploaded}: UploadFieldProps) {
   const input = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(defaultValue ?? '');
   const [busy, setBusy] = useState(false);
   const {trackUpload} = useUploadStatus();
+  const urlInput = !onUploaded;
 
   const upload = async (file: File) => {
     setBusy(true);
@@ -77,51 +84,71 @@ export function UploadField({name, label, kind, defaultValue, hint, onUploaded}:
     }
   };
 
+  const defaultHint = kind === 'cv' ? 'PDF, up to 10 MB.' : 'JPEG, PNG, WebP or AVIF, up to 5 MB.';
+
   return (
-    <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <input type="hidden" name={name} value={url} />
-      <input
-        id={id}
-        ref={input}
-        type="file"
-        accept={kind === 'cv' ? 'application/pdf' : 'image/jpeg,image/png,image/webp,image/avif'}
-        className="sr-only"
-        onChange={(event) => {
-          const file = event.target.files?.[0];
-          if (file) void upload(file);
-        }}
-      />
-      <div className="flex flex-wrap items-center gap-3">
-        {url && kind === 'image' ? (
-          // biome-ignore lint/performance/noImgElement: a 64px admin thumbnail of an R2 upload; next/image would need the R2 host configured for no gain here
-          <img src={url} alt="" className="size-16 rounded-md border object-cover" />
-        ) : null}
-        {url && kind === 'cv' ? (
-          <a href={url} target="_blank" rel="noreferrer" className="text-sm underline">
-            Current CV (PDF)
-          </a>
-        ) : null}
-        <Button type="button" variant="outline" disabled={busy} onClick={() => input.current?.click()}>
-          <FileUp />
-          {busy ? 'Uploading…' : url ? 'Replace' : 'Upload'}
-        </Button>
-        {url ? (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => {
-              setUrl('');
-              onUploaded?.(null);
+    <FieldShell name={name} label={label} hint={hint ?? defaultHint} errors={errors}>
+      {(aria) => (
+        <div className="flex flex-col gap-2">
+          {urlInput ? (
+            <Input
+              name={name}
+              {...aria}
+              type="url"
+              value={url}
+              onChange={(event) => setUrl(event.target.value)}
+              placeholder={kind === 'cv' ? 'https://…/file.pdf' : 'https://…/image.jpg'}
+              spellCheck={false}
+              autoComplete="off"
+            />
+          ) : (
+            // Upload only: the caller needs the pixel size that only a decoded file carries, so there is nothing to type
+            <input type="hidden" name={name} value={url} />
+          )}
+          <input
+            // Driven by the Upload button, so it stays out of the tab order and off the label
+            id={urlInput ? undefined : `field-${name}`}
+            ref={input}
+            type="file"
+            aria-label={urlInput ? `${label} file` : undefined}
+            accept={kind === 'cv' ? 'application/pdf' : 'image/jpeg,image/png,image/webp,image/avif'}
+            className="sr-only"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void upload(file);
             }}
-            aria-label={`Remove ${label.toLowerCase()}`}
-          >
-            <X />
-            Remove
-          </Button>
-        ) : null}
-      </div>
-      <p className="text-xs text-muted-foreground">{hint ?? (kind === 'cv' ? 'PDF, up to 10 MB.' : 'JPEG, PNG, WebP or AVIF, up to 5 MB.')}</p>
-    </div>
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            {url && kind === 'image' ? (
+              // biome-ignore lint/performance/noImgElement: a 64px admin thumbnail of an R2 upload; next/image would need the R2 host configured for no gain here
+              <img src={url} alt="" className="size-16 rounded-md border object-cover" />
+            ) : null}
+            {url && kind === 'cv' ? (
+              <a href={url} target="_blank" rel="noreferrer" className="text-sm underline">
+                Current CV (PDF)
+              </a>
+            ) : null}
+            <Button type="button" variant="outline" disabled={busy} onClick={() => input.current?.click()}>
+              <FileUp />
+              {busy ? 'Uploading…' : url ? 'Replace' : 'Upload'}
+            </Button>
+            {url ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setUrl('');
+                  onUploaded?.(null);
+                }}
+                aria-label={`Remove ${label.toLowerCase()}`}
+              >
+                <X />
+                Remove
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </FieldShell>
   );
 }

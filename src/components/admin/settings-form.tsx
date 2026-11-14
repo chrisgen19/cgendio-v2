@@ -57,6 +57,7 @@ export function SettingsForm({settings}: SettingsFormProps) {
               kind="image"
               defaultValue={settings.photoUrl}
               hint="JPEG, PNG, WebP or AVIF, up to 5 MB. Portrait (4:5) works best; without one the About section shows a placeholder."
+              errors={errors}
             />
             <UploadField
               name="cvUrl"

@@ -114,7 +114,7 @@ export function ProjectForm({project}: {project: ProjectFormValues | null}) {
         <Card>
           <CardContent className="flex flex-col gap-4">
             <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-              <UploadField name="coverImageUrl" label="Cover image" kind="image" defaultValue={project?.coverImageUrl} />
+              <UploadField name="coverImageUrl" label="Cover image" kind="image" defaultValue={project?.coverImageUrl} errors={errors} />
               <TextField name="liveUrl" label="Live site" type="url" defaultValue={project?.liveUrl ?? ''} errors={errors} />
               <TextField name="repoUrl" label="Repository" type="url" defaultValue={project?.repoUrl ?? ''} errors={errors} />
               <TextField

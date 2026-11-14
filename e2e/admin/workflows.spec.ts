@@ -142,6 +142,42 @@ test('settings saves persist across reloads', async ({page}) => {
   await expect(email).toHaveValue(original);
 });
 
+test('a CV URL typed into the settings form saves without uploading a file', async ({page}) => {
+  const pasted = 'https://e2e-media.example.test/cv/pasted-cv.pdf';
+  await page.goto('/admin/settings');
+  const cvUrl = page.getByLabel('CV (A4)', {exact: true});
+  await cvUrl.waitFor({state: 'visible'});
+  const original = await cvUrl.inputValue();
+  try {
+    await cvUrl.fill(pasted);
+    await page.getByRole('button', {name: 'Save settings', exact: true}).click();
+    await expect(page.getByText('Settings saved.', {exact: true})).toBeVisible();
+    await page.reload();
+    await expect(cvUrl).toHaveValue(pasted);
+    // The typed URL is the field's value, so the public buttons pick it up like an uploaded one
+    await expect(page.getByRole('link', {name: 'Current CV (PDF)'}).first()).toHaveAttribute('href', pasted);
+  } finally {
+    await page.goto('/admin/settings');
+    await cvUrl.waitFor({state: 'visible'});
+    await cvUrl.fill(original);
+    await page.getByRole('button', {name: 'Save settings', exact: true}).click();
+    await expect(page.getByText('Settings saved.', {exact: true})).toBeVisible();
+  }
+});
+
+test('a CV URL that is not a web URL is refused with a field error', async ({page}) => {
+  await page.goto('/admin/settings');
+  const cvUrl = page.getByLabel('CV (A4)', {exact: true});
+  await cvUrl.waitFor({state: 'visible'});
+  // type="url" blocks the browser's own submit, so the server rule is what this checks: ftp:// is not accepted
+  await cvUrl.evaluate((node: HTMLInputElement) => node.setAttribute('type', 'text'));
+  await cvUrl.fill('ftp://example.com/cv.pdf');
+  await page.getByRole('button', {name: 'Save settings', exact: true}).click();
+  await expect(page.getByText('Settings saved.', {exact: true})).toHaveCount(0);
+  await page.reload();
+  await expect(cvUrl).not.toHaveValue('ftp://example.com/cv.pdf');
+});
+
 test('page copy saves persist across reloads', async ({page}) => {
   await page.goto('/admin/copy');
   const eyebrow = page.getByLabel('Eyebrow', {exact: true}).first();
