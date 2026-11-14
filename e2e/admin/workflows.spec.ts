@@ -174,6 +174,10 @@ test('a CV URL that is not a web URL is refused with a field error', async ({pag
   await cvUrl.fill('ftp://example.com/cv.pdf');
   await page.getByRole('button', {name: 'Save settings', exact: true}).click();
   await expect(page.getByText('Settings saved.', {exact: true})).toHaveCount(0);
+  // The reason shows on the field itself, not only as a toast: without this the field's errors prop can go missing
+  // and the save fails with nothing highlighted (#170 review).
+  await expect(page.locator('#field-cvUrl-error')).toHaveText('Enter a full URL');
+  await expect(cvUrl).toHaveAttribute('aria-invalid', 'true');
   await page.reload();
   await expect(cvUrl).not.toHaveValue('ftp://example.com/cv.pdf');
 });

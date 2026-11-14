@@ -65,6 +65,7 @@ export function SettingsForm({settings}: SettingsFormProps) {
               kind="cv"
               defaultValue={settings.cvUrl}
               hint="PDF, up to 10 MB. Every Download CV button links to it; without one they're all hidden."
+              errors={errors}
             />
             <UploadField
               name="cvUrlLetter"
@@ -72,6 +73,7 @@ export function SettingsForm({settings}: SettingsFormProps) {
               kind="cv"
               defaultValue={settings.cvUrlLetter}
               hint="Optional. With one uploaded, Contact offers both cuts side by side; without one it shows a single CV button."
+              errors={errors}
             />
             <div>
               <SubmitButton pending={pending}>Save settings</SubmitButton>
