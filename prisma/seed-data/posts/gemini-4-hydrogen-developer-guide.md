@@ -6,7 +6,7 @@ I haven't shipped Hydrogen in a client project yet, so this isn't a case study. 
 
 ## What Hydrogen is
 
-![Google's launch post header: Introducing Gemini 4 Hydrogen, dated November 12, 2026, by Koray Kavukcuoglu of Google DeepMind](/__hydrogen-images/launch-page.webp)
+![Google's launch post header: Introducing Gemini 4 Hydrogen, dated November 12, 2026, by Koray Kavukcuoglu of Google DeepMind](https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/a9ce48fe-72da-4a94-a3f8-d02a5f4de6d7.webp)
 
 *Google's launch post, November 12, 2026.*
 
@@ -86,7 +86,7 @@ Coming from 3.8 Flash, most of this is a model ID swap, but a few things now ret
 
 For most people, Hydrogen is something they've already used without choosing it. It's in Search for everyone, it answers free Gemini app users when auto selection picks it, and Google says Gemini in Sheets now outputs "over 30% faster than previous models in Sheets canvas". One early app user on HN: "I just tried it in the Gemini app, it's much better than the previous version." ([HN](https://news.ycombinator.com/item?id=50472631))
 
-![Hacker News submission "Gemini 4 Hydrogen (blog.google)" with 559 points and 349 comments](/__hydrogen-images/hn-thread.webp)
+![Hacker News submission "Gemini 4 Hydrogen (blog.google)" with 559 points and 349 comments](https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/9efc8cc3-dd4d-4fc9-8bfe-7cc4e744184d.webp)
 
 *Hacker News, at the time of writing (November 14, 2026).*
 
@@ -234,7 +234,7 @@ export async function screenshotToHtml(image: Uint8Array, notes: string): Promis
 }
 ```
 
-![Diagram: Gemini 4 Carbon or Claude Sonnet 5.5 plans and reviews, three Gemini 4 Hydrogen workers each run one step in parallel, and their results merge into one result](/__hydrogen-images/orchestrator.webp)
+![Diagram: Gemini 4 Carbon or Claude Sonnet 5.5 plans and reviews, three Gemini 4 Hydrogen workers each run one step in parallel, and their results merge into one result](https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/9d03702f-8dd8-4cf5-a44d-26105acab0ca.webp)
 
 *The Antigravity Orchestrator pattern, as I'd wire it into an app.*
 
@@ -278,7 +278,7 @@ Note the Sonnet ID: the AI Gateway writes it `anthropic/claude-sonnet-5.5`, whil
 
 ## Hydrogen, Haiku 5.5 or Sonnet 5.5?
 
-![Diagram: high-volume, simple work goes to Claude Haiku 5.5; fast everyday work, agents and image to UI go to Gemini 4 Hydrogen (start here); tricky reasoning, review and planning go to Claude Sonnet 5.5 or Gemini 4 Carbon](/__hydrogen-images/model-picker.webp)
+![Diagram: high-volume, simple work goes to Claude Haiku 5.5; fast everyday work, agents and image to UI go to Gemini 4 Hydrogen (start here); tricky reasoning, review and planning go to Claude Sonnet 5.5 or Gemini 4 Carbon](https://pub-2804367faf354b5c8072c41278bae114.r2.dev/images/2026/c50a619c-9334-4e1c-9266-aa33b74b258e.webp)
 
 *Which model I reach for, by job, with prices as of November 14, 2026.*
 
