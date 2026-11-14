@@ -62,7 +62,7 @@ test('the CV button records cv_download when only the A4 cut is uploaded', async
   }
 });
 
-test('both CV cuts get their own button and their own format param', async ({page}) => {
+test('both CV cuts sit in one Download CV menu, each with its own format param', async ({page}) => {
   await queryTestDb('UPDATE site_settings SET cv_url = $1, cv_url_letter = $2', [CV_URL, CV_LETTER_URL]);
   try {
     await resaveSettings(page);
@@ -70,14 +70,24 @@ test('both CV cuts get their own button and their own format param', async ({pag
     await page.goto('/contact');
     await waitForGtag(page);
 
+    const trigger = page.locator('main').getByRole('button', {name: 'Download CV', exact: true});
     const a4 = page.locator('main [data-track="cv_download"][data-track-format="a4"]');
     const letter = page.locator('main [data-track="cv_download"][data-track-format="letter"]');
+    await expect(a4).toHaveCount(0);
+
+    await trigger.click();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
     await expect(a4).toHaveAttribute('href', CV_URL);
     await expect(letter).toHaveAttribute('href', CV_LETTER_URL);
-    await expect(a4).toHaveText('Download CV (A4)');
-    await expect(letter).toHaveText('Download CV (Letter)');
-
+    await expect(a4).toContainText('A4 Format CV');
+    await expect(letter).toContainText('Letter Format CV');
     await a4.click();
+
+    // swallowCvClicks cancels the click, and Radix skips its select (which closes the menu) on a cancelled click
+    await page.keyboard.press('Escape');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await expect(trigger).toBeFocused();
+    await trigger.click();
     await letter.click();
     expect(await gaEvents(page, 'cv_download')).toEqual([
       {placement: 'contact', format: 'a4'},
