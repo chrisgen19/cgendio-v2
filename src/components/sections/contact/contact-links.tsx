@@ -45,7 +45,7 @@ export function ContactLinks({copy, settings}: {copy: PageCopy; settings: SiteSe
     <div className="flex flex-wrap items-center gap-3">
       <ContactCv copy={copy} settings={settings} />
       {socials.map((social) => (
-        <Button key={social.key} href={social.href} variant="secondary" size="icon" rel="me noopener" target="_blank" title={social.label}>
+        <Button key={social.key} href={social.href} variant="outline" size="icon" rel="me noopener" target="_blank" title={social.label}>
           <SocialIcon name={social.key} className="size-5" />
           <span className="sr-only">{social.label} (opens in a new tab)</span>
         </Button>
