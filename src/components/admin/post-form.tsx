@@ -62,7 +62,7 @@ export function PostForm({post}: {post: PostFormValues | null}) {
                 defaultValue={post?.publishedAt ? publishedDay(new Date(post.publishedAt)) : ''}
                 errors={errors}
               />
-              <UploadField name="coverImageUrl" label="Cover image" kind="image" defaultValue={post?.coverImageUrl} />
+              <UploadField name="coverImageUrl" label="Cover image" kind="image" defaultValue={post?.coverImageUrl} errors={errors} />
             </div>
             <SwitchField
               name="status"
