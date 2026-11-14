@@ -1,4 +1,5 @@
 import {Button} from '@/components/ui-site/button';
+import {SocialIcon} from '@/components/ui-site/social-icon';
 import type {PageCopy, SiteSettings} from '@/server/content';
 import {CvDownloadMenu} from './cv-download-menu';
 
@@ -44,9 +45,9 @@ export function ContactLinks({copy, settings}: {copy: PageCopy; settings: SiteSe
     <div className="flex flex-wrap items-center gap-3">
       <ContactCv copy={copy} settings={settings} />
       {socials.map((social) => (
-        <Button key={social.key} href={social.href} variant="secondary" size="sm" rel="me noopener" target="_blank">
-          {social.label}
-          <span className="sr-only">(opens in a new tab)</span>
+        <Button key={social.key} href={social.href} variant="secondary" size="icon" rel="me noopener" target="_blank" title={social.label}>
+          <SocialIcon name={social.key} className="size-5" />
+          <span className="sr-only">{social.label} (opens in a new tab)</span>
         </Button>
       ))}
     </div>

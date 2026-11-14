@@ -2,7 +2,7 @@ import type {AnchorHTMLAttributes, ButtonHTMLAttributes} from 'react';
 import {cn} from '@/lib/cn';
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'lime';
-type Size = 'md' | 'sm';
+type Size = 'md' | 'sm' | 'icon';
 
 type BaseProps = {
   variant?: Variant;
@@ -28,6 +28,8 @@ const VARIANTS: Record<Variant, string> = {
 const SIZES: Record<Size, string> = {
   md: 'min-h-13 px-6 text-[15px]',
   sm: 'min-h-11 px-[18px] text-sm',
+  // A round 44px button holding one icon; give it an accessible name (sr-only text or aria-label)
+  icon: 'size-11 shrink-0 p-0',
 };
 
 /** The pill button's classes, for elements Button can't render itself (a disclosure's `<summary>`). */

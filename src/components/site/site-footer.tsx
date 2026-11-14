@@ -1,4 +1,5 @@
 import {Logo} from '@/components/ui-site/logo';
+import {SocialIcon} from '@/components/ui-site/social-icon';
 import {SITE_NAME} from '@/lib/metadata';
 import {getSiteSettings} from '@/server/content';
 
@@ -8,13 +9,16 @@ const PROFILES = [
   {key: 'linkedin', label: 'LinkedIn'},
 ] as const;
 
+const PAGES = [
+  {href: '/#work', label: 'Work'},
+  {href: '/writing', label: 'Blog'},
+];
+
+const LINK = 'inline-flex min-h-11 items-center text-sm text-ink no-underline hover:text-ink';
+
 export async function SiteFooter() {
   const {socials} = await getSiteSettings();
-  const links = [
-    {href: '/#work', label: 'Work'},
-    {href: '/writing', label: 'Blog'},
-    ...PROFILES.flatMap(({key, label}) => (socials[key] ? [{href: socials[key], label}] : [])),
-  ];
+  const profiles = PROFILES.flatMap(({key, label}) => (socials[key] ? [{key, label, href: socials[key]}] : []));
   return (
     /*
      * The last thing on the page, so it carries the bottom inset: `viewport-fit: cover` (#112) puts the home
@@ -26,11 +30,20 @@ export async function SiteFooter() {
         <div className="flex flex-col items-start gap-5 md:flex-row md:items-center md:justify-between">
           <Logo />
           <nav aria-label="Footer">
-            <ul className="-mx-3 my-0 flex list-none flex-wrap gap-1 p-0">
-              {links.map((link) => (
+            <ul className="-mx-3 my-0 flex list-none flex-wrap items-center gap-1 p-0">
+              {PAGES.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="inline-flex min-h-11 items-center px-3 text-sm text-ink no-underline hover:text-ink">
+                  <a href={link.href} className={`${LINK} px-3`}>
                     {link.label}
+                  </a>
+                </li>
+              ))}
+              {/* Icon only, so each is a 44px square around the mark; the label stays as its accessible name */}
+              {profiles.map((profile) => (
+                <li key={profile.key}>
+                  <a href={profile.href} rel="me noopener" title={profile.label} className={`${LINK} min-w-11 justify-center`}>
+                    <SocialIcon name={profile.key} className="size-[18px]" />
+                    <span className="sr-only">{profile.label}</span>
                   </a>
                 </li>
               ))}
