@@ -71,5 +71,7 @@ export const pageCopy: PageCopy = {
   'contact.lede': "Here's my card. Email me directly, or tell me about it in the form and I'll reply to you myself.",
   'contact.primaryLabel': 'Start a project',
   'contact.cvLabel': 'Download CV',
+  'contact.cvLabelA4': 'Download CV (A4)',
+  'contact.cvLabelLetter': 'Download CV (Letter)',
   'contact.location': 'Pasig City, Philippines · Asia/Manila (UTC+8)',
 };

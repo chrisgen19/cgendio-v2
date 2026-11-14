@@ -65,7 +65,7 @@ export function AboutInspect({copy, name, openToProjects, cvUrl}: AboutInspectPr
         </Button>
         {/* Only once a CV is uploaded in admin Settings, like the Timeline and Contact buttons */}
         {cvUrl ? (
-          <Button href={cvUrl} variant="secondary" size="sm">
+          <Button href={cvUrl} variant="secondary" size="sm" data-track="cv_download" data-track-placement="about">
             {copy.cvLabel}
           </Button>
         ) : null}

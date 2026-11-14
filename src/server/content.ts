@@ -328,6 +328,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
     contactEmail: row.contactEmail,
     openToProjects: row.openToProjects,
     cvUrl: row.cvUrl,
+    cvUrlLetter: row.cvUrlLetter,
     photoUrl: row.photoUrl,
     socials: row.socials,
   });

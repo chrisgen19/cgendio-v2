@@ -142,6 +142,7 @@ export const settingsFormSchema = z.object({
   contactEmail: text('Contact email', 200),
   openToProjects: checkbox,
   cvUrl: optionalUrl,
+  cvUrlLetter: optionalUrl,
   photoUrl: optionalUrl,
   linkedinUrl: optionalUrl,
 });

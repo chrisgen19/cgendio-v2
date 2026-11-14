@@ -150,7 +150,10 @@ model SiteSettings {
   id             String   @id @default("site")
   contactEmail   String   @map("contact_email")
   openToProjects Boolean  @default(true) @map("open_to_projects")
+  /// The main CV (A4). The About and Timeline buttons link to this one.
   cvUrl          String?  @map("cv_url")
+  /// The US Letter cut, offered beside the A4 one in the Contact section. Optional: without it Contact shows one button.
+  cvUrlLetter    String?  @map("cv_url_letter")
   /// The About section photo, uploaded in admin Settings
   photoUrl       String?  @map("photo_url")
   /// {github, linkedin, ...}: profile URLs, null until known
