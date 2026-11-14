@@ -62,39 +62,90 @@ test('the CV button records cv_download when only the A4 cut is uploaded', async
   }
 });
 
-test('both CV cuts sit in one Download CV menu, each with its own format param', async ({page}) => {
+/** Puts both CV cuts in the settings for the callback, then takes them out again. */
+const withBothCuts = async (page: Page, run: () => Promise<void>) => {
   await queryTestDb('UPDATE site_settings SET cv_url = $1, cv_url_letter = $2', [CV_URL, CV_LETTER_URL]);
   try {
     await resaveSettings(page);
+    await run();
+  } finally {
+    await queryTestDb('UPDATE site_settings SET cv_url = NULL, cv_url_letter = NULL');
+    await resaveSettings(page);
+  }
+};
+
+/** The Download CV disclosure in the Contact section: its `<details>`, its `<summary>` and the two rows. */
+const cvMenu = (page: Page) => {
+  const details = page.locator('main details').filter({has: page.locator('[data-track="cv_download"]')});
+  return {
+    details,
+    summary: details.locator('summary'),
+    a4: details.locator('[data-track="cv_download"][data-track-format="a4"]'),
+    letter: details.locator('[data-track="cv_download"][data-track-format="letter"]'),
+  };
+};
+
+test('both CV cuts sit in one Download CV menu, each with its own format param', async ({page}) => {
+  await withBothCuts(page, async () => {
     await swallowCvClicks(page);
     await page.goto('/contact');
     await waitForGtag(page);
 
-    const trigger = page.locator('main').getByRole('button', {name: 'Download CV', exact: true});
-    const a4 = page.locator('main [data-track="cv_download"][data-track-format="a4"]');
-    const letter = page.locator('main [data-track="cv_download"][data-track-format="letter"]');
-    await expect(a4).toHaveCount(0);
+    const {details, summary, a4, letter} = cvMenu(page);
+    await expect(summary).toHaveText('Download CV');
+    await expect(a4).toBeHidden();
 
-    await trigger.click();
-    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await summary.click();
+    await expect(details).toHaveAttribute('open', '');
     await expect(a4).toHaveAttribute('href', CV_URL);
     await expect(letter).toHaveAttribute('href', CV_LETTER_URL);
     await expect(a4).toContainText('A4 Format CV');
     await expect(letter).toContainText('Letter Format CV');
     await a4.click();
+    await expect(details).not.toHaveAttribute('open');
 
-    // swallowCvClicks cancels the click, and Radix skips its select (which closes the menu) on a cancelled click
-    await page.keyboard.press('Escape');
-    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    await expect(trigger).toBeFocused();
-    await trigger.click();
+    await summary.click();
     await letter.click();
     expect(await gaEvents(page, 'cv_download')).toEqual([
       {placement: 'contact', format: 'a4'},
       {placement: 'contact', format: 'letter'},
     ]);
-  } finally {
-    await queryTestDb('UPDATE site_settings SET cv_url = NULL, cv_url_letter = NULL');
-    await resaveSettings(page);
-  }
+  });
+});
+
+test('the CV menu closes on Escape, returning focus to its button, and on a click outside it', async ({page}) => {
+  await withBothCuts(page, async () => {
+    await page.goto('/contact');
+    const {details, summary, a4} = cvMenu(page);
+
+    await summary.click();
+    await a4.focus();
+    await page.keyboard.press('Escape');
+    await expect(details).not.toHaveAttribute('open');
+    await expect(summary).toBeFocused();
+
+    await summary.click();
+    await expect(details).toHaveAttribute('open', '');
+    await page.locator('main h1').click();
+    await expect(details).not.toHaveAttribute('open');
+  });
+});
+
+test('without JavaScript the CV menu still opens and both cuts are links', async ({page, browser}) => {
+  await withBothCuts(page, async () => {
+    const context = await browser.newContext({javaScriptEnabled: false, baseURL: E2E_BASE_URL});
+    try {
+      const noJs = await context.newPage();
+      await noJs.goto('/contact');
+      const {details, summary, a4, letter} = cvMenu(noJs);
+      await summary.click();
+      await expect(details).toHaveAttribute('open', '');
+      await expect(a4).toBeVisible();
+      await expect(a4).toHaveAttribute('href', CV_URL);
+      await expect(letter).toBeVisible();
+      await expect(letter).toHaveAttribute('href', CV_LETTER_URL);
+    } finally {
+      await context.close();
+    }
+  });
 });
