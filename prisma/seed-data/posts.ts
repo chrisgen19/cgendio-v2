@@ -15,7 +15,9 @@ export const posts: SeedPost[] = [
     slug: 'gemini-4-hydrogen-developer-guide',
     title: "Gemini 4 Hydrogen for developers: performance, cost, and how I'd use it",
     tag: 'AI workflow',
-    status: 'DRAFT',
+    status: 'PUBLISHED',
+    publishedAt: '2026-11-14T03:44:29.753Z',
+    updatedAt: '2026-11-14T03:44:29.758Z',
     excerpt:
       "How fast Google's Gemini 4 Hydrogen really is, what it costs next to 3.8 Flash, Claude Haiku 5.5 and Sonnet 5.5, what developers on Hacker News and X make of it, and how I'd wire it into a Next.js app with the AI SDK.",
   },
