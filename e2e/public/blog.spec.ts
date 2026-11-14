@@ -37,6 +37,7 @@ test('the RSS feed is valid XML with every published post', async ({page, reques
   expect(feed.error).toBeNull();
   expect(feed.title).toBeTruthy();
   expect(feed.links).toEqual([
+    `${E2E_BASE_URL}/writing/gemini-4-hydrogen-developer-guide`,
     `${E2E_BASE_URL}/writing/claude-fable-5-2-developer-guide`,
     `${E2E_BASE_URL}/writing/wordpress-news-october-2026`,
     `${E2E_BASE_URL}/writing/redirect-maps-wordpress-to-nextjs`,
