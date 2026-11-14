@@ -20,6 +20,7 @@ test('visiting the admin marks this browser internal, and the public pages then 
 });
 
 const CV_URL = 'https://e2e-media.example.test/cv/e2e-cv.pdf';
+const CV_LETTER_URL = 'https://e2e-media.example.test/cv/e2e-cv-letter.pdf';
 
 /**
  * Saves the settings form as it stands, so the public pages pick up a cv_url written straight to the database. The
@@ -37,23 +38,53 @@ const resaveSettings = async (page: Page) => {
   await expect(page.getByText('Settings saved.', {exact: true})).toBeVisible();
 };
 
-test('the CV button records cv_download', async ({page}) => {
+/** Keeps CV clicks on the page: the CV host doesn't exist, and the listener only needs the click. */
+const swallowCvClicks = (page: Page) =>
+  page.addInitScript(() =>
+    addEventListener('click', (event) => (event.target as Element).closest?.('a[data-track="cv_download"]') && event.preventDefault(), true),
+  );
+
+test('the CV button records cv_download when only the A4 cut is uploaded', async ({page}) => {
   await queryTestDb('UPDATE site_settings SET cv_url = $1', [CV_URL]);
   try {
     await resaveSettings(page);
-    // Keep the click on the page: the CV host doesn't exist, and the listener only needs the click
-    await page.addInitScript(
-      (href) => addEventListener('click', (event) => (event.target as Element).closest?.(`a[href="${href}"]`) && event.preventDefault(), true),
-      CV_URL,
-    );
+    await swallowCvClicks(page);
     await page.goto('/contact');
     await waitForGtag(page);
-    const cv = page.locator('main [data-track="cv_download"]').first();
+    const cv = page.locator('main [data-track="cv_download"]');
+    await expect(cv).toHaveCount(1);
     await expect(cv).toHaveAttribute('href', CV_URL);
     await cv.click();
-    expect(await gaEvents(page, 'cv_download')).toEqual([{}]);
+    expect(await gaEvents(page, 'cv_download')).toEqual([{placement: 'contact'}]);
   } finally {
     await queryTestDb('UPDATE site_settings SET cv_url = NULL');
+    await resaveSettings(page);
+  }
+});
+
+test('both CV cuts get their own button and their own format param', async ({page}) => {
+  await queryTestDb('UPDATE site_settings SET cv_url = $1, cv_url_letter = $2', [CV_URL, CV_LETTER_URL]);
+  try {
+    await resaveSettings(page);
+    await swallowCvClicks(page);
+    await page.goto('/contact');
+    await waitForGtag(page);
+
+    const a4 = page.locator('main [data-track="cv_download"][data-track-format="a4"]');
+    const letter = page.locator('main [data-track="cv_download"][data-track-format="letter"]');
+    await expect(a4).toHaveAttribute('href', CV_URL);
+    await expect(letter).toHaveAttribute('href', CV_LETTER_URL);
+    await expect(a4).toHaveText('Download CV (A4)');
+    await expect(letter).toHaveText('Download CV (Letter)');
+
+    await a4.click();
+    await letter.click();
+    expect(await gaEvents(page, 'cv_download')).toEqual([
+      {placement: 'contact', format: 'a4'},
+      {placement: 'contact', format: 'letter'},
+    ]);
+  } finally {
+    await queryTestDb('UPDATE site_settings SET cv_url = NULL, cv_url_letter = NULL');
     await resaveSettings(page);
   }
 });

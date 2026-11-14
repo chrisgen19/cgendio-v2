@@ -209,6 +209,7 @@ describe('getSiteSettings', () => {
       contactEmail: '[YOUR EMAIL]',
       openToProjects: true,
       cvUrl: null,
+      cvUrlLetter: null,
       photoUrl: null,
       socials: {github: 'https://github.com/chrisgen19', linkedin: null},
     });
@@ -216,6 +217,7 @@ describe('getSiteSettings', () => {
       contactEmail: '[YOUR EMAIL]',
       openToProjects: true,
       cvUrl: null,
+      cvUrlLetter: null,
       photoUrl: null,
       socials: {github: 'https://github.com/chrisgen19', linkedin: null},
     });

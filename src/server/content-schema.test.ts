@@ -88,6 +88,7 @@ describe('siteSettingsSchema', () => {
       contactEmail: '[YOUR EMAIL]',
       openToProjects: true,
       cvUrl: null,
+      cvUrlLetter: null,
       photoUrl: null,
       socials: {github: 'https://github.com/x', linkedin: null},
     };

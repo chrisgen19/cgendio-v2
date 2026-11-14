@@ -162,6 +162,7 @@ describe('settingsFormSchema', () => {
       contactEmail: 'me@example.com',
       openToProjects: false,
       cvUrl: null,
+      cvUrlLetter: null,
       photoUrl: null,
       linkedinUrl: null,
     });

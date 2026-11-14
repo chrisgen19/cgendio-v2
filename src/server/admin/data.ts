@@ -56,13 +56,14 @@ export const getSettingsForEdit = async () => {
   await requireAdmin();
   const row = await db.siteSettings.findUniqueOrThrow({
     where: {id: 'site'},
-    select: {contactEmail: true, openToProjects: true, cvUrl: true, photoUrl: true, socials: true},
+    select: {contactEmail: true, openToProjects: true, cvUrl: true, cvUrlLetter: true, photoUrl: true, socials: true},
   });
   const linkedin = (row.socials as Record<string, unknown>).linkedin;
   return {
     contactEmail: row.contactEmail,
     openToProjects: row.openToProjects,
     cvUrl: row.cvUrl,
+    cvUrlLetter: row.cvUrlLetter,
     photoUrl: row.photoUrl,
     linkedinUrl: typeof linkedin === 'string' ? linkedin : null,
   };

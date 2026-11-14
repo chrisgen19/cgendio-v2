@@ -170,6 +170,7 @@ export const siteSettingsSchema = z.object({
   contactEmail: z.string().min(1),
   openToProjects: z.boolean(),
   cvUrl: z.url().nullable(),
+  cvUrlLetter: z.url().nullable(),
   photoUrl: z.url().nullable(),
   /** Profile URLs by network, null until known */
   socials: z.record(z.string(), z.url().nullable()),
@@ -235,6 +236,8 @@ export const PAGE_COPY_KEYS = [
   'contact.lede',
   'contact.primaryLabel',
   'contact.cvLabel',
+  'contact.cvLabelA4',
+  'contact.cvLabelLetter',
   'contact.location',
 ] as const;
 

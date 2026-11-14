@@ -30,7 +30,7 @@ export async function Timeline() {
           <p className="m-0 max-w-[420px] text-lg leading-[1.55] text-muted max-md:text-base">{copy['timeline.lede']}</p>
           {/* Only once a CV is uploaded in admin Settings */}
           {settings.cvUrl ? (
-            <Button href={settings.cvUrl} variant="secondary" size="sm">
+            <Button href={settings.cvUrl} variant="secondary" size="sm" data-track="cv_download" data-track-placement="timeline">
               {copy['timeline.cvLabel']}
             </Button>
           ) : null}

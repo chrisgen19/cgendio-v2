@@ -9,7 +9,14 @@ import {useActionToast} from './use-action-toast';
 import {useAdminForm} from './use-admin-form';
 
 type SettingsFormProps = {
-  settings: {contactEmail: string; openToProjects: boolean; cvUrl: string | null; photoUrl: string | null; linkedinUrl: string | null};
+  settings: {
+    contactEmail: string;
+    openToProjects: boolean;
+    cvUrl: string | null;
+    cvUrlLetter: string | null;
+    photoUrl: string | null;
+    linkedinUrl: string | null;
+  };
 };
 
 export function SettingsForm({settings}: SettingsFormProps) {
@@ -53,10 +60,17 @@ export function SettingsForm({settings}: SettingsFormProps) {
             />
             <UploadField
               name="cvUrl"
-              label="CV"
+              label="CV (A4)"
               kind="cv"
               defaultValue={settings.cvUrl}
-              hint="PDF, up to 10 MB. The Download CV buttons link to it; without one they're hidden."
+              hint="PDF, up to 10 MB. Every Download CV button links to it; without one they're all hidden."
+            />
+            <UploadField
+              name="cvUrlLetter"
+              label="CV (US Letter)"
+              kind="cv"
+              defaultValue={settings.cvUrlLetter}
+              hint="Optional. With one uploaded, Contact offers both cuts side by side; without one it shows a single CV button."
             />
             <div>
               <SubmitButton pending={pending}>Save settings</SubmitButton>
