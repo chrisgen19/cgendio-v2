@@ -30,9 +30,13 @@ const SIZES: Record<Size, string> = {
   sm: 'min-h-11 px-[18px] text-sm',
 };
 
+/** The pill button's classes, for elements Button can't render itself (a disclosure's `<summary>`). */
+export const buttonClasses = ({variant = 'primary', size = 'md', className}: BaseProps & {className?: string} = {}) =>
+  cn(BASE, VARIANTS[variant], SIZES[size], className);
+
 /** Pill button from the design. Renders an `<a>` when given `href`, otherwise a `<button type="button">`. */
 export function Button({variant = 'primary', size = 'md', className, ...props}: ButtonProps) {
-  const classes = cn(BASE, VARIANTS[variant], SIZES[size], className);
+  const classes = buttonClasses({variant, size, className});
 
   if (props.href !== undefined) {
     return <a {...(props as AnchorHTMLAttributes<HTMLAnchorElement>)} className={classes} />;
