@@ -25,7 +25,7 @@ describe('seeded post bodies', () => {
     });
 
     it('links only over https', () => {
-      const links = [...body.matchAll(/\]\((?<url>[^)\s]+)/g)].map((match) => match.groups?.url ?? '');
+      const links = [...body.matchAll(/\]\(([^)\s]+)/g)].map((match) => match[1] ?? '');
       expect(links.filter((url) => !url.startsWith('https://'))).toEqual([]);
     });
   });
