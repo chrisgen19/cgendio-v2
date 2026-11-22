@@ -42,7 +42,7 @@ describe('contentSecurityPolicy', () => {
     expect(directives['frame-ancestors']).toEqual(["'none'"]);
     expect(directives['base-uri']).toEqual(["'self'"]);
     expect(directives['form-action']).toEqual(["'self'"]);
-    // Self-hosted with next/font/local (#94), so no font host is allowed
+    // Self-hosted from public/fonts (#94), so no font host is allowed
     expect(directives['font-src']).toEqual(["'self'"]);
   });
 

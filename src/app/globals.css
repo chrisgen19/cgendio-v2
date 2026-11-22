@@ -8,7 +8,76 @@
 /* Animate only when JS can reveal it and the user hasn't asked for less motion */
 @custom-variant motion-js (@media (scripting: enabled) and (prefers-reduced-motion: no-preference));
 
-/* `inline` because these tokens reference variables set by next/font */
+/*
+ * The three self-hosted latin variable fonts, declared by hand rather than through `next/font/local` (#92 moved them
+ * off Google, this moves them off next/font). next/font emitted its preload hints only into the RSC flight payload,
+ * never as <link rel="preload"> in <head>, so the browser could not discover a woff2 until it had fetched and parsed
+ * the stylesheet: with `font-display: swap` every first paint showed the Arial fallback and then swapped. The files
+ * live in public/fonts, so the root layout can preload them at a stable URL (src/app/layout.tsx).
+ *
+ * Each family keeps a metric-matched Arial fallback, so the swap changes the typeface without moving the layout. The
+ * override percentages are the ones next/font generated for these exact files; recompute them if a font file changes.
+ *
+ * public/ is served without a content hash, so next.config.ts sets the immutable cache header on this directory by
+ * path. A new version of a font must therefore be given a new filename, in all four places: here, the preload tags,
+ * the file itself and the header rule.
+ */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/fonts/bricolage-grotesque-latin-variable.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Bricolage Grotesque Fallback";
+  src: local("Arial");
+  ascent-override: 91.48%;
+  descent-override: 26.56%;
+  line-gap-override: 0%;
+  size-adjust: 101.66%;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/geist-latin-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Fallback";
+  src: local("Arial");
+  ascent-override: 94.56%;
+  descent-override: 27.76%;
+  line-gap-override: 0%;
+  size-adjust: 106.28%;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/geist-mono-latin-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono Fallback";
+  src: local("Arial");
+  ascent-override: 76.43%;
+  descent-override: 22.43%;
+  line-gap-override: 0%;
+  size-adjust: 131.49%;
+}
+
+/*
+ * The names the rest of the CSS uses. Same three variables next/font used to set through a class on <html>, with the
+ * same two-family value, so the tokens below and every *.module.css carry on unchanged.
+ */
+:root {
+  --font-bricolage: "Bricolage Grotesque", "Bricolage Grotesque Fallback";
+  --font-geist: "Geist", "Geist Fallback";
+  --font-geist-mono: "Geist Mono", "Geist Mono Fallback";
+}
+
+/* `inline` because these tokens reference the variables above */
 @theme inline {
   --font-display: var(--font-bricolage), system-ui, sans-serif;
   --font-body: var(--font-geist), system-ui, sans-serif;

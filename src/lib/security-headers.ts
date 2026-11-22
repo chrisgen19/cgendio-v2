@@ -55,7 +55,7 @@ export const contentSecurityPolicy = ({isDev, siteUrl}: PolicyOptions) => {
     // allows images from any host (src/components/prose/markdown.tsx). This also covers R2 and the GA beacons. data: is
     // for the seed and e2e fixtures, blob: for the admin's upload preview. Plain http stays blocked.
     ['img-src', ["'self'", 'data:', 'blob:', 'https:']],
-    // Self-hosted through next/font/local (#94): nothing is fetched from Google
+    // Self-hosted from public/fonts (#94): nothing is fetched from Google
     ['font-src', ["'self'"]],
     // The film is silent, but the Remotion player still preallocates <audio> tags on a base64 data URL
     // (node_modules/remotion/dist/cjs/audio/shared-audio-tags.js), which default-src 'self' would block
