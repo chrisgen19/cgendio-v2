@@ -14,11 +14,15 @@ const withBodies = posts.filter((post) => existsSync(bodyPath(post.slug)));
 /** Every em or en dash in `text`. CLAUDE.md bans both in anything written for the site. */
 export const findDashes = (text: string) => text.match(/[–—]/g) ?? [];
 
-/** Markdown link targets that leave the page over plain http. Site-relative and in-page links are fine. */
-export const findInsecureLinks = (text: string) =>
-  [...text.matchAll(/\]\(([^)\s]+)/g)]
-    .map((match) => match[1] ?? '')
-    .filter((url) => !url.startsWith('https://') && !url.startsWith('/') && !url.startsWith('#'));
+/**
+ * Link targets that leave the page over plain http, from both Markdown links and bare autolinks. Site-relative and
+ * in-page links are fine.
+ */
+export const findInsecureLinks = (text: string) => {
+  const markdown = [...text.matchAll(/\]\(([^)\s]+)/g)].map((match) => match[1] ?? '');
+  const autolinks = [...text.matchAll(/<((?:https?|ftp):\/\/[^>\s]+)>/g)].map((match) => match[1] ?? '');
+  return [...markdown, ...autolinks].filter((url) => !url.startsWith('https://') && !url.startsWith('/') && !url.startsWith('#'));
+};
 
 describe('findDashes', () => {
   it('finds an em dash and an en dash', () => {
@@ -37,6 +41,10 @@ describe('findInsecureLinks', () => {
 
   it('accepts https, site-relative and in-page links', () => {
     expect(findInsecureLinks('[a](https://x.test) [b](/writing/post) [c](#sources)')).toEqual([]);
+  });
+
+  it('flags a bare autolink that is not https', () => {
+    expect(findInsecureLinks('see <http://example.test/p> and <https://ok.test>')).toEqual(['http://example.test/p']);
   });
 });
 
@@ -80,7 +88,9 @@ describe('the Gemini 4 Neon post', () => {
   it('carries the agreed title, tag and excerpt', () => {
     expect(post?.title).toBe('Gemini 4 Neon for developers: which Gemini 4 model to pick, and what it really costs');
     expect(post?.tag).toBe('AI workflow');
-    expect(post?.excerpt).toMatch(/^Google shipped four Gemini 4 models in six weeks\./);
+    expect(post?.excerpt).toBe(
+      "Google shipped four Gemini 4 models in six weeks. What Neon costs per task next to Hydrogen and Carbon, what changes in your code when you switch, what developers on Hacker News make of it, and which one I'd point a project at.",
+    );
   });
 
   it('has a body file at its slug', () => {

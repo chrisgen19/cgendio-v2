@@ -39,27 +39,25 @@ Cached input is 5% of the input price across the Gemini 4 line, Batch and Flex a
 
 Now what you get for it. These are [Artificial Analysis](https://artificialanalysis.ai/models/gemini-4-neon)'s own measurements, not Google's, at matched thinking levels:
 
-| Model and level | Index | Output tok/s | First token | Cost per index task |
-| --- | --- | --- | --- | --- |
-| Hydrogen `high` | 51 | 156 | 22.05s | not published |
-| Hydrogen `xhigh` | 54 | 153 | 55.24s | $3.16 |
-| Neon `medium` | 55 | 100 | 22.52s | not published |
-| Neon `high` (default) | 60 | 103 | 38.95s | not published |
-| Neon `xhigh` | 61 | 106 | 59.77s | $6.44 |
-| Carbon `medium` (default) | 58 | 68 | 32.99s | not published |
-| Carbon `high` | 60 | 59 | 69.71s | $7.76 |
+| Model and level | Index | Output tok/s | First token |
+| --- | --- | --- | --- |
+| Hydrogen `high` | 51 | 156 | 22.05s |
+| Hydrogen `xhigh` | 54 | 153 | 55.24s |
+| Neon `medium` | 55 | 100 | 22.52s |
+| Neon `high` (default) | 60 | 103 | 38.95s |
+| Neon `xhigh` | 61 | 106 | 59.77s |
+| Carbon `medium` (default) | 58 | 68 | 32.99s |
+| Carbon `high` | 60 | 59 | 69.71s |
 
-Three things to take from that table, and one warning about reading it.
+Three things to take from that table. Cost per task is the next section, because Artificial Analysis publishes only one figure per model and they need more explaining than a column allows.
 
 The headline is **Neon `high` against Carbon `high`: the same index score, 60, at 103 output tokens per second against 59, and the first token back in 39 seconds instead of 70**. Artificial Analysis also has Neon's whole index run finishing in 14.5 minutes at `high` against Carbon's 34.9 minutes. Second, **Carbon has no `xhigh`**, so Neon's 61 is a level Carbon can't reach. Third, **Hydrogen is not in the same conversation on quality**: 51 at `high` against Neon's 60 is a wide gap, and it's wider still further down, where Hydrogen `low` scores 27 and Neon `low` scores 44.
-
-The warning: only one cost per task is published per model, and not at a common level, so the $3.16, $6.44 and $7.76 figures are not like for like. Hydrogen's and Neon's are at `xhigh`; Carbon's is at `high`, because `high` is as far as Carbon goes. And Artificial Analysis's Carbon page already quotes the December price of $4 / $20, so that $7.76 may be computed at the new rate rather than today's. Don't lift any of those three numbers as "what it will cost me". Also don't mistake the blended price per million that these pages show for a cost per task; they're different measurements.
 
 ## Cost per task, three ways
 
 Google's claim is specific: at the default `high` setting Neon delivers "a 32% lower cost per task than Carbon", and on the Vals and Agent Arena indexes "roughly 50% to 80% lower cost per task than top competing frontier models" ([launch post](https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon/)). It's a vendor's own framing, so I read it as a reason to test rather than a verdict. Three independent-ish measures point the same way, with different numbers:
 
-- **[Artificial Analysis](https://artificialanalysis.ai/models/gemini-4-neon):** $6.44 per index task for Neon at `xhigh` against $7.76 for Carbon at `high`, with the caveats above. Its speed and latency figures "average each endpoint's runs over the past 5 days", so they move.
+- **[Artificial Analysis](https://artificialanalysis.ai/models/gemini-4-neon):** $6.44 per index task for Neon at `xhigh`, $7.76 for Carbon at `high` and $3.16 for Hydrogen at `xhigh`. Read those three carefully, because they are not like for like: Carbon's is at `high` only because `high` is as far as Carbon goes, and Artificial Analysis's Carbon page already quotes the December price of $4 / $20, so that $7.76 may be computed at the new rate rather than today's. Don't lift any of them as "what it will cost me", and don't mistake the blended price per million these pages also show for a cost per task. Its speed and latency figures "average each endpoint's runs over the past 5 days", so they move.
 - **[Vals](https://www.vals.ai/):** Neon at 70.87% on the Vals Index for $7.40 per test, against Carbon at 70.36% for $10.51 and Claude Fable 5.2 at 71.31% for $17.94. Near-identical scores at 70% of Carbon's bill, and 41% of Fable 5.2's. Vals' own page for Neon was a 404 when I checked, so those figures come off the Vals home page.
 - **[Models Engineering Index](https://git-aarvin.github.io/mei/):** "a composite index across 16 coding benchmarks, adjusted for benchmark difficulty and missing results so models average 50". Neon places second at 67.0, just behind Fable 5.2 at 67.2, with Carbon fifth at 61.6 and Hydrogen eighth at 58.9. It reports cost as a multiple of a typical model: Neon 3.1x, Carbon 3.5x, Fable 5.2 7.7x. Its own health warning is worth repeating: "Results are reproduced as published, not independently verified, and may be affected by contamination or tuning to the benchmarks." It aggregates other people's published runs, and Vals is one of its sources, so treat the two as overlapping rather than independent.
 
