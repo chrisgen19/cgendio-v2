@@ -3,8 +3,22 @@ import {TrackingBoundary} from '@/components/site/tracking-boundary';
 import {siteEnv} from '@/lib/env';
 import {OG_LOCALE, SITE_DESCRIPTION, SITE_NAME} from '@/lib/metadata';
 import {THEME_COLORS, THEME_SCRIPT} from '@/lib/theme';
-import {body, display, mono} from './fonts';
 import './globals.css';
+
+/**
+ * The self-hosted woff2 files, declared in globals.css and preloaded here. The preload is the point: the @font-face
+ * rules sit in a stylesheet, so without these tags the browser cannot start a font request until it has fetched and
+ * parsed that stylesheet, and the first paint shows the Arial fallback before swapping. Keep in step with the
+ * @font-face URLs in globals.css and the cache header in next.config.ts.
+ *
+ * `crossOrigin="anonymous"` is required even same-origin: fonts are fetched in CORS mode, and a preload whose mode
+ * differs from the real request is discarded and fetched again.
+ */
+const PRELOADED_FONTS = [
+  '/fonts/bricolage-grotesque-latin-variable.woff2',
+  '/fonts/geist-latin-variable.woff2',
+  '/fonts/geist-mono-latin-variable.woff2',
+];
 
 /**
  * The Search Console property for cgdiomampo.dev, carried over from the previous site (#81) so the domain stays verified
@@ -49,14 +63,11 @@ export default function RootLayout({children}: LayoutProps<'/'>) {
      * scroll is animated the whole way instead of being instant, which is what made #110's mis-targeted scroll slide
      * visibly down to the footer rather than simply landing in the wrong place. In-page anchors still scroll smoothly.
      */
-    <html
-      lang="en"
-      data-theme="light"
-      data-scroll-behavior="smooth"
-      suppressHydrationWarning
-      className={`${display.variable} ${body.variable} ${mono.variable}`}
-    >
+    <html lang="en" data-theme="light" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
+        {PRELOADED_FONTS.map((href) => (
+          <link key={href} rel="preload" as="font" type="font/woff2" href={href} crossOrigin="anonymous" />
+        ))}
         {/* Reads the theme cookie and sets data-theme before the first paint, so static pages never flash (src/lib/theme.ts) */}
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: a fixed script from src/lib/theme.ts, no user input */}
         <script dangerouslySetInnerHTML={{__html: THEME_SCRIPT}} />

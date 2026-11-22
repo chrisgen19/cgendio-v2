@@ -43,6 +43,16 @@ const nextConfig: NextConfig = {
         {key: 'Strict-Transport-Security', value: HSTS},
       ],
     },
+    /*
+     * The fonts moved out of next/font into public/fonts so the root layout can preload them at a stable URL. Nothing
+     * under public/ is content-hashed, so Next serves it `max-age=0, must-revalidate` and the browser revalidates
+     * every font on every visit. These three files never change under their current names (globals.css says to rename
+     * on a new version), so they get the same year-long immutable header /_next/static/media used to give them.
+     */
+    {
+      source: '/fonts/:file*.woff2',
+      headers: [{key: 'Cache-Control', value: 'public, max-age=31536000, immutable'}],
+    },
     // Admin, sign-in and draft previews never go in search results (also set as robots metadata on those pages)
     {source: '/admin/:path*', headers: [{key: 'X-Robots-Tag', value: 'noindex, nofollow'}]},
     {source: '/admin', headers: [{key: 'X-Robots-Tag', value: 'noindex, nofollow'}]},
