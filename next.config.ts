@@ -12,6 +12,8 @@ const csp = contentSecurityPolicy({
 });
 
 const nextConfig: NextConfig = {
+  // Records that `next upgrade --agent=security` made the 16.4.2 → 16.4.6 bump, so the build stops re-nudging
+  experimental: {agentUpgrade: 'security'},
   // The development regression suite owns a separate dev server and never shares next dev's lock or output.
   distDir: process.env.E2E_ADMIN_DEV === '1' ? '.next/admin-dev' : '.next',
   cacheComponents: true,
