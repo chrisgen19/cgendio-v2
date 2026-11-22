@@ -96,8 +96,68 @@ The things that decide whether I'd put a client's data through this, rather than
 
 ## What developers say
 
+I couldn't reach Reddit while writing this, so this section is Hacker News: the [launch thread](https://news.ycombinator.com/item?id=50552424) at 1,060 points and 775 comments, and a [second thread](https://news.ycombinator.com/item?id=50568130) on the Models Engineering Index result at 375 points and 246 comments. Five things came up repeatedly.
+
+**Nobody can keep the lineup straight.** [Mitchem](https://news.ycombinator.com/item?id=50552306): "4 is really confusing. Very hard to figure out in what situation I would use Carbon, Argon, Neon or Hydrogen if I'm coming in brand new to Google AI." [HenryMulligan](https://news.ycombinator.com/item?id=50552324) offers the ordering I'd use too: "The new lineup is Hydrogen < Neon < Carbon. I think Argon has been superceded on the Pareto Front." [mkagenius](https://news.ycombinator.com/item?id=50557692) counts the field: "So total names to remember, hydrogen, argon, carbon, neon, luna, sol, terra, astra, opus, fable, sonnet, haiku".
+
+**The per-token versus per-task argument, in public.** [zeroq](https://news.ycombinator.com/item?id=50557155) reads it as a price cut: "Carbon costs the same as Argon did. Neon is a cheaper model." [svachalek](https://news.ycombinator.com/item?id=50561934) reads today's invoice instead: "Carbon is 50% off, while Neon is not; at full price Carbon is the \"premium\" model." Both are right, eight days apart, which is the whole problem with quoting a price here.
+
+**The people actually running it are positive, and specific.** [pkulak](https://news.ycombinator.com/item?id=50569816): "As far as I can tell, it's at least as good as Opus 5.5 at writing code". [postalcoder](https://news.ycombinator.com/item?id=50568821): "Coding-wise, it's equivalent to Opus 5.5/Fable." [jorl17](https://news.ycombinator.com/item?id=50570116) on a build: "it seems to have built faster and waaaaay cheaper than Claude." [aleqs](https://news.ycombinator.com/item?id=50570996) on subscription throughput: "Noticeably faster than opus 5.5, and so far it seems like I will get at least 10x usage", and separately, "I've been running 3 neon sessions for the last ~hour and I'm still at 0% weekly usage". That last one is a quota observation on a subscription, not an API cost measurement, so it doesn't transfer to your bill.
+
+**And the sceptics are specific too.** [jiggawatts](https://news.ycombinator.com/item?id=50569074): "All of the Gemini 4 models -- including Neon -- consistently make simple, \"doofus\" errors", adding "For comparison, these basic errors no longer occur with any of the recent Anthropic or OpenAI models". [impulser_](https://news.ycombinator.com/item?id=50552711) on the Gemini 4 line generally: "they just don't seem as good as Opus 5.5 despite the benchmarks." One widely repeated claim deserves a label: [irthomasthomas](https://news.ycombinator.com/item?id=50558513) wrote that "Neon is within about 1% of Fable 5.2's performance for about 40% the cost on vals.ai", which is a commenter reading a leaderboard, not their own test. The Vals figures above say roughly the same thing, for what that's worth.
+
+**Access is the most common complaint, and it isn't about money.** [esperent](https://news.ycombinator.com/item?id=50569602) put it best: "Google just makes it weirdly hard to give them money." [306bobby](https://news.ycombinator.com/item?id=50569782): "I have AI Pro as well and have Hydrogen and Neon access. Just no Argon or Carbon". For agent work specifically, [soared](https://news.ycombinator.com/item?id=50572053) on Antigravity: "it still asks me permission for every tiny thing it tries to do."
+
 ## Which one I'd pick
+
+This is my own call, not a benchmark result.
+
+**Neon is the new default for serious work.** Same index score as Carbon at matched levels, roughly 1.7x the output speed, a shorter wait for the first token, and less per task on all three measures I could find. For a coding agent, an analysis pipeline or anything tool-heavy, it's the one I'd start on.
+
+**Hydrogen keeps the volume.** It's half Neon's price, it's the fastest of the three by a wide margin, and it's the only one with a free tier for prototypes. For classification, extraction, routing, short summaries and anything behind a chat box where latency is the product, the quality gap doesn't earn Neon's price.
+
+**Carbon is now a specialist.** After December 1 it costs 33% more per token than Neon and scores the same at matched levels while running slower, so what's left for it is the hardest long-horizon work, where Google still positions it, and where its `medium` default and heavier token habit are a deliberate choice rather than an accident.
+
+**And Argon I'd leave alone.** Priced like Carbon, passed on the curve, and apparently gone from the app picker.
+
+The two dates to watch are December 1, when Carbon and Argon double, and January 1, when Gemini 3.8 Flash does. Both change this arithmetic, so I'd re-run it in January rather than treat today's table as settled.
 
 ## What I'd do this week
 
+1. **Pin the model ID in one config value.** Two Google pages disagree about whether Neon carries a 45-day retirement risk, so assume it does.
+2. **Set the thinking level explicitly if you're coming from Carbon or Argon.** Their default is `medium`, Neon's is `high`, and thinking bills as output. A model ID swap alone is a silent price rise.
+3. **Measure cost per task, not price per token.** Run your real prompts on Neon and on whatever you use now, and compare the cost of a finished job. Published per-task figures range from $3.16 to $7.76 depending on model, level and who measured.
+4. **Clean out the old request fields.** `temperature`, `top_p`, `top_k`, `thinking_budget`, `minimal`, explicit caches, and any low `max_output_tokens` cap left over from a 64K-output model.
+5. **Raise your HTTP timeouts to 15 minutes** or move long jobs to background execution, before a client-side timeout throws away work you've paid for.
+6. **Check `store` and the tier before client data goes near it.** New paid projects store requests by default now, and the free tier, which Neon can't use anyway, is the one that feeds product improvement.
+7. **Try Neon as the planner over Hydrogen workers.** That's the split Google's own Antigravity setup uses, and it's where the price gap between the two actually pays for itself.
+
 ## Sources
+
+**Google**
+
+- [Introducing Gemini 4 Neon](https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon/)
+- [Gemini 4 Neon model card](https://deepmind.google/models/model-cards/gemini-4-neon/)
+
+**Docs**
+
+- [What's new in Gemini 4 Neon](https://aistudio.google.com/docs/whats-new-gemini-4-neon)
+- [AI Studio model page](https://aistudio.google.com/docs/models/gemini-4-neon)
+- [Gemini API pricing](https://aistudio.google.com/docs/pricing)
+- [Gemini API changelog](https://aistudio.google.com/docs/changelog)
+- [Gemini Enterprise Agent Platform model page](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-neon)
+- [Firebase AI Logic models](https://firebase.google.com/docs/ai-logic/models)
+- [Vercel AI SDK Google provider](https://ai-sdk.dev/providers/ai-sdk-providers/google)
+- [Vercel AI Gateway: Gemini 4 Neon](https://vercel.com/ai-gateway/models/gemini-4-neon)
+- [OpenRouter: Gemini 4 Neon](https://openrouter.ai/google/gemini-4-neon)
+
+**Independent tests**
+
+- [Artificial Analysis: Gemini 4 Neon](https://artificialanalysis.ai/models/gemini-4-neon), [Gemini 4 Carbon](https://artificialanalysis.ai/models/gemini-4-carbon) and [Gemini 4 Hydrogen](https://artificialanalysis.ai/models/gemini-4-hydrogen)
+- [Vals](https://www.vals.ai/)
+- [Models Engineering Index](https://git-aarvin.github.io/mei/)
+
+**Hacker News**
+
+- [Gemini 4 Neon (launch thread)](https://news.ycombinator.com/item?id=50552424) and [Gemini 4 Neon is the new #1 on the Models Engineering Index](https://news.ycombinator.com/item?id=50568130)
+- Comments quoted: [Mitchem](https://news.ycombinator.com/item?id=50552306), [HenryMulligan](https://news.ycombinator.com/item?id=50552324), [mkagenius](https://news.ycombinator.com/item?id=50557692), [zeroq](https://news.ycombinator.com/item?id=50557155), [svachalek](https://news.ycombinator.com/item?id=50561934), [anentropic](https://news.ycombinator.com/item?id=50557758), [pkulak](https://news.ycombinator.com/item?id=50569816), [postalcoder](https://news.ycombinator.com/item?id=50568821), [jorl17](https://news.ycombinator.com/item?id=50570116), [aleqs](https://news.ycombinator.com/item?id=50570996), [jiggawatts](https://news.ycombinator.com/item?id=50569074), [impulser_](https://news.ycombinator.com/item?id=50552711), [irthomasthomas](https://news.ycombinator.com/item?id=50558513), [esperent](https://news.ycombinator.com/item?id=50569602), [306bobby](https://news.ycombinator.com/item?id=50569782), [soared](https://news.ycombinator.com/item?id=50572053)
