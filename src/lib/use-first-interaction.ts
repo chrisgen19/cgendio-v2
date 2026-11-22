@@ -10,6 +10,20 @@ import {useEffect, useState} from 'react';
 const INTERACTION_EVENTS = ['scroll', 'wheel', 'pointerdown', 'pointermove', 'touchstart', 'keydown'] as const;
 
 /**
+ * Mark a control with this so touching it doesn't count as "start the heavy work". The hero's "See my work" link uses
+ * it: a tap emits pointerdown and touchstart, both of which bubble to the listeners below, so without it the film
+ * mounts (about 2s of main-thread work on a mid-range phone) while the visitor is navigating away to #work.
+ */
+export const DEFER_FILM_ATTRIBUTE = 'data-defer-film';
+
+/** Duck-typed so this stays testable without a DOM: a real EventTarget that can't `closest` is not inside anything. */
+const canClosest = (target: EventTarget | null): target is EventTarget & {closest: (selector: string) => unknown} =>
+  typeof (target as {closest?: unknown} | null)?.closest === 'function';
+
+/** False only for events raised inside a [data-defer-film] element. Everything else is a real interaction. */
+export const startsHeavyWork = (target: EventTarget | null) => !canClosest(target) || target.closest(`[${DEFER_FILM_ATTRIBUTE}]`) === null;
+
+/**
  * True from the visitor's first scroll, tap, click, mouse movement or key press. Lets heavy, non-essential work (the hero film) wait
  * until someone is actually on the page, so it stays out of the first seconds of load.
  *
@@ -25,11 +39,17 @@ export const useFirstInteraction = () => {
       setInteracted(true);
       return;
     }
-    const onInteract = () => setInteracted(true);
-    for (const type of INTERACTION_EVENTS) window.addEventListener(type, onInteract, {passive: true, once: true});
-    return () => {
+    // Not `once`: an event inside a deferred control is ignored, and `once` would have spent the listener on it
+    const remove = () => {
       for (const type of INTERACTION_EVENTS) window.removeEventListener(type, onInteract);
     };
+    const onInteract = (event: Event) => {
+      if (!startsHeavyWork(event.target)) return;
+      remove();
+      setInteracted(true);
+    };
+    for (const type of INTERACTION_EVENTS) window.addEventListener(type, onInteract, {passive: true});
+    return remove;
   }, [interacted]);
   return interacted;
 };

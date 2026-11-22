@@ -33,14 +33,21 @@ export function HeroStaticFrame() {
       <p className="m-0 max-w-[520px] font-body text-lg leading-[1.55] text-muted @max-[860px]:text-base portrait:text-base">
         Here&apos;s how I take an idea from first question to a live URL — in about thirty seconds.
       </p>
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <Button href="#work">See my work</Button>
+      {/*
+       * Phone layout only, on the frame's own container-query tiers: desktop gets the film within a second of the
+       * first pointermove and already shows "Work" in the header, so these would only flash and then disappear.
+       * data-defer-film keeps the tap that follows this link from also mounting the film (see use-first-interaction).
+       */}
+      <div className="hidden flex-wrap items-center justify-center gap-3 @max-[860px]:flex portrait:flex">
+        <Button href="#work" data-defer-film="">
+          See my work
+        </Button>
         <PlayFilmButton />
       </div>
       {/* Decorative: the buttons above carry the real affordance, so this stays out of the accessibility tree */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-6 flex flex-col items-center gap-[7px] font-mono text-[11px] font-medium tracking-[0.12em] text-muted uppercase"
+        className="absolute inset-x-0 bottom-6 hidden flex-col items-center gap-[7px] font-mono text-[11px] font-medium tracking-[0.12em] text-muted uppercase @max-[860px]:flex portrait:flex"
       >
         Scroll
         <svg width="16" height="9" viewBox="0 0 16 9" fill="none" aria-hidden="true">
