@@ -80,9 +80,9 @@ describe('seeded post bodies', () => {
 describe('the Gemini 4 Neon post', () => {
   const post = posts.find((candidate) => candidate.slug === NEON_SLUG);
 
-  it('is seeded as a draft with no publish date', () => {
-    expect(post?.status).toBe('DRAFT');
-    expect(post).not.toHaveProperty('publishedAt');
+  it('is seeded as published, with the timestamps the production admin stamped', () => {
+    expect(post?.status).toBe('PUBLISHED');
+    expect(post).toMatchObject({publishedAt: '2026-11-22T14:04:58.003Z', updatedAt: '2026-11-22T14:04:58.005Z'});
   });
 
   it('carries the agreed title, tag and excerpt', () => {
