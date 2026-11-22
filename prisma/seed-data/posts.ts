@@ -12,6 +12,14 @@ export type SeedPost = Omit<Post, 'readMinutes' | 'date' | 'publishedAt'> &
 
 export const posts: SeedPost[] = [
   {
+    slug: 'gemini-4-neon-developer-guide',
+    title: 'Gemini 4 Neon for developers: which Gemini 4 model to pick, and what it really costs',
+    tag: 'AI workflow',
+    status: 'DRAFT',
+    excerpt:
+      "Google shipped four Gemini 4 models in six weeks. What Neon costs per task next to Hydrogen and Carbon, what changes in your code when you switch, what developers on Hacker News make of it, and which one I'd point a project at.",
+  },
+  {
     slug: 'gemini-4-hydrogen-developer-guide',
     title: "Gemini 4 Hydrogen for developers: performance, cost, and how I'd use it",
     tag: 'AI workflow',
