@@ -63,7 +63,36 @@ The direction is consistent across all three: same quality as Carbon, materially
 
 ## What changes in your code
 
+Google's own summary is that "switching to `gemini-4-neon` requires no request schema changes" from another Gemini 4 model, which is true as far as the schema goes. What changes is the behaviour, and in one case the bill. All of this comes from Google's [what's new in Neon](https://aistudio.google.com/docs/whats-new-gemini-4-neon) page, the [AI Studio model page](https://aistudio.google.com/docs/models/gemini-4-neon) and the [Agent Platform model page](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-neon).
+
+**Coming from Hydrogen,** it really is close to a one-line change. Same four thinking levels, same `high` default, same shared window. Two things to check: Neon has no free tier, so a project that was running Hydrogen for nothing now needs billing on, and your per-token costs double.
+
+**Coming from Carbon or Argon, read this twice.** Those two "default to `medium` and cap at `high`", and Neon "defaults to `high` and supports `xhigh`". Swap the model ID and leave the request alone, and you have silently moved up a thinking level, on a model that bills thinking as output. That's a bill increase with no code change behind it. Set the level explicitly on the first deploy, then tune it.
+
+Either way, these apply:
+
+1. **No sampling settings.** Remove `temperature`, `top_p` and `top_k`. "The server ignores in-range custom values if sent. Out-of-range values return a `400` validation error."
+2. **`minimal` is gone.** Neon takes `low`, `medium`, `high` and `xhigh` only. On the Agent Platform, "Setting `thinking_budget` or `thinking_level="MINIMAL"` returns an HTTP 400 validation error."
+3. **One window for everything.** "Input, thinking, and output tokens share one 1,048,576-token window", and "The `max_output_tokens` field caps combined thinking and output tokens for a response." A low hard-coded cap left over from an older model now starves the thinking budget: raise it, or lower the thinking level on purpose.
+4. **Long output is opt-in.** Synchronous responses stop at 65,536 tokens per hop. Past that you need long decode, either `background: true` or client-side continuation. Set `background` without `max_output_tokens` and "the server stops after 65,536 tokens" anyway.
+5. **Slow turns need patient clients.** Google's advice is to use background execution or "set HTTP client timeouts to at least 15 minutes". A default 30-second fetch timeout will cut off work you've already paid for.
+6. **No explicit caching.** "Gemini 4 Neon does not support explicit caching (`cachedContents` and `caches.create`). Remove `cached_content` fields from requests." Implicit caching runs by default from 4,096 tokens and takes 95% off cached input, so the lever you have left is prompt order: keep the stable part of the prompt at the front.
+7. **Keep thought signatures intact.** In client-managed `generateContent` histories, return prior model turns and their thought signatures unchanged, and "Do not copy a thought signature across parallel `functionCall` parts." On the Interactions API, `previous_interaction_id` does this for you.
+8. **Declare your tools.** Function calling, structured outputs, Search and Maps grounding, URL context, code execution, computer use and file search are all supported. Asking for JSON tool calls in the prompt with no tools declared "can return `MALFORMED_FUNCTION_CALL`".
+9. **What isn't there.** No Live API, no image or audio generation. Text in, text out, with images, video, audio and PDF accepted as input.
+
+Two caveats about third-party docs, because both cost me time. The AI SDK's Google provider page shows an explicit caching example on a Gemini 4 model, which these models don't support, so don't copy it. The AI Gateway's model page advertises 1,000,000 max output tokens, which is only reachable through background long decode, not from a normal request. OpenRouter lists `temperature` and `top_p` among the fields Neon accepts, which Google says it ignores.
+
 ## The parts that matter for client work
+
+The things that decide whether I'd put a client's data through this, rather than whether the model is clever:
+
+- **Paid tier only, and that's good news.** Neon isn't on the free tier at all. Google's pricing page marks free-tier content "used to improve our products" and paid-tier content "**not** used to improve our products", so the tier that would have been the problem isn't available anyway. Hydrogen, by contrast, is free on the free tier, which is exactly where a prototype quietly leaks client data.
+- **Requests are stored by default now.** Since October 26, 2026, "New projects using the Generate Content API ... on the paid tier now store requests by default (`store=true`)", and "Existing projects keep their current setting" ([changelog](https://aistudio.google.com/docs/changelog)). It's per-request `store=false` to opt out. Worth knowing before a client asks where their documents went.
+- **Enterprise terms.** On the Agent Platform, "Gemini 4 Neon is a Google Frontier Model subject to Section 34 of the Service Specific Terms", which is the abuse-monitoring clause. That's the paragraph a client's legal team will want, not the benchmark table.
+- **Caching bills in a way worth planning for.** Implicit caching only, 4,096-token minimum, durable caching on by default, and cache writes "billed at 1.25x the standard input token price by default". From January 12, 2027 there's TTL configuration, where "longer retention costs more".
+- **Grounding is metered separately.** Google Search grounding gives "5,000 free search requests per month (shared across all Gemini 3 and newer models), then $14 per 1,000 requests", capped at 1,500 a day, and you're charged "for each individual search query performed". One grounded answer can run several searches.
+- **Retirement risk, stated carefully.** The Agent Platform page says "Launch stage: GA" with a release date of November 18, 2026, and carries no retirement-notice wording, unlike Hydrogen's. But [Firebase AI Logic](https://firebase.google.com/docs/ai-logic/models) footnotes Neon as a short-term availability model on the Agent Platform API, and defines those as models that "may be shut down (retired) as early as 45 days after a replacement model is released". Two Google pages, two impressions. I'd plan for the 45 days and keep the model ID in one config value. Firebase also doesn't support long decode for Neon yet.
 
 ## What developers say
 
