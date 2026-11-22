@@ -15,7 +15,9 @@ export const posts: SeedPost[] = [
     slug: 'gemini-4-neon-developer-guide',
     title: 'Gemini 4 Neon for developers: which Gemini 4 model to pick, and what it really costs',
     tag: 'AI workflow',
-    status: 'DRAFT',
+    status: 'PUBLISHED',
+    publishedAt: '2026-11-22T14:04:58.003Z',
+    updatedAt: '2026-11-22T14:04:58.005Z',
     excerpt:
       "Google shipped four Gemini 4 models in six weeks. What Neon costs per task next to Hydrogen and Carbon, what changes in your code when you switch, what developers on Hacker News make of it, and which one I'd point a project at.",
   },
