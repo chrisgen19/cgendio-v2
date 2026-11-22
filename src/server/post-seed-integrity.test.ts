@@ -11,6 +11,45 @@ const NEON_SLUG = 'gemini-4-neon-developer-guide';
 const bodyPath = (slug: string) => new URL(`../../prisma/seed-data/posts/${slug}.md`, import.meta.url);
 const withBodies = posts.filter((post) => existsSync(bodyPath(post.slug)));
 
+/** Every em or en dash in `text`. CLAUDE.md bans both in anything written for the site. */
+export const findDashes = (text: string) => text.match(/[–—]/g) ?? [];
+
+/** Markdown link targets that leave the page over plain http. Site-relative and in-page links are fine. */
+export const findInsecureLinks = (text: string) =>
+  [...text.matchAll(/\]\(([^)\s]+)/g)]
+    .map((match) => match[1] ?? '')
+    .filter((url) => !url.startsWith('https://') && !url.startsWith('/') && !url.startsWith('#'));
+
+describe('findDashes', () => {
+  it('finds an em dash and an en dash', () => {
+    expect(findDashes('a — b and 1–2')).toEqual(['—', '–']);
+  });
+
+  it('leaves hyphens alone, including the double hyphen in a quoted comment', () => {
+    expect(findDashes('all models -- including Neon -- make errors, cost-per-task')).toEqual([]);
+  });
+});
+
+describe('findInsecureLinks', () => {
+  it('flags a plain http link', () => {
+    expect(findInsecureLinks('[a](http://example.test/p)')).toEqual(['http://example.test/p']);
+  });
+
+  it('accepts https, site-relative and in-page links', () => {
+    expect(findInsecureLinks('[a](https://x.test) [b](/writing/post) [c](#sources)')).toEqual([]);
+  });
+});
+
+describe('seeded post metadata', () => {
+  it('uses no em or en dashes in any title or excerpt', () => {
+    const offenders = posts.flatMap((post) => [
+      ...findDashes(post.title).map(() => `${post.slug} title`),
+      ...findDashes(post.excerpt).map(() => `${post.slug} excerpt`),
+    ]);
+    expect(offenders).toEqual([]);
+  });
+});
+
 describe('seeded post bodies', () => {
   // A guard, not a count: a filter typo must not empty the loop below
   it('cover more than one post', () => {
@@ -21,12 +60,11 @@ describe('seeded post bodies', () => {
     const body = readFileSync(bodyPath(post.slug), 'utf8');
 
     it('uses no em or en dashes', () => {
-      expect(body.match(/[–—]/g) ?? []).toEqual([]);
+      expect(findDashes(body)).toEqual([]);
     });
 
     it('links only over https', () => {
-      const links = [...body.matchAll(/\]\(([^)\s]+)/g)].map((match) => match[1] ?? '');
-      expect(links.filter((url) => !url.startsWith('https://'))).toEqual([]);
+      expect(findInsecureLinks(body)).toEqual([]);
     });
   });
 });
