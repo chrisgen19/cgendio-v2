@@ -102,9 +102,9 @@ describe('the Gemini 4 Neon post', () => {
 describe('the GPT-6.2 Astra and Sol post', () => {
   const post = posts.find((candidate) => candidate.slug === GPT_6_2_SLUG);
 
-  it('is seeded as a draft with no publish date', () => {
-    expect(post?.status).toBe('DRAFT');
-    expect(post).not.toHaveProperty('publishedAt');
+  it('is seeded as published, with the timestamps the production admin stamped', () => {
+    expect(post?.status).toBe('PUBLISHED');
+    expect(post).toMatchObject({publishedAt: '2026-11-23T00:00:00.000Z', updatedAt: '2026-11-23T07:52:20.534Z'});
   });
 
   it('carries the agreed title, tag and excerpt', () => {

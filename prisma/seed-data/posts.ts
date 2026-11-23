@@ -15,7 +15,9 @@ export const posts: SeedPost[] = [
     slug: 'gpt-6-2-astra-sol-developer-guide',
     title: 'GPT-6.2 Astra and Sol for developers: when Astra is worth 4x Sol, and what changes in the Responses API',
     tag: 'AI workflow',
-    status: 'DRAFT',
+    status: 'PUBLISHED',
+    publishedAt: '2026-11-23T00:00:00.000Z',
+    updatedAt: '2026-11-23T07:52:20.534Z',
     excerpt:
       "OpenAI shipped GPT-6.2 Astra ($8/$40) and Sol ($2/$10) on November 17. What they cost per task, the Responses API caching and reasoning changes that break old habits, what Hacker News developers make of both, and how I'd wire them into a Next.js app.",
   },
