@@ -78,7 +78,7 @@ The [Models Engineering Index](https://git-aarvin.github.io/mei/) (a composite a
 
 This is the part I'd read before touching a model string. OpenAI's [Using GPT-6.2](https://developers.openai.com/api/docs/guides/latest-model) guide and [Background mode](https://developers.openai.com/api/docs/guides/background) docs list five concrete behaviour changes that affect caching, quality, and billing on both `gpt-6.2-astra` and `gpt-6.2-sol`:
 
-1. **Top-level `instructions` now lands *after* `input`.** Starting with GPT-6.2, the Responses API appends the top-level `instructions` field after `input`. If you leave a big reusable system prompt in `instructions`, it no longer sits at the front of the prefix and stops qualifying for prompt caching. Move reusable instructions into a `{role: 'developer', content: ...}` item at index 0 of `input`, and reserve top-level `instructions` for per-request guidance only ([Using GPT-6.2](https://developers.openai.com/api/docs/guides/latest-model)).
+1. **Top-level `instructions` now lands *after* `input`, and changing user turns need an explicit cache breakpoint.** Starting with GPT-6.2, the Responses API appends the top-level `instructions` field after `input`. Moving reusable instructions into a `{role: 'developer', content: ...}` item at index 0 of `input` puts them back at the front of the prefix ([Using GPT-6.2](https://developers.openai.com/api/docs/guides/latest-model)), while reserving top-level `instructions` for per-request guidance only. Two further rules from the [Prompt caching guide](https://developers.openai.com/api/docs/guides/prompt-caching) decide whether those tokens actually hit the cache: the stable prefix must be at least **1,024 visible input tokens**, and on GPT-5.6+ implicit caching places its breakpoint at the latest eligible user message, so a static developer prompt followed by a different user message on every call will miss unless you place an explicit `prompt_cache_breakpoint` after the stable prefix with `prompt_cache_options: {mode: 'explicit', ttl: '30m'}`.
 2. **Prefix edits and model downgrades drop reasoning items.** If your app rewrites an earlier developer message, mutates past tool calls, switches to a different model mid-thread, or changes the end user or organization, the Responses API drops prior internal reasoning items. OpenAI notes that losing them can degrade answer quality and force the model to spend extra tokens re-doing earlier reasoning. Keep conversation prefixes append-only across turns.
 3. **No `service_tier: 'flex'` and no `reasoning.effort: 'none'`.** Both 6.2 models reject `reasoning.effort: 'none'` and launch without Flex processing. For discounted asynchronous jobs, use `background: true` with `service_tier: 'default'`, `background_options: {completion_window: '2h' | '8h'}`, and no streaming (`stream` omitted or `false`). Two catches from the [Background mode](https://developers.openai.com/api/docs/guides/background) docs:
    - Discounted `2h` and `8h` jobs share the Batch/Background rate limit, and standard synchronous requests **cannot reuse** prompt cache entries written by `2h` or `8h` background runs.
@@ -117,7 +117,7 @@ Every snippet below was type-checked with `tsc --noEmit` in strict mode against 
 
 ### 1. Streaming Route Handler with cache-safe developer instructions
 
-Notice where `SHARED_REVIEW_POLICY` goes: first item in `input` as a `developer` message, paired with a stable `prompt_cache_key`, while top-level `instructions` holds only the per-request `focus` hint. Passing `request.signal` aborts the upstream stream if the client disconnects.
+Notice three details in the request shape: `SHARED_REVIEW_POLICY` goes first in `input` as a `developer` message (in production this prefix must be at least 1,024 visible tokens to cache; the string below is shortened for readability), `prompt_cache_options: {mode: 'explicit', ttl: '30m'}` paired with `prompt_cache_breakpoint: {mode: 'explicit'}` pins the cache boundary before the per-request `diff`, and top-level `instructions` holds only the per-request `focus` hint. Passing `request.signal` aborts the upstream stream if the client disconnects, and the loop checks `response.completed`, `response.incomplete`, and `response.failed` so truncated or failed streams don't close as HTTP 200 successes.
 
 ```ts
 // app/api/review/route.ts
@@ -127,11 +127,13 @@ const openai = new OpenAI();
 
 // Stable, reusable guidance goes in the first developer message in `input`,
 // NOT in top-level `instructions`, which GPT-6.2 appends after `input`.
+// Abbreviated here: real prefixes need >= 1,024 visible input tokens to cache.
 const SHARED_REVIEW_POLICY = `You review TypeScript pull requests for a Next.js App Router codebase.
 Flag correctness bugs, missing auth checks, and unsafe SQL or XSS sinks.
 Keep findings concise and cite the exact file and line.`;
 
 export async function POST(request: Request) {
+  // Verify the caller's session and permissions before calling OpenAI.
   const {diff, focus}: {diff: string; focus?: string} = await request.json();
 
   const stream = openai.responses.stream(
@@ -139,8 +141,18 @@ export async function POST(request: Request) {
       model: 'gpt-6.2-sol',
       reasoning: {effort: 'medium'},
       prompt_cache_key: 'pr-review-policy-v1',
+      prompt_cache_options: {mode: 'explicit', ttl: '30m'},
       input: [
-        {role: 'developer', content: SHARED_REVIEW_POLICY},
+        {
+          role: 'developer',
+          content: [
+            {
+              type: 'input_text',
+              text: SHARED_REVIEW_POLICY,
+              prompt_cache_breakpoint: {mode: 'explicit'},
+            },
+          ],
+        },
         {role: 'user', content: diff},
       ],
       // Use top-level `instructions` only for per-request guidance.
@@ -152,11 +164,25 @@ export async function POST(request: Request) {
   const encoder = new TextEncoder();
   const body = new ReadableStream({
     async start(controller) {
+      let completed = false;
       try {
         for await (const event of stream) {
           if (event.type === 'response.output_text.delta') {
             controller.enqueue(encoder.encode(event.delta));
+          } else if (event.type === 'response.completed') {
+            completed = true;
+          } else if (event.type === 'response.failed' || event.type === 'response.incomplete') {
+            const detail =
+              event.type === 'response.failed'
+                ? (event.response.error?.message ?? 'request failed')
+                : (event.response.incomplete_details?.reason ?? 'incomplete');
+            controller.error(new Error(`Response ended with ${event.type}: ${detail}`));
+            return;
           }
+        }
+        if (!completed) {
+          controller.error(new Error('Response stream ended without response.completed'));
+          return;
         }
         controller.close();
       } catch (error) {
@@ -228,7 +254,7 @@ export async function triageIssue(issueText: string, escalate = false): Promise<
 
 ### 3. Long-running audit on Background Mode (8h discounted window)
 
-Because `service_tier: 'flex'` is gone on GPT-6.2, an overnight architecture or security audit belongs on Background Mode with `service_tier: 'default'`, `completion_window: '8h'` (40% off Standard), and Astra at `xhigh` rather than `max`. Subscribe to the `response.completed` webhook (or poll `openai.responses.retrieve(responseId)`) instead of holding a Next.js request open.
+Because `service_tier: 'flex'` is gone on GPT-6.2, an overnight architecture or security audit belongs on Background Mode with `service_tier: 'default'`, `completion_window: '8h'` (40% off Standard), and Astra at `xhigh` rather than `max`. Subscribe to `response.completed` alongside the `response.failed`, `response.incomplete`, and `response.canceled` webhooks (or poll `openai.responses.retrieve(responseId)` until a terminal status) and record a failure or retry state so stalled audits never hang unresolved.
 
 ```ts
 // app/actions/audit.ts
@@ -277,7 +303,7 @@ export async function queueOvernightAudit(repoSummary: string, runId: string) {
 
 ## What I'd do this week
 
-1. **Audit every `instructions` field in Responses API calls.** Move reusable prompts into the first `developer` message in `input` so 95%-off cached reads keep hitting.
+1. **Audit every `instructions` field in Responses API calls.** Move reusable prompts (>= 1,024 visible tokens) into the first `developer` message in `input` and add an explicit `prompt_cache_breakpoint` before changing user messages so 95%-off cached reads actually hit.
 2. **Make conversation history strictly append-only.** Stop mutating earlier developer messages or downgrading models mid-thread, or GPT-6.2 will drop prior reasoning items and burn tokens re-thinking.
 3. **Strip legacy `"be concise"` lines and add explicit completion rules.** GPT-6.2 is already terse by default, and for autonomous agent loops it needs explicit permission to make reversible assumptions instead of stopping to ask.
 4. **Replace `service_tier: 'flex'` with Background Mode (`2h` or `8h`) or Batch.** Check the temporary-storage note before sending sensitive client data through background windows, and keep background and synchronous cache budgets separate.
