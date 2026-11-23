@@ -8,6 +8,7 @@ import {posts} from '../../prisma/seed-data/posts';
  * title-only drafts, which seed PLACEHOLDER_BODY) are skipped rather than failed.
  */
 const NEON_SLUG = 'gemini-4-neon-developer-guide';
+const GPT_6_2_SLUG = 'gpt-6-2-astra-sol-developer-guide';
 const bodyPath = (slug: string) => new URL(`../../prisma/seed-data/posts/${slug}.md`, import.meta.url);
 const withBodies = posts.filter((post) => existsSync(bodyPath(post.slug)));
 
@@ -95,5 +96,26 @@ describe('the Gemini 4 Neon post', () => {
 
   it('has a body file at its slug', () => {
     expect(existsSync(bodyPath(NEON_SLUG))).toBe(true);
+  });
+});
+
+describe('the GPT-6.2 Astra and Sol post', () => {
+  const post = posts.find((candidate) => candidate.slug === GPT_6_2_SLUG);
+
+  it('is seeded as a draft with no publish date', () => {
+    expect(post?.status).toBe('DRAFT');
+    expect(post).not.toHaveProperty('publishedAt');
+  });
+
+  it('carries the agreed title, tag and excerpt', () => {
+    expect(post?.title).toBe('GPT-6.2 Astra and Sol for developers: when Astra is worth 4x Sol, and what changes in the Responses API');
+    expect(post?.tag).toBe('AI workflow');
+    expect(post?.excerpt).toBe(
+      "OpenAI shipped GPT-6.2 Astra ($8/$40) and Sol ($2/$10) on November 17. What they cost per task, the Responses API caching and reasoning changes that break old habits, what Hacker News developers make of both, and how I'd wire them into a Next.js app.",
+    );
+  });
+
+  it('has a body file at its slug', () => {
+    expect(existsSync(bodyPath(GPT_6_2_SLUG))).toBe(true);
   });
 });
