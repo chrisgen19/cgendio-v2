@@ -12,6 +12,14 @@ export type SeedPost = Omit<Post, 'readMinutes' | 'date' | 'publishedAt'> &
 
 export const posts: SeedPost[] = [
   {
+    slug: 'gpt-6-2-astra-sol-developer-guide',
+    title: 'GPT-6.2 Astra and Sol for developers: when Astra is worth 4x Sol, and what changes in the Responses API',
+    tag: 'AI workflow',
+    status: 'DRAFT',
+    excerpt:
+      "OpenAI shipped GPT-6.2 Astra ($8/$40) and Sol ($2/$10) on November 17. What they cost per task, the Responses API caching and reasoning changes that break old habits, what Hacker News developers make of both, and how I'd wire them into a Next.js app.",
+  },
+  {
     slug: 'gemini-4-neon-developer-guide',
     title: 'Gemini 4 Neon for developers: which Gemini 4 model to pick, and what it really costs',
     tag: 'AI workflow',
