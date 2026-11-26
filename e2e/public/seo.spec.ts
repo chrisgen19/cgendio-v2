@@ -139,7 +139,7 @@ test('the feed declares dc, and carries a copyright, docs and stable guids', asy
   expect(body).toMatch(/<pubDate>[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT<\/pubDate>/);
 });
 
-test('every feed item carries its full body as HTML in a CDATA section', async ({request}) => {
+test('every feed item carries its full body as HTML in a CDATA section', async ({page, request}) => {
   const body = await (await request.get('/feed.xml')).text();
   expect(body).toContain('xmlns:content="http://purl.org/rss/1.0/modules/content/"');
 
@@ -153,10 +153,19 @@ test('every feed item carries its full body as HTML in a CDATA section', async (
     expect(html.length).toBeGreaterThan(2000);
     expect(html).toContain('<p>');
     // Semantic markup only. The site renderer's Tailwind classes and Shiki colours would bloat every item and are
-    // stripped by readers anyway, so the feed uses its own pipeline (src/server/feed-markdown.ts)
-    expect(html).not.toContain('<script');
-    expect(html).not.toMatch(/style="/);
-    for (const className of [...html.matchAll(/class="([^"]*)"/g)].map((match) => match[1])) {
+    // stripped by readers anyway, so the feed uses its own pipeline (src/server/feed-markdown.ts). Parse as HTML so
+    // escaped code examples like `<code>&lt;span class="ab-icon"&gt;</code>` are checked as text, not element attributes.
+    const audit = await page.evaluate((markup) => {
+      const doc = new DOMParser().parseFromString(markup, 'text/html');
+      return {
+        scripts: doc.querySelectorAll('script').length,
+        styled: doc.querySelectorAll('[style]').length,
+        classes: [...doc.querySelectorAll('[class]')].map((el) => el.getAttribute('class') ?? ''),
+      };
+    }, html);
+    expect(audit.scripts).toBe(0);
+    expect(audit.styled).toBe(0);
+    for (const className of audit.classes) {
       expect(className, 'only code-fence language classes belong in the feed').toMatch(/^language-/);
     }
   }
