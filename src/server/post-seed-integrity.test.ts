@@ -124,9 +124,9 @@ describe('the GPT-6.2 Astra and Sol post', () => {
 describe('the WordPress 7.2 and Gutenberg post', () => {
   const post = posts.find((candidate) => candidate.slug === WP_7_2_SLUG);
 
-  it('is seeded as a draft with no publish date', () => {
-    expect(post?.status).toBe('DRAFT');
-    expect(post).not.toHaveProperty('publishedAt');
+  it('is seeded as published, with the timestamps the production admin stamped', () => {
+    expect(post?.status).toBe('PUBLISHED');
+    expect(post).toMatchObject({publishedAt: '2026-11-26T22:38:36.049Z', updatedAt: '2026-11-26T22:38:36.049Z'});
   });
 
   it('carries the agreed title, tag and excerpt', () => {
