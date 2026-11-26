@@ -1,7 +1,7 @@
 import {expect, test} from '@playwright/test';
 import {E2E_BASE_URL} from '../support/test-env';
 
-/* Seeded published posts, newest first: "GPT-6.2 Astra and Sol…", "Gemini 4 Neon…", "Gemini 4 Hydrogen…", "Claude Fable 5.2…", "WordPress news, October 2026…", "Redirect maps…". The canvas posts and v1's title-only posts are drafts. */
+/* Seeded published posts, newest first: "WordPress 7.2 and Gutenberg…", "GPT-6.2 Astra and Sol…", "Gemini 4 Neon…", "Gemini 4 Hydrogen…", "Claude Fable 5.2…", "WordPress news, October 2026…", "Redirect maps…". The canvas posts and v1's title-only posts are drafts. */
 
 test('blog list, then a post, then the next post', async ({page}) => {
   await page.goto('/writing');
@@ -37,6 +37,7 @@ test('the RSS feed is valid XML with every published post', async ({page, reques
   expect(feed.error).toBeNull();
   expect(feed.title).toBeTruthy();
   expect(feed.links).toEqual([
+    `${E2E_BASE_URL}/writing/wordpress-7-2-gutenberg-developer-guide`,
     `${E2E_BASE_URL}/writing/gpt-6-2-astra-sol-developer-guide`,
     `${E2E_BASE_URL}/writing/gemini-4-neon-developer-guide`,
     `${E2E_BASE_URL}/writing/gemini-4-hydrogen-developer-guide`,
@@ -44,4 +45,14 @@ test('the RSS feed is valid XML with every published post', async ({page, reques
     `${E2E_BASE_URL}/writing/wordpress-news-october-2026`,
     `${E2E_BASE_URL}/writing/redirect-maps-wordpress-to-nextjs`,
   ]);
+});
+
+test('long inline code identifiers in a post wrap without horizontal page overflow', async ({page}) => {
+  await page.goto('/writing/wordpress-7-2-gutenberg-developer-guide');
+  await expect(page.getByRole('heading', {level: 1})).toHaveText(
+    "WordPress 7.2 and Gutenberg for developers: what's shipping, what's delayed, and what breaks",
+  );
+
+  const overflowPx = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflowPx).toBeLessThanOrEqual(0);
 });
