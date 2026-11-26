@@ -38,7 +38,7 @@ Instead of injecting custom panels or fighting DOM selectors across multiple scr
 - **Entity Fields API** (`wp_entity_fields_api_init`): `wp_register_entity_fields()`, `wp_update_entity_fields()`, `wp_unregister_entity_fields()`, and `wp_get_registered_entity_fields()`.
 - **Entity Actions API** (`wp_entity_actions_api_init`): `wp_register_entity_actions()` and `wp_unregister_entity_actions()`.
 
-Register a field once in PHP with its serializable metadata (`id`, `type`, `label`) and pair it with a client-side script module, and it appears across Site Editor list screens, Quick Edit and the Post Editor inspector:
+Register a field once in PHP with its serializable metadata (`id`, `type`, `label`), pair it with a client-side script module, and add its ID to the view and form configuration (`get_entity_view_config_posttype_page`) so it shows up by default across Site Editor list screens, Quick Edit and the Post Editor inspector:
 
 ```php title="register-entity-field.php"
 add_action( 'init', function () {
@@ -67,6 +67,28 @@ add_action( 'wp_entity_fields_api_init', function () {
         'demo-page-field'
     );
 } );
+
+// Registered fields are hidden by default; add them to the view and form config to display them
+add_filter( 'get_entity_view_config_posttype_page', function ( $data ) {
+    return $data->merge(
+        array(
+            'default_view' => array( 'fields' => array( 'demo_subtitle' ) ),
+            'form'         => array( 'fields' => array( 'demo_subtitle' ) ),
+        ),
+        1
+    );
+} );
+```
+
+The companion script module default-exports the client-side read and write handlers keyed by field ID:
+
+```js title="fields.js"
+export default {
+    demo_subtitle: {
+        getValue: ( { item } ) => item.meta?.demo_subtitle ?? '',
+        setValue: ( { value } ) => ( { meta: { demo_subtitle: value } } ),
+    },
+};
 ```
 
 Existing `PluginDocumentSettingPanel` and `PluginPostStatusInfo` fills keep working, and `removeEditorPanel` still hides matching settings.
@@ -239,12 +261,12 @@ register_post_type( 'case_study', array(
 
 ### 6. Preparing for jQuery 4 (jQuery Migrate 3.6.0)
 
-WordPress 7.2 does not upgrade jQuery to 4.0 yet, but it ships **jQuery Migrate 3.6.0** specifically to surface console deprecation warnings for APIs jQuery 4 removes ([Preparing for jQuery 4](https://make.wordpress.org/core/2026/11/17/preparing-for-jquery-4-with-wordpress-7-2/)). The tentative plan is jQuery 4 + updated jQuery UI in **WordPress 7.3**, and disabling jQuery Migrate by default at the end of 2027 (7.5 or 7.6). Watching browser consoles during 7.2 staging tests gives you a full release cycle to clean up old jQuery code before 7.3 breaks it.
+WordPress 7.2 does not upgrade jQuery to 4.0 yet, but it ships **jQuery Migrate 3.6.0** specifically to surface console deprecation warnings for APIs jQuery 4 removes ([Preparing for jQuery 4](https://make.wordpress.org/core/2026/11/17/preparing-for-jquery-4-with-wordpress-7-2/)). The tentative plan is jQuery 4 + updated jQuery UI in **WordPress 7.3**, and disabling jQuery Migrate by default at the end of 2027 (7.5 or 7.6). Because minified `jquery-migrate.min.js` stays silent by default, set `define( 'SCRIPT_DEBUG', true );` on staging so WordPress loads the uncompressed `jquery-migrate.js` and logs deprecation notices to the browser console while you still have a full release cycle to fix them.
 
 ## What I'd do before December 8
 
 1. **Confirm every live site is on WordPress 7.1.5** (or the matching backport on older branches) and verify no site runs the six permanently closed WP Connect plugins.
-2. **Spin up 7.2 RC3 on staging** (`wp core update --version=7.2-RC3`) and open the browser console across both front-end and wp-admin to catch jQuery Migrate 3.6.0 warnings and any `WP_DEBUG` notices on `local` environments.
+2. **Spin up 7.2 RC3 on staging** (`wp core update --version=7.2-RC3`), enable `SCRIPT_DEBUG` (`define( 'SCRIPT_DEBUG', true );`) so uncompressed jQuery Migrate 3.6.0 logs warnings, and check the browser console across both front-end and wp-admin alongside any `WP_DEBUG` notices on `local` environments.
 3. **Audit custom admin CSS and plugins** for `::before` rules targeting `#adminmenu` or `#wpadminbar`, `__experimentalGroup` on `InspectorControls`, `__experimentalPluginPostExcerpt`, and bundled `@wordpress/*` packages that need bumping for CSS module collisions.
 4. **Decide on `/random/`** for client sites with custom post types, SEO crawl rules or aggressive page caching, and add `wp_enable_random_content_redirect` or `'randomable' => false` where it doesn't belong.
 5. **Check client sites for forgotten Additional CSS** on Navigation Links or other parent-rendered blocks that will suddenly take effect in 7.2.
