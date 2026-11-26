@@ -9,6 +9,7 @@ import {posts} from '../../prisma/seed-data/posts';
  */
 const NEON_SLUG = 'gemini-4-neon-developer-guide';
 const GPT_6_2_SLUG = 'gpt-6-2-astra-sol-developer-guide';
+const WP_7_2_SLUG = 'wordpress-7-2-gutenberg-developer-guide';
 const bodyPath = (slug: string) => new URL(`../../prisma/seed-data/posts/${slug}.md`, import.meta.url);
 const withBodies = posts.filter((post) => existsSync(bodyPath(post.slug)));
 
@@ -117,5 +118,26 @@ describe('the GPT-6.2 Astra and Sol post', () => {
 
   it('has a body file at its slug', () => {
     expect(existsSync(bodyPath(GPT_6_2_SLUG))).toBe(true);
+  });
+});
+
+describe('the WordPress 7.2 and Gutenberg post', () => {
+  const post = posts.find((candidate) => candidate.slug === WP_7_2_SLUG);
+
+  it('is seeded as a draft with no publish date', () => {
+    expect(post?.status).toBe('DRAFT');
+    expect(post).not.toHaveProperty('publishedAt');
+  });
+
+  it('carries the agreed title, tag and excerpt', () => {
+    expect(post?.title).toBe("WordPress 7.2 and Gutenberg for developers: what's shipping, what's delayed, and what breaks");
+    expect(post?.tag).toBe('WordPress');
+    expect(post?.excerpt).toBe(
+      'WordPress 7.2 lands December 8 with inline SVG admin icons, a DataForm inspector, client-side media in the Media Library, and Gutenberg 23.7 to 24.3. What actually ships, what got pulled (Secrets API, React 19 in core, real-time collaboration), and the CSS, JS and PHP breaking changes to check first.',
+    );
+  });
+
+  it('has a body file at its slug', () => {
+    expect(existsSync(bodyPath(WP_7_2_SLUG))).toBe(true);
   });
 });

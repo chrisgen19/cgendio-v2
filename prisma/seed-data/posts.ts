@@ -12,6 +12,14 @@ export type SeedPost = Omit<Post, 'readMinutes' | 'date' | 'publishedAt'> &
 
 export const posts: SeedPost[] = [
   {
+    slug: 'wordpress-7-2-gutenberg-developer-guide',
+    title: "WordPress 7.2 and Gutenberg for developers: what's shipping, what's delayed, and what breaks",
+    tag: 'WordPress',
+    status: 'DRAFT',
+    excerpt:
+      'WordPress 7.2 lands December 8 with inline SVG admin icons, a DataForm inspector, client-side media in the Media Library, and Gutenberg 23.7 to 24.3. What actually ships, what got pulled (Secrets API, React 19 in core, real-time collaboration), and the CSS, JS and PHP breaking changes to check first.',
+  },
+  {
     slug: 'gpt-6-2-astra-sol-developer-guide',
     title: 'GPT-6.2 Astra and Sol for developers: when Astra is worth 4x Sol, and what changes in the Responses API',
     tag: 'AI workflow',
