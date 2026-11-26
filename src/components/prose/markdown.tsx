@@ -108,7 +108,7 @@ export const COMPONENTS: Components = {
     className?.includes('language-') ? (
       <code className={className} {...props} />
     ) : (
-      <code className="rounded-md bg-ground px-1.5 py-0.5 font-mono text-[0.86em]" {...props} />
+      <code className="rounded-md bg-ground px-1.5 py-0.5 font-mono text-[0.86em] wrap-anywhere" {...props} />
     ),
   pre: CodeWindow,
   table: ({node: _node, ...props}) => (
