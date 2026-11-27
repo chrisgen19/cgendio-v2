@@ -17,7 +17,7 @@ export function Logo({compact = false}: LogoProps) {
       href="/"
       className={cn(
         "relative inline-flex items-center gap-2.5 text-base font-semibold tracking-[-0.01em] text-ink no-underline after:absolute after:content-[''] hover:text-ink",
-        compact ? 'h-11 shrink-0 after:-inset-x-1 after:inset-y-0' : 'after:-inset-y-1 after:inset-x-0',
+        compact ? 'h-12 shrink-0 after:-inset-x-1.5 after:inset-y-0' : 'after:-inset-y-1.5 after:-inset-x-1.5',
       )}
     >
       <b className="inline-grid size-9 place-items-center rounded-logo bg-badge font-display text-base leading-none font-extrabold tracking-[-0.04em] text-badge-ink">

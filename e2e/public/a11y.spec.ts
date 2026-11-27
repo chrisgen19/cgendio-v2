@@ -34,3 +34,53 @@ for (const theme of ['light', 'dark'] as const) {
     }
   });
 }
+
+test('mobile navigation menu traps focus, handles Escape, sets aria-modal and meets 48px targets', async ({page}, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'mobile menu only renders below 860px');
+
+  await page.goto('/');
+  const headerLogo = page.getByRole('banner').getByRole('link', {name: /Chris Diomampo/});
+  const headerLogoTarget = await headerLogo.evaluate((el) => {
+    const after = getComputedStyle(el, '::after');
+    return {width: parseFloat(after.width), height: parseFloat(after.height)};
+  });
+  expect(headerLogoTarget.width).toBeGreaterThanOrEqual(48);
+  expect(headerLogoTarget.height).toBeGreaterThanOrEqual(48);
+
+  const menuTrigger = page.getByRole('banner').getByRole('button', {name: 'Menu', exact: true});
+  await menuTrigger.click();
+
+  const dialog = page.getByRole('dialog', {name: 'Navigation'});
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toHaveAttribute('aria-modal', 'true');
+
+  const closeButton = dialog.getByRole('button', {name: 'Close menu', exact: true});
+  await expect(closeButton).toBeFocused();
+  const closeBox = await closeButton.boundingBox();
+  expect(closeBox?.width).toBeGreaterThanOrEqual(48);
+  expect(closeBox?.height).toBeGreaterThanOrEqual(48);
+
+  const fontSizes = await dialog.evaluate((el) => {
+    const readout = el.querySelector('span[class*="readout"]');
+    const index = el.querySelector('span[class*="index"]');
+    return {
+      readout: readout ? parseFloat(getComputedStyle(readout).fontSize) : 0,
+      index: index ? parseFloat(getComputedStyle(index).fontSize) : 0,
+    };
+  });
+  expect(fontSizes.readout).toBeGreaterThanOrEqual(12);
+  expect(fontSizes.index).toBeGreaterThanOrEqual(12);
+
+  // Shift+Tab from first control wraps to last control inside the dialog
+  await page.keyboard.press('Shift+Tab');
+  await expect(dialog.getByRole('link', {name: /Let's talk/})).toBeFocused();
+
+  // Tab from last control wraps back to Close menu
+  await page.keyboard.press('Tab');
+  await expect(closeButton).toBeFocused();
+
+  // Escape closes the dialog and returns focus to the trigger
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(menuTrigger).toBeFocused();
+});
