@@ -73,7 +73,7 @@ export function MobileMenu({sectionsOnThisPage, marked}: MobileMenuProps) {
         <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
         <Dialog.Portal>
           <Dialog.Overlay className={styles.backdrop} />
-          <Dialog.Content aria-describedby={undefined} className={styles.panel}>
+          <Dialog.Content aria-modal="true" aria-describedby={undefined} className={styles.panel}>
             <div className={styles.panelHeader}>
               <Dialog.Title className={styles.title}>Navigation</Dialog.Title>
               <Dialog.Close className={styles.close} aria-label="Close menu">

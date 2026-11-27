@@ -47,7 +47,7 @@
   align-items: center;
   gap: 9px;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -60,8 +60,8 @@
 }
 .close {
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
   place-items: center;
   border: 1px solid var(--color-line);
@@ -89,7 +89,7 @@
 }
 .index {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--color-muted);
 }
 .label {
